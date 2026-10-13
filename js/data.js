@@ -300,6 +300,15 @@ function addBike(brand, name, type, eng, extra) {
   if (BIKE_KEYS[brand + "|" + name]) return;
   B(brand, name, type, [[eng, null, extra || {}]]);
 }
+/* Сменить мотор у существующей версии модели (подпись пересчитывается, годы сохраняются) */
+function setEngine(brand, name, vi, eng, extra) {
+  var b = BIKES.find(function (x) { return x.brand === brand && x.name === name; }), e = ENGINES[eng];
+  if (!b || !b.versions[vi]) throw new Error("setEngine: нет модели " + brand + " " + name + " / версии " + vi);
+  if (!e) throw new Error("setEngine: нет двигателя " + eng);
+  var old = b.versions[vi], v = { engine: eng, label: (old.years ? old.years + " · " : "") + e.code + ", " + e.cc + " см³" };
+  if (old.years) v.years = old.years;
+  b.versions[vi] = Object.assign(v, extra || {});
+}
 /* Порядок списка: марки по алфавиту, внутри марки — порядок добавления, «Любая модель» в конце */
 function sortBikes() {
   var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
@@ -3103,4 +3112,48 @@ mergeGenerations("Yamaha", "YZ450F", [["YZ450F 2003–2009", "2003–2009"], ["Y
 mergeGenerations("Yamaha", "WR450F", [["WR450F 2003–2015", "2003–2015"], ["WR450F 2016–2026", "2016–2026"]], { "WR450F": 1 });
 mergeGenerations("GasGas", "EC 250", [["EC 250 (2000–2020, карбюратор)", "до 2020, карбюратор"], ["EC 250", "TPI"]]);
 mergeGenerations("GasGas", "EC 300", [["EC 300 (2000–2020, карбюратор)", "до 2020, карбюратор"], ["EC 300", "TPI"]]);
+/* ===================== v20: точные моторы вместо «≈» с неверным объёмом ===================== */
+CL("JP250F", "YZ250F", { code: "JP 250 4T FI", name: "Японский кроссовый 250 4T, инжектор (KX250F 2011+ / KX250 / RM-Z250 2010+)", maker: "Kawasaki / Suzuki", cc: 249, hp: 41 }, 1.8);
+CL("RFS450", "KTM450F", { code: "KTM RFS 450", name: "KTM RFS 400/450/525 (EXC/SX 2000–2007, карбюратор)", groups: ["liquid", "carb", "4t", "big", "eu"], carb: "Keihin FCR-MX39", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", start: "Электро + кик", hp: 50 }, 2.0);
+CL("RFS400", "RFS450", { code: "KTM RFS 400", cc: 398, hp: 45 }, 2.0);
+CL("RFS525", "RFS450", { code: "KTM RFS 525", cc: 510, hp: 55 }, 2.0);
+CL("KTM200", "KTM300C", { code: "200 EXC", name: "KTM 200 EXC / XC-W (2T 193)", cc: 193, hp: 36, carb: "Keihin PWK36" }, 1.6);
+CL("KTM150", "KTM125", { code: "150 SX", name: "KTM 150 SX/XC-W / Husqvarna TE 150 (2T 144)", cc: 144, hp: 40 }, 1.5);
+CL("BETA125", "BETA300", { code: "Beta 125 2T", name: "Beta RR 125 2T (2T 124)", cc: 124, hp: 30, groups: ["2t", "liquid", "carb", "small", "eu"] }, 1.4);
+CL("BETA250", "BETA300", { code: "Beta 250 2T", name: "Beta RR 250 2T / Xtrainer 250 (2T 249)", cc: 249, hp: 43 }, 1.7);
+CL("TR200", "TR2T", { code: "Trial 2T 200", name: "Триальный 2T 200 (Beta Evo 200)", cc: 199, hp: 17 }, 1.4);
+CL("XR80", "XR100", { code: "XR80 / CRF80", name: "Honda XR80R / CRF80F (вертикальный 80)", cc: 80, hp: 6 }, 1.0);
+CL("KX112", "YZ85", { code: "KX112", name: "Kawasaki KX112 / KX100 (2T 99–112)", maker: "Kawasaki", cc: 112, hp: 26 }, 1.1);
+CL("F800", "F850", { code: "BMW F800", name: "BMW F 800 (рядная двойка 798, Rotax: F 650/700/800 GS, F 800 R)", cc: 798, hp: 85, cam: "DOHC, 8 клапанов, 2 цилиндра (360°)" }, 2.2);
+CL("F900", "F850", { code: "BMW F900", name: "BMW F 900 (рядная двойка 895: F 900 GS / F 900 R / Voge 900DSX)", cc: 895, hp: 105 }, 2.3);
+CL("R1170", "R1250", { code: "BMW Boxer 1170", name: "BMW оппозит 1170 (R 1200 GS / R nineT)", cc: 1170, hp: 110, cooling: "Воздушно-масляное (с 2013 — воздушно-жидкостное)", cam: "DOHC, 8 клапанов" }, 2.4);
+CL("LC8_990", "LC8", { code: "LC8 990", name: "KTM LC8 950/990 (V-twin 75°: 950/990 Adventure)", cc: 999, hp: 106, carb: "Keihin ×2 (950) / инжектор (990)" }, 2.6);
+CL("HNC750", "XL750", { code: "RC70E/RC88E", name: "Honda NC700/NC750 (рядная двойка 270°, наклон 55°: NC750X / NC750S / Integra)", cc: 745, hp: 55, cam: "SOHC, 8 клапанов" }, 1.8);
+CL("HNC700", "HNC750", { code: "RC61E", cc: 670, hp: 52 }, 1.8);
+CL("I4_900K", "I4_1000K", { code: "Kawasaki 948", name: "Kawasaki 948 (рядная четвёрка: Z900 / Z900RS)", cc: 948, hp: 125 }, 2.1);
+CL("T250K", "T400K", { code: "Ninja 250", name: "Kawasaki 249 (рядная двойка 180°: Ninja 250R / Z250)", cc: 249, hp: 32 }, 1.4);
+CL("T250Y", "T321Y", { code: "R25 249", name: "Yamaha 249 (рядная двойка 180°: YZF-R25 / MT-25)", cc: 249, hp: 36 }, 1.4);
+CL("T700BN", "T750BN", { code: "QJ 698", name: "Benelli / QJMotor 698 (рядная двойка 270°: TRK 702 / 702X)", cc: 698, hp: 70 }, 1.6);
+CL("S250QJ", "S250C", { code: "QJ 249", name: "Benelli / QJMotor 249 (TRK 251 / BN 251 / Leoncino 250)", maker: "QJMotor / Benelli", cc: 249, hp: 25 }, 1.0);
+CL("S160BJ", "S200BJ", { code: "Bajaj NS160", name: "Bajaj Pulsar NS160 / NS125 (маслоохлаждаемый, 4 клапана)", cooling: "Воздушно-масляное", groups: ["air", "efi", "4t", "small", "in"], carb: "Инжектор", cc: 160, hp: 17 }, 0.8);
+CL("XP210", "XP200", { code: "Hero 210", name: "Hero XPulse 210 (жидкостный 210)", cooling: "Жидкостное", groups: ["dohc", "liquid", "efi", "4t", "big", "in"], cam: "DOHC, 4 клапана", cc: 210, hp: 24.6 }, 1.0);
+setEngine("Kawasaki", "KX250", 0, "JP250F", { hp: 43 }); setEngine("Kawasaki", "KX250F", 1, "JP250F"); setEngine("Suzuki", "RM-Z250", 1, "JP250F", { hp: 40 });
+setEngine("KTM", "450 EXC", 0, "RFS450"); setEngine("KTM", "400 EXC", 0, "RFS400"); setEngine("KTM", "525 EXC", 0, "RFS525"); setEngine("KTM", "520 EXC", 0, "RFS525", { hp: 52 });
+setEngine("KTM", "200 EXC", 0, "KTM200"); setEngine("Beta", "RR 125 2T", 0, "BETA125"); setEngine("Beta", "RR 250 2T", 0, "BETA250"); setEngine("Beta", "Xtrainer 250", 0, "BETA250", { hp: 38 });
+setEngine("Beta", "EVO 200 2T", 0, "TR200"); setEngine("Honda", "XR80R", 0, "XR80"); setEngine("Honda", "CRF80F", 0, "XR80");
+setEngine("BMW", "F 650 GS (двухцилиндровый)", 0, "F800", { hp: 71 }); setEngine("BMW", "F 700 GS", 0, "F800", { hp: 75 }); setEngine("BMW", "F 800 GS", 0, "F800");
+setEngine("BMW", "F 800 GS Adventure", 0, "F800"); setEngine("BMW", "F 800 R", 0, "F800", { hp: 87 });
+setEngine("BMW", "F 900 GS", 0, "F900"); setEngine("BMW", "F 900 R", 0, "F900"); setEngine("Voge", "900DSX", 0, "F900", { hp: 95 });
+setEngine("BMW", "R 1200 GS", 0, "R1170", { hp: 110, approx: true }); setEngine("BMW", "R 1200 GS Adventure", 0, "R1170", { hp: 110, approx: true }); setEngine("BMW", "R nineT", 0, "R1170");
+setEngine("KTM", "990 Adventure", 0, "LC8_990"); setEngine("KTM", "950 Adventure", 0, "LC8_990", { hp: 98, approx: true });
+setEngine("Honda", "NC750X", 0, "HNC750", { hp: 58 }); setEngine("Honda", "NC750S", 0, "HNC750"); setEngine("Honda", "NC700X", 0, "HNC700");
+setEngine("Kawasaki", "Z900", 0, "I4_900K"); setEngine("Kawasaki", "Z900RS", 0, "I4_900K", { hp: 111 });
+setEngine("Kawasaki", "Ninja 250R", 0, "T250K"); setEngine("Yamaha", "MT-25", 0, "T250Y"); setEngine("Yamaha", "YZF-R25", 0, "T250Y");
+setEngine("Yamaha", "XT600E", 0, "XT600"); setEngine("Honda", "Steed 600", 0, "V600H", { hp: 40 });
+setEngine("Benelli", "TRK 702", 0, "T700BN"); setEngine("Benelli", "TRK 702X", 0, "T700BN");
+setEngine("Benelli", "TRK 251", 0, "S250QJ"); setEngine("Benelli", "BN 251", 0, "S250QJ"); setEngine("Benelli", "Leoncino 250", 0, "S250QJ");
+addBike("KTM", "150 SX", "Кросс-эндуро", "KTM150"); addBike("KTM", "150 XC-W", "Кросс-эндуро", "KTM150", { hp: 35 }); addBike("Husqvarna", "TE 150", "Кросс-эндуро", "KTM150", { hp: 35 });
+addBike("Kawasaki", "KX112", "Кросс-эндуро", "KX112"); addBike("Kawasaki", "KX100", "Кросс-эндуро", "KX112", { hp: 22, approx: true });
+addBike("Bajaj", "Pulsar NS160", "Нейкед", "S160BJ"); addBike("Bajaj", "Pulsar NS125", "Нейкед", "S160BJ", { hp: 12, approx: true });
+addBike("Hero", "XPulse 210", "Лёгкий эндуро", "XP210");
 sortBikes();
