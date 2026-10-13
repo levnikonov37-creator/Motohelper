@@ -52,6 +52,38 @@ const server = http.createServer((req, res) => {
       await page.waitForTimeout(400);
     }
     console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
+
+    // Пользователь со старыми сохранениями (до объединения поколений) — ключи должны перенестись
+    const old = await browser.newPage({ viewport: { width: 420, height: 900 } });
+    old.on("pageerror", (e) => errors.push("Ошибка JS (старые сохранения): " + e.message));
+    await old.addInitScript(() => {
+      if (localStorage.getItem("mh2-test-seeded")) return;
+      localStorage.setItem("mh2-test-seeded", "1");
+      localStorage.setItem("mh2-onboarded", "true");
+      localStorage.setItem("mh2-sel", JSON.stringify({ key: "Honda CRF450R 2009–2016", vi: 0 }));
+      localStorage.setItem("mh2-custom", JSON.stringify({ "Honda CRF450R 2009–2016|0": { hp: 60 } }));
+      localStorage.setItem("mh2-garage", JSON.stringify([{ key: "Yamaha WR250R 2012", vi: 0 }]));
+      localStorage.setItem("mh2-projects", JSON.stringify({ "Honda CRF450R 2009–2016|CRF450": ["pipe"] }));
+    });
+    await old.goto(base, { waitUntil: "load" });
+    await old.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 20000 });
+    const st = await old.evaluate(() => ({
+      sel: JSON.parse(localStorage.getItem("mh2-sel")),
+      custom: JSON.parse(localStorage.getItem("mh2-custom")),
+      garage: JSON.parse(localStorage.getItem("mh2-garage")),
+      projects: JSON.parse(localStorage.getItem("mh2-projects")),
+    }));
+    const expect = (ok, what) => ok || errors.push("Перенос сохранений: " + what + " — " + JSON.stringify(st));
+    expect(st.sel.key === "Honda CRF450R" && st.sel.vi === 1, "выбор мотоцикла");
+    expect(st.custom["Honda CRF450R|1"] && st.custom["Honda CRF450R|1"].hp === 60, "настройки");
+    expect(st.garage[0].key === "Yamaha WR250R" && st.garage[0].vi === 0, "гараж");
+    expect(st.projects["Honda CRF450R|CRF450"], "проекты тюнинга");
+    // повторная загрузка не должна менять уже перенесённое
+    await old.evaluate(() => localStorage.setItem("mh2-sel", JSON.stringify({ key: "Honda CRF450R", vi: 3 })));
+    await old.reload({ waitUntil: "load" });
+    await old.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 20000 });
+    const again = await old.evaluate(() => JSON.parse(localStorage.getItem("mh2-sel")));
+    if (again.vi !== 3) errors.push("Перенос сохранений срабатывает повторно: " + JSON.stringify(again));
   } catch (e) {
     errors.push("Сценарий не прошёл: " + e.message.split("\n")[0]);
   } finally {

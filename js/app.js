@@ -19,6 +19,54 @@ function save(key, val) {
   } catch (e) {}
   if (window.mhOnSave) window.mhOnSave(key);
 }
+/* Перенос сохранений на новые ключи моделей (BIKE_ALIASES в js/data.js).
+   Выполняется один раз на устройстве; старые записи вида «Марка Модель» и «Марка Модель|0»
+   становятся «Марка НоваяМодель» и «Марка НоваяМодель|номер версии». */
+function migrateBikeKeys() {
+  var flag = "mh2-keys-v19", A = typeof BIKE_ALIASES === "object" ? BIKE_ALIASES : {};
+  try {
+    if (localStorage.getItem(flag)) return;
+    var str = function (s) {
+      if (A[s]) return A[s][0];
+      if (s.indexOf("|") < 0) return s;
+      var p = s.split("|");
+      for (var i = 0; i < p.length; i++) if (A[p[i]]) {
+        var a = A[p[i]];
+        p[i] = a[0];
+        if (/^\d+$/.test(p[i + 1] || "")) p[i + 1] = String(a[1]);
+      }
+      return p.join("|");
+    };
+    var walk = function (v) {
+      if (typeof v === "string") return str(v);
+      if (Array.isArray(v)) return v.map(walk);
+      if (!v || typeof v !== "object") return v;
+      var o = {};
+      Object.keys(v).forEach(function (k) { o[str(k)] = walk(v[k]); });
+      if (typeof v.key === "string" && A[v.key] && "vi" in v) o.vi = A[v.key][1];
+      return o;
+    };
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k.indexOf("mh2-") !== 0 || k === flag) continue;
+      var raw = localStorage.getItem(k), val;
+      try { val = JSON.parse(raw); } catch (e) { continue; }
+      var next = JSON.stringify(walk(val));
+      if (next !== raw) localStorage.setItem(k, next);
+    }
+    localStorage.setItem(flag, "1");
+  } catch (e) {}
+}
+migrateBikeKeys();
+/* «2002–2008» → «2002 2003 … 2008», «2023+» → до текущего года: чтобы поиск находил модель по году выпуска */
+function bfYears(y) {
+  if (!y) return "";
+  var m = String(y).match(/((?:19|20)\d\d)\s*(?:[–-]\s*((?:19|20)\d\d)|(\+))?/);
+  if (!m) return String(y);
+  var a = +m[1], b = m[2] ? +m[2] : m[3] ? new Date().getFullYear() : a, out = [String(y)];
+  for (var i = a; i <= b && i - a < 60; i++) out.push(i);
+  return out.join(" ");
+}
 function rub(v) {
   return new Intl.NumberFormat("ru-RU").format(Math.round(v || 0)) + " ₽";
 }
@@ -1572,7 +1620,7 @@ function BikeFinder({
     [limit, setLimit] = useState(40);
   const idx = useMemo(() => BIKES.map(b => ({
     b: b,
-    s: bfNorm(b.brand + " " + b.name + " " + b.versions.map(v => (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name).join(" "))
+    s: bfNorm(b.brand + " " + b.name + " " + b.versions.map(v => bfYears(v.years) + " " + (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name).join(" "))
   })), []);
   const toks = bfTokens(q);
   const types = ["Все"].concat(BF_TYPES.filter(t => BIKES.some(b => b.type === t)));

@@ -3045,4 +3045,62 @@ CL("Z312", "S350Z", { code: "Zontes 312", name: "Zontes 312 (ZT310 R / T / X / V
   add("Любая модель", "с мотором KTM 125 2T", K, "KTM125"); add("Любая модель", "с мотором KTM 250 2T (кросс)", K, "KTM250SX"); add("Любая модель", "с мотором CFMOTO 249", Nk, "S250C");
   add("Любая модель", "с мотором QJ 754 (Benelli / QJMotor)", T, "T750BN");
 })();
+/* ===================== v19: поколения — одна модель, версии по годам ===================== */
+/* Старый ключ «Марка Модель» → [новый ключ, номер версии]. По нему js/app.js один раз
+   переносит сохранённый выбор, гараж, настройки и журнал ТО у тех, кто выбирал старые записи. */
+var BIKE_ALIASES = {};
+/* gens: [[старое название, годы], ...] по порядку лет; same: { "старое название": номер поколения } — дубли без своих данных */
+function mergeGenerations(brand, name, gens, same) {
+  var all = gens.map(function (g) { return g[0]; }).concat(Object.keys(same || {}));
+  var at = BIKES.length, type = null, versions = [];
+  all.forEach(function (n) {
+    var i = BIKES.findIndex(function (b) { return b.brand === brand && b.name === n; });
+    if (i < 0) throw new Error("mergeGenerations: нет модели " + brand + " " + n);
+    if (BIKES[i].versions.length !== 1) throw new Error("mergeGenerations: у " + brand + " " + n + " несколько версий");
+    at = Math.min(at, i);
+  });
+  gens.forEach(function (g, vi) {
+    var b = BIKES.find(function (x) { return x.brand === brand && x.name === g[0]; }), e = ENGINES[b.versions[0].engine];
+    versions.push(Object.assign({}, b.versions[0], { years: g[1], label: g[1] + " · " + e.code + ", " + e.cc + " см³" }));
+    BIKE_ALIASES[brand + " " + g[0]] = [brand + " " + name, vi];
+    type = b.type;
+  });
+  Object.keys(same || {}).forEach(function (n) { BIKE_ALIASES[brand + " " + n] = [brand + " " + name, same[n]]; });
+  var merged = { brand: brand, name: name, type: type, versions: versions };
+  var rest = BIKES.filter(function (b) { return b.brand !== brand || all.indexOf(b.name) < 0; });
+  all.forEach(function (n) { delete BIKE_KEYS[brand + "|" + n]; });
+  BIKES.length = 0;
+  rest.forEach(function (b, i) { if (i === at) BIKES.push(merged); BIKES.push(b); });
+  if (at >= rest.length) BIKES.push(merged);
+  BIKE_KEYS[brand + "|" + name] = true;
+}
+mergeGenerations("Honda", "CRF450R", [["CRF450R 2002–2008", "2002–2008"], ["CRF450R 2009–2016", "2009–2016"], ["CRF450R 2017–2020", "2017–2020"], ["CRF450R 2021–2026", "2021–2026"]], { "CRF450R": 2 });
+mergeGenerations("Honda", "CRF250R", [["CRF250R 2004–2009", "2004–2009"], ["CRF250R 2010–2017", "2010–2017"], ["CRF250R 2018–2026", "2018–2026"]], { "CRF250R": 2 });
+mergeGenerations("Honda", "CRF250X", [["CRF250X 2004–2017", "2004–2017"]]);
+mergeGenerations("Honda", "CRF450X", [["CRF450X 2005–2017", "2005–2017"]]);
+mergeGenerations("Honda", "XR250R", [["XR250R 1996–2004", "1996–2004"]], { "XR250R": 0 });
+mergeGenerations("Honda", "XR400R", [["XR400R 1996–2004", "1996–2004"]], { "XR400R": 0 });
+mergeGenerations("Honda", "XR150L", [["XR150L", "до 2022"], ["XR150L (2023+)", "2023+"]]);
+mergeGenerations("Honda", "CB500X", [["CB500X (2013–2018)", "2013–2018"], ["CB500X", "2019–2023"]]);
+mergeGenerations("Husqvarna", "TE 250", [["TE 250 (2008–2013)", "2008–2013, 4T"], ["TE 250", "2014+, 2T"]]);
+mergeGenerations("Husqvarna", "TE 450", [["TE 450 (2008–2013)", "2008–2013"]]);
+mergeGenerations("Husqvarna", "Svartpilen 401", [["Svartpilen 401", "2018–2023"], ["Svartpilen 401 (2024+)", "2024+"]]);
+mergeGenerations("Husqvarna", "Vitpilen 401", [["Vitpilen 401", "2018–2023"], ["Vitpilen 401 (2024+)", "2024+"]]);
+mergeGenerations("Kawasaki", "KX250F", [["KX250F 2004–2010", "2004–2010"], ["KX250F 2011–2020", "2011–2020"]]);
+mergeGenerations("Kawasaki", "KX450F", [["KX450F 2006–2008", "2006–2008"], ["KX450F 2009–2018", "2009–2018"]]);
+mergeGenerations("Kawasaki", "KLX450R", [["KLX450R 2008–2026", "2008–2026"]], { "KLX450R": 0 });
+mergeGenerations("KTM", "525 EXC", [["525 EXC (2003–2007)", "2003–2007"]]);
+mergeGenerations("KTM", "450 EXC", [["450 EXC (2003–2011)", "2003–2011"]]);
+mergeGenerations("KTM", "400 EXC", [["400 EXC (2000–2011)", "2000–2011"]]);
+mergeGenerations("KTM", "390 Adventure", [["390 Adventure", "2020–2024"], ["390 Adventure (2025)", "2025+"]]);
+mergeGenerations("Suzuki", "RM-Z250", [["RM-Z250 2004–2009", "2004–2009"], ["RM-Z250 2010–2026", "2010–2026"]], { "RM-Z250": 1 });
+mergeGenerations("Suzuki", "RM-Z450", [["RM-Z450 2005–2007", "2005–2007"], ["RM-Z450 2008–2026", "2008–2026"]], { "RM-Z450": 1 });
+mergeGenerations("Suzuki", "DR-Z400E", [["DR-Z400E 2000–2007", "2000–2007"]], { "DR-Z400E": 0 });
+mergeGenerations("Yamaha", "WR250R", [["WR250R", "2008–2020"]], { "WR250R 2012": 0 });
+mergeGenerations("Yamaha", "YZ250F", [["YZ250F 2001–2013", "2001–2013"], ["YZ250F 2014–2026", "2014–2026"]], { "YZ250F": 1 });
+mergeGenerations("Yamaha", "WR250F", [["WR250F 2001–2014", "2001–2014"], ["WR250F 2015–2026", "2015–2026"]], { "WR250F": 1 });
+mergeGenerations("Yamaha", "YZ450F", [["YZ450F 2003–2009", "2003–2009"], ["YZ450F 2010–2026", "2010–2026"]], { "YZ450F": 1 });
+mergeGenerations("Yamaha", "WR450F", [["WR450F 2003–2015", "2003–2015"], ["WR450F 2016–2026", "2016–2026"]], { "WR450F": 1 });
+mergeGenerations("GasGas", "EC 250", [["EC 250 (2000–2020, карбюратор)", "до 2020, карбюратор"], ["EC 250", "TPI"]]);
+mergeGenerations("GasGas", "EC 300", [["EC 300 (2000–2020, карбюратор)", "до 2020, карбюратор"], ["EC 300", "TPI"]]);
 sortBikes();
