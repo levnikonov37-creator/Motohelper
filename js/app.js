@@ -14083,7 +14083,7 @@ function BikePage(props) {
       className: "grad"
     }, cu.nick || bike.name)),
     sub: "\u0425\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A\u0438, \u043E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u043D\u0438\u0435, \u0442\u044E\u043D\u0438\u043D\u0433 \u0438 \u0441\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u0435 \u2014 \u0432\u0441\u0451 \u043F\u0440\u043E \u0442\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B.",
-    stats: [[eng.hp + " л.с.", "мощность"], [eng.cc + " см³", "объём"], ["≈ " + speedFor(eng, bike, cu, TUNING.filter(t => eng.installed.indexOf(t.id) >= 0)).v + " км/ч", "максималка"], [eng.code, "двигатель"]]
+    stats: [[eng.hp + " л.с.", "мощность"], [eng.cc + " см³", "объём"], ["≈ " + speedFor(eng, bike, cu, TUNING.filter(t => eng.installed.indexOf(t.id) >= 0)).v + " км/ч", "макс. скорость"], [eng.code, "двигатель"]]
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn ghost",
     onClick: () => setPicker(true)
