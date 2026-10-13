@@ -1,0 +1,98 @@
+// Проверка сайта в настоящем браузере: node tests/check-page.js
+// Поднимает локальный сервер, открывает index.html в Chromium (Playwright),
+// ждёт отрисовки и проверяет, что нет ошибок и работает поиск мотоцикла.
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const { chromium } = require("playwright");
+
+const root = path.join(__dirname, "..");
+const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json" };
+
+const server = http.createServer((req, res) => {
+  const url = decodeURIComponent(req.url.split("?")[0]);
+  const file = path.join(root, url === "/" ? "index.html" : url);
+  if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+    res.writeHead(404);
+    return res.end();
+  }
+  res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] || "application/octet-stream" });
+  fs.createReadStream(file).pipe(res);
+});
+
+(async () => {
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const base = `http://127.0.0.1:${server.address().port}/`;
+  const browser = await chromium.launch();
+  const errors = [];
+  try {
+    const page = await browser.newPage({ viewport: { width: 420, height: 900 } });
+    page.on("pageerror", (e) => errors.push("Ошибка JS: " + e.message));
+    page.on("console", (m) => m.type() === "error" && !/fonts\.g|net::ERR|Failed to load resource/.test(m.text()) && errors.push("console.error: " + m.text()));
+    page.on("requestfailed", (r) => r.url().startsWith(base) && errors.push("Не загрузился файл: " + r.url()));
+    // без онбординга, чтобы сразу попасть в интерфейс
+    await page.addInitScript(() => localStorage.setItem("mh2-onboarded", "true"));
+    await page.goto(base, { waitUntil: "load" });
+    await page.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 20000 });
+
+    const counts = await page.evaluate(() => ({ bikes: BIKES.length, engines: Object.keys(ENGINES).length }));
+    if (counts.bikes < 1000) errors.push("Слишком мало моделей: " + counts.bikes);
+
+    // Поиск в окне «Найди свой мотоцикл»
+    await page.getByText("Выбрать", { exact: true }).first().click({ timeout: 10000 });
+    const input = page.getByPlaceholder(/Марка, модель или мотор/);
+    await input.fill("DR-Z400S");
+    await page.getByText("DR-Z400S").first().waitFor({ timeout: 5000 });
+
+    // Выбираем найденную модель и обходим разделы — каждый должен открыться без ошибок
+    await page.getByText("DR-Z400S").first().click();
+    await page.waitForTimeout(500);
+    for (const tab of ["Мотоцикл", "Ремонт", "Запчасти", "Главная"]) {
+      await page.getByRole("button", { name: tab }).last().click({ timeout: 5000 });
+      await page.waitForTimeout(400);
+    }
+    console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
+
+    // Пользователь со старыми сохранениями (до объединения поколений) — ключи должны перенестись
+    const old = await browser.newPage({ viewport: { width: 420, height: 900 } });
+    old.on("pageerror", (e) => errors.push("Ошибка JS (старые сохранения): " + e.message));
+    await old.addInitScript(() => {
+      if (localStorage.getItem("mh2-test-seeded")) return;
+      localStorage.setItem("mh2-test-seeded", "1");
+      localStorage.setItem("mh2-onboarded", "true");
+      localStorage.setItem("mh2-sel", JSON.stringify({ key: "Honda CRF450R 2009–2016", vi: 0 }));
+      localStorage.setItem("mh2-custom", JSON.stringify({ "Honda CRF450R 2009–2016|0": { hp: 60 } }));
+      localStorage.setItem("mh2-garage", JSON.stringify([{ key: "Yamaha WR250R 2012", vi: 0 }]));
+      localStorage.setItem("mh2-projects", JSON.stringify({ "Honda CRF450R 2009–2016|CRF450": ["pipe"] }));
+    });
+    await old.goto(base, { waitUntil: "load" });
+    await old.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 20000 });
+    const st = await old.evaluate(() => ({
+      sel: JSON.parse(localStorage.getItem("mh2-sel")),
+      custom: JSON.parse(localStorage.getItem("mh2-custom")),
+      garage: JSON.parse(localStorage.getItem("mh2-garage")),
+      projects: JSON.parse(localStorage.getItem("mh2-projects")),
+    }));
+    const expect = (ok, what) => ok || errors.push("Перенос сохранений: " + what + " — " + JSON.stringify(st));
+    expect(st.sel.key === "Honda CRF450R" && st.sel.vi === 1, "выбор мотоцикла");
+    expect(st.custom["Honda CRF450R|1"] && st.custom["Honda CRF450R|1"].hp === 60, "настройки");
+    expect(st.garage[0].key === "Yamaha WR250R" && st.garage[0].vi === 0, "гараж");
+    expect(st.projects["Honda CRF450R|CRF450"], "проекты тюнинга");
+    // повторная загрузка не должна менять уже перенесённое
+    await old.evaluate(() => localStorage.setItem("mh2-sel", JSON.stringify({ key: "Honda CRF450R", vi: 3 })));
+    await old.reload({ waitUntil: "load" });
+    await old.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 20000 });
+    const again = await old.evaluate(() => JSON.parse(localStorage.getItem("mh2-sel")));
+    if (again.vi !== 3) errors.push("Перенос сохранений срабатывает повторно: " + JSON.stringify(again));
+  } catch (e) {
+    errors.push("Сценарий не прошёл: " + e.message.split("\n")[0]);
+  } finally {
+    await browser.close();
+    server.close();
+  }
+  if (errors.length) {
+    console.error(errors.map((e) => " - " + e).join("\n"));
+    process.exit(1);
+  }
+  console.log("OK: страница работает без ошибок");
+})();
