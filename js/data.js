@@ -1,3 +1,21 @@
+/* ============================================================================
+   MotoHelper — база данных.  Подключается в index.html перед js/app.js.
+
+   Главное:
+     ENGINES  — двигатели (ключ — ID мотора)
+     BIKES    — мотоциклы; заполняются через B() и addBike()
+     PARTS    — запчасти; комплекты под каждый мотор создаёт genKit()
+     GUIDES   — инструкции по ремонту, TUNING — доработки, DIAG/CAUSES — диагностика
+
+   Как добавить мотор:
+     CL("НОВЫЙ_ID", "ID_ПОХОЖЕГО", { code, name, cc, hp, ... })  — копия похожего с правками
+     RE("ID", { region, code, name, cc, hp, groups, ... })        — дорожный/импортный мотор с нуля
+   Как добавить модель:
+     addBike("Марка", "Модель", "Эндуро", "ID_МОТОРА", { hp: 25 }) — повтор марки+модели пропускается
+     { approx: true } — мотор подобран по похожему, в интерфейсе покажется «≈»
+   Список сортируется один раз — в конце файла (sortBikes).
+   После правок: npm test
+   ============================================================================ */
 /* ===== ДВИГАТЕЛИ =====
    groups: horiz, cg, cb, zs4v, dohc, air, liquid, carb, efi, 2t, 4t, small, big, balancer */
 var ENGINES = {
@@ -267,12 +285,26 @@ ENGINES["CB150"] = { code: "162FMJ-2", name: "CB150 (162FMJ-2) вертикал�
 /* ===== МОТОЦИКЛЫ =====
    B(марка, модель, тип, версии) — версия: "ID" или ["ID", "подпись", {carb, hp}] */
 var BIKES = [];
+var BIKE_KEYS = {};
 function B(brand, name, type, vers) {
   BIKES.push({ brand: brand, name: name, type: type, versions: vers.map(function (v) {
     if (typeof v === "string") v = [v];
     var e = ENGINES[v[0]];
+    if (!e) throw new Error(brand + " " + name + ": нет двигателя «" + v[0] + "» в ENGINES");
     return Object.assign({ engine: v[0], label: v[1] || e.code + ", " + e.cc + " см³" }, v[2] || {});
   }) });
+  BIKE_KEYS[brand + "|" + name] = true;
+}
+/* Модель с одним мотором; если такая марка+модель уже есть — пропускается */
+function addBike(brand, name, type, eng, extra) {
+  if (BIKE_KEYS[brand + "|" + name]) return;
+  B(brand, name, type, [[eng, null, extra || {}]]);
+}
+/* Порядок списка: марки по алфавиту, внутри марки — порядок добавления, «Любая модель» в конце */
+function sortBikes() {
+  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
+  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
+  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 }
 (function () {
 var E = "Эндуро", P = "Питбайк", M = "Мотард", K = "Кросс-эндуро", T = "Тур-эндуро", L = "Лёгкий эндуро";
@@ -809,9 +841,10 @@ function fits(item, eng) {
   if (!item.fit || !eng) return true;
   return item.fit.some(function (f) { return f === eng.id || eng.groups.indexOf(f) >= 0; });
 }
+/* деталь нужного вида под мотор: сначала именно под этот ID, потом под группу */
 function partByKind(kind, eng) {
   var c = PARTS.filter(function (p) { return p.kind === kind && fits(p, eng); });
-  return c[0] || null;
+  return c.find(function (p) { return p.fit && p.fit.indexOf(eng.id) >= 0; }) || c[0] || null;
 }
 function partByName(name) { return PARTS.find(function (p) { return p.name === name; }) || null; }
 function partById(id) { return PARTS.find(function (p) { return p.id === id; }) || null; }
@@ -1411,6 +1444,11 @@ ENGINES["Z155"] = { id: "Z155", code: "ZS1P60YMJ", name: "Zongshen Z155 · пи�
 
 /* типичные обороты пика мощности и отсечки — для графика и тахометра */
 function enginePeak(e) {
+  var L = e.layout || "single";
+  if (L === "i4") return e.cc <= 450 ? { peak: 14500, red: 15500, max: 17000 } : e.cc <= 650 ? { peak: 13500, red: 15000, max: 16000 } : { peak: 13000, red: 14000, max: 15000 };
+  if (L === "i3") return { peak: 10000, red: 11500, max: 13000 };
+  if (L === "vtwin" && e.groups.indexOf("cg") >= 0) return { peak: 5000, red: 6000, max: 7000 };
+  if (L === "vtwin") return { peak: 8000, red: 9500, max: 11000 };
   if (e.stroke === "2T") return { peak: 8500, red: 10000, max: 12000 };
   if (e.cc >= 400) return { peak: 8500, red: 10000, max: 12000 };
   if (e.groups.indexOf("dohc") >= 0) return { peak: 9500, red: 11000, max: 13000 };
@@ -1455,7 +1493,6 @@ function enginePeak(e) {
   B("Tekken", "250 Motard", M, ["172FMM"]);
   B("Любая модель", "с мотором ZS1P60YMJ", P, [["Z155", "ZS1P60YMJ"]]);
 })();
-(function () { var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }); var rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; }); BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); }); })();
 
 /* --- ещё детали двигателя под каждый мотор --- */
 (function () {
@@ -1921,8 +1958,7 @@ ENGINES["175FMM"] = { id: "175FMM", code: "ZS175FMM", name: "Zongshen CB300F (ZS
 /* --- новые модели: [марка, модель, тип, мотор, {доп}] ; approx — мотор не подтверждён --- */
 (function () {
   var E = "Эндуро", P = "Питбайк", M = "Мотард", T = "Тур-эндуро", L = "Лёгкий эндуро", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   /* Sharmax */
   add("Sharmax", "Sport 190", P, "Z190", A); add("Sharmax", "Sport 230", E, "167FMM", A); add("Sharmax", "Sport 250", E, "172FMM-3A");
   add("Sharmax", "Sport 280", E, "NB300", A); add("Sharmax", "Sport 300 Air", E, "PR300", A); add("Sharmax", "Sport 320", E, "NB300", A);
@@ -1970,9 +2006,6 @@ ENGINES["175FMM"] = { id: "175FMM", code: "ZS175FMM", name: "Zongshen CB300F (ZS
   add("Roliz", "Sport-005", E, "172FMM", A); add("Roliz", "Sport-007", E, "PR300", A); add("MMZ", "06", E, "165FMM", A); add("TZR", "Enduro 250", E, "172FMM", A);
   add("Gladiator", "K6 PR300", E, "PR300", { carb: "NIBBI PWK34" }); add("BKGTR", "KT2 CB300", E, "175FMM");
   add("Любая модель", "с мотором ZS175FMM", E, "175FMM");
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 
 /* --- совет дня --- */
@@ -2114,8 +2147,7 @@ genKit("KOVE450", 1.2); genKit("VOGE300", 1.1);
 /* --- мотоциклы: японские и новые китайские --- */
 (function () {
   var E = "Эндуро", P2 = "Питбайк", M = "Мотард", T = "Тур-эндуро", L = "Лёгкий эндуро", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   /* Honda */
   add("Honda", "CRF250L", E, "CRF250L"); add("Honda", "CRF250 Rally", T, "CRF250L"); add("Honda", "CRF300L", E, "CRF300L"); add("Honda", "CRF300 Rally", T, "CRF300L");
   add("Honda", "XR250R", E, "XR250"); add("Honda", "XR250 Baja", T, "XR250"); add("Honda", "XR150L", L, "XR150L"); add("Honda", "CRF150F", P2, "CRF150F");
@@ -2140,16 +2172,8 @@ genKit("KOVE450", 1.2); genKit("VOGE300", 1.1);
   add("Stels", "Enduro 250", E, "172FMM", A); add("Stels", "Flame 200", L, "CG200", A); add("Stels", "Pit 125", P2, "154FMI", A);
   add("Hengjian", "Pit 125", P2, "154FMI", A); add("Jianshe", "JS200GY", L, "CG200", A); add("Bosuer", "M2 250", E, "NC250", A); add("Bosuer", "J5 300", E, "NB300", A);
   add("Любая модель", "с мотором Kove 450", T, "KOVE450"); add("Любая модель", "с мотором LX300", T, "VOGE300");
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  var jp = ["Honda", "Yamaha", "Suzuki", "Kawasaki"];
-  rest.sort(function (a, b) { var ja = jp.indexOf(a.brand) >= 0, jb = jp.indexOf(b.brand) >= 0; if (ja !== jb) return ja ? 1 : -1; return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 /* детали «именно под этот мотор» — в приоритете */
-function partByKind(kind, eng) {
-  var c = PARTS.filter(function (p) { return p.kind === kind && fits(p, eng); });
-  return c.find(function (p) { return p.fit && p.fit.indexOf(eng.id) >= 0; }) || c[0] || null;
-}
 /* оформление по классу: номер на табличке, вторые цвета */
 function hashStr(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
 /* ===================== v8: ещё японцы и китайцы ===================== */
@@ -2194,8 +2218,7 @@ TUNING.push(
 /* --- мотоциклы --- */
 (function () {
   var E = "Эндуро", P2 = "Питбайк", M = "Мотард", T = "Тур-эндуро", L = "Лёгкий эндуро", K = "Кросс-эндуро", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   /* Япония */
   add("Yamaha", "TW200", L, "TW200"); add("Yamaha", "XT660R", E, "XT660"); add("Yamaha", "XT660X", M, "XT660"); add("Yamaha", "XT660Z Ténéré", T, "XT660"); add("Yamaha", "XT600E", T, "XT660", A);
   add("Yamaha", "YZ250", K, "YZ250"); add("Yamaha", "YZ125", K, "YZ125"); add("Yamaha", "PW50", P2, "PW50"); add("Yamaha", "TT-R50E", P2, "CRF50F", A); add("Yamaha", "DT230 Lanza", E, "KDX220", A);
@@ -2215,10 +2238,6 @@ TUNING.push(
   add("GR", "GR2 250 Enduro", E, "172FMM", A); add("Wels", "MZK 250 Lite", E, "165FMM", A); add("Ataki", "EF125", P2, "154FMI", A);
   add("Rockot", "ZX250", E, "172FMM-3A", A); add("Hawk", "250 DLX", E, "167FMM", A); add("SSR", "SR250S", E, "172FMM", A);
   add("Apollo", "AGB-37 125", P2, "154FMI", A); add("Apollo", "DB-X18 150", P2, "1P60FMK", A); add("YCF", "Bigy 125 MX", P2, "154FMI", A); add("YCF", "Pilot F150", P2, "1P60FMK", A);
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  var jp = ["Honda", "Yamaha", "Suzuki", "Kawasaki"];
-  rest.sort(function (a, b) { var ja = jp.indexOf(a.brand) >= 0, jb = jp.indexOf(b.brand) >= 0; if (ja !== jb) return ja ? 1 : -1; return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 
 /* --- ещё инструкции --- */
@@ -2288,8 +2307,7 @@ W("URAL", o({ region: "ru", fuel: "АИ-92", ignition: "Электронное (
 /* --- мотоциклы --- */
 (function () {
   var E = "Эндуро", K = "Кросс-эндуро", T = "Тур-эндуро", L = "Лёгкий эндуро", C = "Классика", P2 = "Питбайк", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   add("KTM", "250 EXC TPI", K, "KTM250TPI"); add("KTM", "300 EXC TPI", K, "KTM300TPI"); add("KTM", "300 EXC (карбюратор)", K, "KTM300C"); add("KTM", "250 EXC-F", E, "KTM250F"); add("KTM", "350 EXC-F", E, "KTM350F");
   add("KTM", "450 EXC-F", E, "KTM450F"); add("KTM", "500 EXC-F", E, "KTM450F", { hp: 62 }); add("KTM", "690 Enduro R", E, "LC4"); add("KTM", "390 Adventure", T, "KTM390"); add("KTM", "890 Adventure R", T, "LC8C");
   add("KTM", "790 Adventure", T, "LC8C", { hp: 95 }); add("KTM", "1290 Super Adventure", T, "LC8"); add("KTM", "250 SX-F", K, "KTM250F", A); add("KTM", "450 SX-F", K, "KTM450F", A);
@@ -2309,10 +2327,6 @@ W("URAL", o({ region: "ru", fuel: "АИ-92", ignition: "Электронное (
   add("Suzuki", "RM-Z450", K, "RMZ450"); add("Suzuki", "RM-Z250", K, "RMZ450", { hp: 40, approx: true }); add("Suzuki", "V-Strom 650XT", T, "VS650");
   add("ИЖ", "Планета-5", C, "IZHP5"); add("ИЖ", "Юпитер-5", C, "IZHJ5"); add("Минск", "ММВЗ 3.112", C, "MINSK125"); add("Минск", "М1НСК 125", C, "MINSK125"); add("Восход", "3М", C, "VOSHOD");
   add("Урал", "М-67 / ИМЗ-8.103", C, "URAL"); add("Урал", "Gear Up", T, "URAL");
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  var order = function (b) { return ["Honda", "Yamaha", "Suzuki", "Kawasaki"].indexOf(b.brand) >= 0 ? 1 : ["KTM", "Husqvarna", "GasGas", "Beta", "Sherco", "TM Racing", "Rieju", "Fantic", "BMW"].indexOf(b.brand) >= 0 ? 2 : ["ИЖ", "Минск", "Восход", "Урал"].indexOf(b.brand) >= 0 ? 3 : ["Royal Enfield", "Hero"].indexOf(b.brand) >= 0 ? 4 : 0; };
-  rest.sort(function (a, b) { var d = order(a) - order(b); if (d) return d; return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 /* ===================== v10: мопеды, мини, ещё модели ===================== */
 ENGINES["147FMD"] = { id: "147FMD", code: "1P47FMD", name: "1P47FMD · горизонтальный 70–72 см³", maker: "Lifan / Zongshen / Loncin", groups: ["horiz","air","carb","4t","small"],
@@ -2344,8 +2358,7 @@ var MOPED = ["139FMB", "147FMD", "152FMH", "154FMI", "CUB110", "CUB125"];
 /* --- модели --- */
 (function () {
   var Mo = "Мопед", P2 = "Питбайк", L = "Лёгкий эндуро", E = "Эндуро", T = "Тур-эндуро", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   add("Motoland", "Alpha 50", Mo, "139FMB", A); add("Motoland", "Alpha 72", Mo, "147FMD", A); add("Motoland", "Alpha 110", Mo, "152FMH", A); add("Motoland", "Alpha Lux 110", Mo, "152FMH", A);
   add("Motoland", "Alpha RX 125", Mo, "154FMI", A); add("Motoland", "Orion 110", Mo, "152FMH", A); add("Motoland", "Delta 110", Mo, "152FMH", A);
   add("Racer", "Alpha RC110N", Mo, "152FMH", A); add("Racer", "Alpha RC125N", Mo, "154FMI", A); add("Racer", "Alpha RC50", Mo, "139FMB", A); add("Racer", "Trophy 110", Mo, "152FMH", A);
@@ -2356,10 +2369,6 @@ var MOPED = ["139FMB", "147FMD", "152FMH", "154FMI", "CUB110", "CUB125"];
   add("Progasi", "Kids 70", P2, "147FMD", A); add("Avantis", "Pitbike 70", P2, "147FMD", A); add("JMC", "70 Kids", P2, "147FMD", A);
   add("Honda", "Super Cub 110", Mo, "CUB110"); add("Honda", "Super Cub C125", Mo, "CUB125"); add("Honda", "CT125 Trail", L, "CUB125"); add("Honda", "Monkey 125", Mo, "CUB125"); add("Honda", "Grom (MSX125)", Mo, "CUB125");
   add("Любая модель", "с мотором 1P47FMD", P2, "147FMD");
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  var order = function (b) { return ["Honda", "Yamaha", "Suzuki", "Kawasaki"].indexOf(b.brand) >= 0 ? 1 : ["KTM", "Husqvarna", "GasGas", "Beta", "Sherco", "TM Racing", "Rieju", "Fantic", "BMW"].indexOf(b.brand) >= 0 ? 2 : ["ИЖ", "Минск", "Восход", "Урал"].indexOf(b.brand) >= 0 ? 3 : ["Royal Enfield", "Hero"].indexOf(b.brand) >= 0 ? 4 : 0; };
-  rest.sort(function (a, b) { var d = order(a) - order(b); if (d) return d; return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 
 /* --- инструкции для мопедов --- */
@@ -2381,6 +2390,8 @@ var SPEED_CLS = {
 function speedClass(bike, eng) { return typeof bikeClass === "function" ? bikeClass(bike, eng) : "enduro"; }
 function defaultSprockets(bike, eng) {
   var c = speedClass(bike, eng), two = eng.stroke === "2T", L = eng.layout || "single";
+  if (c === "sport" || c === "naked") return eng.cc >= 900 ? [17, 43] : eng.cc >= 500 ? [16, 45] : [14, 42];
+  if (c === "cruiser") return [15, 38]; if (c === "trial") return [9, 41];
   if (c === "moped") return [14, 35]; if (c === "kids") return [13, 37]; if (c === "pit") return [14, 37];
   if (c === "light") return [15, 45]; if (c === "motard") return [15, 42];
   if (c === "cross") return two ? (eng.cc <= 150 ? [13, 48] : [13, 50]) : [13, 49];
@@ -2558,8 +2569,7 @@ W("KTM65", { stroke: "2T", code: "KTM 65 SX", name: "KTM 65 SX / Husqvarna TC 65
 /* ---------- новые мотоциклы ---------- */
 (function () {
   var E = "Эндуро", K = "Кросс-эндуро", T = "Тур-эндуро", L = "Лёгкий эндуро", P2 = "Питбайк", M = "Мотард", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   add("CFMOTO", "450MT", T, "CF450"); add("Kove", "800X Rally", T, "KOVE800"); add("Kove", "800X Pro", T, "KOVE800", A); add("Voge", "525DSX", T, "VOGE525"); add("Voge", "300 Rally", T, "VOGE300");
   add("Benelli", "TRK 502X", T, "TRK502"); add("Benelli", "TRK 502", T, "TRK502"); add("Aprilia", "Tuareg 660", T, "TUAREG660"); add("Ducati", "DesertX", T, "DESERTX");
   add("Honda", "NX500", T, "NX500"); add("Honda", "CB500X", T, "NX500"); add("Honda", "XR190L", L, "XR190"); add("Honda", "XR150L (2023+)", L, "XR190", { hp: 12.5, approx: true });
@@ -2570,10 +2580,6 @@ W("KTM65", { stroke: "2T", code: "KTM 65 SX", name: "KTM 65 SX / Husqvarna TC 65
   add("Kayo", "K1 300 MX", E, "PR300", A); add("Kayo", "T2 300 MX", E, "PR300", A); add("Kayo", "K6-R 300 PR", E, "NB300", A); add("BSE", "Z5 300", E, "PR300", A);
   add("Motoland", "XT300 HS 21/18", E, "NB300", A); add("Motoland", "Blazer 300", E, "175FMM", A); add("Progasi", "Super Max 300 Pro", E, "175FMM", A); add("Avantis", "A2 Lux 300", E, "PR300", A);
   add("Regulmoto", "Crosstrec 300", E, "PR300", A); add("Racer", "Panther RC250GY-C2X", E, "172FMM", A); add("Sharmax", "PowerMax 250 PRO", E, "172FMM-3A", A);
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  var order = function (b) { return ["Honda", "Yamaha", "Suzuki", "Kawasaki"].indexOf(b.brand) >= 0 ? 1 : ["KTM", "Husqvarna", "GasGas", "Beta", "Sherco", "TM Racing", "Rieju", "Fantic", "BMW", "Aprilia", "Ducati"].indexOf(b.brand) >= 0 ? 2 : ["ИЖ", "Минск", "Восход", "Урал"].indexOf(b.brand) >= 0 ? 3 : ["Royal Enfield", "Hero"].indexOf(b.brand) >= 0 ? 4 : 0; };
-  rest.sort(function (a, b) { var d = order(a) - order(b); if (d) return d; return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 /* ===================== v12: STN, YBS300, исправление NB300 ===================== */
 (function () {
@@ -2592,8 +2598,7 @@ ENGINES["YBS300"] = { id: "YBS300", code: "LX176MN", name: "Loncin YBS300 (LX176
 genKit("YBS300", 1.05); ensureSpark("YBS300", 1);
 (function () {
   var E = "Эндуро", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   add("STN", "G8 NB300", E, "NB300"); add("STN", "G8 PRO NB300", E, "NB300"); add("STN", "V8 NB300", E, "NB300"); add("STN", "V8 PRO NB300", E, "NB300");
   add("STN", "H8 NB300", E, "NB300"); add("STN", "H8 PRO NB300", E, "NB300");
   add("STN", "G9 YBS300", E, "YBS300"); add("STN", "G9 PRO YBS300", E, "YBS300"); add("STN", "V9 YBS300", E, "YBS300"); add("STN", "V9 PRO YBS300", E, "YBS300");
@@ -2601,10 +2606,6 @@ genKit("YBS300", 1.05); ensureSpark("YBS300", 1);
   add("XGZ", "K26 NB300", E, "NB300"); add("JHL", "Z5 NB300", E, "NB300"); add("Zuumav", "CBS 300 Pro", E, "CBS300"); add("Zuumav", "K8 NB300", E, "NB300", A);
   add("BRZ", "X6 NB300", E, "NB300"); add("BRZ", "MX8 NB300", E, "NB300"); add("Fxmoto", "X8 NB300", E, "NB300"); add("Kews", "K16 NB300", E, "NB300"); add("Kews", "K23 NB300", E, "NB300", A);
   add("Любая модель", "с мотором LX176MN (YBS300)", E, "YBS300");
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  var order = function (b) { return ["Honda", "Yamaha", "Suzuki", "Kawasaki"].indexOf(b.brand) >= 0 ? 1 : ["KTM", "Husqvarna", "GasGas", "Beta", "Sherco", "TM Racing", "Rieju", "Fantic", "BMW", "Aprilia", "Ducati"].indexOf(b.brand) >= 0 ? 2 : ["ИЖ", "Минск", "Восход", "Урал"].indexOf(b.brand) >= 0 ? 3 : ["Royal Enfield", "Hero"].indexOf(b.brand) >= 0 ? 4 : 0; };
-  rest.sort(function (a, b) { var d = order(a) - order(b); if (d) return d; return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 /* ярлыки версий у старых моделей на NB300 */
 BIKES.forEach(function (b) { b.versions.forEach(function (v) { if (v.engine === "NB300") v.label = "ZS174MN-5, 300 см³"; }); });
@@ -2626,14 +2627,10 @@ genKit("NC300", 1.15); ensureSpark("NC300", 1);
   setEng("STN", "G9 YBS300", "YBS300"); setEng("STN", "V9 YBS300", "YBS300");
   setEng("STN", "G9 PRO YBS300", "YBS300G2"); setEng("STN", "V9 PRO YBS300", "YBS300G2"); setEng("STN", "H9 PRO YBS300", "YBS300G2"); setEng("STN", "C9 PRO", "YBS300G2", { approx: true });
   setEng("Avantis", "A7 Premium", "NC300");
-  var E = "Эндуро", have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var E = "Эндуро";
+  var add = addBike;
   add("KNIK", "G9 PRO YBS300", E, "YBS300G2"); add("Kews", "K28 PRO YBS300", E, "YBS300G2"); add("Kews", "K28 YBS300", E, "YBS300", { approx: true });
   add("Любая модель", "с мотором ZS182MN (NC300)", E, "NC300"); add("Любая модель", "с мотором YBS300 Gen 2", E, "YBS300G2");
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  var order = function (b) { return ["Honda", "Yamaha", "Suzuki", "Kawasaki"].indexOf(b.brand) >= 0 ? 1 : ["KTM", "Husqvarna", "GasGas", "Beta", "Sherco", "TM Racing", "Rieju", "Fantic", "BMW", "Aprilia", "Ducati"].indexOf(b.brand) >= 0 ? 2 : ["ИЖ", "Минск", "Восход", "Урал"].indexOf(b.brand) >= 0 ? 3 : ["Royal Enfield", "Hero"].indexOf(b.brand) >= 0 ? 4 : 0; };
-  rest.sort(function (a, b) { var d = order(a) - order(b); if (d) return d; return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 /* ===================== v14: спорт, чопперы, триал, нейкеды, новые бренды ===================== */
 var ROAD = { cooling: "Жидкостное", ignition: "ЭБУ (EFI)", start: "Электро", gearbox: "6 ст.", carb: "Инжектор", idle: "1100–1300", gap: "0.7–0.8 мм", fuel: "АИ-95", oil: "10W-40 (JASO MA)",
@@ -2702,8 +2699,7 @@ RE("S160HJ", { region: "cn", code: "Haojue 162", name: "Haojue 162 воздуш�
 RE("S200LF", { region: "cn", code: "Lifan 200 LC", name: "Lifan 200 жидкостный (KPR 200 / KP Mini 200)", maker: "Lifan", groups: ["liquid", "carb", "4t", "big"], cam: "SOHC, 4 клапана", cc: 198, hp: 18, torque: "≈ 16 Н·м", compression: "≈ 11 бар", carb: "Keihin / инжектор (по году)", oilVol: "≈ 1.2 л", oilInt: 3000, valveInt: 6000 }, 0.8);
 (function () {
   var Sp = "Спорт", Ch = "Чоппер", Tr = "Триал", Nk = "Нейкед", Mo = "Мотард", T = "Тур-эндуро", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   /* Honda */
   add("Honda", "CBR125R", Sp, "S125J", { hp: 13 }); add("Honda", "CBR250R", Sp, "CRF250L", { hp: 26 }); add("Honda", "CBR250RR", Sp, "T250H"); add("Honda", "CBR300R", Sp, "CRF300L");
   add("Honda", "CB300R", Nk, "CRF300L", { hp: 31 }); add("Honda", "CBR500R", Sp, "NX500"); add("Honda", "CB500F", Nk, "NX500"); add("Honda", "CB500 Hornet", Nk, "NX500", A);
@@ -2763,9 +2759,6 @@ RE("S200LF", { region: "cn", code: "Lifan 200 LC", name: "Lifan 200 жидкос
   add("Haojue", "DR160", "Лёгкий эндуро", "S160HJ"); add("Haojue", "DK150", Nk, "S160HJ", { hp: 13, approx: true }); add("Haojue", "NK150", Nk, "S160HJ", { hp: 13, approx: true });
   add("Lifan", "KPR 200", Sp, "S200LF"); add("Lifan", "KP Mini 200", Nk, "S200LF", A); add("Lifan", "V16 250", Ch, "V250LF", A); add("Stels", "Flex 250", Ch, "V250LF");
   add("Voge", "300AC", Nk, "S300C", A); add("Voge", "500R", Nk, "VOGE525", A); add("Voge", "525ACX", Nk, "VOGE525", A);
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 GUIDES.push(
   { id: "multi-sync", title: "Синхронизация дроссельных заслонок (2–4 цилиндра)", area: "carb", time: "1–1.5 ч", diff: "сложно", only: ["efi"], tools: ["Вакуумметр-синхронизатор", "Отвёртка", "Сканер (у части моделей)"], parts: ["vacgauge"],
@@ -2786,22 +2779,6 @@ SPEED_CLS.sport = { cda: 0.42, m: 240, crr: 0.013, rim: 17, h: 95 };
 SPEED_CLS.naked = { cda: 0.58, m: 230, crr: 0.013, rim: 17, h: 95 };
 SPEED_CLS.cruiser = { cda: 0.78, m: 300, crr: 0.015, rim: 16, h: 105 };
 SPEED_CLS.trial = { cda: 0.7, m: 150, crr: 0.03, rim: 18, h: 100 };
-var _defSpr14 = defaultSprockets;
-defaultSprockets = function (bike, eng) {
-  var c = speedClass(bike, eng);
-  if (c === "sport" || c === "naked") return eng.cc >= 900 ? [17, 43] : eng.cc >= 500 ? [16, 45] : [14, 42];
-  if (c === "cruiser") return [15, 38]; if (c === "trial") return [9, 41];
-  return _defSpr14(bike, eng);
-};
-var _peak14 = enginePeak;
-enginePeak = function (e) {
-  var L = e.layout || "single";
-  if (L === "i4") return e.cc <= 450 ? { peak: 14500, red: 15500, max: 17000 } : e.cc <= 650 ? { peak: 13500, red: 15000, max: 16000 } : { peak: 13000, red: 14000, max: 15000 };
-  if (L === "i3") return { peak: 10000, red: 11500, max: 13000 };
-  if (L === "vtwin" && e.groups.indexOf("cg") >= 0) return { peak: 5000, red: 6000, max: 7000 };
-  if (L === "vtwin") return { peak: 8000, red: 9500, max: 11000 };
-  return _peak14(e);
-};
 ENGINES.TR2T.topRatio = 3.2; ENGINES.TR125.topRatio = 3.4; ENGINES.TR4RT.topRatio = 3.2;
 /* ===================== v15: японские поколения, 2T-кросс, ЦПГ и инструкции ===================== */
 function CL(id, base, o, k) { ENGINES[id] = Object.assign({}, ENGINES[base], { id: id }, o); genKit(id, k || 1.8); ensureSpark(id, k || 1.8); }
@@ -2823,8 +2800,7 @@ CL("JP2T250", "YZ250", { code: "JP 250 2T", name: "Японский кроссо
 CL("JP2T125", "YZ125", { code: "JP 125 2T", name: "Японский кроссовый 2T 125 (CR125R / KX125 / RM125)", maker: "Honda / Kawasaki / Suzuki", carb: "Keihin PWK36 / Mikuni TMX (по модели)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", hp: 36 });
 (function () {
   var E = "Эндуро", K = "Кросс-эндуро", T = "Тур-эндуро", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   /* Honda */
   add("Honda", "CRF450R 2002–2008", K, "CRF450C"); add("Honda", "CRF450R 2009–2016", K, "CRF450", { hp: 54 }); add("Honda", "CRF450R 2017–2020", K, "CRF450"); add("Honda", "CRF450R 2021–2026", K, "CRF450", { hp: 56 });
   add("Honda", "CRF250R 2004–2009", K, "CRF250C"); add("Honda", "CRF250R 2010–2017", K, "CRF250C", { hp: 39, approx: true }); add("Honda", "CRF250R 2018–2026", K, "CRF250R");
@@ -2840,9 +2816,6 @@ CL("JP2T125", "YZ125", { code: "JP 125 2T", name: "Японский кроссо
   /* Suzuki */
   add("Suzuki", "RM-Z250 2004–2009", K, "RMZ250C"); add("Suzuki", "RM-Z250 2010–2026", K, "RMZ450", { hp: 40, approx: true }); add("Suzuki", "RM-Z450 2005–2007", K, "RMZ450C"); add("Suzuki", "RM-Z450 2008–2026", K, "RMZ450");
   add("Suzuki", "RMX450Z", E, "RMZ450", { hp: 48 }); add("Suzuki", "RM125", K, "JP2T125"); add("Suzuki", "RM250", K, "JP2T250"); add("Suzuki", "DR-Z250", E, "DRZ250"); add("Suzuki", "DR-Z400E 2000–2007", E, "DRZ400");
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 GUIDES.push(
   { id: "cpg-4t", title: "Замена ЦПГ (поршень, кольца, цилиндр) на 4T", area: "cyl", time: "4–6 ч", diff: "сложно", only: ["4t"], fig: "piston", tools: ["Ключи и головки", "Динамометрический ключ", "Щупы", "Пластиковый шабер", "Оправка для колец (желательно)", "Тряпки, чтобы закрыть картер"], parts: ["piston", "rings", "gasketset", "basegasket", "headgasket"],
@@ -2881,8 +2854,7 @@ RE("S180BJ", { region: "in", code: "Bajaj DTS-i 180", name: "Bajaj Pulsar 150/18
 RE("S200TV", { region: "in", code: "TVS 200 4V", name: "TVS Apache RTR 160 4V / 200 4V (маслоохлаждаемый)", maker: "TVS", groups: ["air", "efi", "4t", "small"], cooling: "Воздушно-масляное", cam: "SOHC, 4 клапана", cc: 198, hp: 20.5, torque: "≈ 17 Н·м", compression: "≈ 10 бар", gearbox: "5 ст.", oilVol: "≈ 1.1 л", oilInt: 5000, valveInt: 10000 }, 0.8);
 (function () {
   var Nk = "Нейкед", Ch = "Чоппер", Sp = "Спорт", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   add("Honda", "CB400 Super Four (NC39)", Nk, "I4_400H"); add("Honda", "CB400 Super Four VTEC Revo (NC42)", Nk, "I4_400H", { hp: 56 }); add("Honda", "CB400 Super Bol d'Or", Sp, "I4_400H", { hp: 56 });
   add("Honda", "Steed 400", Ch, "V400H"); add("Honda", "Steed 600", Ch, "V400H", { hp: 40, approx: true }); add("Honda", "Shadow 400", Ch, "V400H"); add("Honda", "Magna 250 (V4)", Ch, "V250H4", A); add("Honda", "VTR250", Nk, "V250H4", { hp: 32 });
   add("Honda", "CB1300 Super Four", Nk, "I4_1000J", { hp: 113, approx: true }); add("Honda", "CB750 (RC42)", Nk, "I4_650H", { hp: 73, approx: true });
@@ -2892,9 +2864,6 @@ RE("S200TV", { region: "in", code: "TVS 200 4V", name: "TVS Apache RTR 160 4V / 
   add("Bajaj", "Dominar 400", "Тур-эндуро", "S400BJ"); add("Bajaj", "Pulsar NS200", Nk, "S200BJ"); add("Bajaj", "Pulsar RS200", Sp, "S200BJ"); add("Bajaj", "Pulsar 180", Nk, "S180BJ"); add("Bajaj", "Pulsar 150", Nk, "S180BJ", { hp: 14 });
   add("Bajaj", "Avenger 220 Cruise", Ch, "S180BJ", { hp: 19, approx: true });
   add("TVS", "Apache RTR 200 4V", Nk, "S200TV"); add("TVS", "Apache RTR 160 4V", Nk, "S200TV", { hp: 17.5 }); add("TVS", "Apache RR 310", Sp, "G310");
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 /* ===================== v17: классические туреры и эндуро — до 1000+ моделей ===================== */
 RE("ROTAX652", { code: "Rotax 652", name: "Rotax 652 (BMW F650 / G650, Aprilia Pegaso 650)", maker: "Rotax / BMW / Aprilia", groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 4 клапана, 2 свечи (у части)", cc: 652, hp: 50, torque: "≈ 60 Н·м", compression: "≈ 11.5 бар", gearbox: "5 ст.", carb: "Инжектор (у ранних — карбюраторы)", oilVol: "≈ 2.3 л (сухой картер)", oilInt: 10000, valveInt: 20000 }, 2.2);
@@ -2915,8 +2884,7 @@ RE("V853G", { code: "Guzzi 853", name: "Moto Guzzi 853/1151 (поперечны�
 RE("V1200D", { code: "Testastretta 1198", name: "Ducati Testastretta 1198 (L-twin 90°: Multistrada 1200)", maker: "Ducati", layout: "vtwin", vAngle: 90, groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 8 клапанов, Desmodromic, V-twin 90°", cc: 1198, hp: 150, torque: "≈ 124 Н·м", compression: "≈ 12.5 бар", oilVol: "≈ 4 л", fuel: "АИ-98" }, 3.0);
 (function () {
   var T = "Тур-эндуро", E = "Эндуро", Mo = "Мотард", Nk = "Нейкед", Sp = "Спорт", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   /* Honda */
   add("Honda", "NX650 Dominator", T, "XR650L", { hp: 44, approx: true }); add("Honda", "XL600V Transalp", T, "V600H"); add("Honda", "XL650V Transalp", T, "V600H", { hp: 53 }); add("Honda", "XL700V Transalp", T, "V600H", { hp: 60 });
   add("Honda", "XRV750 Africa Twin", T, "V750H"); add("Honda", "XRV650 Africa Twin", T, "V750H", { hp: 50, approx: true }); add("Honda", "XL1000V Varadero", T, "V1000H"); add("Honda", "SLR650", T, "XR650L", { hp: 38, approx: true });
@@ -2951,9 +2919,6 @@ RE("V1200D", { code: "Testastretta 1198", name: "Ducati Testastretta 1198 (L-twi
   add("Triumph", "Tiger 800 XC", T, "I3_800T"); add("Triumph", "Tiger 800 XR", T, "I3_800T"); add("Triumph", "Tiger Explorer 1200", T, "I3_1200T"); add("Triumph", "Tiger 1200 Rally Pro", T, "I3_1200T", { hp: 148 }); add("Triumph", "Scrambler 1200 XE", Nk, "T1200TR", { hp: 89 });
   add("Moto Guzzi", "V85 TT", T, "V853G"); add("Moto Guzzi", "Stelvio 1200 NTX", T, "V853G", { hp: 105, approx: true });
   add("Ducati", "Multistrada 1200", T, "V1200D"); add("Ducati", "Hypermotard 950", Mo, "DESERTX", { hp: 114 });
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 GUIDES.push(
   { id: "winter-storage", title: "Зимнее хранение: консервация мотоцикла", area: null, time: "1–2 ч", diff: "просто", tools: ["Зарядное устройство с режимом хранения", "Чехол", "Подставки"], parts: ["oil", "battery"],
@@ -2967,8 +2932,7 @@ GUIDES.push(
 );
 (function () {
   var T = "Тур-эндуро", E = "Эндуро", K = "Кросс-эндуро", Nk = "Нейкед", Sp = "Спорт", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   add("Honda", "CBR650F", Sp, "I4_650H", { hp: 87 }); add("Honda", "CB650F", Nk, "I4_650H", { hp: 87 }); add("Honda", "CB500X (2013–2018)", T, "NX500"); add("Honda", "CRF1000L Africa Twin", T, "AT1100", { hp: 95, approx: true });
   add("Honda", "NC700X", T, "XL750", { hp: 52, approx: true }); add("Honda", "NC750S", Nk, "XL750", { hp: 55, approx: true });
   add("Yamaha", "XJ6", Nk, "I4_600J", { hp: 78, approx: true }); add("Yamaha", "FZ8", Nk, "I4_1000J", { hp: 106, approx: true }); add("Yamaha", "MT-25", Nk, "T321Y", { hp: 36, approx: true }); add("Yamaha", "YZF-R25", Sp, "T321Y", { hp: 36, approx: true });
@@ -2982,9 +2946,6 @@ GUIDES.push(
   add("GasGas", "MC 250F", K, "KTM250F", { hp: 47 }); add("GasGas", "MC 450F", K, "KTM450F", { hp: 63 }); add("GasGas", "EX 300", K, "KTM300TPI");
   add("Beta", "RR 300 Race Edition", K, "BETA300"); add("Beta", "RR 480 Race", E, "BETA4T", { hp: 56 });
   add("Sherco", "SE 300 Factory", K, "SHERCO300"); add("Sherco", "SEF 450 Factory", E, "SHERCO4T", { hp: 55 });
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
 /* ===================== v18: детские и 2T-кроссы, новинки 2024–2025, Benelli/QJ 750, CFMOTO 250 ===================== */
 /* Honda: детские и лёгкие */
@@ -3022,8 +2983,7 @@ RE("S374BN", { region: "cn", code: "Benelli 374", name: "Benelli Imperiale 400 (
 CL("Z312", "S350Z", { code: "Zontes 312", name: "Zontes 312 (ZT310 R / T / X / V)", cc: 312, hp: 35 }, 1.1);
 (function () {
   var E = "Эндуро", K = "Кросс-эндуро", T = "Тур-эндуро", L = "Лёгкий эндуро", Mo = "Мотард", Nk = "Нейкед", Sp = "Спорт", Ch = "Чоппер", P2 = "Питбайк", A = { approx: true };
-  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
-  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  var add = addBike;
   /* уточнение моторов у уже добавленных моделей */
   function remap(brand, name, eng, extra) {
     BIKES.forEach(function (b) { if (b.brand !== brand || b.name !== name) return; var e = ENGINES[eng];
@@ -3084,7 +3044,5 @@ CL("Z312", "S350Z", { code: "Zontes 312", name: "Zontes 312 (ZT310 R / T / X / V
   /* «Любая модель» — новые моторы */
   add("Любая модель", "с мотором KTM 125 2T", K, "KTM125"); add("Любая модель", "с мотором KTM 250 2T (кросс)", K, "KTM250SX"); add("Любая модель", "с мотором CFMOTO 249", Nk, "S250C");
   add("Любая модель", "с мотором QJ 754 (Benelli / QJMotor)", T, "T750BN");
-  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
-  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
+sortBikes();
