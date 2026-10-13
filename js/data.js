@@ -309,6 +309,13 @@ function setEngine(brand, name, vi, eng, extra) {
   if (old.years) v.years = old.years;
   b.versions[vi] = Object.assign(v, extra || {});
 }
+/* Добавить поколение (версию) к существующей модели */
+function addVersion(brand, name, eng, years, extra) {
+  var b = BIKES.find(function (x) { return x.brand === brand && x.name === name; }), e = ENGINES[eng];
+  if (!b) throw new Error("addVersion: нет модели " + brand + " " + name);
+  if (!e) throw new Error("addVersion: нет двигателя " + eng);
+  b.versions.push(Object.assign({ engine: eng, years: years, label: years + " · " + e.code + ", " + e.cc + " см³" }, extra || {}));
+}
 /* Порядок списка: марки по алфавиту, внутри марки — порядок добавления, «Любая модель» в конце */
 function sortBikes() {
   var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
@@ -3172,5 +3179,39 @@ addBike("Hero", "XPulse 210", "Лёгкий эндуро", "XP210");
   addBike("Progasi", "Flex 250", E, "172FMM-5", { hp: 25, approx: true });
   /* Besuda 008 NB300: объявления drom.ru */
   addBike("Besuda", "008 NB300", E, "NB300");
+})();
+/* ===================== v22: ещё модели — Азия 155, KTM/Husqvarna, классика СССР и Jawa, китайские на NC300 ===================== */
+CL("Y155", "S125J", { code: "Y155 VVA", name: "Yamaha 155 VVA (WR155R / MT-15 / YZF-R15 / XSR155)", maker: "Yamaha", cc: 155, hp: 18.4, cam: "SOHC, 4 клапана, VVA" }, 1.0);
+CL("JAWA350", "IZHJ5", { code: "Jawa 634/638", name: "Jawa 350 (2T, двухцилиндровый: 634 / 638)", maker: "Jawa", cc: 344, hp: 26, groups: ["2t", "air", "carb", "big", "eu"] }, 1.0);
+CL("IZHPS", "IZHP5", { code: "ИЖ П-С", name: "ИЖ Планета Спорт (2T 340)", cc: 340, hp: 32 }, 1.0);
+CL("DNEPR", "URAL", { code: "МТ-10/11", name: "Днепр МТ (оппозит 650)", maker: "КМЗ (Киев)", cc: 649, hp: 36 }, 1.0);
+CL("BETA200", "BETA250", { code: "Beta 200 2T", name: "Beta RR 200 2T (2T 190)", cc: 190, hp: 30 }, 1.5);
+CL("ANIMA190", "Z190", { code: "Anima 190", name: "Daytona Anima 190 (4 клапана, питбайк)", maker: "Daytona / YCF", cc: 190, hp: 19, cam: "SOHC, 4 клапана" }, 1.3);
+(function () {
+  var E = "Эндуро", K = "Кросс-эндуро", T = "Тур-эндуро", L = "Лёгкий эндуро", P2 = "Питбайк", Nk = "Нейкед", Sp = "Спорт", C = "Классика", A = { approx: true };
+  /* Азия: 150–190 */
+  addBike("Yamaha", "WR155R", L, "Y155", { hp: 16.5 }); addBike("Yamaha", "MT-15", Nk, "Y155"); addBike("Yamaha", "YZF-R15", Sp, "Y155"); addBike("Yamaha", "XSR155", Nk, "Y155");
+  addBike("Honda", "CRF150L", L, "XR150L", { hp: 12.9 }); addBike("Honda", "CRF190L", L, "XR190");
+  addVersion("Honda", "CRF450X", "CRF450", "2019+", { hp: 50, approx: true });
+  /* Kawasaki, Suzuki */
+  addBike("Kawasaki", "KX250X", K, "JP250F"); addBike("Kawasaki", "KLR650 S", T, "KLR650"); addBike("Kawasaki", "KLR650 Adventure", T, "KLR650"); addBike("Kawasaki", "KLX110R L", P2, "KLX110");
+  addBike("Suzuki", "DR-Z125L", P2, "DRZ125"); addBike("Suzuki", "GN125", C, "JP125A", { hp: 11, approx: true });
+  /* KTM, Husqvarna, Beta */
+  addBike("KTM", "790 Adventure R", T, "LC8C", { hp: 95 }); addBike("KTM", "890 Adventure", T, "LC8C"); addBike("KTM", "1290 Super Adventure S", T, "LC8"); addBike("KTM", "1290 Super Adventure R", T, "LC8");
+  addBike("KTM", "250 XC", K, "KTM250TPI"); addBike("KTM", "300 XC", K, "KTM300TPI"); addBike("KTM", "350 XC-F", K, "KTM350F");
+  addBike("Husqvarna", "Norden 901 Expedition", T, "LC8C"); addBike("Husqvarna", "701 Enduro LR", E, "LC4");
+  addBike("Beta", "RR 200 2T", K, "BETA200", A); addBike("Beta", "RR 125 X-Pro", K, "BETA125"); addBike("Beta", "RR 300 X-Pro", K, "BETA300");
+  /* BMW, Ducati */
+  addBike("BMW", "F 900 GS Adventure", T, "F900"); addBike("BMW", "R 1300 GS Adventure", T, "R1250", { hp: 145 }); addBike("Ducati", "DesertX Rally", T, "DESERTX");
+  /* классика: СССР и Jawa */
+  addBike("Jawa", "350 638", C, "JAWA350"); addBike("Jawa", "350 634", C, "JAWA350", { hp: 25 });
+  addBike("ИЖ", "Планета Спорт", C, "IZHPS"); addBike("ИЖ", "Планета-4", C, "IZHP5", { hp: 18, approx: true }); addBike("ИЖ", "Юпитер-4", C, "IZHJ5", { hp: 25, approx: true });
+  addBike("Днепр", "МТ-11", C, "DNEPR"); addBike("Днепр", "МТ-10", C, "DNEPR", { hp: 32, approx: true });
+  /* Китай: NC300 (ZS182MN) и питбайки 190 — по карточкам дилеров (avantsb.ru, jazzmoto.ru, globaldrive.ru, startmoto.pro, master-tehno.ru) */
+  addBike("Avantis", "A7 NEW", E, "NC300"); addBike("Avantis", "Enduro 300 PRO EFI Exclusive", E, "NC300", { hp: 34, carb: "Инжектор", approx: true });
+  addBike("Regulmoto", "Nibbi 300", E, "NC300"); addBike("Kayo", "K6 300 FCR", E, "NC300");
+  setEngine("Progasi", "Race 300", 0, "NC300");
+  addBike("Kayo", "Evolution ZS190EM", P2, "Z190", { hp: 16 }); addBike("Kayo", "KRZ 125", P2, "154FMI");
+  addBike("YCF", "Daytona 190", P2, "ANIMA190"); addBike("YCF", "Bigy 190 MX", P2, "Z190", { hp: 18, approx: true });
 })();
 sortBikes();

@@ -198,7 +198,7 @@ function buildSpec(bike, ver, cu) {
 
 /* ---------- ТО: статус ---------- */
 function maintStatus(eng, mt) {
-  const unit = eng.hours ? "м/ч" : "км";
+  const unit = eng.hours ? "моточ." : "км";
   return maintItems(eng).map(it => {
     const last = mt.last && mt.last[it.id] != null ? mt.last[it.id] : null;
     const since = last == null ? null : Math.max(0, (mt.odo || 0) - last);
@@ -249,8 +249,8 @@ function Val({
   const changed = stock != null && String(v) !== String(stock);
   return /*#__PURE__*/React.createElement("span", {
     className: changed ? "val changed" : "val",
-    title: changed ? "В стоке: " + stock : undefined
-  }, v, changed && /*#__PURE__*/React.createElement("small", null, "\u0441\u0442\u043E\u043A ", stock));
+    title: changed ? "С завода: " + stock : undefined
+  }, v, changed && /*#__PURE__*/React.createElement("small", null, "с завода ", stock));
 }
 function Field({
   label,
@@ -276,11 +276,11 @@ function Field({
         [k]: ""
       });
     },
-    "aria-label": "Вернуть сток: " + label
+    "aria-label": "Вернуть заводское: " + label
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "reset",
     s: 14
-  }), "\u0441\u0442\u043E\u043A")), /*#__PURE__*/React.createElement("input", {
+  }), "как с завода")), /*#__PURE__*/React.createElement("input", {
     type: type || "text",
     value: v,
     placeholder: stock != null ? String(stock) : "",
@@ -323,7 +323,7 @@ function EditBike({
     className: "edit"
   }, /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "\u041C\u0435\u043D\u044F\u0439 \u0442\u043E\u043B\u044C\u043A\u043E \u0442\u043E, \u0447\u0442\u043E \u043E\u0442\u043B\u0438\u0447\u0430\u0435\u0442\u0441\u044F \u043E\u0442 \u0441\u0442\u043E\u043A\u0430. \u041F\u0443\u0441\u0442\u043E\u0435 \u043F\u043E\u043B\u0435 \u2014 \u0437\u043D\u0430\u0447\u0438\u0442 \u043A\u0430\u043A \u0441 \u0437\u0430\u0432\u043E\u0434\u0430 (\u043F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u0430 \u0441\u0435\u0440\u044B\u043C). \u0412\u0441\u0451 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442\u0441\u044F \u0441\u0440\u0430\u0437\u0443 \u0438 \u043F\u0440\u0438\u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F \u043A \u0434\u0438\u0430\u0433\u043D\u043E\u0441\u0442\u0438\u043A\u0435, \u0442\u044E\u043D\u0438\u043D\u0433\u0443 \u0438 \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u044F\u043C."), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u041C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("div", {
+  }, "Меняй только то, что у тебя отличается от заводского. Пустое поле — значит как с завода (заводское значение подсказано серым). Всё сохраняется сразу и учитывается в диагностике, тюнинге и подборе запчастей."), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u041C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("div", {
     className: "fgrid"
   }, /*#__PURE__*/React.createElement("label", {
     className: "f wide"
@@ -417,7 +417,7 @@ function EditBike({
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "reset",
     s: 14
-  }), "\u0441\u0442\u043E\u043A")), /*#__PURE__*/React.createElement("select", {
+  }), "как с завода")), /*#__PURE__*/React.createElement("select", {
     value: cu.engine || "",
     onChange: e => {
       setCu({
@@ -439,7 +439,7 @@ function EditBike({
     value: e.id
   }, e.code, " \u2014 ", e.name, ", ", e.cc, " \u0441\u043C\xB3"))))), /*#__PURE__*/React.createElement("span", {
     className: "f-hint"
-  }, "\u0415\u0441\u043B\u0438 \u043C\u043E\u0442\u043E\u0440 \u043C\u0435\u043D\u044F\u043B\u0438 (\u0441\u0432\u0430\u043F) \u0438\u043B\u0438 \u043D\u0430 \u0442\u0430\u0431\u043B\u0438\u0447\u043A\u0435 \u0434\u0440\u0443\u0433\u043E\u0439 \u043A\u043E\u0434.")), /*#__PURE__*/React.createElement(Field, {
+  }, "Если мотор меняли на другой или на табличке двигателя другой код.")), /*#__PURE__*/React.createElement(Field, {
     label: "\u041C\u043E\u0449\u043D\u043E\u0441\u0442\u044C, \u043B.\u0441.",
     k: "hp",
     cu: cu,
@@ -462,7 +462,7 @@ function EditBike({
     setCu: setCu,
     stock: defaultSprockets(bike, eng)[0],
     type: "number",
-    hint: "\u0427\u0438\u0441\u043B\u043E \u0437\u0443\u0431\u044C\u0435\u0432. \u0412\u043B\u0438\u044F\u0435\u0442 \u043D\u0430 \u043C\u0430\u043A\u0441\u0438\u043C\u0430\u043B\u043A\u0443 \u0438 \u0442\u044F\u0433\u0443."
+    hint: "Число зубьев. Влияет на максимальную скорость и тягу."
   }), /*#__PURE__*/React.createElement(Field, {
     label: "\u0417\u0430\u0434\u043D\u044F\u044F \u0437\u0432\u0435\u0437\u0434\u0430",
     k: "sprR",
@@ -506,7 +506,7 @@ function EditBike({
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "reset",
     s: 14
-  }), "\u0441\u0442\u043E\u043A")), /*#__PURE__*/React.createElement("select", {
+  }), "как с завода")), /*#__PURE__*/React.createElement("select", {
     value: carbSel,
     onChange: e => {
       setCu({
@@ -692,9 +692,9 @@ function Maint({
       flash("Для этих пунктов деталей не нужно");
       return;
     }
-    addRows(rows, "Смета на ТО собрана");
+    addRows(rows, "Смета на обслуживание собрана");
   }
-  const unit = eng.hours ? "м/ч" : "км";
+  const unit = eng.hours ? "моточ." : "км";
   const [odo, setOdo] = useState(mt.odo || "");
   useEffect(() => {
     setOdo(mt.odo || "");
@@ -755,10 +755,10 @@ function Maint({
     className: "btn primary",
     disabled: !dueN,
     onClick: () => buildTO(false)
-  }, dueN ? "Смета на ТО (пора: " + dueN + ")" : "Пока ничего не пора"), /*#__PURE__*/React.createElement("button", {
+  }, dueN ? "Смета на обслуживание (пора: " + dueN + ")" : "Пока ничего не пора"), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: () => buildTO(true)
-  }, "\u0421\u043C\u0435\u0442\u0430 \u043D\u0430 \u043F\u043E\u043B\u043D\u043E\u0435 \u0422\u041E")), /*#__PURE__*/React.createElement("ul", {
+  }, "Смета на полное обслуживание")), /*#__PURE__*/React.createElement("ul", {
     className: "mlist"
   }, st.map(x => /*#__PURE__*/React.createElement(MaintRow, {
     key: x.id,
@@ -939,7 +939,7 @@ function Estimate({
   }, "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435"), /*#__PURE__*/React.createElement("input", {
     value: estName,
     onChange: e => setEstName(e.target.value),
-    placeholder: "\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0422\u041E-3000"
+    placeholder: "Например, ТО на 3000 км"
   })), /*#__PURE__*/React.createElement("div", {
     className: "est"
   }, est.length === 0 && /*#__PURE__*/React.createElement("p", {
@@ -1131,7 +1131,7 @@ function readPhoto(file) {
     img.src = url;
   });
 }
-const PHOTO_FX = [["none", "Как есть"], ["garage", "Гараж"], ["night", "Ночь"], ["dust", "Пыль"], ["mono", "Ч/Б"]];
+const PHOTO_FX = [["none", "Как есть"], ["garage", "Гараж"], ["night", "Ночь"], ["dust", "Пыль"], ["mono", "Чёрно-белое"]];
 function PhotoStage({
   vkey,
   running,
@@ -1755,7 +1755,7 @@ function BikeFinder({
   }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", list.length - limit, ")")));
 }
 /* ===== Первый заход: приветствие и «С чего начать» ===== */
-const ONB_TILES = [["home", "Главная", "3D-двигатель твоего мотоцикла: крути, заводи, смотри в разрезе. Совет дня и проверка перед выездом."], ["bike", "Мой мотоцикл", "Характеристики и максималка, ТО по пробегу с журналом, тюнинг под цель и бюджет."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["wrench", "Ремонт", "«Что сломалось?» по симптомам, 60+ инструкций со схемами, справочник и коды ошибок."], ["cart", "Запчасти", "Только детали под твой мотор, с аналогами, сложностью установки и сметой."]];
+const ONB_TILES = [["home", "Главная", "Объёмная модель мотора твоего мотоцикла: крути, заводи, заглядывай внутрь. Совет дня и проверка перед выездом."], ["bike", "Мой мотоцикл", "Характеристики и максимальная скорость, обслуживание по пробегу с журналом работ, тюнинг под цель и бюджет."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["wrench", "Ремонт", "«Что сломалось?» по симптомам, 60+ инструкций со схемами, справочник и коды ошибок."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и расчёт стоимости."]];
 function Onboarding({
   step0,
   sel,
@@ -1784,7 +1784,7 @@ function Onboarding({
     className: "onb-hero"
   }, /*#__PURE__*/React.createElement("span", {
     className: "brand-mark onb-mark"
-  }, "MH"), /*#__PURE__*/React.createElement("h2", null, "\u0414\u043E\u0431\u0440\u043E \u043F\u043E\u0436\u0430\u043B\u043E\u0432\u0430\u0442\u044C \u0432 MotoHelper"), /*#__PURE__*/React.createElement("p", null, "\u041F\u043E\u043C\u043E\u0449\u043D\u0438\u043A \u043F\u043E \u0440\u0435\u043C\u043E\u043D\u0442\u0443, \u0422\u041E \u0438 \u0442\u044E\u043D\u0438\u043D\u0433\u0443 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u043E\u0432. \u0412\u043E\u0442 \u0447\u0442\u043E \u0437\u0434\u0435\u0441\u044C \u0435\u0441\u0442\u044C:")), /*#__PURE__*/React.createElement("ul", {
+  }, "MH"), /*#__PURE__*/React.createElement("h2", null, "\u0414\u043E\u0431\u0440\u043E \u043F\u043E\u0436\u0430\u043B\u043E\u0432\u0430\u0442\u044C \u0432 MotoHelper"), /*#__PURE__*/React.createElement("p", null, "Помощник по ремонту, обслуживанию и тюнингу мотоциклов. Вот что здесь есть:")), /*#__PURE__*/React.createElement("ul", {
     className: "onb-tiles"
   }, ONB_TILES.map(t => /*#__PURE__*/React.createElement("li", {
     key: t[0]
@@ -1807,7 +1807,7 @@ function Onboarding({
     className: "onb-body"
   }, /*#__PURE__*/React.createElement("div", {
     className: "onb-find-head"
-  }, /*#__PURE__*/React.createElement("h2", null, "\u041D\u0430\u0439\u0434\u0438 \u0441\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("p", null, "\u0412\u0441\u0451 \u043D\u0430 \u0441\u0430\u0439\u0442\u0435 \u043F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u0441\u044F \u043F\u043E\u0434 \u043D\u0435\u0433\u043E: \u043C\u043E\u0442\u043E\u0440, \u0422\u041E, \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0438 \u0438 \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u0438.")), /*#__PURE__*/React.createElement(BikeFinder, {
+  }, /*#__PURE__*/React.createElement("h2", null, "\u041D\u0430\u0439\u0434\u0438 \u0441\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("p", null, "Всё на сайте подстроится под него: мотор, обслуживание, запчасти и инструкции.")), /*#__PURE__*/React.createElement(BikeFinder, {
     compact: true,
     sel: sel,
     custom: custom,
@@ -1832,13 +1832,13 @@ function StartGuide({
 }) {
   const s = useStats();
   const [hide, setHide] = useState(() => load("startHide", false));
-  const items = [[load("picked", false), "Выбери свой мотоцикл", "Выбрать", () => setPicker(true)], [(mt.odo || 0) > 0, "Укажи пробег — подскажу, когда ТО", "Указать", () => go("bike", "service")], [(s.start || 0) > 0 || (s.xray || 0) > 0, "Заведи мотор или открой разрез", "К мотору", () => {
+  const items = [[load("picked", false), "Выбери свой мотоцикл", "Выбрать", () => setPicker(true)], [(mt.odo || 0) > 0, "Укажи пробег — подскажу, когда обслуживание", "Указать", () => go("bike", "service")], [(s.start || 0) > 0 || (s.xray || 0) > 0, "Заведи мотор или загляни внутрь", "К мотору", () => {
     const st = document.querySelector(".stage");
     if (st) window.scrollTo({
       top: st.getBoundingClientRect().top + window.scrollY - 70,
       behavior: "smooth"
     });
-  }], [(s.diag || 0) > 0 || (s.ai || 0) > 0, "Попробуй «Что сломалось?» или ИИ", "Открыть", () => go("repair", "find")]];
+  }], [(s.diag || 0) > 0 || (s.ai || 0) > 0, "Опиши поломку в «Что сломалось?» или спроси ИИ", "Открыть", () => go("repair", "find")]];
   const done = items.filter(i => i[0]).length;
   if (hide || done === items.length) return null;
   return /*#__PURE__*/React.createElement("div", {
@@ -8025,7 +8025,7 @@ function soundProfile(eng, exOverride) {
   };
 }
 const EX_LABEL = {
-  stock: "сток",
+  stock: "заводской",
   slip: "прямоток (slip-on)",
   full: "полная система",
   pipe: "тюнинг-труба"
@@ -12263,7 +12263,7 @@ function CompareView({
   const b2 = other.b,
     v2 = b2.versions[other.vi] || b2.versions[0];
   const e2 = buildSpec(b2, v2, {});
-  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "м/ч" : eng.oilInt, e2.hours ? "м/ч" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на ТО", toCost(eng), toCost(e2), "₽", -1], ["Слабых мест (серьёзных)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng).ok).length, TUNING.filter(t => tuningFor(t, e2).ok).length, "", 1]];
+  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на обслуживание", toCost(eng), toCost(e2), "₽", -1], ["Слабых мест (серьёзных)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng).ok).length, TUNING.filter(t => tuningFor(t, e2).ok).length, "", 1]];
   const fmtv = (v, u) => typeof v === "number" ? u === "₽" ? rub(v) : num(v) + (u ? " " + u : "") : v;
   return /*#__PURE__*/React.createElement("section", {
     className: "panel compare"
@@ -12316,7 +12316,7 @@ function CompareView({
     }))));
   })))), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, "\u0417\u0435\u043B\u0451\u043D\u044B\u043C \u2014 \u043B\u0443\u0447\u0448\u0435 \u043F\u043E \u044D\u0442\u043E\u043C\u0443 \u043F\u0443\u043D\u043A\u0442\u0443. \u0426\u0435\u043D\u044B \u0440\u0430\u0441\u0445\u043E\u0434\u043D\u0438\u043A\u043E\u0432 \u2014 \u0441\u0440\u0435\u0434\u043D\u0438\u0435, \u0437\u0430 \u043E\u0434\u0438\u043D \u0441\u0435\u0440\u0432\u0438\u0441 \u0422\u041E."));
+  }, "Зелёным — лучше по этому пункту. Цены расходников — средние, за одно обслуживание."));
 }
 /* ===== Навигация v4: 5 понятных разделов ===== */
 ICONS.ai = "M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4zM18.5 14l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9zM5.5 15l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6L3.2 17.3l1.6-.7z";
@@ -12362,7 +12362,7 @@ const NAV = [{
   label: "Запчасти и смета",
   short: "Запчасти"
 }];
-const BIKE_TABS = [["overview", "Обзор", "Обзор"], ["edit", "Настроить", "Настроить"], ["service", "Обслуживание", "ТО"], ["tuning", "Тюнинг", "Тюнинг"]];
+const BIKE_TABS = [["overview", "Обзор", "Обзор"], ["edit", "Настроить", "Настроить"], ["service", "Обслуживание", "Сервис"], ["tuning", "Тюнинг", "Тюнинг"]];
 const REPAIR_TABS = [["find", "Что сломалось?", "Поломки"], ["guides", "Инструкции", "Инструкции"], ["ref", "Справочник", "Справочник"]];
 function diagFor(eng) {
   return DIAG.filter(d => !d.only || d.only.some(g => eng.groups.indexOf(g) >= 0));
@@ -12409,6 +12409,20 @@ function App() {
   const [repairTab, setRepairTab] = useState("find");
   const [partsTab, setPartsTab] = useState("catalog");
   const [guideOpen, setGuideOpen] = useState(null);
+  /* направление выезда раздела: перешёл вправо по меню — выезжает справа, влево — слева */
+  const pageDir = useRef({
+    page: "home",
+    dir: "r"
+  });
+  if (pageDir.current.page !== page) {
+    const ids = NAV.map(n => n.id),
+      from = ids.indexOf(pageDir.current.page),
+      to = ids.indexOf(page);
+    pageDir.current = {
+      page: page,
+      dir: to < from ? "l" : "r"
+    };
+  }
   const [treeOpen, setTreeOpen] = useState(null);
   const [sel, setSel] = useState(() => load("sel", {
     key: "Motoland TT250",
@@ -12561,7 +12575,7 @@ function App() {
     });
     c[vkey] = keep;
     setCustom(c);
-    flash("Характеристики сброшены к стоку");
+    flash("Характеристики сброшены к заводским");
   }
   function setMt(patch) {
     setMaint(Object.assign({}, maint, {
@@ -12727,7 +12741,7 @@ function App() {
     className: "rb-name"
   }, cu.nick || bike.brand + " " + bike.name), eng.mods > 0 && /*#__PURE__*/React.createElement("span", {
     className: "rb-mod"
-  }, eng.swapped ? "свап мотора" : eng.mods + " " + plural(eng.mods, "изменение", "изменения", "изменений"))), /*#__PURE__*/React.createElement("div", {
+  }, eng.swapped ? "другой мотор" : eng.mods + " " + plural(eng.mods, "изменение", "изменения", "изменений"))), /*#__PURE__*/React.createElement("div", {
     className: "rail-links"
   }, /*#__PURE__*/React.createElement("button", {
     className: "link",
@@ -12764,7 +12778,7 @@ function App() {
     className: "main"
   }, !intro && /*#__PURE__*/React.createElement("div", {
     key: page,
-    className: "page-anim"
+    className: "page-anim pa-" + pageDir.current.dir
   }, page === "home" && /*#__PURE__*/React.createElement(Home, _extends({}, ctx, {
     project: project
   })), page === "bike" && /*#__PURE__*/React.createElement(BikePage, _extends({}, ctx, {
@@ -13367,7 +13381,7 @@ function EngineExplorer({
     onPointerUp: gasUp,
     onPointerCancel: gasUp,
     onContextMenu: e => e.preventDefault()
-  }, "\u0413\u0430\u0437 \u2014 \u0437\u0430\u0436\u043C\u0438")), (view === "bike" || view === "photo") && !running && /*#__PURE__*/React.createElement("div", {
+  }, "Газ — нажми и держи")), (view === "bike" || view === "photo") && !running && /*#__PURE__*/React.createElement("div", {
     className: "real-look"
   }, /*#__PURE__*/React.createElement("a", {
     className: "ctl",
@@ -13383,7 +13397,7 @@ function EngineExplorer({
     className: "seg dark sm",
     role: "group",
     "aria-label": "\u0412\u044B\u0445\u043B\u043E\u043F"
-  }, (eng.stroke === "2T" ? [["mine", "Мой"], ["stock", "Сток"], ["pipe", "Труба"], ["slip", "Прямоток"]] : [["mine", "Мой"], ["stock", "Сток"], ["slip", "Прямоток"], ["full", "Полная"]]).map(x => /*#__PURE__*/React.createElement("button", {
+  }, (eng.stroke === "2T" ? [["mine", "Мой"], ["stock", "Заводской"], ["pipe", "Труба"], ["slip", "Прямоток"]] : [["mine", "Мой"], ["stock", "Заводской"], ["slip", "Прямоток"], ["full", "Полная"]]).map(x => /*#__PURE__*/React.createElement("button", {
     key: x[0],
     className: exPrev === x[0] ? "on" : "",
     onClick: () => {
@@ -13393,7 +13407,7 @@ function EngineExplorer({
         setExLabel(snd.current.label());
       }
     }
-  }, x[1]))), /*#__PURE__*/React.createElement("small", null, "\u0421\u0435\u0439\u0447\u0430\u0441 \u0437\u0432\u0443\u0447\u0438\u0442: ", exLabel, ". ", exPrev === "mine" ? "Берётся из установленных доработок." : "Это предпрослушка — на мотоцикл не ставится.")), view === "3d" && !xray && /*#__PURE__*/React.createElement("p", {
+  }, x[1]))), /*#__PURE__*/React.createElement("small", null, "\u0421\u0435\u0439\u0447\u0430\u0441 \u0437\u0432\u0443\u0447\u0438\u0442: ", exLabel, ". ", exPrev === "mine" ? "Берётся из установленных доработок." : "Это только пример звука — на твой мотоцикл ничего не ставится.")), view === "3d" && !xray && /*#__PURE__*/React.createElement("p", {
     className: "stage-note"
   }, "\u041A\u0440\u0443\u0442\u0438 \u043C\u043E\u0442\u043E\u0440 \u043F\u0430\u043B\u044C\u0446\u0435\u043C, \u0449\u0438\u043F\u043E\u043A \u2014 \u043F\u0440\u0438\u0431\u043B\u0438\u0436\u0435\u043D\u0438\u0435, \u043A\u0430\u0441\u0430\u043D\u0438\u0435 \u0434\u0435\u0442\u0430\u043B\u0438 \u2014 \u0447\u0442\u043E \u044D\u0442\u043E \u0438 \u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0441\u0442\u043E\u0438\u0442. \xAB\u0420\u0430\u0437\u0440\u0435\u0437\xBB \u043F\u043E\u043A\u0430\u0436\u0435\u0442 \u043A\u043E\u043B\u0435\u043D\u0432\u0430\u043B, \u043F\u043E\u0440\u0448\u0435\u043D\u044C, \u043A\u043B\u0430\u043F\u0430\u043D\u044B, \u0441\u0446\u0435\u043F\u043B\u0435\u043D\u0438\u0435 \u0438 \u0448\u0435\u0441\u0442\u0435\u0440\u043D\u0438 \u041A\u041F\u041F \u0432 \u0440\u0430\u0431\u043E\u0442\u0435."), view === "3d" && xray && /*#__PURE__*/React.createElement("p", {
     className: "stage-note"
@@ -13836,7 +13850,7 @@ function Home(props) {
     className: "grad"
   }, cu.nick ? "«" + cu.nick + "»" : bike.name), "?"), /*#__PURE__*/React.createElement("p", {
     className: "hero-sub"
-  }, "\u0414\u0438\u0430\u0433\u043D\u043E\u0441\u0442\u0438\u043A\u0430, \u0440\u0435\u043C\u043E\u043D\u0442, \u0422\u041E \u0438 \u0442\u044E\u043D\u0438\u043D\u0433 \u2014 \u043F\u043E\u0434 \u0442\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B. 3D-\u043C\u043E\u0442\u043E\u0440, \u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A, \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u0438 \u0441\u043E \u0441\u0445\u0435\u043C\u0430\u043C\u0438."), /*#__PURE__*/React.createElement("div", {
+  }, "Поиск поломок, ремонт, обслуживание и тюнинг — под твой мотоцикл. Объёмная модель мотора, ИИ-механик и инструкции со схемами."), /*#__PURE__*/React.createElement("div", {
     className: "hero-cta"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary shine",
@@ -13908,7 +13922,7 @@ function Home(props) {
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "ai",
     s: 26
-  }), /*#__PURE__*/React.createElement("b", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A"), /*#__PURE__*/React.createElement("span", null, ai.state === "ready" ? "Спроси своими словами" : ai.state === "checking" ? "Подключаю…" : "Работает при открытии в Claude")), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("b", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A"), /*#__PURE__*/React.createElement("span", null, ai.state === "ready" ? "Спроси своими словами" : ai.state === "checking" ? "Подключаю…" : "Работает, если сайт открыт в Claude")), /*#__PURE__*/React.createElement("button", {
     className: "act",
     onClick: () => go("tuning")
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -13920,7 +13934,7 @@ function Home(props) {
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "cart",
     s: 26
-  }), /*#__PURE__*/React.createElement("b", null, "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u0438"), /*#__PURE__*/React.createElement("span", null, cart.length ? "В корзине " + cart.length : "Только то, что подходит"))), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("b", null, "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u0438"), /*#__PURE__*/React.createElement("span", null, cart.length ? "В корзине " + cart.length : "Только детали под твой мотор"))), /*#__PURE__*/React.createElement("div", {
     className: "home-grid"
   }, /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(PreRide, {
     eng: eng
@@ -13933,7 +13947,7 @@ function Home(props) {
     onClick: () => go("bike", "service")
   }, "\u041E\u0442\u043A\u0440\u044B\u0442\u044C")), tracked === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "\u0423\u043A\u0430\u0436\u0438 \u043F\u0440\u043E\u0431\u0435\u0433 \u0438 \u043A\u043E\u0433\u0434\u0430 \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u0440\u0430\u0437 \u043C\u0435\u043D\u044F\u043B \u043C\u0430\u0441\u043B\u043E \u2014 \u043F\u043E\u0434\u0441\u043A\u0430\u0436\u0443, \u043A\u043E\u0433\u0434\u0430 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0435 \u0422\u041E.") : urgent.length === 0 ? /*#__PURE__*/React.createElement("p", null, "\u0412\u0441\u0451 \u043F\u043E \u0433\u0440\u0430\u0444\u0438\u043A\u0443. \u041F\u0440\u043E\u0431\u0435\u0433 ", num(mt.odo), " ", eng.hours ? "м/ч" : "км", ".") : /*#__PURE__*/React.createElement("ul", {
+  }, "Укажи пробег и когда последний раз менял масло — подскажу, когда следующее обслуживание.") : urgent.length === 0 ? /*#__PURE__*/React.createElement("p", null, "\u0412\u0441\u0451 \u043F\u043E \u0433\u0440\u0430\u0444\u0438\u043A\u0443. \u041F\u0440\u043E\u0431\u0435\u0433 ", num(mt.odo), " ", eng.hours ? "моточ." : "км", ".") : /*#__PURE__*/React.createElement("ul", {
     className: "mlist compact"
   }, urgent.slice(0, 3).map(x => /*#__PURE__*/React.createElement(MaintRow, {
     key: x.id,
@@ -14216,15 +14230,15 @@ function scoreCauses(eng, mt, symSel, condSel) {
     }
     if (c.id === "valvetight" && due("valves")) {
       s += 3;
-      why.push("по ТО пора регулировать клапаны");
+      why.push("по пробегу пора регулировать клапаны");
     }
     if (c.id === "lowoil" && due("oil")) {
       s += 3;
-      why.push("по ТО пора менять масло");
+      why.push("по пробегу пора менять масло");
     }
     if (c.id === "camchain" && due("camchain")) {
       s += 2;
-      why.push("по ТО пора осмотреть цепь ГРМ");
+      why.push("по пробегу пора осмотреть цепь привода клапанов (ГРМ)");
     }
     if (c.id === "airfilter" && due("air")) {
       s += 2;
@@ -14867,7 +14881,7 @@ function Dyno({
     className: "dl-tuned"
   })), /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("span", {
     className: "lg lg-stock"
-  }), "\u0441\u0442\u043E\u043A ", eng.stockHp, " \u043B.\u0441.", gain > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+  }), "с завода ", eng.stockHp, " \u043B.\u0441.", gain > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     className: "lg lg-tuned"
   }), "\u043F\u043E\u0441\u043B\u0435 \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043E\u043A \u2248 ", Math.round(eng.stockHp * (1 + gain / 100) * 10) / 10, " \u043B.\u0441."), /*#__PURE__*/React.createElement("span", {
     className: "muted"
@@ -14945,7 +14959,7 @@ function Sprockets({
     className: "panel sprockets"
   }, /*#__PURE__*/React.createElement("h2", null, "\u041A\u0430\u043B\u044C\u043A\u0443\u043B\u044F\u0442\u043E\u0440 \u0437\u0432\u0451\u0437\u0434"), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, "\u0421\u043A\u043E\u043B\u044C\u043A\u043E \u043A\u043C/\u0447 \u0434\u0430\u0441\u0442 \u0438\u043B\u0438 \u0437\u0430\u0431\u0435\u0440\u0451\u0442 \u0437\u0430\u043C\u0435\u043D\u0430 \u0437\u0432\u0451\u0437\u0434 \u043D\u0430 \u0442\u0432\u043E\u0451\u043C ", bike.name, ": \u0443\u0447\u0438\u0442\u044B\u0432\u0430\u044E \u043E\u0431\u043E\u0440\u043E\u0442\u044B \u043E\u0442\u0441\u0435\u0447\u043A\u0438, \u043A\u043E\u043B\u0435\u0441\u043E \u0438 \u043C\u043E\u0449\u043D\u043E\u0441\u0442\u044C \u043C\u043E\u0442\u043E\u0440\u0430."), /*#__PURE__*/React.createElement("div", {
+  }, "\u0421\u043A\u043E\u043B\u044C\u043A\u043E \u043A\u043C/\u0447 \u0434\u0430\u0441\u0442 \u0438\u043B\u0438 \u0437\u0430\u0431\u0435\u0440\u0451\u0442 \u0437\u0430\u043C\u0435\u043D\u0430 \u0437\u0432\u0451\u0437\u0434 \u043D\u0430 \u0442\u0432\u043E\u0451\u043C ", bike.name, ": учитываю предельные обороты, размер колеса и мощность мотора."), /*#__PURE__*/React.createElement("div", {
     className: "spr-grid"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, "\u0421\u0435\u0439\u0447\u0430\u0441"), /*#__PURE__*/React.createElement("div", {
     className: "fgrid two"
@@ -14957,9 +14971,9 @@ function Sprockets({
     className: s2.v > s1.v ? "up" : s2.v < s1.v ? "down" : ""
   }, s2.v), " \u043A\u043C/\u0447")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "\u0422\u044F\u0433\u0430"), /*#__PURE__*/React.createElement("b", {
     className: tr > 0 ? "up" : tr < 0 ? "down" : ""
-  }, tr > 0 ? "+" : "", tr, "%")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "\u041F\u0435\u0440\u0435\u0434\u0430\u0442\u043E\u0447\u043D\u043E\u0435"), /*#__PURE__*/React.createElement("b", null, k1.toFixed(2), " \u2192 ", k2.toFixed(2))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "\u0426\u0435\u043F\u044C"), /*#__PURE__*/React.createElement("b", null, links === 0 ? "та же" : (links > 0 ? "+" : "") + links + " " + plural(Math.abs(links), "звено", "звена", "звеньев")))), ok && /*#__PURE__*/React.createElement("p", {
+  }, tr > 0 ? "+" : "", tr, "%")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Передаточное число"), /*#__PURE__*/React.createElement("b", null, k1.toFixed(2), " \u2192 ", k2.toFixed(2))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "\u0426\u0435\u043F\u044C"), /*#__PURE__*/React.createElement("b", null, links === 0 ? "та же" : (links > 0 ? "+" : "") + links + " " + plural(Math.abs(links), "звено", "звена", "звеньев")))), ok && /*#__PURE__*/React.createElement("p", {
     className: "spr-note"
-  }, s2.limit === "power" && s2.vGear > s1.vGear ? "Мотору не хватит мощности раскрутиться до отсечки на этих звёздах — максималка почти не вырастет, а тяга упадёт." : s2.limit === "rpm" ? "Мотоцикл упирается в отсечку " + num(s2.red) + " об/мин — звёзды прямо меняют максималку." : "Максималку ограничивает мощность, на звёздах выигрываешь в основном тягу или экономию."), /*#__PURE__*/React.createElement("p", {
+  }, s2.limit === "power" && s2.vGear > s1.vGear ? "На этих звёздах мотору не хватит мощности раскрутиться до предельных оборотов — максимальная скорость почти не вырастет, а тяга упадёт." : s2.limit === "rpm" ? "Мотоцикл упирается в предельные обороты: " + num(s2.red) + " об/мин — от звёзд напрямую зависит максимальная скорость." : "Максималку ограничивает мощность, на звёздах выигрываешь в основном тягу или экономию."), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
   }, "\u041F\u0440\u0430\u0432\u0438\u043B\u043E: \u22121 \u0437\u0443\u0431 \u0441\u043F\u0435\u0440\u0435\u0434\u0438 \u2248 +3 \u0437\u0443\u0431\u0430 \u0441\u0437\u0430\u0434\u0438. \u041E\u0446\u0435\u043D\u043A\u0430 \xB110\u201315%: \u043D\u0430 \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C \u0432\u043B\u0438\u044F\u044E\u0442 \u043F\u043E\u0441\u0430\u0434\u043A\u0430, \u0432\u0435\u0442\u0435\u0440, \u0440\u0435\u0437\u0438\u043D\u0430 \u0438 \u0438\u0437\u043D\u043E\u0441 \u043C\u043E\u0442\u043E\u0440\u0430."));
 }
@@ -15117,7 +15131,7 @@ function TopSpeed({
     className: "vmax-n"
   }, /*#__PURE__*/React.createElement("b", null, sp.v), /*#__PURE__*/React.createElement("span", null, "\u043A\u043C/\u0447")), /*#__PURE__*/React.createElement("div", {
     className: "vmax-t"
-  }, /*#__PURE__*/React.createElement("h3", null, "\u041C\u0430\u043A\u0441\u0438\u043C\u0430\u043B\u044C\u043D\u0430\u044F \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C (\u043E\u0446\u0435\u043D\u043A\u0430)"), /*#__PURE__*/React.createElement("p", null, sp.limit === "power" ? "Упирается в мощность мотора: звезда на скорость почти ничего не добавит" + (up.v > sp.v ? " (≈ +" + (up.v - sp.v) + " км/ч)" : "") + ", прибавку даст тюнинг мотора." : "Упирается в отсечку " + num(sp.red) + " об/мин: передняя звезда +1 зуб даст ≈ +" + (up.v - sp.v) + " км/ч."), /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("h3", null, "\u041C\u0430\u043A\u0441\u0438\u043C\u0430\u043B\u044C\u043D\u0430\u044F \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C (\u043E\u0446\u0435\u043D\u043A\u0430)"), /*#__PURE__*/React.createElement("p", null, sp.limit === "power" ? "Упирается в мощность мотора: звезда на скорость почти ничего не добавит" + (up.v > sp.v ? " (≈ +" + (up.v - sp.v) + " км/ч)" : "") + ", прибавку даст тюнинг мотора." : "Упирается в предельные обороты " + num(sp.red) + " об/мин: передняя звезда +1 зуб даст ≈ +" + (up.v - sp.v) + " км/ч."), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
   }, "\u0417\u0432\u0451\u0437\u0434\u044B ", sp.front, "/", sp.rear, ", \u0437\u0430\u0434\u043D\u0435\u0435 \u043A\u043E\u043B\u0435\u0441\u043E ", sp.rim, "\u2033, ", sp.hp, " \u043B.\u0441. \u041F\u043E\u0433\u0440\u0435\u0448\u043D\u043E\u0441\u0442\u044C \xB110\u201315%. ", !cu.sprF && "Звёзды типовые для класса — ", !cu.sprF && /*#__PURE__*/React.createElement("button", {
     className: "link inline",
@@ -15246,7 +15260,7 @@ function Tuning({
     className: afterSp.v > baseSp.v ? "up" : "down"
   }, afterSp.v)), /*#__PURE__*/React.createElement("span", null, "\u043A\u043C/\u0447"), /*#__PURE__*/React.createElement("small", {
     className: "muted"
-  }, afterSp.limit === "power" ? "упирается в мощность" : "упирается в отсечку")), /*#__PURE__*/React.createElement("div", {
+  }, afterSp.limit === "power" ? "не хватает мощности" : "упирается в предельные обороты")), /*#__PURE__*/React.createElement("div", {
     className: "meters"
   }, /*#__PURE__*/React.createElement(Meter, {
     label: "\u0422\u044F\u0433\u0430 \u0432\u043D\u0438\u0437\u0443",
@@ -16172,7 +16186,7 @@ function AiChat({
     setTimeout(() => send(lastUser.text), 0);
   }
   const efi = eng.groups.indexOf("efi") >= 0;
-  const sugg = ["Глохнет на холодную — с чего начать?", eng.stroke === "4T" ? "Как отрегулировать клапаны на моём моторе?" : "Как понять, что пора менять поршень?", efi ? "Горит Check — что проверить в первую очередь?" : "Какой главный жиклёр поставить после прямотока и фильтра нулевого?", "Какие слабые места у " + eng.code + " и как их предупредить?", "Что проверить перед дальней поездкой по лесу?"].concat(ai.images ? ["Посмотри фото свечи и скажи, что со смесью"] : []);
+  const sugg = ["Глохнет на холодную — с чего начать?", eng.stroke === "4T" ? "Как отрегулировать клапаны на моём моторе?" : "Как понять, что пора менять поршень?", efi ? "Горит лампа Check Engine — что проверить в первую очередь?" : "Какой главный жиклёр поставить после прямотока и фильтра нулевого?", "Какие слабые места у " + eng.code + " и как их предупредить?", "Что проверить перед дальней поездкой по лесу?"].concat(ai.images ? ["Посмотри фото свечи и скажи, что со смесью"] : []);
   return /*#__PURE__*/React.createElement("section", {
     className: "page ai-page"
   }, /*#__PURE__*/React.createElement("div", {

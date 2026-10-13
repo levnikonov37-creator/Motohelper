@@ -1374,3 +1374,34 @@ body::after { display: none !important; }
 .boot { min-height: 70vh; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--muted); font: 16px/1.5 var(--body); }
 .boot b { display: block; font: 400 26px var(--display); color: var(--ink); margin-bottom: 6px; }
 :root{--mud:#CBD5E1;} :root[data-theme="dark"]{--mud:#CBD5E1;}
+
+/* ===================== v25: фон — карта рельефа и мягкий свет =====================
+   Всё статично и лежит на отдельном фиксированном слое (contain + translateZ):
+   при прокрутке слой не перерисовывается, нагрузка на телефон — как у одной картинки. */
+.space-bg { contain: strict; transform: translateZ(0);
+  background:
+    radial-gradient(55% 38% at 88% 6%, rgba(147,197,253,.20), transparent 70%),
+    radial-gradient(50% 36% at 6% 96%, rgba(243,195,24,.10), transparent 72%),
+    radial-gradient(120% 70% at 50% 100%, #121822 0%, #0A0D12 55%, #06080B 100%) !important; }
+.space-bg::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: url("../img/topo.svg") 50% 0 / 1500px 1500px repeat;
+  -webkit-mask-image: radial-gradient(130% 95% at 50% 25%, #000 35%, rgba(0,0,0,.35) 75%, transparent 100%);
+  mask-image: radial-gradient(130% 95% at 50% 25%, #000 35%, rgba(0,0,0,.35) 75%, transparent 100%); }
+.fx-horizon { opacity: .75; }
+@media (max-width: 760px) { .space-bg::before { background-size: 1050px 1050px; } }
+
+/* ===================== v26: плавно выезжающие разделы =====================
+   Только transform/opacity — без перерисовки страницы. Правила с !important и повышенной
+   специфичностью, потому что v24 обнуляет transform у карточек. */
+@keyframes paR { from { opacity: 0; transform: translate3d(32px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes paL { from { opacity: 0; transform: translate3d(-32px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes mhEnter { from { opacity: 0; transform: translate3d(0, 16px, 0); } to { opacity: 1; transform: none; } }
+.main .page-anim.pa-r { animation: paR .38s cubic-bezier(.2, .8, .2, 1) both !important; }
+.main .page-anim.pa-l { animation: paL .38s cubic-bezier(.2, .8, .2, 1) both !important; }
+.main .mh-enter { animation: mhEnter .36s cubic-bezier(.2, .8, .2, 1) both !important; }
+.main .mh-rv:not(.mh-in) { opacity: 0 !important; transform: translate3d(0, 26px, 0) !important; }
+.main .mh-rv { transition: opacity .5s ease, transform .6s cubic-bezier(.2, .8, .2, 1) !important; }
+@media (prefers-reduced-motion: reduce) {
+  .main .page-anim.pa-r, .main .page-anim.pa-l, .main .mh-enter { animation: none !important; }
+  .main .mh-rv, .main .mh-rv:not(.mh-in) { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
