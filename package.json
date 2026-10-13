@@ -1,0 +1,13 @@
+{
+  "name": "motohelper",
+  "private": true,
+  "description": "MotoHelper — справочник китайских эндуро",
+  "scripts": {
+    "test": "node tests/check-data.js && node tests/check-page.js",
+    "test:data": "node tests/check-data.js",
+    "test:page": "node tests/check-page.js"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}
