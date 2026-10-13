@@ -3156,4 +3156,21 @@ addBike("KTM", "150 SX", "Кросс-эндуро", "KTM150"); addBike("KTM", "1
 addBike("Kawasaki", "KX112", "Кросс-эндуро", "KX112"); addBike("Kawasaki", "KX100", "Кросс-эндуро", "KX112", { hp: 22, approx: true });
 addBike("Bajaj", "Pulsar NS160", "Нейкед", "S160BJ"); addBike("Bajaj", "Pulsar NS125", "Нейкед", "S160BJ", { hp: 12, approx: true });
 addBike("Hero", "XPulse 210", "Лёгкий эндуро", "XP210");
+/* ===================== v21: китайские эндуро 2024–2025 (проверено по карточкам дилеров и объявлениям) ===================== */
+(function () {
+  var E = "Эндуро", A = { approx: true };
+  /* YBS300 (Loncin LX176MN): moto-life.shop, x-m.su, drom.ru, motolifeshop.ru */
+  addBike("Kews", "K23 YBS300", E, "YBS300", { hp: 28 }); addBike("Kews", "K23 YBS300 PRO", E, "YBS300G2"); addBike("Kews", "K16 YBS300", E, "YBS300");
+  addBike("Zuumav", "K9 YBS300", E, "YBS300"); addBike("JHL", "LX6 YBS300", E, "YBS300"); addBike("Fidelis", "ESH YBS300", E, "YBS300");
+  /* Kayo K6 EFI 250 (2025): arawheels.com — инжекторная версия K6 на NC250 */
+  addBike("Kayo", "K6 EFI 250", E, "NC250E");
+  /* Avantis A6 Lux 300: объявления drom.ru — мотор 174MN-3, жидкостное охлаждение */
+  addBike("Avantis", "A6 Lux 300", E, "NB300");
+  /* Motoland XR 300 Lite (2025): av.by — мотор 175FMM */
+  addBike("Motoland", "XR 300 Lite", E, "175FMM");
+  /* Progasi Flex 250: 21vek.by — 249.4 см³, 25 л.с., карбюратор, воздушно-масляное охлаждение */
+  addBike("Progasi", "Flex 250", E, "172FMM-5", { hp: 25, approx: true });
+  /* Besuda 008 NB300: объявления drom.ru */
+  addBike("Besuda", "008 NB300", E, "NB300");
+})();
 sortBikes();
