@@ -4678,6 +4678,108 @@ GUIDES.push(
   rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
   BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 })();
+/* ===================== v18: детские и 2T-кроссы, новинки 2024–2025, Benelli/QJ 750, CFMOTO 250 ===================== */
+/* Honda: детские и лёгкие */
+CL("CRF70", "CRF50F", { code: "XR70 / CRF70", name: "Honda XR70R / CRF70F (горизонтальный 72)", cc: 72, hp: 5, gearbox: "4 ст., сцепление автомат", carb: "Keihin PB (по мануалу)" }, 1.1);
+CL("XR100", "XR125L", { code: "XR80 / XR100", name: "Honda XR80R / XR100R / CRF80F / CRF100F (вертикальный 80–100)", cc: 99, hp: 8, start: "Кик", gearbox: "5 ст.", carb: "Keihin PB (по мануалу)" }, 1.1);
+CL("CRF125F", "CRF110F", { code: "JE01E", name: "Honda CRF125F / CRF125F Big Wheel (горизонтальный 125)", cc: 124, hp: 9.5, gearbox: "4 ст., ручное сцепление", groups: ["horiz", "air", "carb", "4t", "small", "jp"], carb: "Keihin (до 2018) / инжектор (2019+)" }, 1.2);
+CL("XR200R", "CRF230F", { code: "ME04E", name: "Honda XR200R / XR200 (воздушный 195, RFVC)", cc: 195, hp: 17, start: "Кик", carb: "Keihin PD (по мануалу)" }, 1.2);
+CL("CRF250F", "CRF230F", { code: "MD48E", name: "Honda CRF250F (воздушный 249, инжектор)", cc: 249, hp: 23, groups: ["air", "efi", "4t", "big", "jp"], carb: "Инжектор PGM-FI", start: "Электро" }, 1.4);
+CL("NX400", "NX500", { code: "NC65E", name: "Honda 399 (рядная двойка 180°: NX400 / CBR400R / CB400F)", cc: 399, hp: 46 }, 1.8);
+/* Yamaha */
+CL("XT350", "DR350", { code: "55V", name: "Yamaha XT350 (воздушный DOHC, 4 клапана)", maker: "Yamaha", cc: 346, hp: 30, cam: "DOHC, 4 клапана", groups: ["dohc", "air", "carb", "4t", "big", "jp"], carb: "Mikuni ×2 (двухкамерный)" }, 1.4);
+CL("XT500", "XT600", { code: "1E6 / 583", name: "Yamaha XT500 / TT500 (воздушный, 2 клапана)", cc: 499, hp: 30, cam: "SOHC, 2 клапана", start: "Кик (с декомпрессором)", gearbox: "5 ст.", carb: "Mikuni VM34", oilVol: "≈ 2.5 л (сухой картер, масло в раме)" }, 1.4);
+CL("DT125", "JP2T125", { code: "DT125R / TS125R", name: "Японский эндуро 2T 125 (Yamaha DT125R/RE/X, Suzuki TS125R, Kawasaki KDX125)", maker: "Yamaha / Suzuki / Kawasaki", hp: 22, start: "Кик", fuel: "АИ-95 + 2T масло (раздельная смазка у DT)", carb: "Mikuni TM28 / VM26 (по модели)" }, 1.2);
+CL("DT200", "JP2T250", { code: "DT200R / WR200", name: "Yamaha DT200R / WR200R (2T 195, YPVS)", maker: "Yamaha", cc: 195, hp: 32, start: "Кик", carb: "Mikuni TM28SS" }, 1.3);
+CL("JP2T65", "YZ85", { code: "JP 65 2T", name: "Японский детский кроссовый 2T 65 (KX65 / YZ65 / RM65)", maker: "Kawasaki / Yamaha / Suzuki", cc: 64, hp: 15 }, 1.0);
+CL("JP125A", "XR125L", { code: "JP 125 air", name: "Японский 125 воздушный (XTZ125 / DR125SM / KLX125 / CB125F)", maker: "Yamaha / Suzuki / Kawasaki / Honda", hp: 11 }, 1.0);
+/* Kawasaki, Suzuki */
+CL("KLX300E", "KLX250", { code: "LX300A", name: "Kawasaki KLX300 / KLX300R / KLX300SM (292, DOHC)", cc: 292, hp: 29, groups: ["dohc", "liquid", "efi", "4t", "big", "jp"], carb: "Инжектор (KLX300R — Keihin FCR)" }, 1.3);
+CL("DRZ4", "DRZ400", { code: "DR-Z4", name: "Suzuki DR-Z4S / DR-Z4SM (2025+, инжектор, ride-by-wire)", hp: 38, groups: ["dohc", "liquid", "efi", "4t", "big", "jp"], carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—", start: "Электро" }, 1.5);
+/* Европа: 2T-кросс и детские */
+CL("KTM50", "KTM65", { code: "50 SX", name: "KTM 50 SX / Husqvarna TC 50 / GasGas MC 50 (2T, автомат-сцепление)", cc: 49, hp: 9, gearbox: "1 ст., автоматическое сцепление" }, 0.9);
+CL("KTM125", "KTM85", { code: "125 SX", name: "KTM 125 SX/EXC / Husqvarna TC/TE 125 / GasGas MC 125 (2T)", cc: 125, hp: 37, groups: ["2t", "liquid", "carb", "small", "eu"], carb: "Keihin PWK38 / Mikuni TMX (2023+ — впрыск TBI)" }, 1.4);
+CL("KTM250SX", "KTM300C", { code: "250 SX", name: "KTM 250 SX / Husqvarna TC 250 / GasGas MC 250 (2T, кросс)", cc: 249, hp: 48, gearbox: "5 ст., кроссовый ряд", carb: "Keihin PWK36 / Mikuni TMX38 (2023+ — впрыск TBI)" }, 1.8);
+CL("G450X", "KTM450F", { code: "BMW G450X", name: "BMW G 450 X / Husqvarna TE 449 / TE 511 (BMW-эпоха)", maker: "BMW (сборка Kymco)", cc: 449, hp: 52, groups: ["dohc", "liquid", "efi", "4t", "big", "eu"], cam: "DOHC, 4 клапана",
+  issues: [{ t: "Редкий мотор: запчасти ЦПГ и ГРМ — под заказ", sev: "med", fix: "Регламент по моточасам, заранее найди поставщика." }] }, 2.2);
+CL("KTM399", "KTM390", { code: "LC4c 399", name: "KTM / Husqvarna 399 (390 Duke / 390 Adventure / 390 Enduro R / 390 SMC R, 2024+)", cc: 399, hp: 45 }, 1.3);
+CL("S250KT", "KTM390", { code: "LC4c 250", name: "KTM / Bajaj 248 (250 Duke / 250 Adventure / Dominar 250)", cc: 249, hp: 30 }, 1.1);
+/* Индия */
+CL("HIM440", "HIM411", { code: "Scram 440", name: "Royal Enfield 443 (Scram 440)", cc: 443, hp: 25.4 }, 1.2);
+CL("S250BJ", "S180BJ", { code: "Bajaj 250 FI", name: "Bajaj Pulsar N250 / F250 (маслоохлаждаемый 249)", cc: 249, hp: 24.5, cam: "SOHC, 2 клапана", groups: ["air", "efi", "4t", "big", "in"], cooling: "Воздушно-масляное", carb: "Инжектор" }, 0.9);
+/* Китай */
+RE("S250C", { region: "cn", code: "CF 249", name: "CFMOTO 249 (250NK / 250SR), аналог у Benelli TRK 251", maker: "CFMOTO", groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 4 клапана", cc: 249, hp: 27, torque: "≈ 22 Н·м", compression: "≈ 11.3 бар", oilVol: "≈ 1.6 л" }, 1.0);
+RE("T750BN", { region: "cn", code: "QJ 754", name: "Benelli / QJMotor 754 (рядная двойка 270°: TRK 800 / Leoncino 800 / 752S / SRT 800)", maker: "QJMotor / Benelli", layout: "twin", crankPhase: 270, groups: ["dohc", "liquid", "efi", "4t", "big", "balancer"], cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 754, hp: 76, torque: "≈ 67 Н·м", compression: "≈ 11.5 бар", oilVol: "≈ 3.5 л" }, 1.6);
+RE("S374BN", { region: "cn", code: "Benelli 374", name: "Benelli Imperiale 400 (воздушный 374)", maker: "Benelli", groups: ["air", "efi", "4t", "big"], cooling: "Воздушное", cam: "SOHC, 2 клапана", cc: 374, hp: 21, torque: "≈ 29 Н·м", compression: "≈ 9.5 бар", gearbox: "5 ст.", oilVol: "≈ 2 л", oilInt: 5000, valveInt: 10000 }, 1.0);
+CL("Z312", "S350Z", { code: "Zontes 312", name: "Zontes 312 (ZT310 R / T / X / V)", cc: 312, hp: 35 }, 1.1);
+(function () {
+  var E = "Эндуро", K = "Кросс-эндуро", T = "Тур-эндуро", L = "Лёгкий эндуро", Mo = "Мотард", Nk = "Нейкед", Sp = "Спорт", Ch = "Чоппер", P2 = "Питбайк", A = { approx: true };
+  var have = {}; BIKES.forEach(function (b) { have[b.brand + "|" + b.name] = true; });
+  function add(brand, name, type, eng, extra) { if (have[brand + "|" + name]) return; have[brand + "|" + name] = true; B(brand, name, type, [[eng, null, extra || {}]]); }
+  /* уточнение моторов у уже добавленных моделей */
+  function remap(brand, name, eng, extra) {
+    BIKES.forEach(function (b) { if (b.brand !== brand || b.name !== name) return; var e = ENGINES[eng];
+      b.versions = [Object.assign({ engine: eng, label: e.code + ", " + e.cc + " см³" }, extra || {})]; });
+  }
+  remap("Husqvarna", "TC 125", "KTM125"); remap("Kawasaki", "KLX300", "KLX300E"); remap("Kawasaki", "KLX300SM", "KLX300E");
+  /* Honda */
+  add("Honda", "XR70R", P2, "CRF70"); add("Honda", "CRF70F", P2, "CRF70"); add("Honda", "XR50R", P2, "CRF50F"); add("Honda", "XR80R", P2, "XR100", { hp: 6, approx: true }); add("Honda", "CRF80F", P2, "XR100", { hp: 6, approx: true });
+  add("Honda", "XR100R", P2, "XR100"); add("Honda", "CRF100F", P2, "XR100"); add("Honda", "CRF125F", P2, "CRF125F"); add("Honda", "CRF125F Big Wheel", P2, "CRF125F");
+  add("Honda", "XR200R", E, "XR200R"); add("Honda", "CRF250F", E, "CRF250F"); add("Honda", "XR250 Tornado", L, "XR250", { hp: 23, approx: true }); add("Honda", "XL250 Degree", L, "XR250", { hp: 28, approx: true });
+  add("Honda", "NX400", T, "NX400"); add("Honda", "CBR400R", Sp, "NX400"); add("Honda", "CB400F", Nk, "NX400"); add("Honda", "CL500", Nk, "NX500", { hp: 46 });
+  add("Honda", "CB125F", Nk, "JP125A", { hp: 11 }); add("Honda", "CB125R", Nk, "S125J");
+  /* Yamaha */
+  add("Yamaha", "TT-R225", E, "TTR230", { hp: 19 }); add("Yamaha", "TT600", E, "XT600", { hp: 40, approx: true }); add("Yamaha", "XT350", E, "XT350"); add("Yamaha", "XT500", T, "XT500"); add("Yamaha", "TT500", E, "XT500", { hp: 32 });
+  add("Yamaha", "XTZ125", L, "JP125A", { hp: 10 }); add("Yamaha", "XTZ250 Lander", L, "XT250", { hp: 21 }); add("Yamaha", "XG250 Tricker", L, "XT250", { hp: 19, approx: true });
+  add("Yamaha", "DT125R", K, "DT125"); add("Yamaha", "DT125RE", K, "DT125", { hp: 15 }); add("Yamaha", "DT125X", Mo, "DT125", { hp: 15 }); add("Yamaha", "DT200R", K, "DT200"); add("Yamaha", "WR200R", K, "DT200", { hp: 33 });
+  add("Yamaha", "YZ65", K, "JP2T65"); add("Yamaha", "YZ80", K, "YZ85", { hp: 20, approx: true }); add("Yamaha", "Ténéré 700 Extreme", T, "T700"); add("Yamaha", "Ténéré 700 Rally Edition", T, "T700");
+  /* Kawasaki */
+  add("Kawasaki", "KLX230S", L, "KLX230"); add("Kawasaki", "KLX230SM", Mo, "KLX230"); add("Kawasaki", "KLX230R", E, "KLX230", { hp: 18, approx: true }); add("Kawasaki", "KLX300R", E, "KLX300E", { hp: 31 });
+  add("Kawasaki", "KLX400SR", E, "DRZ400"); add("Kawasaki", "KLX150L", P2, "KLX140", { hp: 12 }); add("Kawasaki", "KLX150S", L, "KLX140", { hp: 12 }); add("Kawasaki", "KLX125", L, "JP125A", { hp: 10 });
+  add("Kawasaki", "D-Tracker 125", Mo, "JP125A", { hp: 10 }); add("Kawasaki", "KLR250", E, "KLX250", { hp: 25, approx: true }); add("Kawasaki", "KDX125", K, "DT125", { hp: 23, approx: true });
+  add("Kawasaki", "KX65", K, "JP2T65"); add("Kawasaki", "Eliminator 500", Ch, "T400K", { hp: 45, approx: true }); add("Kawasaki", "Z500", Nk, "T400K", { hp: 45, approx: true });
+  /* Suzuki */
+  add("Suzuki", "DR-Z4S", E, "DRZ4"); add("Suzuki", "DR-Z4SM", Mo, "DRZ4"); add("Suzuki", "DR-Z110", P2, "KLX110"); add("Suzuki", "DR125SM", Mo, "JP125A", { hp: 11 });
+  add("Suzuki", "TS125R", K, "DT125", { hp: 22, approx: true }); add("Suzuki", "RMX250", K, "JP2T250", { hp: 40, approx: true }); add("Suzuki", "RM85", K, "YZ85"); add("Suzuki", "RM65", K, "JP2T65");
+  add("Suzuki", "JR50", P2, "PW50", A); add("Suzuki", "V-Strom 800RE", T, "T800S");
+  /* KTM */
+  add("KTM", "50 SX", K, "KTM50"); add("KTM", "125 SX", K, "KTM125"); add("KTM", "125 EXC", K, "KTM125", { hp: 32 }); add("KTM", "250 SX", K, "KTM250SX");
+  add("KTM", "Freeride 250 F", E, "KTM250F", { hp: 24, approx: true }); add("KTM", "Freeride 250 R", K, "KTM250TPI", { hp: 30, approx: true }); add("KTM", "Freeride 350", E, "KTM350F", { hp: 24, approx: true });
+  add("KTM", "520 EXC", E, "KTM450F", { hp: 52, approx: true }); add("KTM", "390 Adventure (2025)", T, "KTM399"); add("KTM", "390 Adventure R", T, "KTM399"); add("KTM", "390 Enduro R", E, "KTM399");
+  add("KTM", "390 SMC R", Mo, "KTM399"); add("KTM", "250 Duke", Nk, "S250KT"); add("KTM", "250 Adventure", T, "S250KT");
+  /* Husqvarna, GasGas */
+  add("Husqvarna", "TC 50", K, "KTM50"); add("Husqvarna", "TE 125", K, "KTM125", { hp: 32 }); add("Husqvarna", "TC 250", K, "KTM250SX"); add("Husqvarna", "FC 250", K, "KTM250F", { hp: 47 }); add("Husqvarna", "FC 350", K, "KTM350F", { hp: 57 });
+  add("Husqvarna", "TE 449", E, "G450X"); add("Husqvarna", "TE 511", E, "G450X", { hp: 55, approx: true }); add("Husqvarna", "Svartpilen 401 (2024+)", Nk, "KTM399"); add("Husqvarna", "Vitpilen 401 (2024+)", Nk, "KTM399");
+  add("GasGas", "MC 50", K, "KTM50"); add("GasGas", "MC 125", K, "KTM125"); add("GasGas", "MC 250", K, "KTM250SX"); add("GasGas", "MC 350F", K, "KTM350F", { hp: 57 });
+  add("GasGas", "EX 250F", E, "KTM250F"); add("GasGas", "EX 350F", E, "KTM350F"); add("GasGas", "EX 450F", E, "KTM450F", { hp: 63 }); add("GasGas", "SM 700", Mo, "LC4");
+  add("GasGas", "EC 250 (2000–2020, карбюратор)", K, "2T250", A); add("GasGas", "EC 300 (2000–2020, карбюратор)", K, "2T300", A);
+  /* BMW, Beta, Fantic, Aprilia, Triumph */
+  add("BMW", "G 450 X", E, "G450X"); add("BMW", "G 650 Xmoto", Mo, "ROTAX652", { hp: 53 }); add("BMW", "F 700 GS", T, "F850", { hp: 75, approx: true }); add("BMW", "F 750 GS", T, "F850", { hp: 77 }); add("BMW", "F 800 R", Nk, "F850", { hp: 87, approx: true });
+  add("Beta", "Alp 4.0", L, "DR350", { hp: 26, approx: true }); add("Beta", "Alp 200", L, "DR200", { hp: 15, approx: true });
+  add("Fantic", "Caballero 500 Scrambler", Nk, "NC450", { hp: 40 }); add("Fantic", "Caballero 500 Rally", E, "NC450", { hp: 40 }); add("Fantic", "Caballero 125", L, "M125");
+  add("Aprilia", "RX 125", E, "M125", A); add("Aprilia", "SX 125", Mo, "M125", A); add("Aprilia", "RX 50", E, "AM6", A); add("Aprilia", "SX 50", Mo, "AM6", A);
+  add("Triumph", "Tiger 900 GT Pro", T, "I3_900T"); add("Triumph", "Tiger 850 Sport", T, "I3_900T", { hp: 85 }); add("Triumph", "Tiger 1200 GT Pro", T, "I3_1200T", { hp: 148 });
+  add("Triumph", "Scrambler 400 XC", L, "S400T"); add("Triumph", "Thruxton 400", Sp, "S400T", { hp: 42 });
+  /* Индия */
+  add("Royal Enfield", "Guerrilla 450", Nk, "HIM450"); add("Royal Enfield", "Scram 440", L, "HIM440"); add("Royal Enfield", "Bear 650", Nk, "T650RE"); add("Royal Enfield", "Classic 650", Ch, "T650RE");
+  add("Royal Enfield", "Goan Classic 350", Ch, "S350RE");
+  add("Bajaj", "Dominar 250", T, "S250KT", { hp: 27 }); add("Bajaj", "Pulsar N250", Nk, "S250BJ"); add("Bajaj", "Pulsar F250", Sp, "S250BJ");
+  add("TVS", "Apache RTR 310", Nk, "G310", { hp: 35.6 }); add("Hero", "XPulse 200T", L, "XP200"); add("Hero", "XPulse 200 4V Pro", L, "XP200");
+  /* Китай */
+  add("CFMOTO", "250NK", Nk, "S250C"); add("CFMOTO", "250SR", Sp, "S250C");
+  add("Benelli", "TRK 702", T, "T750BN", { hp: 70, approx: true }); add("Benelli", "TRK 702X", T, "T750BN", { hp: 70, approx: true }); add("Benelli", "TRK 800", T, "T750BN"); add("Benelli", "Leoncino 800", Nk, "T750BN");
+  add("Benelli", "Leoncino 800 Trail", Nk, "T750BN"); add("Benelli", "752S", Nk, "T750BN"); add("Benelli", "Imperiale 400", Ch, "S374BN"); add("Benelli", "TRK 251", T, "S250C", { hp: 25, approx: true });
+  add("Benelli", "Leoncino 250", Nk, "S250C", { hp: 25, approx: true }); add("Benelli", "BN 251", Nk, "S250C", { hp: 25, approx: true });
+  add("QJMotor", "SRT 800", T, "T750BN"); add("QJMotor", "SRT 800X", T, "T750BN"); add("QJMotor", "SRK 800", Nk, "T750BN");
+  add("Voge", "300DS", T, "VOGE300"); add("Voge", "300R", Nk, "VOGE300"); add("Voge", "500DS", T, "VOGE525", { hp: 47 }); add("Voge", "900DSX", T, "F850", { hp: 95, approx: true });
+  add("Zontes", "ZT310-T", T, "Z312"); add("Zontes", "ZT310-X", Nk, "Z312"); add("Zontes", "ZT310-R", Nk, "Z312"); add("Zontes", "ZT310-V", Ch, "Z312");
+  /* «Любая модель» — новые моторы */
+  add("Любая модель", "с мотором KTM 125 2T", K, "KTM125"); add("Любая модель", "с мотором KTM 250 2T (кросс)", K, "KTM250SX"); add("Любая модель", "с мотором CFMOTO 249", Nk, "S250C");
+  add("Любая модель", "с мотором QJ 754 (Benelli / QJMotor)", T, "T750BN");
+  var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
+  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
+  BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
+})();
 </script><script>function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 const {
   useState,
