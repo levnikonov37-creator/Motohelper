@@ -960,8 +960,9 @@ function Estimate({
     "aria-label": "\u0426\u0435\u043D\u0430 \u0440\u0430\u0431\u043E\u0442\u044B",
     type: "number",
     inputMode: "numeric",
-    value: r.workPrice,
-    onChange: e => upd(i, "workPrice", Number(e.target.value))
+    value: r.workPrice || "",
+    placeholder: "0",
+    onChange: e => upd(i, "workPrice", Number(e.target.value) || 0)
   }), /*#__PURE__*/React.createElement("select", {
     "aria-label": "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u044C",
     value: r.part,
@@ -977,8 +978,9 @@ function Estimate({
     "aria-label": "\u0426\u0435\u043D\u0430 \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0438",
     type: "number",
     inputMode: "numeric",
-    value: r.partPrice,
-    onChange: e => upd(i, "partPrice", Number(e.target.value))
+    value: r.partPrice || "",
+    placeholder: "0",
+    onChange: e => upd(i, "partPrice", Number(e.target.value) || 0)
   }), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     "aria-label": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0441\u0442\u0440\u043E\u043A\u0443",
@@ -14943,6 +14945,7 @@ function Sprockets({
       rear: r2
     }) : null;
   const links = Math.ceil((f2 - f1 + (r2 - r1)) / 2);
+  /* 0 показываем пустым полем: иначе после стирания остаётся «0» и ввод даёт «012» */
   const N = (v, set, l) => /*#__PURE__*/React.createElement("label", {
     className: "f"
   }, /*#__PURE__*/React.createElement("span", {
@@ -14950,10 +14953,10 @@ function Sprockets({
   }, l), /*#__PURE__*/React.createElement("input", {
     type: "number",
     inputMode: "numeric",
-    value: v,
+    value: v || "",
     min: "8",
     max: "60",
-    onChange: e => set(Number(e.target.value))
+    onChange: e => set(Number(e.target.value) || 0)
   }));
   return /*#__PURE__*/React.createElement("div", {
     className: "panel sprockets"
@@ -15003,11 +15006,15 @@ function FuelCalc({
   const [l, setL] = useState(""),
     [km, setKm] = useState(""),
     [pr, setPr] = useState(() => load("fuelPrice", ""));
+  /* объём бака храним как введённый текст, чтобы можно было набрать «6,5» */
+  const [tankRaw, setTankRaw] = useState(() => st.tank ? String(st.tank).replace(".", ",") : "");
   useEffect(() => {
-    setSt(load(key, {
+    const s = load(key, {
       tank: 0,
       log: []
-    }));
+    });
+    setSt(s);
+    setTankRaw(s.tank ? String(s.tank).replace(".", ",") : "");
   }, [key]);
   const upd = v => {
     setSt(v);
@@ -15097,11 +15104,14 @@ function FuelCalc({
     className: "f-label"
   }, "\u041E\u0431\u044A\u0451\u043C \u0431\u0430\u043A\u0430, \u043B"), /*#__PURE__*/React.createElement("input", {
     inputMode: "decimal",
-    value: st.tank || "",
-    onChange: e => upd({
-      tank: parseFloat(String(e.target.value).replace(",", ".")) || 0,
-      log: st.log
-    }),
+    value: tankRaw,
+    onChange: e => {
+      setTankRaw(e.target.value);
+      upd({
+        tank: parseFloat(String(e.target.value).replace(",", ".")) || 0,
+        log: st.log
+      });
+    },
     placeholder: String(tank)
   }))), /*#__PURE__*/React.createElement("div", {
     className: "row-gap"

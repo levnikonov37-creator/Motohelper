@@ -53,6 +53,21 @@ const server = http.createServer((req, res) => {
     }
     console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
 
+    // Ввод чисел с клавиатуры: стёр поле и набрал заново — без лишнего «0» впереди, дроби с запятой
+    await page.getByRole("button", { name: "Мотоцикл" }).last().click();
+    await page.getByRole("tab", { name: "Тюнинг" }).click();
+    const spr = page.locator(".sprockets input").first();
+    await spr.fill("");
+    await spr.pressSequentially("12");
+    const sprVal = await spr.inputValue();
+    if (sprVal !== "12") errors.push(`Калькулятор звёзд: набрал «12», в поле «${sprVal}»`);
+    await page.getByRole("tab", { name: "Обзор" }).click();
+    const tankIn = page.getByLabel("Объём бака, л");
+    await tankIn.fill("");
+    await tankIn.pressSequentially("6,5");
+    const tankVal = await tankIn.inputValue();
+    if (tankVal !== "6,5") errors.push(`Объём бака: набрал «6,5», в поле «${tankVal}»`);
+
     // Пользователь со старыми сохранениями (до объединения поколений) — ключи должны перенестись
     const old = await browser.newPage({ viewport: { width: 420, height: 900 } });
     old.on("pageerror", (e) => errors.push("Ошибка JS (старые сохранения): " + e.message));
