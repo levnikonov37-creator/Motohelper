@@ -10287,12 +10287,13 @@ function bikeArtFor(bike, eng, cu) {
   const g = eng.groups || [],
     inst = eng.installed || [];
   const cn = !/^(Honda|Yamaha|Kawasaki|Suzuki|KTM|Husqvarna|GasGas|Beta|Sherco|TM Racing|Fantic|Rieju|BMW|Triumph|Ducati|Aprilia|Harley-Davidson|Royal Enfield)$/.test(bike.brand);
-  const col = window.bikeLivery(bike.brand, bike.name, cu && cu.color);
+  const col = window.bikeLivery(bike.brand, bike.name, cu && cu.color, cu && cu.accent);
   const road = ["naked", "sport", "cruiser", "classic", "tour", "moped", "light", "motard"].indexOf(cls) >= 0;
   return window.bikeArt({
     uid: "bk",
     cls: cls,
     brand: bike.brand.length <= 12 ? bike.brand : bike.brand.split(/[\s-]/)[0],
+    model: bike.name,
     num: L.num,
     eng: {
       stroke: eng.stroke,
@@ -10485,6 +10486,36 @@ function BikeView(props) {
   const [ok, setOk] = useState(false);
   useEffect(() => setOk(false), [ph.u]);
   const showPhoto = !!ph.u && mode === "photo";
+  const cu = props.cu || {},
+    setCu = props.setCu;
+  /* цвета под свой мотоцикл: заводская раскраска есть не у всех моделей */
+  const swatches = (label, list, key) => /*#__PURE__*/React.createElement("div", {
+    className: "bv-row",
+    role: "group",
+    "aria-label": label
+  }, /*#__PURE__*/React.createElement("span", null, label), list.map(c => /*#__PURE__*/React.createElement("button", {
+    key: c[0],
+    type: "button",
+    className: "sw" + (cu[key] === c[0] ? " on" : ""),
+    style: {
+      background: c[0]
+    },
+    "aria-label": c[1],
+    "aria-pressed": cu[key] === c[0],
+    onClick: () => setCu({
+      [key]: c[0]
+    })
+  })), cu[key] && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "sw sw-auto",
+    "aria-label": "Как на заводе",
+    onClick: () => setCu({
+      [key]: ""
+    })
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "reset",
+    s: 14
+  })));
   return /*#__PURE__*/React.createElement("div", {
     className: "bike-view"
   }, showPhoto ? /*#__PURE__*/React.createElement("figure", {
@@ -10513,8 +10544,11 @@ function BikeView(props) {
       setMode(x[0]);
       save("bikeview", x[0]);
     }
-  }, x[1]))));
+  }, x[1]))), !showPhoto && !running && setCu && /*#__PURE__*/React.createElement("div", {
+    className: "bv-colors"
+  }, swatches("Пластик", PLASTIC, "color"), swatches("Наклейки", BIKE_ACCENTS, "accent")));
 }
+const BIKE_ACCENTS = [["#F2F3F0", "Белые"], ["#1E2125", "Чёрные"], ["#D31F2B", "Красные"], ["#F26722", "Оранжевые"], ["#F6D21B", "Жёлтые"], ["#1D4F9C", "Синие"], ["#5DBB3E", "Зелёные"]];
 function ChassisPanel({
   area,
   eng,
@@ -11661,7 +11695,8 @@ function EngineExplorer({
   addToCart,
   cart,
   compact,
-  flash
+  flash,
+  setCu
 }) {
   const vkey = bikeKey(bike) + "|" + Math.max(0, bike.versions.indexOf(ver));
   const [view, setView] = useState(() => {
@@ -11879,6 +11914,7 @@ function EngineExplorer({
     eng: eng,
     bike: bike,
     cu: cu,
+    setCu: setCu,
     sel: sel,
     onSel: pick,
     running: running

@@ -1557,3 +1557,11 @@ body::after { display: none !important; }
 .rail-search { margin-bottom: 6px; border: 1px solid rgba(255,255,255,.1) !important; }
 .ref-btn { text-align: left; }
 .ss-top .qsearch input, .ss-top .qsearch input:focus { box-shadow: none !important; outline: none !important; border: 0 !important; background: transparent !important; }
+
+/* ===== v35: мотоцикл как на фото + свой цвет под рисунком ===== */
+.bv-colors { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 8px 6px 2px; }
+.bv-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.bv-row > span { font: 600 14px var(--cond); color: var(--muted); margin-right: 2px; }
+.bv-row .sw { width: 26px; height: 26px; border-width: 2px; border-color: rgba(255,255,255,.22); }
+.bv-row .sw.on { outline: 2px solid #F2F3F0; outline-offset: 2px; }
+.bv-row .sw-auto { display: inline-grid; place-items: center; background: rgba(255,255,255,.08); color: var(--ink); }
