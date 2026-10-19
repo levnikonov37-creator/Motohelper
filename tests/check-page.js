@@ -41,6 +41,19 @@ const server = http.createServer((req, res) => {
     // Поиск в окне «Найди свой мотоцикл»
     await page.getByText("Выбрать", { exact: true }).first().click({ timeout: 10000 });
     const input = page.getByPlaceholder(/Марка, модель или мотор/);
+    // Поиск по мотору: «174» → подсказка ZS174MN-5 → все модели с ним; вкладка «Моторы» понимает русскую раскладку
+    await input.fill("174");
+    const hint = page.locator(".bf-enghints .chip", { hasText: "ZS174MN-5" });
+    await hint.waitFor({ timeout: 5000 });
+    await hint.click();
+    const engHead = await page.locator(".bf-brandhead h3").innerText();
+    if (!/ZS174MN-5/.test(engHead)) errors.push("Поиск мотора: после выбора ZS174MN-5 заголовок «" + engHead + "»");
+    if ((await page.locator(".bf-item").count()) < 10) errors.push("Поиск мотора: мало моделей с ZS174MN-5");
+    await page.getByRole("button", { name: "Моторы", exact: true }).click();
+    await page.getByPlaceholder(/Код мотора/).fill("нб300");
+    const engFound = await page.locator(".bf-item b", { hasText: "ZS174MN-5" }).first().waitFor({ timeout: 5000 }).then(() => true, () => false);
+    if (!engFound) errors.push("Вкладка «Моторы»: «нб300» не нашёл ZS174MN-5, нашёл: " + (await page.locator(".bf-item b").allInnerTexts()).join(", "));
+    await page.getByRole("button", { name: "Модели", exact: true }).click();
     await input.fill("DR-Z400S");
     await page.getByText("DR-Z400S").first().waitFor({ timeout: 5000 });
 
@@ -52,6 +65,21 @@ const server = http.createServer((req, res) => {
       await page.waitForTimeout(400);
     }
     console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
+
+    // Ввод чисел с клавиатуры: стёр поле и набрал заново — без лишнего «0» впереди, дроби с запятой
+    await page.getByRole("button", { name: "Мотоцикл" }).last().click();
+    await page.getByRole("tab", { name: "Тюнинг" }).click();
+    const spr = page.locator(".sprockets input").first();
+    await spr.fill("");
+    await spr.pressSequentially("12");
+    const sprVal = await spr.inputValue();
+    if (sprVal !== "12") errors.push(`Калькулятор звёзд: набрал «12», в поле «${sprVal}»`);
+    await page.getByRole("tab", { name: "Обзор" }).click();
+    const tankIn = page.getByLabel("Объём бака, л");
+    await tankIn.fill("");
+    await tankIn.pressSequentially("6,5");
+    const tankVal = await tankIn.inputValue();
+    if (tankVal !== "6,5") errors.push(`Объём бака: набрал «6,5», в поле «${tankVal}»`);
 
     // Пользователь со старыми сохранениями (до объединения поколений) — ключи должны перенестись
     const old = await browser.newPage({ viewport: { width: 420, height: 900 } });
@@ -84,6 +112,44 @@ const server = http.createServer((req, res) => {
     await old.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 20000 });
     const again = await old.evaluate(() => JSON.parse(localStorage.getItem("mh2-sel")));
     if (again.vi !== 3) errors.push("Перенос сохранений срабатывает повторно: " + JSON.stringify(again));
+
+    // Установка на телефон: manifest и иконки на месте
+    const man = await page.evaluate(async () => (await fetch("manifest.webmanifest")).json());
+    for (const ic of man.icons || []) {
+      const ok = await page.evaluate(async (src) => (await fetch(src)).ok, ic.src);
+      if (!ok) errors.push("Нет иконки из manifest: " + ic.src);
+    }
+    if (!man.icons || !man.icons.length || !man.start_url) errors.push("manifest без иконок или start_url");
+
+    // Без интернета: после первого захода сайт открывается из кэша (service worker), 3D тоже
+    const offCtx = await browser.newContext({ viewport: { width: 420, height: 900 } });
+    const off = await offCtx.newPage();
+    off.on("pageerror", (e) => errors.push("Ошибка JS (без сети): " + e.message));
+    await off.addInitScript(() => { localStorage.setItem("mh2-onboarded", "true"); sessionStorage.setItem("mh-intro", "1"); });
+    await off.goto(base, { waitUntil: "load" });
+    const swState = await off.evaluate(async () => {
+      const reg = await Promise.race([navigator.serviceWorker.ready, new Promise((r) => setTimeout(() => r(null), 10000))]);
+      if (!reg) return "нет";
+      // дождаться, пока в кэш ляжет и 3D-библиотека (она кладётся фоном после основных файлов)
+      for (let i = 0; i < 50; i++) {
+        const keys = await caches.keys();
+        const c = keys.length && (await caches.open(keys[0]));
+        if (c && (await c.match("vendor/three.min.js"))) return reg.active && reg.active.state;
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      return "без 3D в кэше";
+    });
+    if (swState !== "activated") errors.push("Service worker (работа без интернета): " + swState);
+    await offCtx.setOffline(true);
+    await off.reload({ waitUntil: "load" });
+    const offOk = await off.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 15000 }).then(() => true, () => false);
+    if (!offOk) errors.push("Без интернета сайт не открылся");
+    else {
+      await off.locator(".view-toggle button", { hasText: "3D" }).first().click();
+      const has3d = await off.waitForFunction(() => !!window.THREE, null, { timeout: 10000 }).then(() => true, () => false);
+      if (!has3d) errors.push("Без интернета не загрузилась 3D-модель мотора");
+    }
+    await offCtx.close();
   } catch (e) {
     errors.push("Сценарий не прошёл: " + e.message.split("\n")[0]);
   } finally {

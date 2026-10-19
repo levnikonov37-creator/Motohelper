@@ -1405,3 +1405,33 @@ body::after { display: none !important; }
   .main .page-anim.pa-r, .main .page-anim.pa-l, .main .mh-enter { animation: none !important; }
   .main .mh-rv, .main .mh-rv:not(.mh-in) { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
+
+/* ===================== v27: поиск по моторам в выборе мотоцикла ===================== */
+.bf-mode { display: flex; width: 100%; margin: 10px 0 8px; }
+.bf-mode button { flex: 1; padding: 9px 12px; font-weight: 600; }
+.bf-hint { margin: 2px 0 10px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.bf-enghints { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.bf-enghints .chip { border-color: rgba(147,197,253,.55); color: #CFE3FF; }
+
+/* ===================== v28: ИИ-механик — кнопки под ответом, голос, карточка мотора ===================== */
+.msg-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0; }
+.msg-actions .chip { font-size: 13px; padding: 5px 11px; }
+.msg-actions .chip.eng { border-color: rgba(147,197,253,.55); color: #CFE3FF; }
+.sugg.follow { margin: 10px 0 2px; display: flex; flex-wrap: wrap; gap: 6px; }
+.sugg.follow .chip { font-size: 13px; }
+.ai-engcard { margin-top: 14px; padding: 14px 16px; border: 1px dashed rgba(147,197,253,.4); border-radius: 14px; background: rgba(147,197,253,.05); display: grid; gap: 10px; }
+.ai-engcard b { display: block; margin-bottom: 4px; }
+.ai-engcard span { font-size: 14px; color: var(--muted); line-height: 1.45; }
+.composer textarea { resize: none; overflow-y: auto; max-height: 180px; }
+.icon-btn.mic.on { background: #E5533D; color: #fff; border-color: #E5533D; animation: micPulse 1.2s ease-in-out infinite; }
+@keyframes micPulse { 50% { box-shadow: 0 0 0 6px rgba(229,83,61,.25); } }
+@media (prefers-reduced-motion: reduce) { .icon-btn.mic.on { animation: none; } }
+.msg { flex-wrap: wrap; }
+.msg > .msg-actions, .msg > .sugg.follow { flex: 0 0 100%; justify-content: flex-start; }
+.msg .msg-actions .chip, .msg .sugg.follow .chip { flex: 0 0 auto; width: auto; height: auto; border-radius: 999px; }
+.msg > .sugg.follow { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.msg > .sugg.follow::-webkit-scrollbar { display: none; }
+
+/* ===================== v29: резервная копия в подвале ===================== */
+.backup-bar { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08); display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.backup-bar > span { flex: 1 1 220px; }

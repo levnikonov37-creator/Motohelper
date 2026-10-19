@@ -160,7 +160,7 @@ var ENGINES = {
       { t: "Ранний износ сцепления у тяжёлых райдеров", sev: "med", fix: "Усиленные пружины, свежее масло JASO MA." },
       { t: "Рывки на малом газе на PWK", sev: "low", fix: "Подбор иглы и холостого жиклёра, проверить ТНВД — винт качества." }
     ] },
-  "CBS300": { code: "ZS CBS300", name: "Zongshen CBS300 · жидкостное", maker: "Zongshen", groups: ["cb","liquid","carb","4t","big","balancer"],
+  "CBS300": { code: "ZS174MN-3", name: "Zongshen CBS300 (ZS174MN-3) · жидкостное", maker: "Zongshen", groups: ["cb","liquid","carb","4t","big","balancer"],
     stroke: "4T", cam: "SOHC, 4 клапана + балансир", cooling: "Жидкостное", cc: 276, hp: 28, torque: "25 Н·м", compression: "11–13 бар",
     fuel: "АИ-95", ignition: "CDI", timing: "Цепь ГРМ, автонатяжитель", start: "Электро", gearbox: "6 ст.",
     carb: "NIBBI PE30 / PWK34", jetMain: "120–130", jetPilot: "40–42", needle: "3 канавка", idle: "1500–1700",
@@ -261,7 +261,7 @@ ENGINES["Z190"] = { code: "ZS1P62YML-2", name: "Zongshen Z190 · питбайк"
 ENGINES["NC250E"] = Object.assign({}, ENGINES["NC250"], { code: "ZS177MM EFI", name: "Zongshen NC250 EFI (инжектор)", groups: ["dohc","liquid","efi","4t","big"],
   ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—",
   issues: ENGINES["NC250"].issues.slice(0, 3).concat([{ t: "Ошибки датчиков после мойки", sev: "med", fix: "Сушка разъёмов, диэлектрическая смазка." }, { t: "Плавающий холостой", sev: "low", fix: "Чистка дросселя, адаптация ЭБУ." }]) });
-ENGINES["NB300E"] = Object.assign({}, ENGINES["NB300"], { code: "ZS182MN EFI", name: "Zongshen NB300 EFI (инжектор)", groups: ["dohc","liquid","efi","4t","big","balancer"],
+ENGINES["NB300E"] = Object.assign({}, ENGINES["NB300"], { code: "ZS182MN EFI", name: "Zongshen NC300 EFI (ZS182MN, инжектор)", cc: 300, hp: 34, groups: ["dohc","liquid","efi","4t","big","balancer"],
   ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—",
   issues: ENGINES["NB300"].issues.slice(0, 3).concat([{ t: "Топливный насос и фильтр насоса", sev: "med", fix: "Чистый бензин, фильтр раз в сезон." }, { t: "Ошибка датчика температуры", sev: "low", fix: "Разъём и проводка датчика у головки." }]) });
 ENGINES["NC450C"] = Object.assign({}, ENGINES["NC450"], { code: "ZS194MQ", name: "Zongshen NC450 карбюраторный", groups: ["dohc","liquid","carb","4t","big"],
@@ -3213,5 +3213,43 @@ CL("ANIMA190", "Z190", { code: "Anima 190", name: "Daytona Anima 190 (4 клап
   setEngine("Progasi", "Race 300", 0, "NC300");
   addBike("Kayo", "Evolution ZS190EM", P2, "Z190", { hp: 16 }); addBike("Kayo", "KRZ 125", P2, "154FMI");
   addBike("YCF", "Daytona 190", P2, "ANIMA190"); addBike("YCF", "Bigy 190 MX", P2, "Z190", { hp: 18, approx: true });
+})();
+/* ===================== v23: синонимы моторов для поиска, мотор 174 у Ataki EF300, Darex ===================== */
+/* Как ещё называют мотор: цифры с картера («174», «182»), рыночные имена, русская раскладка */
+var ENGINE_AKA = {
+  "139FMB": "50 139 мопедный", "147FMD": "70 72 147", "152FMH": "110 152", "154FMI": "125 154 1p54fmi",
+  "YX140": "yx 140 1p56fmj ях140", "1P60FMK": "yx150 yx160 150 160 ях150 ях160", "Z155": "155 1p60ymj zs155", "Z190": "190 w190 1p62yml zs190",
+  "ANIMA190": "daytona анима 190 4v", "CG150": "cg 150 162fmj цг150", "CG200": "cg 200 163fml цг200", "CB150": "cb 150 162fmj2 цб150",
+  "167FMM": "cg250 167 цг250", "165FMM": "cb250d cb250 165 223 цб250",
+  "172FMM": "172 cb250 2v цб250 зонгшен зоншен", "172FMM-3A": "172 cb250 4v 3a цб250 зонгшен зоншен", "172FMM-5": "172 pr250 балансир пр250 зонгшен зоншен",
+  "PR300": "pr300 172fmm5 175fmm5 4v балансир пр300 зонгшен зоншен", "175FMM": "175 175fmm cb300 cb300f цб300 зонгшен зоншен",
+  "CBS300": "174 174mn 174mn3 cbs cbs300 цбс300 водянка зонгшен зоншен", "NB300": "174 174mn 174mn5 nb nb300 нб300 водянка зонгшен зоншен",
+  "NB300E": "182 182mn nc300 нц300 efi инжектор зонгшен зоншен", "NC300": "182 182mn nc nc300 нц300 зонгшен зоншен",
+  "NC250": "177 177mm nc250 нц250 зонгшен зоншен", "NC250E": "177 177mm nc250 нц250 efi инжектор зонгшен зоншен",
+  "NC450": "194 194mq nc450 нц450 зонгшен зоншен", "NC450C": "194 194mq nc450 нц450 зонгшен зоншен",
+  "YBS300": "ybs ybs300 176 176mn lx176mn лончин", "YBS300G2": "ybs ybs300 176 176mn lx176mn лончин gen2",
+  "VOGE300": "lx300 лончин", "2T250": "2т двухтакт 250", "2T300": "2т двухтакт 300"
+};
+(function () {
+  var E = "Эндуро", P2 = "Питбайк", Mo = "Мотард", A = { approx: true };
+  /* «Любая модель с мотором ZS182MN» стояла на NB300 со старых версий: 182MN — это NC300 */
+  setEngine("Любая модель", "с мотором ZS182MN", 0, "NC300");
+  addBike("Любая модель", "с мотором ZS174MN-5 (NB300)", E, "NB300");
+  /* Ataki EF300 — мотор 174 (ZS174MN); у него две версии: -5 (NB300) и -3 (CBS300) */
+  setEngine("Ataki", "EF300", 0, "NB300");
+  addVersion("Ataki", "EF300", "CBS300", "вариант мотора 174MN-3");
+  /* Darex (darexmoto.ru, mvideo.ru, jazzmoto.ru, quadromoto.by) */
+  addBike("Darex", "Matay 250", E, "172FMM-5", { hp: 21 }); addBike("Darex", "Timer 250", E, "172FMM"); addBike("Darex", "Timer 300", E, "175FMM");
+  addBike("Darex", "Alga 300 S", E, "PR300", A); addBike("Darex", "Alga 250 S", E, "172FMM-3A", A);
+  addBike("Darex", "TAU NB300", E, "NB300"); addBike("Darex", "URMAN NB300", E, "NB300");
+  addBike("Darex", "Malai 125", P2, "154FMI"); addBike("Darex", "Malai 150", P2, "1P60FMK", { hp: 11, approx: true });
+  /* прочие — по карточкам дилеров */
+  addBike("Motoland", "GS Enduro", E, "172FMM-5"); addBike("Regulmoto", "Nibbi N300-S", E, "NB300");
+  addBike("Geon", "Dakar GNS 300R SM", Mo, "NC300", { hp: 32 }); addBike("BRZ", "X5 PR300", E, "PR300"); addBike("BRZ", "MX8 PR300", E, "PR300");
+  /* GR8: F300L — NB300 (ZS174MN-5, 27 л.с.); F300A — воздушного охлаждения, а не NB300; T300L RR — 2T 293 см³ (bvdshop.ru, grmoto.ru, sports.ru) */
+  addBike("GR8", "F300L (4T NB300) Enduro Lite", E, "NB300", { hp: 27 }); addBike("GR8", "F300L (4T NB300) Enduro Optimum", E, "NB300", { hp: 27 });
+  setEngine("GR8", "F300A Enduro Pro", 0, "PR300", { approx: true }); addBike("GR8", "T300L RR", "Кросс-эндуро", "2T300", { hp: 44 });
+  /* Zuumav K5 на CB300F, Fxmoto PR300, BNK K10 NB300 (bvdshop.ru, pitbikemarket.ru) */
+  addBike("Zuumav", "K5 300", E, "175FMM"); addBike("Fxmoto", "PR300", E, "PR300"); addBike("BNK", "K10 NB300", E, "NB300");
 })();
 sortBikes();
