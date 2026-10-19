@@ -289,9 +289,7 @@ function Field({
       [k]: e.target.value
     }),
     inputMode: type === "number" ? "decimal" : undefined
-  }), hint && /*#__PURE__*/React.createElement("span", {
-    className: "f-hint"
-  }, hint));
+  }));
 }
 function EditBike({
   eng,
@@ -362,9 +360,7 @@ function EditBike({
     onClick: () => setCu({
       color: c[0]
     })
-  }))), /*#__PURE__*/React.createElement("span", {
-    className: "f-hint"
-  }, "\u0422\u0430\u043A \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B \u0431\u0443\u0434\u0435\u0442 \u0432\u044B\u0433\u043B\u044F\u0434\u0435\u0442\u044C \u043D\u0430 \u0433\u043B\u0430\u0432\u043D\u043E\u0439 \u0432 \u0432\u0438\u0434\u0435 \xAB\u041C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\xBB.")), /*#__PURE__*/React.createElement("div", {
+  }))), null), /*#__PURE__*/React.createElement("div", {
     className: "f wide"
   }, /*#__PURE__*/React.createElement("span", {
     className: "f-label"
@@ -437,9 +433,7 @@ function EditBike({
   }, groups[g].filter(e => e.id !== ver.engine).map(e => /*#__PURE__*/React.createElement("option", {
     key: e.id,
     value: e.id
-  }, e.code, " \u2014 ", e.name, ", ", e.cc, " \u0441\u043C\xB3"))))), /*#__PURE__*/React.createElement("span", {
-    className: "f-hint"
-  }, "Если мотор меняли на другой или на табличке двигателя другой код.")), /*#__PURE__*/React.createElement(Field, {
+  }, e.code, " \u2014 ", e.name, ", ", e.cc, " \u0441\u043C\xB3"))))), null), /*#__PURE__*/React.createElement(Field, {
     label: "\u041C\u043E\u0449\u043D\u043E\u0441\u0442\u044C, \u043B.\u0441.",
     k: "hp",
     cu: cu,
@@ -482,9 +476,7 @@ function EditBike({
     className: "f vmax-mini"
   }, /*#__PURE__*/React.createElement("span", {
     className: "f-label"
-  }, "\u041C\u0430\u043A\u0441\u0438\u043C\u0430\u043B\u043A\u0430 \u0441 \u044D\u0442\u0438\u043C\u0438 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F\u043C\u0438"), /*#__PURE__*/React.createElement("b", null, speedFor(eng, bike, cu, TUNING.filter(t => eng.installed.indexOf(t.id) >= 0)).v, " \u043A\u043C/\u0447"), /*#__PURE__*/React.createElement("span", {
-    className: "f-hint"
-  }, "\u041E\u0446\u0435\u043D\u043A\u0430 \xB110\u201315%")))), !efi && /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u041A\u0430\u0440\u0431\u044E\u0440\u0430\u0442\u043E\u0440 \u0438 \u0441\u043C\u0435\u0441\u044C"), /*#__PURE__*/React.createElement("div", {
+  }, "\u041C\u0430\u043A\u0441\u0438\u043C\u0430\u043B\u043A\u0430 \u0441 \u044D\u0442\u0438\u043C\u0438 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F\u043C\u0438"), /*#__PURE__*/React.createElement("b", null, speedFor(eng, bike, cu, TUNING.filter(t => eng.installed.indexOf(t.id) >= 0)).v, " \u043A\u043C/\u0447"), null))), !efi && /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u041A\u0430\u0440\u0431\u044E\u0440\u0430\u0442\u043E\u0440 \u0438 \u0441\u043C\u0435\u0441\u044C"), /*#__PURE__*/React.createElement("div", {
     className: "fgrid"
   }, /*#__PURE__*/React.createElement("label", {
     className: "f wide" + (carbSel ? " f-changed" : "")
@@ -522,9 +514,7 @@ function EditBike({
   }, "\u041A\u0430\u043A \u0441 \u0437\u0430\u0432\u043E\u0434\u0430: ", S.carb), CARBS.map(c => /*#__PURE__*/React.createElement("option", {
     key: c.id,
     value: c.id
-  }, c.name, c.mm ? ", " + c.mm + " мм" : ""))), range && /*#__PURE__*/React.createElement("span", {
-    className: "f-hint"
-  }, "\u0414\u043B\u044F ", eng.code, " \u043E\u0431\u044B\u0447\u043D\u043E ", range[0], "\u2013", range[1], " \u043C\u043C.")), carbSel === "custom" && /*#__PURE__*/React.createElement("label", {
+  }, c.name, c.mm ? ", " + c.mm + " мм" : "")))), carbSel === "custom" && /*#__PURE__*/React.createElement("label", {
     className: "f wide f-changed"
   }, /*#__PURE__*/React.createElement("span", {
     className: "f-label"
@@ -611,9 +601,7 @@ function EditBike({
   }, ["10W-40 JASO MA", "10W-50 JASO MA2", "15W-50 JASO MA2", "20W-50 JASO MA", "5W-40 JASO MA2"].map(s => /*#__PURE__*/React.createElement("option", {
     key: s,
     value: s
-  })))), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u0427\u0442\u043E \u0443\u0436\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E"), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "\u041E\u0442\u043C\u0435\u0442\u044C \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438, \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u0443\u0436\u0435 \u0441\u0442\u043E\u044F\u0442. \u041C\u043E\u0449\u043D\u043E\u0441\u0442\u044C \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0435\u0442\u0441\u044F, \u0430 \u0442\u044E\u043D\u0438\u043D\u0433 \u043D\u0435 \u0431\u0443\u0434\u0435\u0442 \u0438\u0445 \u043F\u0440\u0435\u0434\u043B\u0430\u0433\u0430\u0442\u044C."), /*#__PURE__*/React.createElement("div", {
+  })))), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u0427\u0442\u043E \u0443\u0436\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E"), null, /*#__PURE__*/React.createElement("div", {
     className: "checks"
   }, tuneOk.map(t => {
     const on = eng.installed.indexOf(t.id) >= 0;
@@ -747,9 +735,7 @@ function Maint({
       });
       flash("Пробег сохранён");
     }
-  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043F\u0440\u043E\u0431\u0435\u0433")), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "\u041D\u0430\u0436\u043C\u0438 \xAB\u0421\u0434\u0435\u043B\u0430\u043D\u043E\xBB \u043F\u043E\u0441\u043B\u0435 \u0440\u0430\u0431\u043E\u0442\u044B \u2014 \u043E\u0442\u043C\u0435\u0442\u043A\u0430 \u0432\u0441\u0442\u0430\u043D\u0435\u0442 \u043D\u0430 \u0442\u0435\u043A\u0443\u0449\u0438\u0439 \u043F\u0440\u043E\u0431\u0435\u0433 \u0438 \u043F\u043E\u043F\u0430\u0434\u0451\u0442 \u0432 \u0436\u0443\u0440\u043D\u0430\u043B. \u0418\u043D\u0442\u0435\u0440\u0432\u0430\u043B\u044B \u0432\u0437\u044F\u0442\u044B \u0434\u043B\u044F ", eng.code, "."), /*#__PURE__*/React.createElement("div", {
+  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043F\u0440\u043E\u0431\u0435\u0433")), null, /*#__PURE__*/React.createElement("div", {
     className: "row-gap"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
@@ -1767,9 +1753,7 @@ function BikeFinder({
       setMode(m[0]);
       setEngF(null);
     }
-  }, m[1]))), mode === "engines" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
-    className: "bf-hint"
-  }, "Код мотора выбит на картере, обычно слева под цилиндром: ZS174MN-5, 172FMM, 1P60FMK. Можно ввести только цифры — например, «174»."), /*#__PURE__*/React.createElement("div", {
+  }, m[1]))), mode === "engines" ? /*#__PURE__*/React.createElement(React.Fragment, null, null, /*#__PURE__*/React.createElement("div", {
     className: "bf-list"
   }, engMatch(q).slice(0, limit).map(x => /*#__PURE__*/React.createElement(EngCard, {
     key: x.id,
@@ -12432,9 +12416,7 @@ function CompareView({
         width: r[2] / mx * 100 + "%"
       }
     }))));
-  })))), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "Зелёным — лучше по этому пункту. Цены расходников — средние, за одно обслуживание."));
+  })))), null);
 }
 /* ===== Навигация v4: 5 понятных разделов ===== */
 ICONS.ai = "M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4zM18.5 14l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9zM5.5 15l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6L3.2 17.3l1.6-.7z";
@@ -12960,7 +12942,7 @@ function App() {
     setSaved: setSaved
   })), /*#__PURE__*/React.createElement("footer", {
     className: "foot"
-  }, "\u0412 \u0431\u0430\u0437\u0435 ", BIKES.length, " \u043C\u043E\u0434\u0435\u043B\u0435\u0439, ", Object.keys(ENGINES).length, " \u0434\u0432\u0438\u0433\u0430\u0442\u0435\u043B\u0435\u0439, ", num(PARTS.length), " \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0435\u0439, ", CAUSES.length, " \u043F\u0440\u0438\u0447\u0438\u043D \u043D\u0435\u0438\u0441\u043F\u0440\u0430\u0432\u043D\u043E\u0441\u0442\u0435\u0439, ", GUIDES.length, " \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u0439 \u0438 ", TUNING.length, " \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043E\u043A. \u0414\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u043E\u0432\u043E\u0447\u043D\u044B\u0435: \u043A\u043E\u043C\u043F\u043B\u0435\u043A\u0442\u0430\u0446\u0438\u0438 \u043C\u0435\u043D\u044F\u044E\u0442\u0441\u044F \u043E\u0442 \u0433\u043E\u0434\u0430 \u043A \u0433\u043E\u0434\u0443 \u2014 \u0441\u0432\u0435\u0440\u044F\u0439 \u043A\u043E\u0434 \u043D\u0430 \u043A\u0430\u0440\u0442\u0435\u0440\u0435 \u0438 \u043C\u0430\u043D\u0443\u0430\u043B. \u0415\u0441\u043B\u0438 \u0443 \u0442\u0435\u0431\u044F \u0441\u0442\u043E\u0438\u0442 \u0434\u0440\u0443\u0433\u043E\u0435, \u043F\u043E\u043C\u0435\u043D\u044F\u0439 \u0432 \xAB\u041C\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B \u2192 \u041D\u0430\u0441\u0442\u0440\u043E\u0438\u0442\u044C\xBB, \u0438 \u0432\u0441\u0451 \u043F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u0441\u044F.", /*#__PURE__*/React.createElement(BackupBar, {
+  }, /*#__PURE__*/React.createElement(BackupBar, {
     flash: flash
   })))), /*#__PURE__*/React.createElement("nav", {
     className: "tabbar"
@@ -13592,9 +13574,7 @@ function EngineExplorer({
     cart: cart,
     flash: flash,
     onClose: () => setSel(null)
-  }), !sel && !compact && view !== "photo" && view !== "3d" && /*#__PURE__*/React.createElement("p", {
-    className: "stage-hint"
-  }, view === "engine" ? "Нажми на светящуюся точку на моторе — покажу регулировки, слабые места, проверки и детали узла. Переключи на «Мотоцикл», чтобы посмотреть ходовую." : "Нажми на светящуюся точку — вилка, тормоза, колёса, цепь и другие узлы. Двигатель — отдельным видом."));
+  }), null);
 }
 function DetailPanel({
   det,
@@ -14051,25 +14031,25 @@ function Home(props) {
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "diag",
     s: 26
-  }), /*#__PURE__*/React.createElement("b", null, "\u0427\u0442\u043E \u0441\u043B\u043E\u043C\u0430\u043B\u043E\u0441\u044C?"), /*#__PURE__*/React.createElement("span", null, "\u041E\u0442\u043C\u0435\u0442\u044C \u0441\u0438\u043C\u043F\u0442\u043E\u043C\u044B \u2014 \u043F\u043E\u043A\u0430\u0436\u0443 \u0432\u0435\u0440\u043E\u044F\u0442\u043D\u044B\u0435 \u043F\u0440\u0438\u0447\u0438\u043D\u044B")), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("b", null, "\u0427\u0442\u043E \u0441\u043B\u043E\u043C\u0430\u043B\u043E\u0441\u044C?")), /*#__PURE__*/React.createElement("button", {
     className: "act act-ai",
     onClick: () => go("ai")
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "ai",
     s: 26
-  }), /*#__PURE__*/React.createElement("b", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A"), /*#__PURE__*/React.createElement("span", null, ai.state === "ready" ? "Спроси своими словами" : ai.state === "checking" ? "Подключаю…" : "Работает, если сайт открыт в Claude")), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("b", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A")), /*#__PURE__*/React.createElement("button", {
     className: "act",
     onClick: () => go("tuning")
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "tune",
     s: 26
-  }), /*#__PURE__*/React.createElement("b", null, "\u0422\u044E\u043D\u0438\u043D\u0433"), /*#__PURE__*/React.createElement("span", null, project.length ? "В проекте " + project.length : "Подбор под цель и бюджет")), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("b", null, "\u0422\u044E\u043D\u0438\u043D\u0433"), project.length > 0 && /*#__PURE__*/React.createElement("span", null, "В проекте " + project.length)), /*#__PURE__*/React.createElement("button", {
     className: "act",
     onClick: () => go("parts")
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "cart",
     s: 26
-  }), /*#__PURE__*/React.createElement("b", null, "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u0438"), /*#__PURE__*/React.createElement("span", null, cart.length ? "В корзине " + cart.length : "Только детали под твой мотор"))), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("b", null, "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u0438"), cart.length > 0 && /*#__PURE__*/React.createElement("span", null, "В корзине " + cart.length))), /*#__PURE__*/React.createElement("div", {
     className: "home-grid"
   }, /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(PreRide, {
     eng: eng
@@ -14569,9 +14549,7 @@ function SmartDiag({
       n: "ai",
       s: 15
     }), "\u041E\u0431\u0441\u0443\u0434\u0438\u0442\u044C \u0441 \u0418\u0418"))));
-  }), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "\u041F\u0440\u043E\u0446\u0435\u043D\u0442\u044B \u2014 \u043E\u0446\u0435\u043D\u043A\u0430 \u043F\u043E \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u044E \u0441\u0438\u043C\u043F\u0442\u043E\u043C\u043E\u0432, \u0430 \u043D\u0435 \u0442\u043E\u0447\u043D\u044B\u0439 \u0434\u0438\u0430\u0433\u043D\u043E\u0437. \u041F\u0440\u043E\u0432\u0435\u0440\u044F\u0439 \u043F\u043E \u043F\u043E\u0440\u044F\u0434\u043A\u0443: \u043E\u0442 \u0434\u0435\u0448\u0451\u0432\u043E\u0433\u043E \u0438 \u043F\u0440\u043E\u0441\u0442\u043E\u0433\u043E.")), /*#__PURE__*/React.createElement("details", {
+  }), null), /*#__PURE__*/React.createElement("details", {
     className: "trees"
   }, /*#__PURE__*/React.createElement("summary", null, "\u041F\u043E\u0448\u0430\u0433\u043E\u0432\u044B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 \u043F\u043E \u043E\u0434\u043D\u043E\u043C\u0443 \u0441\u0438\u043C\u043F\u0442\u043E\u043C\u0443 (", diagFor(eng).length, ")"), /*#__PURE__*/React.createElement("div", {
     className: "symptoms"
@@ -14794,9 +14772,7 @@ function RefView({
     key: c[0]
   }, /*#__PURE__*/React.createElement("td", {
     className: "code"
-  }, c[0]), /*#__PURE__*/React.createElement("td", null, c[1]), /*#__PURE__*/React.createElement("td", null, c[2])))))), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "\u0421\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u044B\u0435 OBD-II \u043A\u043E\u0434\u044B. \u041D\u0430 \u043D\u0435\u043A\u043E\u0442\u043E\u0440\u044B\u0445 \u042D\u0411\u0423 \u0432\u0441\u0442\u0440\u0435\u0447\u0430\u044E\u0442\u0441\u044F \u0441\u0432\u043E\u0438 \u2014 \u0447\u0438\u0442\u0430\u0439 \u0440\u0430\u0441\u0448\u0438\u0444\u0440\u043E\u0432\u043A\u0443 \u0432 \u0430\u0434\u0430\u043F\u0442\u0435\u0440\u0435.")), sec === "tables" && /*#__PURE__*/React.createElement("div", {
+  }, c[0]), /*#__PURE__*/React.createElement("td", null, c[1]), /*#__PURE__*/React.createElement("td", null, c[2])))))), null), sec === "tables" && /*#__PURE__*/React.createElement("div", {
     className: "refs"
   }, /*#__PURE__*/React.createElement("div", {
     className: "adj-block"
@@ -15021,9 +14997,7 @@ function Dyno({
     className: "lg lg-stock"
   }), "с завода ", eng.stockHp, " \u043B.\u0441.", gain > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     className: "lg lg-tuned"
-  }), "\u043F\u043E\u0441\u043B\u0435 \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043E\u043A \u2248 ", Math.round(eng.stockHp * (1 + gain / 100) * 10) / 10, " \u043B.\u0441."), /*#__PURE__*/React.createElement("span", {
-    className: "muted"
-  }, " \u2014 \u043E\u0446\u0435\u043D\u043A\u0430, \u043D\u0435 \u0437\u0430\u043C\u0435\u0440 \u043D\u0430 \u0441\u0442\u0435\u043D\u0434\u0435")));
+  }), "\u043F\u043E\u0441\u043B\u0435 \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043E\u043A \u2248 ", Math.round(eng.stockHp * (1 + gain / 100) * 10) / 10, " \u043B.\u0441."), null));
 }
 function Meter({
   label,
@@ -15096,9 +15070,7 @@ function Sprockets({
   }));
   return /*#__PURE__*/React.createElement("div", {
     className: "panel sprockets"
-  }, /*#__PURE__*/React.createElement("h2", null, "\u041A\u0430\u043B\u044C\u043A\u0443\u043B\u044F\u0442\u043E\u0440 \u0437\u0432\u0451\u0437\u0434"), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "\u0421\u043A\u043E\u043B\u044C\u043A\u043E \u043A\u043C/\u0447 \u0434\u0430\u0441\u0442 \u0438\u043B\u0438 \u0437\u0430\u0431\u0435\u0440\u0451\u0442 \u0437\u0430\u043C\u0435\u043D\u0430 \u0437\u0432\u0451\u0437\u0434 \u043D\u0430 \u0442\u0432\u043E\u0451\u043C ", bike.name, ": учитываю предельные обороты, размер колеса и мощность мотора."), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h2", null, "\u041A\u0430\u043B\u044C\u043A\u0443\u043B\u044F\u0442\u043E\u0440 \u0437\u0432\u0451\u0437\u0434"), null, /*#__PURE__*/React.createElement("div", {
     className: "spr-grid"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, "\u0421\u0435\u0439\u0447\u0430\u0441"), /*#__PURE__*/React.createElement("div", {
     className: "fgrid two"
@@ -15112,9 +15084,7 @@ function Sprockets({
     className: tr > 0 ? "up" : tr < 0 ? "down" : ""
   }, tr > 0 ? "+" : "", tr, "%")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Передаточное число"), /*#__PURE__*/React.createElement("b", null, k1.toFixed(2), " \u2192 ", k2.toFixed(2))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "\u0426\u0435\u043F\u044C"), /*#__PURE__*/React.createElement("b", null, links === 0 ? "та же" : (links > 0 ? "+" : "") + links + " " + plural(Math.abs(links), "звено", "звена", "звеньев")))), ok && /*#__PURE__*/React.createElement("p", {
     className: "spr-note"
-  }, s2.limit === "power" && s2.vGear > s1.vGear ? "На этих звёздах мотору не хватит мощности раскрутиться до предельных оборотов — максимальная скорость почти не вырастет, а тяга упадёт." : s2.limit === "rpm" ? "Мотоцикл упирается в предельные обороты: " + num(s2.red) + " об/мин — от звёзд напрямую зависит максимальная скорость." : "Максималку ограничивает мощность, на звёздах выигрываешь в основном тягу или экономию."), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "\u041F\u0440\u0430\u0432\u0438\u043B\u043E: \u22121 \u0437\u0443\u0431 \u0441\u043F\u0435\u0440\u0435\u0434\u0438 \u2248 +3 \u0437\u0443\u0431\u0430 \u0441\u0437\u0430\u0434\u0438. \u041E\u0446\u0435\u043D\u043A\u0430 \xB110\u201315%: \u043D\u0430 \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C \u0432\u043B\u0438\u044F\u044E\u0442 \u043F\u043E\u0441\u0430\u0434\u043A\u0430, \u0432\u0435\u0442\u0435\u0440, \u0440\u0435\u0437\u0438\u043D\u0430 \u0438 \u0438\u0437\u043D\u043E\u0441 \u043C\u043E\u0442\u043E\u0440\u0430."));
+  }, s2.limit === "power" && s2.vGear > s1.vGear ? "На этих звёздах мотору не хватит мощности раскрутиться до предельных оборотов — максимальная скорость почти не вырастет, а тяга упадёт." : s2.limit === "rpm" ? "Мотоцикл упирается в предельные обороты: " + num(s2.red) + " об/мин — от звёзд напрямую зависит максимальная скорость." : "Максималку ограничивает мощность, на звёздах выигрываешь в основном тягу или экономию."), null);
 }
 const TANK_BY_CLASS = {
   enduro: 8,
@@ -15254,9 +15224,7 @@ function FuelCalc({
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: addFill
-  }, "\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0437\u0430\u043F\u0440\u0430\u0432\u043A\u0443"), /*#__PURE__*/React.createElement("small", {
-    className: "muted"
-  }, "\u0417\u0430\u043F\u0440\u0430\u0432\u043B\u044F\u0439\u0441\u044F \u0434\u043E \u043F\u043E\u043B\u043D\u043E\u0433\u043E \u0431\u0430\u043A\u0430 \u2014 \u0442\u043E\u0433\u0434\u0430 \u0440\u0430\u0441\u0445\u043E\u0434 \u0441\u0447\u0438\u0442\u0430\u0435\u0442\u0441\u044F \u0442\u043E\u0447\u043D\u043E.")), st.log.length > 0 && /*#__PURE__*/React.createElement("ul", {
+  }, "\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0437\u0430\u043F\u0440\u0430\u0432\u043A\u0443"), null), st.log.length > 0 && /*#__PURE__*/React.createElement("ul", {
     className: "fuel-log"
   }, st.log.slice(0, 5).map(r => /*#__PURE__*/React.createElement("li", {
     key: r.d
@@ -15330,9 +15298,7 @@ function Tuning({
   list = list.sort((a, b) => sort === "power" ? b.t.power - a.t.power : sort === "price" ? a.t.price - b.t.price : sort === "rating" ? b.t.rating - a.t.rating : a.t.stage - b.t.stage || (b.t.must ? 1 : 0) - (a.t.must ? 1 : 0));
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "tune-builder panel"
-  }, /*#__PURE__*/React.createElement("h2", null, "\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u043F\u043E\u0434 \u0446\u0435\u043B\u044C"), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "\u0412\u044B\u0431\u0435\u0440\u0438, \u0447\u0435\u0433\u043E \u0445\u043E\u0447\u0435\u0448\u044C, \u0438 \u0431\u044E\u0434\u0436\u0435\u0442 \u2014 \u0441\u043E\u0431\u0435\u0440\u0443 \u043D\u0430\u0431\u043E\u0440 \u043F\u043E\u0434 ", eng.code, " \u0441 \u0443\u0447\u0451\u0442\u043E\u043C \u0442\u043E\u0433\u043E, \u0447\u0442\u043E \u0443\u0436\u0435 \u0441\u0442\u043E\u0438\u0442, \u0438 \u0434\u043E\u0431\u0430\u0432\u043B\u044E \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435 \u0434\u043B\u044F \u043D\u0430\u0434\u0451\u0436\u043D\u043E\u0441\u0442\u0438."), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h2", null, "\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u043F\u043E\u0434 \u0446\u0435\u043B\u044C"), null, /*#__PURE__*/React.createElement("div", {
     className: "tags"
   }, GOALS.map(g => /*#__PURE__*/React.createElement("button", {
     key: g.id,
@@ -15968,9 +15934,7 @@ function Overview({
   }), "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u0445\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A\u0438"), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: card
-  }, "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0443")), sameEngineBikes.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0422\u0430\u043A\u043E\u0439 \u0436\u0435 \u043C\u043E\u0442\u043E\u0440 \u0441\u0442\u043E\u0438\u0442 \u043D\u0430"), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u0438 \u0438 \u0440\u0435\u0433\u0443\u043B\u0438\u0440\u043E\u0432\u043A\u0438 \u0432\u0437\u0430\u0438\u043C\u043E\u0437\u0430\u043C\u0435\u043D\u044F\u0435\u043C\u044B."), /*#__PURE__*/React.createElement("div", {
+  }, "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0443")), sameEngineBikes.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0422\u0430\u043A\u043E\u0439 \u0436\u0435 \u043C\u043E\u0442\u043E\u0440 \u0441\u0442\u043E\u0438\u0442 \u043D\u0430"), null, /*#__PURE__*/React.createElement("div", {
     className: "tags"
   }, sameEngineBikes.map(b => /*#__PURE__*/React.createElement("button", {
     key: bikeKey(b),
@@ -16159,15 +16123,6 @@ const AI_ERR = {
   upstream_error: "Связь прервалась. Нажми «Повторить»."
 };
 const AI_OFF_CODES = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"];
-function WorkerNote() {
-  const [p, setP] = useState(window.mhAiProvider || "");
-  useEffect(() => {
-    const h = e => setP(e.detail);
-    window.addEventListener("mh-ai-provider", h);
-    return () => window.removeEventListener("mh-ai-provider", h);
-  }, []);
-  return /*#__PURE__*/React.createElement(React.Fragment, null, "\u0420\u0430\u0431\u043E\u0442\u0430\u0435\u0442 \u043D\u0430 \u0431\u0435\u0441\u043F\u043B\u0430\u0442\u043D\u044B\u0445 \u0418\u0418: Gemini, Groq \u0438 Cloudflare \u2014 \u0441\u0435\u0440\u0432\u0435\u0440 \u0441\u0430\u043C \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0430\u0435\u0442\u0441\u044F, \u043A\u043E\u0433\u0434\u0430 \u0443 \u043E\u0434\u043D\u043E\u0433\u043E \u043A\u043E\u043D\u0447\u0430\u0435\u0442\u0441\u044F \u043B\u0438\u043C\u0438\u0442.", p && /*#__PURE__*/React.createElement(React.Fragment, null, " \u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u043E\u0442\u0432\u0435\u0442: ", p.split(" ")[0], "."));
-}
 /* ===== v28: ссылка на модель — «…/#bike=Kayo T2 250&v=0» открывает этот мотоцикл ===== */
 function bikeFromHash() {
   try {
@@ -16287,7 +16242,7 @@ function BackupBar({
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "backup-bar"
-  }, /*#__PURE__*/React.createElement("span", null, "Мои данные (гараж, журнал, сметы) хранятся только в этом браузере."), /*#__PURE__*/React.createElement("div", {
+  }, null, /*#__PURE__*/React.createElement("div", {
     className: "row-gap"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
@@ -16740,6 +16695,6 @@ function AiChat({
     s: 20
   }))), /*#__PURE__*/React.createElement("p", {
     className: "ai-note"
-  }, "\u0418\u0418 \u043C\u043E\u0436\u0435\u0442 \u043E\u0448\u0438\u0431\u0430\u0442\u044C\u0441\u044F. \u0422\u043E\u0440\u043C\u043E\u0437\u0430, \u0442\u043E\u043F\u043B\u0438\u0432\u043D\u0443\u044E \u0441\u0438\u0441\u0442\u0435\u043C\u0443 \u0438 \u044D\u043B\u0435\u043A\u0442\u0440\u0438\u043A\u0443 \u043F\u0435\u0440\u0435\u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0439. ", ai.provider === "worker" ? /*#__PURE__*/React.createElement(WorkerNote, null) : "Ответы расходуют лимиты твоего аккаунта Claude."))));
+  }, "ИИ может ошибаться — тормоза и электрику перепроверяй."))));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));;document.getElementById("root").dataset.ok="1";

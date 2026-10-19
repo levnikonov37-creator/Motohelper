@@ -350,7 +350,7 @@ textarea { resize: vertical; }
 .send.stop { background: var(--ink); color: var(--bg); }
 .photo-chip { display: inline-flex; gap: 8px; align-items: center; margin: 0 0 8px; padding: 4px 4px 4px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; }
 .photo-chip .link { padding: 2px 8px; }
-.ai-note { margin: 6px 4px 0; font-size: 12px; color: var(--muted); }
+.ai-note { margin: 6px 4px 0; font-size: 13px; color: var(--muted); }
 
 /* ---------- тюнинг ---------- */
 .toolbar { margin: 14px 0; }
@@ -639,7 +639,7 @@ body { background: radial-gradient(1200px 500px at 70% -10%, rgba(229,231,235,.0
 .bk-num { font: 400 15px var(--display); }
 .tips { margin: 4px 0 8px; padding-left: 18px; }
 .tips li { margin-bottom: 6px; }
-.pinfo { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+.pinfo { display: block; font-size: 14px; color: var(--muted); font-weight: 400; }
 .plist .pinfo { margin-top: 2px; }
 .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
 .sw { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--line); box-shadow: inset 0 -4px 0 rgba(0,0,0,.18); }
@@ -743,8 +743,8 @@ body { background: radial-gradient(1200px 500px at 70% -10%, rgba(229,231,235,.0
 .gfig ol { margin: 0; padding-left: 22px; font-size: 14px; }
 .gfig li { margin-bottom: 3px; }
 .gfig li::marker { font-weight: 700; color: var(--mud); }
-.pinst { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
-.pinst .diff { font-size: 12px; }
+.pinst { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+.pinst .diff { font-size: 14px; }
 .detail .det-grid { display: grid; gap: 14px; }
 @media (min-width: 760px) { .detail .det-grid { grid-template-columns: 1fr 1fr; } }
 .det-meta { display: flex; gap: 12px; align-items: center; margin: 6px 0 10px; font-size: 14px; }
