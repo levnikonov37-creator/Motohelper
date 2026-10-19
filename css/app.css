@@ -1445,3 +1445,31 @@ body::after { display: none !important; }
 .bf-search input, .bf-search input:focus { box-shadow: none !important; border: 0 !important; background: none !important; padding: 0 !important; min-height: 0 !important; }
 .bf-search:focus-within { box-shadow: 0 0 0 3px rgba(229,231,235,.35), 0 10px 30px -18px rgba(0,0,0,.8); }
 .bf-cc { margin-top: -4px; }
+
+/* ===== v31: регламент ТО без учёта пробега ===== */
+.plan { list-style: none; padding: 0; margin: 12px 0 16px; display: grid; gap: 8px; }
+.plan li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.plan li b { font-weight: 600; }
+.plan-every { font: 600 15px var(--cond); color: var(--mud); white-space: nowrap; }
+.plan.compact { margin: 4px 0 0; gap: 0; }
+.plan.compact li { background: none; border: 0; border-bottom: 1px dashed var(--line); border-radius: 0; padding: 9px 0; }
+.plan.compact li:last-child { border-bottom: 0; }
+.pbuy { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 8px; font-size: 13px; }
+.pbuy a { padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface2); color: var(--ink); text-decoration: none; font-weight: 600; }
+.pbuy a:active { transform: scale(.96); }
+
+/* ===== v31: меню «Мои мотоциклы» под шапкой ===== */
+.bmenu-ov { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.35); animation: fadeIn .15s ease-out; }
+.bmenu { position: absolute; top: calc(64px + env(safe-area-inset-top, 0px)); right: 12px; width: min(360px, calc(100vw - 24px)); max-height: 70vh; overflow-y: auto; padding: 12px; border-radius: 18px; background: #1d2126; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 24px 60px -20px rgba(0,0,0,.9); color: #E5E7EB; animation: bmIn .18s cubic-bezier(.2,.8,.2,1); }
+.bmenu h4 { margin: 2px 6px 8px; font: 600 14px var(--cond); color: #9CA3AF; text-transform: uppercase; letter-spacing: .04em; }
+.bm-item { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 0; border-radius: 12px; background: none; color: inherit; text-align: left; cursor: pointer; }
+.bm-item span { display: grid; gap: 2px; min-width: 0; }
+.bm-item b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-item small { font-size: 13px; color: #9CA3AF; }
+.bm-item i { font-style: normal; font-size: 13px; color: #9CA3AF; white-space: nowrap; }
+.bm-item:hover, .bm-item:focus-visible { background: rgba(255,255,255,.06); }
+.bm-item.on { background: rgba(229,231,235,.1); }
+.bm-foot { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.08); }
+.bm-foot .btn { flex: 1; }
+@keyframes bmIn { from { opacity: 0; transform: translate3d(0,-8px,0) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

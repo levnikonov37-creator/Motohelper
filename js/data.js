@@ -2070,7 +2070,6 @@ var BADGES = [
   { id: "tuner", t: "Тюнер", d: "Добавить 3 доработки в проект", icon: "⚡", need: function (s) { return (s.tune || 0) >= 3; } },
   { id: "safety", t: "Безопасность прежде всего", d: "3 раза пройти проверку перед выездом", icon: "🦺", need: function (s) { return (s.preride || 0) >= 3; } },
   { id: "ai", t: "На связи с ИИ", d: "Задать ИИ-механику 5 вопросов", icon: "🤖", need: function (s) { return (s.ai || 0) >= 5; } },
-  { id: "km", t: "Тысячник", d: "Пробег в журнале 1000 км и больше", icon: "🏁", need: function (s, x) { return x.odo >= 1000; } },
   { id: "estimate", t: "Сметчик", d: "Сохранить смету ремонта", icon: "🧾", need: function (s) { return (s.estimate || 0) >= 1; } }
 ];
 (function () { var g = BIKES.filter(function (b) { return b.brand === "Любая модель" && b.versions[0].engine === "NC450C"; }); g.forEach(function (b) { b.name = "с мотором ZS194MQ (карбюратор)"; }); })();
@@ -3282,5 +3281,33 @@ var ENGINE_AKA = {
   addBike("Zongshen", "ZS250GY-5", E, "172FMM-3A", A); addBike("Loncin", "LX250GY-6", E, "165FMM", A);
   addBike("Lifan", "LF200GY-3B", LE, "CG200", A); addBike("Racer", "Enduro RC300-GY8X", E, "175FMM", A);
   addBike("Минск", "TRX 300i", E, "175FMM", A); addBike("Ataki", "S004 300", E, "PR300", A); addBike("YCF", "Bigy 125", P2, "154FMI", A);
+})();
+/* ===================== v25: модели с тем же мотором, что у базовой версии ===================== */
+(function () {
+  var E = "Эндуро", LE = "Лёгкий эндуро", Mo = "Мотард", T = "Тур-эндуро";
+  function same(brand, name) {
+    var b = BIKES.find(function (x) { return x.brand === brand && x.name === name; });
+    if (!b) throw new Error("v25: нет модели " + brand + " " + name);
+    return b.versions[0].engine;
+  }
+  /* Honda */
+  addBike("Honda", "CRF230L", LE, "CRF230F"); addBike("Honda", "CRF230M", Mo, "CRF230F"); addBike("Honda", "XR250L", E, "XR250");
+  /* Kawasaki */
+  addBike("Kawasaki", "KL650 Tengai", T, "KLR650");
+  /* KTM: спецверсии Six Days на тех же моторах */
+  addBike("KTM", "250 EXC-F Six Days", E, "KTM250F"); addBike("KTM", "350 EXC-F Six Days", E, "KTM350F"); addBike("KTM", "450 EXC-F Six Days", E, "KTM450F");
+  addBike("KTM", "500 EXC-F Six Days", E, "KTM450F", { approx: true });
+  addBike("KTM", "250 EXC TPI Six Days", E, "KTM250TPI"); addBike("KTM", "300 EXC TPI Six Days", E, "KTM300TPI");
+  /* Husqvarna: Heritage и Pro */
+  addBike("Husqvarna", "TE 250 Pro", E, "KTM250TPI"); addBike("Husqvarna", "TE 300 Pro", E, "KTM300TPI"); addBike("Husqvarna", "TE 300 Heritage", E, "KTM300TPI");
+  addBike("Husqvarna", "FE 350 Pro", E, "KTM350F"); addBike("Husqvarna", "FE 350 Heritage", E, "KTM350F");
+  /* Beta, Sherco */
+  addBike("Beta", "RR 250 Race Edition", E, "BETA250"); addBike("Beta", "RR 430 Race Edition", E, "BETA4T"); addBike("Sherco", "SEF 300 Racing", E, "SHERCO4T");
+  /* CFMOTO — версии на том же моторе */
+  addBike("CFMOTO", "800MT Explore", T, same("CFMOTO", "800MT")); addBike("CFMOTO", "800MT Sport", T, same("CFMOTO", "800MT"));
+  /* Royal Enfield */
+  addBike("Royal Enfield", "Himalayan 450 Summit", T, same("Royal Enfield", "Himalayan 450"));
+  /* Yamaha */
+  addBike("Yamaha", "WR250R Final Edition", E, same("Yamaha", "WR250R"));
 })();
 sortBikes();
