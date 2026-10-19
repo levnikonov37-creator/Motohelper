@@ -38,8 +38,14 @@ const server = http.createServer((req, res) => {
     page.on("requestfailed", (r) => r.url().startsWith(base) && errors.push("Не загрузился файл: " + r.url()));
     // без онбординга, чтобы сразу попасть в интерфейс
     await page.addInitScript(() => localStorage.setItem("mh2-onboarded", "true"));
-    // фото моделей с Wikimedia Commons в проверке не ищем — всегда показывается рисунок
+    // фото моделей: Wikimedia Commons ничего не находит, поиск картинок Bing отдаёт заглушку
     await page.route("https://commons.wikimedia.org/**", (r) => r.fulfill({ contentType: "application/json", body: '{"query":{"pages":[]}}' }));
+    const photoReqs = [];
+    const fakePhoto = (r) => {
+      photoReqs.push(new URL(r.request().url()).searchParams.get("q"));
+      r.fulfill({ contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><rect width="600" height="400" fill="#fff"/><circle cx="150" cy="300" r="80"/><circle cx="460" cy="300" r="80"/></svg>' });
+    };
+    await page.route(/mm\.bing\.net\/th/, fakePhoto);
     await page.goto(base, { waitUntil: "load" });
     await page.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 20000 });
 
@@ -85,12 +91,31 @@ const server = http.createServer((req, res) => {
     const menu = await page.locator(".bmenu").waitFor({ timeout: 3000 }).then(() => true, () => false);
     if (!menu) errors.push("Не открылось меню «Мои мотоциклы» по нажатию на мотоцикл в шапке");
     else await page.keyboard.press("Escape");
-    // Вид «Мотоцикл»: рисунок по геометрии строится, точки узлов на месте
+    // Вид «Мотоцикл»: фото модели из поиска картинок, «Другое фото» листает снимки
     await page.getByRole("button", { name: "Главная" }).last().click();
     await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
+    const photoOk = await page.locator(".model-photo.ok").waitFor({ timeout: 8000 }).then(() => true, () => false);
+    if (!photoOk) errors.push("Вид «Мотоцикл»: фото модели не показалось");
+    else {
+      if (!/DR-Z400S/.test(photoReqs[0] || "")) errors.push("Фото модели: запрос без названия модели — " + photoReqs[0]);
+      const src1 = await page.locator(".mp-img").getAttribute("src");
+      await page.locator(".mp-next").click();
+      await page.locator(".model-photo.ok").waitFor({ timeout: 5000 }).catch(() => {});
+      if ((await page.locator(".mp-img").getAttribute("src")) === src1) errors.push("Кнопка «Другое фото» не сменила фото");
+      await page.locator(".bv-toggle button", { hasText: "Рисунок" }).click();
+    }
+    // рисунок по геометрии строится, точки узлов на месте
     await page.locator(".bike-svg").first().waitFor({ timeout: 5000 }).catch(() => {});
     const artPaths = await page.locator(".bike-svg path").count(), artPins = await page.locator(".bike-svg .pin").count();
     if (artPaths < 60 || artPins < 5) errors.push(`Рисунок мотоцикла не построился: ${artPaths} фигур, ${artPins} точек`);
+    // фото не загрузилось (нет сети, сервер недоступен) — сам показывается рисунок
+    await page.locator(".bv-toggle button", { hasText: "Фото" }).click();
+    await page.locator(".view-toggle button", { hasText: "Схема" }).first().click();
+    await page.unroute(/mm\.bing\.net\/th/, fakePhoto);
+    await page.route(/mm\.bing\.net\/th/, (r) => r.abort());
+    await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
+    const artBack = await page.locator(".bv-note").waitFor({ timeout: 8000 }).then(() => true, () => false);
+    if (!artBack || !(await page.locator(".bike-svg").count())) errors.push("Фото не загрузилось, а рисунок вместо него не показался");
     await page.locator(".view-toggle button", { hasText: "Схема" }).first().click();
     console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
 
