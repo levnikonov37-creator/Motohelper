@@ -95,6 +95,21 @@ PARTS.forEach((p) => {
   if (!(p.price > 0)) fail(`Запчасть ${p.id}: цена ${p.price}`);
   (p.fit || []).forEach((f) => ENGINES[f] || GROUPS.has(f) || fail(`Запчасть ${p.id}: fit "${f}" — нет такого двигателя или группы`));
 });
+// Детали двигателя подписаны кодом своего мотора: у мотора 174 не должно быть деталей «ZS182MN» и наоборот
+const engIds = Object.keys(ENGINES).sort((a, b) => b.length - a.length);
+const engCodes = [...new Set(Object.values(ENGINES).map((e) => e.code))];
+PARTS.forEach((p) => {
+  const own = engIds.find((k) => p.id.startsWith(k + "-"));
+  if (!own) return;
+  const mine = ENGINES[own].code;
+  const other = engCodes.find((c) => c !== mine && c.length < p.name.length && p.name.endsWith(" " + c) && !p.name.endsWith(" " + mine));
+  if (other) fail(`Запчасть ${p.id} «${p.name}»: в названии код ${other}, а мотор ${own} — ${mine}`);
+  // общие детали — только у моторов с одинаковым кодом (ZS177MM и ZS177MM EFI), а не 174 с 182
+  (p.fit || []).forEach((f) => {
+    if (f !== own && ENGINES[f] && ENGINES[f].code.split(" ")[0] !== mine.split(" ")[0])
+      fail(`Запчасть ${p.id} «${p.name}» подходит к ${f} (${ENGINES[f].code}), хотя сделана под ${mine}`);
+  });
+});
 
 // Инструкции и тюнинг
 const guideIds = new Set();

@@ -3309,3 +3309,43 @@ var ENGINE_AKA = {
   addBike("Yamaha", "WR250R Final Edition", E, same("Yamaha", "WR250R"));
 })();
 sortBikes();
+/* ===================== v26: детали 174 и 182 больше не путаются ===================== */
+/* Детали мотора подписаны его кодом. NB300 сначала по ошибке был заведён как ZS182MN, код исправили на ZS174MN-5
+   уже после того, как детали создались, — переподписываем детали текущим кодом их мотора. */
+(function () {
+  var ids = Object.keys(ENGINES).sort(function (a, b) { return b.length - a.length; });
+  var codes = ids.map(function (k) { return ENGINES[k].code; }).filter(Boolean).sort(function (a, b) { return b.length - a.length; });
+  function ends(s, t) { return s.length > t.length && s.slice(-t.length - 1) === " " + t; }
+  PARTS.forEach(function (p) {
+    var own = ids.find(function (k) { return p.id.indexOf(k + "-") === 0; });
+    if (!own) return;
+    var e = ENGINES[own], mine = e.code;
+    if (ends(p.name, mine)) return;
+    var old = codes.find(function (c) { return c !== mine && ends(p.name, c); });
+    if (!old) return;
+    p.name = p.name.slice(0, -old.length) + mine;
+    /* у ZS174MN-5 один распредвал, а не пара, как у DOHC-мотора 182 */
+    if (p.kind === "camshaft" && e.groups.indexOf("dohc") < 0 && p.name.indexOf("Распредвалы (пара)") === 0) {
+      p.name = p.name.replace("Распредвалы (пара)", "Распредвал");
+      p.price = r50(p.price * 3200 / 5200);
+    }
+  });
+  /* NB300E — это инжекторный ZS182MN (NC300 EFI): механика как у NC300, а не как у NB300 (ZS174MN-5) */
+  SHARE.NB300E = "NC300";
+  PARTS.forEach(function (p) {
+    if (!p.fit) return;
+    if (p.id.indexOf("NB300-") === 0) p.fit = p.fit.filter(function (f) { return f !== "NB300E"; });
+    else if (p.id.indexOf("NC300-") === 0 && p.fit.indexOf("NB300E") < 0) p.fit = p.fit.concat(["NB300E"]);
+  });
+  /* деталей, которые раньше NB300E брал у NB300, у NC300 не было — создаём их под 182 по тому же образцу */
+  var have = {};
+  PARTS.forEach(function (p) { if (p.id.indexOf("NC300-") === 0) have[p.kind] = true; });
+  var a = partById("NC300-pis"), b = partById("NB300-pis"), k = a && b ? a.price / b.price : 1;
+  PARTS.filter(function (p) { return p.id.indexOf("NB300-") === 0 && !have[p.kind]; }).forEach(function (p) {
+    var base = p.name.slice(0, -ENGINES.NB300.code.length - 1);
+    PARTS.push(P("NC300-" + p.id.slice(6), base + " " + ENGINES.NC300.code, r50(p.price * k), p.cat, p.kind, ["NC300", "NB300E"]));
+  });
+  /* ZS174MN-5 потерял группу cb при исправлении — инструкция по клапанам пропала. У него клапаны на шайбах, как у CBS300 */
+  var vg = GUIDES.find(function (g) { return g.id === "valves-dohc"; });
+  if (vg && vg.only.indexOf("NB300") < 0) vg.only.push("NB300");
+})();

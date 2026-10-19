@@ -1521,3 +1521,39 @@ body::after { display: none !important; }
 .model-photo figcaption a { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 3px 8px; border-radius: 8px; background: rgba(0,0,0,.55); color: rgba(255,255,255,.85); font-size: 12px; text-decoration: none; text-shadow: none !important; }
 .bv-toggle { position: absolute; top: 8px; right: 8px; z-index: 3; }
 .bv-toggle button { padding: 4px 10px; font-size: 13px; }
+
+/* ===== v34: один раздел «Ремонт и ТО», поиск по всему сайту, кнопка «назад» ===== */
+.sub-head { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin: 2px 0 14px; }
+.sub-head h1 { margin: 0; }
+.back-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 16px 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.07); color: var(--ink); font-weight: 600; }
+.back-btn:hover { background: rgba(255,255,255,.13); }
+.actions4.rhub { margin: 14px 0 6px; }
+@media (min-width: 900px) { .actions4.home-acts { grid-template-columns: repeat(3, 1fr); } }
+.site-search { max-width: 720px; margin-top: 12px; }
+.phero + .site-search { margin-top: 14px; }
+.guide-mini.panel { padding: 6px 16px; }
+.ref-btn { width: 100%; max-width: 720px; justify-content: flex-start; min-height: 54px; margin: 22px 0 8px; }
+.units { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin: 8px 0 20px; }
+.unit-tile { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 58px; padding: 12px 12px 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); text-align: left; color: var(--ink); }
+.unit-tile b { font-weight: 600; line-height: 1.25; }
+.unit-tile .ico { color: var(--muted); flex: none; }
+.unit-tile:hover { border-color: var(--ink); }
+.unit-specs { max-width: 520px; margin: 0 0 6px; }
+.unit-view .issues .row-gap { margin-top: 10px; }
+.unit-view h2 { margin-top: 26px; }
+.plan li { align-items: center; }
+.plan li > div { gap: 2px; }
+.plan-go { flex: none; }
+/* окно поиска — сверху, чтобы не пряталось за клавиатурой телефона */
+.overlay.search-ov { align-items: flex-start; }
+.search-ov .sheet { border-radius: 0 0 22px 22px !important; max-height: 86vh !important; padding-top: calc(12px + env(safe-area-inset-top, 0px)); animation: ssIn .22s ease-out; }
+@keyframes ssIn { from { transform: translateY(-14px); opacity: 0; } }
+@media (min-width: 760px) { .overlay.search-ov { padding-top: 8vh; } .search-ov .sheet { border-radius: 20px !important; max-height: 78vh !important; } }
+.ss-top { display: flex; gap: 8px; align-items: center; }
+.ss-top .qsearch { flex: 1; min-height: 50px; border-width: 1.5px; max-width: none; }
+.ss-quick { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 2px 6px; }
+.search-sheet .qresults { max-width: none; margin-top: 10px; border: 0; box-shadow: none; background: none; padding: 0; }
+.search-sheet .qresults button { padding: 12px 8px; }
+.rail-search { margin-bottom: 6px; border: 1px solid rgba(255,255,255,.1) !important; }
+.ref-btn { text-align: left; }
+.ss-top .qsearch input, .ss-top .qsearch input:focus { box-shadow: none !important; outline: none !important; border: 0 !important; background: transparent !important; }
