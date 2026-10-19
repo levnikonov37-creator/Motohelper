@@ -1056,7 +1056,8 @@ function Picker({
   sel,
   custom,
   onClose,
-  onPick
+  onPick,
+  start
 }) {
   useEffect(() => {
     const h = e => {
@@ -1086,7 +1087,8 @@ function Picker({
   }))), /*#__PURE__*/React.createElement(BikeFinder, {
     sel: sel,
     custom: custom,
-    onPick: onPick
+    onPick: onPick,
+    start: start
   })));
 }
 /* ===== v6: статистика, фото, совет дня, достижения ===== */
@@ -1613,15 +1615,16 @@ function BikeFinder({
   sel,
   custom,
   onPick,
-  compact
+  compact,
+  start
 }) {
   const [q, setQ] = useState(""),
     [type, setType] = useState("Все"),
     [brand, setBrand] = useState(null),
     [allBrands, setAllBrands] = useState(false),
     [limit, setLimit] = useState(40),
-    [mode, setMode] = useState("models"),
-    [engF, setEngF] = useState(null);
+    [mode, setMode] = useState(start && start.mode || "models"),
+    [engF, setEngF] = useState(start && start.engine || null);
   const aka = id => typeof ENGINE_AKA === "object" && ENGINE_AKA[id] || "";
   const idx = useMemo(() => BIKES.map(b => ({
     b: b,
@@ -9595,6 +9598,22 @@ function buildEngine3D(eng, finish) {
     two: two
   };
 }
+/* Three.js (≈600 КБ) грузится только когда открывают 3D-вид мотора */
+let threeLoading = null;
+function loadThree() {
+  if (window.THREE) return Promise.resolve(window.THREE);
+  if (!threeLoading) threeLoading = new Promise((ok, fail) => {
+    const sc = document.createElement("script");
+    sc.src = "vendor/three.min.js";
+    sc.onload = () => window.THREE ? ok(window.THREE) : fail(new Error("three"));
+    sc.onerror = () => {
+      threeLoading = null;
+      fail(new Error("three"));
+    };
+    document.head.appendChild(sc);
+  });
+  return threeLoading;
+}
 function Engine3D({
   eng,
   running,
@@ -9609,6 +9628,15 @@ function Engine3D({
 }) {
   const mount = useRef(null),
     live = useRef({});
+  const [threeOk, setThreeOk] = useState(!!window.THREE);
+  useEffect(() => {
+    if (threeOk) return;
+    let alive = true;
+    loadThree().then(() => alive && setThreeOk(true), () => alive && onFail && onFail());
+    return () => {
+      alive = false;
+    };
+  }, []);
   live.current = {
     running: running,
     rpm: rpm,
@@ -9625,6 +9653,7 @@ function Engine3D({
   const key = eng.id + "|" + (eng.installed || []).join(",") + "|" + eng.carb + "|" + (finish || "");
   useEffect(() => {
     const el = mount.current;
+    if (!threeOk) return;
     if (!el || !window.THREE) {
       onFail && onFail();
       return;
@@ -10157,7 +10186,7 @@ function Engine3D({
       renderer.dispose();
       if (cvs.parentNode) cvs.parentNode.removeChild(cvs);
     };
-  }, [key]);
+  }, [key, threeOk]);
   return /*#__PURE__*/React.createElement("div", {
     className: "e3d",
     ref: mount,
@@ -12513,11 +12542,25 @@ function App() {
     };
   }
   const [treeOpen, setTreeOpen] = useState(null);
-  const [sel, setSel] = useState(() => load("sel", {
+  const [sel, setSel] = useState(() => bikeFromHash() || load("sel", {
     key: "Motoland TT250",
     vi: 0
   }));
+  useEffect(() => {
+    const h = () => {
+      const s = bikeFromHash();
+      if (s) setSel(s);
+    };
+    window.addEventListener("hashchange", h);
+    return () => window.removeEventListener("hashchange", h);
+  }, []);
   const [picker, setPicker] = useState(false);
+  /* открыть выбор мотоцикла откуда угодно: window.dispatchEvent(new CustomEvent("mh-open-picker", { detail: { engine: "NB300" } })) */
+  useEffect(() => {
+    const h = e => setPicker(e.detail && typeof e.detail === "object" ? e.detail : true);
+    window.addEventListener("mh-open-picker", h);
+    return () => window.removeEventListener("mh-open-picker", h);
+  }, []);
   const theme = "dark";
   const [toast, setToast] = useState("");
   const [cart, setCart] = useState(() => load("cart", []));
@@ -12917,7 +12960,9 @@ function App() {
     setSaved: setSaved
   })), /*#__PURE__*/React.createElement("footer", {
     className: "foot"
-  }, "\u0412 \u0431\u0430\u0437\u0435 ", BIKES.length, " \u043C\u043E\u0434\u0435\u043B\u0435\u0439, ", Object.keys(ENGINES).length, " \u0434\u0432\u0438\u0433\u0430\u0442\u0435\u043B\u0435\u0439, ", num(PARTS.length), " \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0435\u0439, ", CAUSES.length, " \u043F\u0440\u0438\u0447\u0438\u043D \u043D\u0435\u0438\u0441\u043F\u0440\u0430\u0432\u043D\u043E\u0441\u0442\u0435\u0439, ", GUIDES.length, " \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u0439 \u0438 ", TUNING.length, " \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043E\u043A. \u0414\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u043E\u0432\u043E\u0447\u043D\u044B\u0435: \u043A\u043E\u043C\u043F\u043B\u0435\u043A\u0442\u0430\u0446\u0438\u0438 \u043C\u0435\u043D\u044F\u044E\u0442\u0441\u044F \u043E\u0442 \u0433\u043E\u0434\u0430 \u043A \u0433\u043E\u0434\u0443 \u2014 \u0441\u0432\u0435\u0440\u044F\u0439 \u043A\u043E\u0434 \u043D\u0430 \u043A\u0430\u0440\u0442\u0435\u0440\u0435 \u0438 \u043C\u0430\u043D\u0443\u0430\u043B. \u0415\u0441\u043B\u0438 \u0443 \u0442\u0435\u0431\u044F \u0441\u0442\u043E\u0438\u0442 \u0434\u0440\u0443\u0433\u043E\u0435, \u043F\u043E\u043C\u0435\u043D\u044F\u0439 \u0432 \xAB\u041C\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B \u2192 \u041D\u0430\u0441\u0442\u0440\u043E\u0438\u0442\u044C\xBB, \u0438 \u0432\u0441\u0451 \u043F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u0441\u044F."))), /*#__PURE__*/React.createElement("nav", {
+  }, "\u0412 \u0431\u0430\u0437\u0435 ", BIKES.length, " \u043C\u043E\u0434\u0435\u043B\u0435\u0439, ", Object.keys(ENGINES).length, " \u0434\u0432\u0438\u0433\u0430\u0442\u0435\u043B\u0435\u0439, ", num(PARTS.length), " \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0435\u0439, ", CAUSES.length, " \u043F\u0440\u0438\u0447\u0438\u043D \u043D\u0435\u0438\u0441\u043F\u0440\u0430\u0432\u043D\u043E\u0441\u0442\u0435\u0439, ", GUIDES.length, " \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u0439 \u0438 ", TUNING.length, " \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043E\u043A. \u0414\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u043E\u0432\u043E\u0447\u043D\u044B\u0435: \u043A\u043E\u043C\u043F\u043B\u0435\u043A\u0442\u0430\u0446\u0438\u0438 \u043C\u0435\u043D\u044F\u044E\u0442\u0441\u044F \u043E\u0442 \u0433\u043E\u0434\u0430 \u043A \u0433\u043E\u0434\u0443 \u2014 \u0441\u0432\u0435\u0440\u044F\u0439 \u043A\u043E\u0434 \u043D\u0430 \u043A\u0430\u0440\u0442\u0435\u0440\u0435 \u0438 \u043C\u0430\u043D\u0443\u0430\u043B. \u0415\u0441\u043B\u0438 \u0443 \u0442\u0435\u0431\u044F \u0441\u0442\u043E\u0438\u0442 \u0434\u0440\u0443\u0433\u043E\u0435, \u043F\u043E\u043C\u0435\u043D\u044F\u0439 \u0432 \xAB\u041C\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B \u2192 \u041D\u0430\u0441\u0442\u0440\u043E\u0438\u0442\u044C\xBB, \u0438 \u0432\u0441\u0451 \u043F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u0441\u044F.", /*#__PURE__*/React.createElement(BackupBar, {
+    flash: flash
+  })))), /*#__PURE__*/React.createElement("nav", {
     className: "tabbar"
   }, NAV.map(n => /*#__PURE__*/React.createElement("button", {
     key: n.id,
@@ -12936,6 +12981,7 @@ function App() {
   }, toast), picker && /*#__PURE__*/React.createElement(Picker, {
     sel: sel,
     custom: custom,
+    start: typeof picker === "object" ? picker : null,
     onClose: () => setPicker(false),
     onPick: (b, vi) => {
       setSel({
@@ -14179,7 +14225,10 @@ function BikePage(props) {
   }, "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0434\u0440\u0443\u0433\u043E\u0439"), /*#__PURE__*/React.createElement("button", {
     className: "btn ghost",
     onClick: () => setCmpPick(true)
-  }, "\u0421\u0440\u0430\u0432\u043D\u0438\u0442\u044C"), bike.versions.length > 1 && /*#__PURE__*/React.createElement("div", {
+  }, "\u0421\u0440\u0430\u0432\u043D\u0438\u0442\u044C"), /*#__PURE__*/React.createElement("button", {
+    className: "btn ghost",
+    onClick: () => shareBike(bike, sel.vi, props.flash || (() => {}))
+  }, "Поделиться"), bike.versions.length > 1 && /*#__PURE__*/React.createElement("div", {
     className: "seg dark",
     role: "group",
     "aria-label": "\u0417\u0430\u0432\u043E\u0434\u0441\u043A\u0430\u044F \u0432\u0435\u0440\u0441\u0438\u044F"
@@ -16119,6 +16168,171 @@ function WorkerNote() {
   }, []);
   return /*#__PURE__*/React.createElement(React.Fragment, null, "\u0420\u0430\u0431\u043E\u0442\u0430\u0435\u0442 \u043D\u0430 \u0431\u0435\u0441\u043F\u043B\u0430\u0442\u043D\u044B\u0445 \u0418\u0418: Gemini, Groq \u0438 Cloudflare \u2014 \u0441\u0435\u0440\u0432\u0435\u0440 \u0441\u0430\u043C \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0430\u0435\u0442\u0441\u044F, \u043A\u043E\u0433\u0434\u0430 \u0443 \u043E\u0434\u043D\u043E\u0433\u043E \u043A\u043E\u043D\u0447\u0430\u0435\u0442\u0441\u044F \u043B\u0438\u043C\u0438\u0442.", p && /*#__PURE__*/React.createElement(React.Fragment, null, " \u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u043E\u0442\u0432\u0435\u0442: ", p.split(" ")[0], "."));
 }
+/* ===== v28: ссылка на модель — «…/#bike=Kayo T2 250&v=0» открывает этот мотоцикл ===== */
+function bikeFromHash() {
+  try {
+    const h = new URLSearchParams(String(location.hash || "").replace(/^#/, ""));
+    let key = h.get("bike");
+    if (!key) return null;
+    let vi = Math.max(0, parseInt(h.get("v") || "0", 10) || 0);
+    const al = typeof BIKE_ALIASES === "object" && BIKE_ALIASES[key];
+    if (al) {
+      key = al[0];
+      vi = al[1];
+    }
+    const b = BIKES.find(x => bikeKey(x) === key);
+    if (!b) return null;
+    return {
+      key: key,
+      vi: Math.min(vi, b.versions.length - 1)
+    };
+  } catch (e) {
+    return null;
+  }
+}
+function bikeLink(bike, vi) {
+  const q = new URLSearchParams();
+  q.set("bike", bikeKey(bike));
+  if (vi) q.set("v", String(vi));
+  return location.href.split("#")[0] + "#" + q.toString();
+}
+function shareBike(bike, vi, flash) {
+  const url = bikeLink(bike, vi),
+    title = bike.brand + " " + bike.name + " — MotoHelper";
+  if (navigator.share) {
+    navigator.share({
+      title: title,
+      text: title,
+      url: url
+    }).catch(() => {});
+    return;
+  }
+  (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => flash("Ссылка скопирована — отправь её другу"), () => window.prompt("Скопируй ссылку:", url));
+}
+/* ===== v28: резервная копия данных в файл =====
+   Всё своё (гараж, журнал ТО, сметы, заправки, настройки, чаты) лежит в localStorage с префиксом «mh2-».
+   «Сохранить копию» скачивает их одним JSON-файлом, «Загрузить из файла» возвращает и перезагружает страницу. */
+const BACKUP_APP = "MotoHelper";
+function backupCollect() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.indexOf("mh2-") === 0) data[k] = localStorage.getItem(k);
+  }
+  return {
+    app: BACKUP_APP,
+    version: 1,
+    date: new Date().toISOString(),
+    data: data
+  };
+}
+function backupRestore(obj) {
+  if (!obj || obj.app !== BACKUP_APP || !obj.data || typeof obj.data !== "object") throw new Error("not a backup");
+  const keys = Object.keys(obj.data).filter(k => k.indexOf("mh2-") === 0 && typeof obj.data[k] === "string");
+  if (!keys.length) throw new Error("empty backup");
+  const old = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.indexOf("mh2-") === 0) old.push(k);
+  }
+  old.forEach(k => localStorage.removeItem(k));
+  keys.forEach(k => localStorage.setItem(k, obj.data[k]));
+  return keys.length;
+}
+function BackupBar({
+  flash
+}) {
+  const fileRef = useRef(null);
+  function exportFile() {
+    try {
+      const b = backupCollect();
+      const blob = new Blob([JSON.stringify(b, null, 1)], {
+        type: "application/json"
+      });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "motohelper-backup-" + b.date.slice(0, 10) + ".json";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }, 1000);
+      flash("Копия сохранена в файл");
+    } catch (e) {
+      flash("Не получилось сохранить копию");
+    }
+  }
+  function importFile(f) {
+    const r = new FileReader();
+    r.onload = () => {
+      let obj;
+      try {
+        obj = JSON.parse(String(r.result));
+        if (!obj || obj.app !== BACKUP_APP) throw 0;
+      } catch (e) {
+        flash("Это не файл копии MotoHelper");
+        return;
+      }
+      const when = obj.date ? new Date(obj.date).toLocaleDateString("ru-RU") : "?";
+      if (!window.confirm("Заменить данные на этом устройстве копией от " + when + "? Гараж, журнал обслуживания и сметы станут как в файле.")) return;
+      try {
+        backupRestore(obj);
+        location.reload();
+      } catch (e) {
+        flash("Файл копии повреждён");
+      }
+    };
+    r.readAsText(f);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "backup-bar"
+  }, /*#__PURE__*/React.createElement("span", null, "Мои данные (гараж, журнал, сметы) хранятся только в этом браузере."), /*#__PURE__*/React.createElement("div", {
+    className: "row-gap"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn sm",
+    onClick: exportFile
+  }, "Сохранить копию"), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost",
+    onClick: () => fileRef.current && fileRef.current.click()
+  }, "Загрузить из файла"), /*#__PURE__*/React.createElement("input", {
+    ref: fileRef,
+    type: "file",
+    accept: "application/json,.json",
+    hidden: true,
+    onChange: e => {
+      const f = e.target.files && e.target.files[0];
+      if (f) importFile(f);
+      e.target.value = "";
+    }
+  })));
+}
+/* ===== v27: удобства ИИ-механика ===== */
+/* коды моторов из базы, которые ИИ может назвать в ответе («ZS174MN-5», «172FMM») */
+const AI_ENG_CODES = Object.keys(ENGINES).map(id => ({
+  id: id,
+  code: ENGINES[id].code
+})).filter(x => /\d/.test(x.code) && x.code.length >= 5).sort((a, b) => b.code.length - a.code.length);
+function aiEngineMentions(text) {
+  const t = String(text || "").toUpperCase().replace(/\s+/g, ""),
+    out = [];
+  AI_ENG_CODES.forEach(x => {
+    const c = x.code.toUpperCase().replace(/\s+/g, "");
+    if (t.indexOf(c) >= 0 && !out.some(o => o.code.toUpperCase().replace(/\s+/g, "").indexOf(c) >= 0)) out.push(x);
+  });
+  return out.slice(0, 3);
+}
+function openEnginePicker(id) {
+  window.dispatchEvent(new CustomEvent("mh-open-picker", {
+    detail: id ? {
+      engine: id
+    } : {
+      mode: "engines"
+    }
+  }));
+}
+const AI_FOLLOW = ["Распиши по шагам подробнее", "Какие запчасти понадобятся?", "Как проверить это самому?", "Сколько это стоит в сервисе?"];
+const SpeechRec = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
 function AiChat({
   eng,
   bike,
@@ -16142,6 +16356,52 @@ function AiChat({
   const [photo, setPhoto] = useState(null);
   const [err, setErr] = useState("");
   const [denied, setDenied] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recRef = useRef(null);
+  const taRef = useRef(null);
+  useEffect(() => {
+    const ta = taRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 180) + "px";
+  }, [input]);
+  useEffect(() => () => {
+    if (recRef.current) try {
+      recRef.current.abort();
+    } catch (e) {}
+  }, []);
+  function toggleVoice() {
+    if (listening && recRef.current) {
+      recRef.current.stop();
+      return;
+    }
+    const r = new SpeechRec();
+    r.lang = "ru-RU";
+    r.interimResults = true;
+    r.continuous = false;
+    const base = input ? input.replace(/\s+$/, "") + " " : "";
+    r.onresult = e => {
+      let t = "";
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      setInput(base + t);
+    };
+    r.onend = () => setListening(false);
+    r.onerror = e => {
+      setListening(false);
+      if (e.error === "not-allowed") flash("Разреши доступ к микрофону в настройках браузера");
+    };
+    recRef.current = r;
+    setListening(true);
+    try {
+      r.start();
+    } catch (e) {
+      setListening(false);
+    }
+  }
+  function copyAnswer(text) {
+    const t = String(text || "").replace(/\[part:[^\]]*\]/g, "").trim();
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => flash("Ответ скопирован"), () => flash("Не удалось скопировать"));
+  }
   const ctl = useRef(null);
   const listRef = useRef(null);
   const fileRef = useRef(null);
@@ -16343,7 +16603,20 @@ function AiChat({
     key: sg,
     className: "chip",
     onClick: () => sg.indexOf("фото") >= 0 ? fileRef.current && fileRef.current.click() : send(sg)
-  }, sg)))), chat.map((m, i) => /*#__PURE__*/React.createElement("div", {
+  }, sg))), /*#__PURE__*/React.createElement("div", {
+    className: "ai-engcard"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Не знаешь, какой у тебя мотор?"), /*#__PURE__*/React.createElement("span", null, "Код выбит на картере слева под цилиндром: ZS174MN-5, 172FMM, 1P60FMK. Введи даже только цифры — «174» — и я покажу подходящие моторы и модели.")), /*#__PURE__*/React.createElement("div", {
+    className: "row-gap"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => openEnginePicker()
+  }, "Найти мотор по коду"), ai.images && /*#__PURE__*/React.createElement("button", {
+    className: "btn ghost",
+    onClick: () => {
+      setInput("Прочитай маркировку мотора на фото и скажи, что это за мотор и на каких мотоциклах он стоит.");
+      fileRef.current && fileRef.current.click();
+    }
+  }, "Сфоткать маркировку")))), chat.map((m, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     className: "msg " + m.role
   }, m.role === "user" ? /*#__PURE__*/React.createElement("div", {
@@ -16365,7 +16638,22 @@ function AiChat({
       addToCart(p);
       flash("В корзине: " + p.name);
     }
-  })))), err && /*#__PURE__*/React.createElement("div", {
+  })), m.role === "assistant" && !m.pending && m.text && /*#__PURE__*/React.createElement("div", {
+    className: "msg-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "chip sm",
+    onClick: () => copyAnswer(m.text)
+  }, "Копировать"), aiEngineMentions(m.text).map(x => /*#__PURE__*/React.createElement("button", {
+    key: x.id,
+    className: "chip sm eng",
+    onClick: () => openEnginePicker(x.id)
+  }, "Модели с мотором ", x.code))), m.role === "assistant" && !m.pending && !busy && i === chat.length - 1 && /*#__PURE__*/React.createElement("div", {
+    className: "sugg follow"
+  }, AI_FOLLOW.map(f => /*#__PURE__*/React.createElement("button", {
+    key: f,
+    className: "chip",
+    onClick: () => send(f)
+  }, f))))), err && /*#__PURE__*/React.createElement("div", {
     className: "chat-err"
   }, err, " ", err === AI_ERR.upstream_error && /*#__PURE__*/React.createElement("button", {
     className: "link",
@@ -16400,6 +16688,7 @@ function AiChat({
     n: "photo",
     s: 20
   }))), /*#__PURE__*/React.createElement("textarea", {
+    ref: taRef,
     rows: "1",
     value: input,
     placeholder: "\u041E\u043F\u0438\u0448\u0438 \u043F\u0440\u043E\u0431\u043B\u0435\u043C\u0443: \u0447\u0442\u043E, \u043A\u043E\u0433\u0434\u0430, \u043F\u0440\u0438 \u043A\u0430\u043A\u0438\u0445 \u0443\u0441\u043B\u043E\u0432\u0438\u044F\u0445",
@@ -16411,7 +16700,30 @@ function AiChat({
       }
     },
     "aria-label": "\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 \u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A\u0443"
-  }), busy ? /*#__PURE__*/React.createElement("button", {
+  }), SpeechRec && !busy && /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn mic" + (listening ? " on" : ""),
+    "aria-label": listening ? "Остановить запись" : "Сказать голосом",
+    "aria-pressed": listening,
+    onClick: toggleVoice
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: 20,
+    height: 20,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: 9,
+    y: 3,
+    width: 6,
+    height: 11,
+    rx: 3
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M5 11a7 7 0 0 0 14 0M12 18v3"
+  }))), busy ? /*#__PURE__*/React.createElement("button", {
     className: "send stop",
     "aria-label": "\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C",
     onClick: () => ctl.current && ctl.current.abort()
