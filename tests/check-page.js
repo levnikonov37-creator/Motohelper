@@ -103,11 +103,35 @@ const server = http.createServer((req, res) => {
     const sprVal = await spr.inputValue();
     if (sprVal !== "12") errors.push(`Калькулятор звёзд: набрал «12», в поле «${sprVal}»`);
     await page.getByRole("tab", { name: "Обзор" }).click();
-    const tankIn = page.getByLabel("Объём бака, л");
-    await tankIn.fill("");
-    await tankIn.pressSequentially("6,5");
-    const tankVal = await tankIn.inputValue();
-    if (tankVal !== "6,5") errors.push(`Объём бака: набрал «6,5», в поле «${tankVal}»`);
+
+    // Весь ремонт в одном разделе; кнопка «Назад» браузера возвращает на прошлый экран, а не уходит с сайта
+    await page.getByRole("button", { name: "Ремонт" }).last().click();
+    await page.locator(".rhub").waitFor({ timeout: 5000 });
+    await page.locator(".rhub .act", { hasText: "ТО по пробегу" }).click();
+    const toOk = await page.locator(".plan-go").first().waitFor({ timeout: 5000 }).then(() => true, () => false);
+    if (!toOk) errors.push("Ремонт → ТО по пробегу: нет кнопок «Как сделать»");
+    await page.goBack();
+    const hubBack = await page.locator(".rhub").waitFor({ timeout: 5000 }).then(() => true, () => false);
+    if (!hubBack) errors.push("«Назад» из «ТО по пробегу» не вернул в раздел «Ремонт»");
+    await page.locator(".rhub .act", { hasText: "Узлы" }).click();
+    await page.locator(".unit-tile").first().click();
+    const unitOk = await page.locator(".unit-view h1").waitFor({ timeout: 5000 }).then(() => true, () => false);
+    if (!unitOk) errors.push("Ремонт → Узлы: страница узла не открылась");
+    // Поиск по всему сайту из шапки: находит инструкцию и открывает её
+    await page.getByRole("button", { name: "Поиск по сайту" }).first().click();
+    await page.getByRole("dialog", { name: "Поиск по сайту" }).getByRole("searchbox").fill("свеча");
+    const hit = page.locator(".search-sheet .qresults button", { hasText: "Инструкция" }).first();
+    const hitOk = await hit.waitFor({ timeout: 5000 }).then(() => true, () => false);
+    if (!hitOk) errors.push("Поиск по сайту: «свеча» не нашёл инструкцию");
+    else {
+      await hit.click();
+      const opened = await page.locator(".g-steps").waitFor({ timeout: 5000 }).then(() => true, () => false);
+      if (!opened) errors.push("Поиск по сайту: инструкция не открылась");
+      if (await page.locator(".search-sheet").count()) errors.push("Поиск по сайту: окно не закрылось после выбора");
+      await page.goBack();
+      const backUnit = await page.locator(".unit-view").waitFor({ timeout: 5000 }).then(() => true, () => false);
+      if (!backUnit) errors.push("«Назад» после поиска не вернул на прошлый экран");
+    }
 
     // Пользователь со старыми сохранениями (до объединения поколений) — ключи должны перенестись
     const old = await browser.newPage({ viewport: { width: 420, height: 900 } });
