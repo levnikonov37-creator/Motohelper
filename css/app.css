@@ -1396,8 +1396,8 @@ body::after { display: none !important; }
 @keyframes paR { from { opacity: 0; transform: translate3d(32px, 0, 0); } to { opacity: 1; transform: none; } }
 @keyframes paL { from { opacity: 0; transform: translate3d(-32px, 0, 0); } to { opacity: 1; transform: none; } }
 @keyframes mhEnter { from { opacity: 0; transform: translate3d(0, 16px, 0); } to { opacity: 1; transform: none; } }
-.main .page-anim.pa-r { animation: paR .38s cubic-bezier(.2, .8, .2, 1) both !important; }
-.main .page-anim.pa-l { animation: paL .38s cubic-bezier(.2, .8, .2, 1) both !important; }
+.main .page-anim.pa-r { animation: paR .38s cubic-bezier(.2, .8, .2, 1) backwards !important; }
+.main .page-anim.pa-l { animation: paL .38s cubic-bezier(.2, .8, .2, 1) backwards !important; }
 .main .mh-enter { animation: mhEnter .36s cubic-bezier(.2, .8, .2, 1) both !important; }
 .main .mh-rv:not(.mh-in) { opacity: 0 !important; transform: translate3d(0, 26px, 0) !important; }
 .main .mh-rv { transition: opacity .5s ease, transform .6s cubic-bezier(.2, .8, .2, 1) !important; }
@@ -1435,3 +1435,13 @@ body::after { display: none !important; }
 /* ===================== v29: резервная копия в подвале ===================== */
 .backup-bar { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08); display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
 .backup-bar > span { flex: 1 1 220px; }
+
+/* ===== v30: поле ИИ всегда над нижним меню, без плашки и пустоты ===== */
+@media (max-width: 979px) {
+  .composer { position: fixed; left: 12px; right: 12px; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); z-index: 25; padding: 0; background: none; }
+  .ai-page { padding-bottom: 96px; }
+}
+.composer .comp-row { border-color: rgba(229,231,235,.7); box-shadow: 0 12px 30px -10px rgba(0,0,0,.9); }
+.bf-search input, .bf-search input:focus { box-shadow: none !important; border: 0 !important; background: none !important; padding: 0 !important; min-height: 0 !important; }
+.bf-search:focus-within { box-shadow: 0 0 0 3px rgba(229,231,235,.35), 0 10px 30px -18px rgba(0,0,0,.8); }
+.bf-cc { margin-top: -4px; }
