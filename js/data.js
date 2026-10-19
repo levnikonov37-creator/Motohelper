@@ -3252,4 +3252,35 @@ var ENGINE_AKA = {
   /* Zuumav K5 на CB300F, Fxmoto PR300, BNK K10 NB300 (bvdshop.ru, pitbikemarket.ru) */
   addBike("Zuumav", "K5 300", E, "175FMM"); addBike("Fxmoto", "PR300", E, "PR300"); addBike("BNK", "K10 NB300", E, "NB300");
 })();
+/* ===================== v24: больше японских, европейских и китайских моделей ===================== */
+(function () {
+  var E = "Эндуро", LE = "Лёгкий эндуро", Mo = "Мотард", X = "Кросс-эндуро", T = "Тур-эндуро", P2 = "Питбайк", A = { approx: true };
+  /* Honda: японские «серые» модели, которые часто встречаются б/у */
+  addBike("Honda", "SL230", LE, "CRF230F"); addBike("Honda", "XL230", LE, "CRF230F"); addBike("Honda", "FTR223", "Классика", "CRF230F");
+  addBike("Honda", "XR400 Motard", Mo, "XR400R"); addBike("Honda", "CRF150R", X, "CRF150F", A); addBike("Honda", "CB190X", LE, "XR190");
+  addBike("Honda", "XLR200R", LE, "XR200R", A);
+  /* Yamaha */
+  addBike("Yamaha", "AG200", LE, "TW200"); addBike("Yamaha", "XT200", LE, "TW200"); addBike("Yamaha", "TW225", LE, "XT225");
+  addBike("Yamaha", "XT600Z Ténéré", T, "XT600"); addBike("Yamaha", "XTZ660 Ténéré", T, "XT660", A);
+  /* Kawasaki */
+  addBike("Kawasaki", "KLX400R", E, "DRZ400"); addBike("Kawasaki", "KLX250R", E, "KLX250"); addBike("Kawasaki", "KDX250SR", E, "JP2T250");
+  addBike("Kawasaki", "D-Tracker X", Mo, "KLX250"); addBike("Kawasaki", "Versys-X 250 Tourer", T, "T250K", A); addBike("Kawasaki", "KLX230 SE", LE, "KLX230");
+  /* Suzuki */
+  addBike("Suzuki", "DR250S", LE, "DRZ250", A); addBike("Suzuki", "DR200S", LE, "DR200");
+  /* KTM, Husqvarna, GasGas */
+  addBike("KTM", "450 XC-F", X, "KTM450F"); addBike("KTM", "450 XC-W", E, "KTM450F"); addBike("KTM", "500 XC-W", E, "KTM450F", A); addBike("KTM", "250 XC-W", E, "KTM250TPI", A);
+  addBike("Husqvarna", "FX 450", X, "KTM450F"); addBike("Husqvarna", "FE 501s", E, "KTM450F", A); addBike("Husqvarna", "TE 250i", E, "KTM250TPI"); addBike("Husqvarna", "TE 300i", E, "KTM300TPI");
+  addBike("GasGas", "EC 250 Ranger", E, "KTM250TPI", A); addBike("GasGas", "EC 300 Ranger", E, "KTM300TPI", A);
+  /* Sherco, TM, Fantic, Rieju, Beta */
+  addBike("Sherco", "SE 125", E, "KTM125", A); addBike("Sherco", "SEF 250", E, "SHERCO4T", A); addBike("Sherco", "SEF 500", E, "KTM450F", A);
+  addBike("TM Racing", "EN 125", E, "KTM125", A); addBike("TM Racing", "EN 450 Fi", E, "KTM450F", A);
+  addBike("Fantic", "XE 300", E, "BETA300", A); addBike("Rieju", "MR 250", E, "BETA250", A); addBike("Beta", "RR 350 Racing", E, "BETA4T", A);
+  /* BMW, Triumph */
+  addBike("BMW", "HP2 Enduro", T, "R1170"); addBike("Triumph", "Tiger 900 Rally", T, "I3_900T"); addBike("Triumph", "Tiger 900 GT", T, "I3_900T");
+  /* китайские эндуро на популярных моторах */
+  addBike("Shineray", "X-Trail 250", E, "172FMM", A); addBike("Shineray", "XY250GY-6C", E, "172FMM", A);
+  addBike("Zongshen", "ZS250GY-5", E, "172FMM-3A", A); addBike("Loncin", "LX250GY-6", E, "165FMM", A);
+  addBike("Lifan", "LF200GY-3B", LE, "CG200", A); addBike("Racer", "Enduro RC300-GY8X", E, "175FMM", A);
+  addBike("Минск", "TRX 300i", E, "175FMM", A); addBike("Ataki", "S004 300", E, "PR300", A); addBike("YCF", "Bigy 125", P2, "154FMI", A);
+})();
 sortBikes();

@@ -1589,6 +1589,33 @@ function bfTokens(q) {
   });
   return s.split(/\s+/).map(bfNorm).filter(Boolean);
 }
+/* Опечатки раскладки («лфнщ» → kayo) и русские буквы вместо латинских («тт250» → tt250) */
+const BF_RU = "йцукенгшщзхъфывапролджэячсмитьбю",
+  BF_EN = "qwertyuiop[]asdfghjkl;'zxcvbnm,.";
+const BF_TR = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya"
+};
+function bfAlts(t) {
+  if (!/[а-я]/.test(t)) return [t];
+  const lay = bfNorm(t.split("").map(c => {
+      const i = BF_RU.indexOf(c);
+      return i < 0 ? c : BF_EN[i];
+    }).join("")),
+    tr = t.split("").map(c => BF_TR[c] != null ? BF_TR[c] : c).join("");
+  return [t, lay, tr].filter((x, i, a) => x && a.indexOf(x) === i);
+}
+function bfHas(s, t) {
+  return bfAlts(t).some(a => s.indexOf(a) >= 0);
+}
+/* Объём мотора: самый простой фильтр, если не помнишь точное название */
+const BF_CC = [["Любой объём", 0, 1e4], ["до 125", 0, 125], ["150–200", 126, 200], ["250", 201, 260], ["300", 261, 349], ["400+", 350, 1e4]];
+function bfRecent() {
+  try {
+    return JSON.parse(localStorage.getItem("mh2-recent") || "[]").filter(k => typeof k === "string");
+  } catch (e) {
+    return [];
+  }
+}
 function bfHl(text, q) {
   const t = String(q || "").trim();
   if (!t) return text;
@@ -1610,7 +1637,15 @@ function BikeFinder({
     [allBrands, setAllBrands] = useState(false),
     [limit, setLimit] = useState(40),
     [mode, setMode] = useState(start && start.mode || "models"),
-    [engF, setEngF] = useState(start && start.engine || null);
+    [engF, setEngF] = useState(start && start.engine || null),
+    [cc, setCc] = useState(0);
+  const pick = (b, i) => {
+    try {
+      const k = bikeKey(b);
+      localStorage.setItem("mh2-recent", JSON.stringify([k].concat(bfRecent().filter(x => x !== k)).slice(0, 6)));
+    } catch (e) {}
+    onPick(b, i);
+  };
   const aka = id => typeof ENGINE_AKA === "object" && ENGINE_AKA[id] || "";
   const idx = useMemo(() => BIKES.map(b => ({
     b: b,
@@ -1636,12 +1671,16 @@ function BikeFinder({
   }, []);
   const engMatch = q => {
     const t = bfTokens(q);
-    return t.length ? engIdx.filter(x => t.every(k => x.s.indexOf(k) >= 0)) : engIdx;
+    return t.length ? engIdx.filter(x => t.every(k => bfHas(x.s, k))) : engIdx;
   };
   const toks = bfTokens(q);
   const types = ["Все"].concat(BF_TYPES.filter(t => BIKES.some(b => b.type === t)));
-  const pool = idx.filter(x => (type === "Все" || x.b.type === type) && x.b.brand !== "Любая модель");
-  let list = pool.filter(x => (!brand || x.b.brand === brand) && (!engF || x.b.versions.some(v => v.engine === engF)) && toks.every(t => x.s.indexOf(t) >= 0)).map(x => x.b);
+  const ccR = BF_CC[cc];
+  const pool = idx.filter(x => (type === "Все" || x.b.type === type) && x.b.brand !== "Любая модель" && (!cc || x.b.versions.some(v => {
+    const c = (ENGINES[v.engine] || {}).cc || 0;
+    return c >= ccR[1] && c <= ccR[2];
+  })));
+  let list = pool.filter(x => (!brand || x.b.brand === brand) && (!engF || x.b.versions.some(v => v.engine === engF)) && toks.every(t => bfHas(x.s, t))).map(x => x.b);
   const engCur = engF ? engIdx.find(x => x.id === engF) : null;
   if (engCur && engCur.gen && !toks.length) list = [engCur.gen].concat(list);
   /* запрос похож на код мотора («174», «NB300», «172») — предложим показать все модели с ним */
@@ -1665,11 +1704,12 @@ function BikeFinder({
     const c = (custom || {})[bikeKey(b) + "|" + i];
     return c && Object.keys(c).length;
   }));
+  const recent = bfRecent().map(k => BIKES.find(b => bikeKey(b) === k)).filter(b => b && mine.indexOf(b) < 0 && b.brand !== "Любая модель");
   const generic = BIKES.filter(b => b.brand === "Любая модель");
   const showBrands = !toks.length && !brand && !engF;
   useEffect(() => {
     setLimit(40);
-  }, [q, type, brand, engF, mode]);
+  }, [q, type, brand, engF, mode, cc]);
   const pickEngine = id => {
     setEngF(id);
     setMode("models");
@@ -1701,7 +1741,7 @@ function BikeFinder({
       className: "bf-item" + (on ? " on" : "")
     }, /*#__PURE__*/React.createElement("button", {
       className: "bf-main",
-      onClick: () => onPick(b, 0)
+      onClick: () => pick(b, 0)
     }, /*#__PURE__*/React.createElement("span", {
       className: "bf-brand-s"
     }, b.brand, on ? " · выбран" : ""), /*#__PURE__*/React.createElement("b", null, c0.nick ? "«" + c0.nick + "» " : "", bfHl(b.name, q)), /*#__PURE__*/React.createElement("span", {
@@ -1715,7 +1755,7 @@ function BikeFinder({
       return /*#__PURE__*/React.createElement("button", {
         key: i,
         className: "chip",
-        onClick: () => onPick(b, i)
+        onClick: () => pick(b, i)
       }, v.label || ev.code);
     })));
   };
@@ -1769,7 +1809,13 @@ function BikeFinder({
     key: t,
     className: "chip" + (type === t ? " on" : ""),
     onClick: () => setType(t)
-  }, t))), engCur && /*#__PURE__*/React.createElement("div", {
+  }, t))), /*#__PURE__*/React.createElement("div", {
+    className: "bf-types bf-cc"
+  }, BF_CC.map((c, i) => /*#__PURE__*/React.createElement("button", {
+    key: c[0],
+    className: "chip" + (cc === i ? " on" : ""),
+    onClick: () => setCc(i)
+  }, c[0], i > 0 ? " см³" : ""))), engCur && /*#__PURE__*/React.createElement("div", {
     className: "bf-brandhead"
   }, /*#__PURE__*/React.createElement("button", {
     className: "link",
@@ -1793,6 +1839,13 @@ function BikeFinder({
   }, /*#__PURE__*/React.createElement("h4", null, "\u041C\u043E\u0438 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u044B"), /*#__PURE__*/React.createElement("div", {
     className: "bf-list"
   }, mine.slice(0, 6).map(b => /*#__PURE__*/React.createElement(Card, {
+    key: bikeKey(b),
+    b: b
+  })))), recent.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "bf-sec"
+  }, /*#__PURE__*/React.createElement("h4", null, "Недавние"), /*#__PURE__*/React.createElement("div", {
+    className: "bf-list"
+  }, recent.slice(0, 4).map(b => /*#__PURE__*/React.createElement(Card, {
     key: bikeKey(b),
     b: b
   })))), /*#__PURE__*/React.createElement("h4", {
@@ -12940,7 +12993,7 @@ function App() {
     setEstName: setEstName,
     saved: saved,
     setSaved: setSaved
-  })), /*#__PURE__*/React.createElement("footer", {
+  })), page === "home" && /*#__PURE__*/React.createElement("footer", {
     className: "foot"
   }, /*#__PURE__*/React.createElement(BackupBar, {
     flash: flash
@@ -16693,8 +16746,6 @@ function AiChat({
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "send",
     s: 20
-  }))), /*#__PURE__*/React.createElement("p", {
-    className: "ai-note"
-  }, "ИИ может ошибаться — тормоза и электрику перепроверяй."))));
+  }))))));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));;document.getElementById("root").dataset.ok="1";

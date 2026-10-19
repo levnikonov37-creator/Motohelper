@@ -54,6 +54,10 @@ const server = http.createServer((req, res) => {
     const engFound = await page.locator(".bf-item b", { hasText: "ZS174MN-5" }).first().waitFor({ timeout: 5000 }).then(() => true, () => false);
     if (!engFound) errors.push("Вкладка «Моторы»: «нб300» не нашёл ZS174MN-5, нашёл: " + (await page.locator(".bf-item b").allInnerTexts()).join(", "));
     await page.getByRole("button", { name: "Модели", exact: true }).click();
+    // Неправильная раскладка: «лфнщ» — это kayo
+    await input.fill("лфнщ");
+    const kayo = await page.locator(".bf-item .bf-brand-s", { hasText: "Kayo" }).first().waitFor({ timeout: 5000 }).then(() => true, () => false);
+    if (!kayo) errors.push("Поиск «лфнщ» (kayo в русской раскладке) ничего не нашёл");
     await input.fill("DR-Z400S");
     await page.getByText("DR-Z400S").first().waitFor({ timeout: 5000 });
 
