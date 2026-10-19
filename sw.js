@@ -5,7 +5,7 @@
 const VERSION = "mh-v2";
 const CORE = [
   "./", "index.html", "manifest.webmanifest",
-  "css/app.css", "js/data.js", "js/app.js", "js/motion.js",
+  "css/app.css", "js/data.js", "js/bike-art.js", "js/app.js", "js/motion.js",
   "vendor/react.production.min.js", "vendor/react-dom.production.min.js",
   "img/topo.svg", "img/icon-192.png", "img/icon-512.png",
 ];

@@ -1507,3 +1507,17 @@ body::after { display: none !important; }
 .main p, .main h1, .main h2, .main h3, .main small, .main .muted, .main label, .main .f-label, .main .link, .main .stage-hint, .main .page-sub, .main .gb-title, .main .qempty, .main .tags, .foot { text-shadow: 0 1px 0 rgba(0,0,0,.55) !important; }
 .main .grad, .grad { filter: drop-shadow(0 1px 0 rgba(0,0,0,.5)) !important; }
 .photo-hud { text-shadow: 0 1px 0 rgba(0,0,0,.6), 0 0 6px rgba(0,0,0,.45); }
+
+/* ===== v33: мотоцикл — рисунок по геометрии и настоящее фото модели ===== */
+.bike-view { position: relative; z-index: 1; width: 100%; max-width: 860px; margin: 0 auto; }
+.bike-box { position: relative; }
+.bike-box .bike-svg { max-width: none; }
+.bike-svg .pin { opacity: .85; }
+.smoke-ov i { left: var(--sx, 92.9%); top: var(--sy, 87.7%); }
+.model-photo { margin: 4px 0 0; position: relative; border-radius: 16px; overflow: hidden; background: #121417; aspect-ratio: 16 / 10; }
+.model-photo img { display: block; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity .35s ease; }
+.model-photo.ok img { opacity: 1; }
+.model-photo figcaption { position: absolute; left: 8px; bottom: 8px; max-width: calc(100% - 16px); }
+.model-photo figcaption a { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 3px 8px; border-radius: 8px; background: rgba(0,0,0,.55); color: rgba(255,255,255,.85); font-size: 12px; text-decoration: none; text-shadow: none !important; }
+.bv-toggle { position: absolute; top: 8px; right: 8px; z-index: 3; }
+.bv-toggle button { padding: 4px 10px; font-size: 13px; }
