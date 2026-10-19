@@ -1565,3 +1565,20 @@ body::after { display: none !important; }
 .bv-row .sw { width: 26px; height: 26px; border-width: 2px; border-color: rgba(255,255,255,.22); }
 .bv-row .sw.on { outline: 2px solid #F2F3F0; outline-offset: 2px; }
 .bv-row .sw-auto { display: inline-grid; place-items: center; background: rgba(255,255,255,.08); color: var(--ink); }
+
+/* ===== v36: настоящее фото модели (Commons или поиск картинок), рисунок — запасной ===== */
+.model-photo { aspect-ratio: 3 / 2; background: #1D2126; isolation: isolate; }
+.model-photo .mp-bg { position: absolute; left: -8%; top: -8%; width: 116%; height: 116%; object-fit: cover; filter: blur(24px) saturate(1.15); opacity: 0; z-index: 0; }
+.model-photo.ok .mp-bg { opacity: .85; }
+.model-photo .mp-img { position: relative; z-index: 1; }
+.model-photo figcaption { z-index: 2; max-width: calc(100% - 150px); }
+.mp-wait { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; text-align: center; color: var(--stage-muted); font: 600 14px var(--cond); background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.05) 50%, transparent 70%) 0 0 / 250% 100%; animation: mpShimmer 1.5s linear infinite; }
+.mp-spin { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(255,255,255,.14); border-top-color: var(--plate); animation: spin .8s linear infinite; }
+@keyframes mpShimmer { from { background-position: 125% 0; } to { background-position: -125% 0; } }
+.mp-next { position: absolute; right: 8px; bottom: 8px; z-index: 3; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 4px 12px 4px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); background: rgba(14,16,19,.66); color: #F2F3F0; font: 600 13px var(--cond); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.mp-next:hover { background: rgba(14,16,19,.85); }
+.model-photo.running .mp-img { animation: pshake .07s linear infinite; }
+.bike-view .bv-toggle { background: rgba(14,16,19,.7); border-color: rgba(255,255,255,.2); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.bike-view .bv-toggle button:not(.on) { color: #F2F3F0; }
+.bv-note { margin: 8px 6px 0; font-size: 13px; color: var(--stage-muted); }
+.bv-note .link { color: var(--stage-ink); }

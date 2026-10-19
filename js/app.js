@@ -10431,7 +10431,16 @@ async function findModelPhoto(bike) {
   const terms = [bike.brand].concat(String(bike.name).replace(/\([^)]*\)/g, " ").replace(/\b\d{2}\/\d{2}\b/g, " ").replace(/[А-Яа-яЁё]+/g, " ").split(/\s+/).filter(w => w && PHOTO_DROP.indexOf(w.toLowerCase()) < 0));
   const q = "filetype:bitmap " + terms.map(w => 'intitle:"' + w.replace(/"/g, "") + '"').join(" ");
   const url = "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&origin=*&generator=search&gsrnamespace=6&gsrlimit=30&gsrsearch=" + encodeURIComponent(q) + "&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Cextmetadata&iiurlwidth=1280&iiextmetadatafilter=Artist%7CLicenseShortName";
-  const r = await fetch(url);
+  const ctl = new AbortController(),
+    tm = setTimeout(() => ctl.abort(), 7000);
+  let r;
+  try {
+    r = await fetch(url, {
+      signal: ctl.signal
+    });
+  } finally {
+    clearTimeout(tm);
+  }
   if (!r.ok) throw new Error("commons " + r.status);
   const j = await r.json();
   return photoPick(j && j.query && j.query.pages, brandW, modelW);
@@ -10452,41 +10461,141 @@ function photoCache(key, val) {
   } catch (e) {}
   return null;
 }
-function useModelPhoto(bike) {
-  const key = bikeKey(bike);
-  const [st, setSt] = useState(() => photoCache(key) || {
-    loading: true
-  });
+/* У китайских марок на Commons почти ничего нет — для всех моделей есть фото из поиска картинок Bing
+   по названию. Несколько запросов дают несколько разных снимков: «Другое фото» листает их, выбор запоминается.
+   Картинка грузится прямо с сервера Bing и на сайте не хранится; не загрузилась — показываем рисунок */
+const PHOTO_WIKI = /^(Honda|Yamaha|Kawasaki|Suzuki|KTM|Husqvarna|Husaberg|GasGas|Beta|Sherco|TM Racing|Fantic|Rieju|Montesa|Scorpa|BMW|Triumph|Ducati|Aprilia|Cagiva|Moto Guzzi|Benelli|Harley-Davidson|Royal Enfield|Bajaj|TVS|Hero|Jawa|CFMOTO)$/;
+const PHOTO_KIND = {
+  "Питбайк": ["питбайк", "pit bike"],
+  "Мопед": ["мопед", "moped"],
+  "Кросс-эндуро": ["мотоцикл", "кроссовый мотоцикл"],
+  "Мотард": ["мотоцикл", "мотард"],
+  "Спорт": ["мотоцикл", "спортбайк"],
+  "Нейкед": ["мотоцикл", "нейкед"],
+  "Чоппер": ["мотоцикл", "чоппер"],
+  "Триал": ["мотоцикл", "триал"],
+  "Классика": ["мотоцикл", "классика"]
+};
+function photoQueries(bike, ver) {
+  if (bike.brand === "Любая модель") return [];
+  const name = String(bike.name).replace(/\([^)]*\)/g, " ").replace(/\b\d{2}\/\d{2}\b/g, " ").replace(/\s+/g, " ").trim();
+  const base = (name.toLowerCase().indexOf(bike.brand.toLowerCase()) === 0 ? "" : bike.brand + " ") + name;
+  const kw = PHOTO_KIND[bike.type] || ["мотоцикл", "эндуро"];
+  /* у поколений первое фото — с годом начала выпуска, чтобы мотоцикл был своего поколения */
+  const yr = (String(ver && ver.label || "").match(/\b(19[5-9]\d|20[0-4]\d)\b/) || [])[1];
+  const qs = (yr ? [base + " " + yr + " " + kw[0]] : []).concat([base + " " + kw[0], base + " " + kw[1], base + " motorcycle"], yr ? [] : [base + " фото"]);
+  return qs.filter((q, i) => qs.indexOf(q) === i);
+}
+function webPhoto(q) {
+  let h = 0;
+  for (let i = 0; i < q.length; i++) h = h * 31 + q.charCodeAt(i) | 0;
+  return {
+    id: "q:" + q,
+    web: true,
+    u: "https://tse" + (1 + Math.abs(h) % 4) + ".mm.bing.net/th?q=" + encodeURIComponent(q) + "&w=1200&p=0",
+    page: "https://www.bing.com/images/search?q=" + encodeURIComponent(q)
+  };
+}
+const PHOTO_SEEN = {};
+/* фото грузим, когда страница уже загрузилась (но не ждём дольше 4 с):
+   если сервер картинок не отвечает, сайт не «висит» в загрузке */
+function usePageLoaded() {
+  const [ok, setOk] = useState(() => document.readyState === "complete");
   useEffect(() => {
-    const c = photoCache(key);
-    if (c) {
-      setSt(c);
-      return;
-    }
+    if (ok) return;
+    const on = () => setOk(true),
+      t = setTimeout(on, 4000);
+    if (document.readyState === "complete") on();else window.addEventListener("load", on);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("load", on);
+    };
+  }, []);
+  return ok;
+}
+function useModelPhotos(bike, ver) {
+  const key = bikeKey(bike),
+    wikiOn = PHOTO_WIKI.test(bike.brand);
+  const [tick, setTick] = useState(0);
+  const wiki = useMemo(() => !wikiOn ? {} : PHOTO_SEEN[key] || photoCache(key), [key, tick]);
+  useEffect(() => {
+    if (wiki) return;
     let alive = true;
-    setSt({
-      loading: true
-    });
     findModelPhoto(bike).then(p => {
+      PHOTO_SEEN[key] = p || {};
       photoCache(key, p || {});
-      if (alive) setSt(photoCache(key) || {});
-    }, () => alive && setSt({}));
+    }, () => {
+      PHOTO_SEEN[key] = {};
+    }).then(() => alive && setTick(t => t + 1));
     return () => {
       alive = false;
     };
-  }, [key]);
-  return st;
+  }, [key, !wiki]);
+  const vl = ver && ver.label || "";
+  const web = useMemo(() => photoQueries(bike, ver).map(webPhoto), [key, vl]);
+  return {
+    wait: !wiki,
+    list: (wiki && wiki.u ? [Object.assign({
+      id: "wiki"
+    }, wiki)] : []).concat(web)
+  };
 }
 function BikeView(props) {
   const {
     bike,
+    ver,
     running
   } = props;
-  const ph = useModelPhoto(bike);
-  const [mode, setMode] = useState(() => load("bikeview", "photo"));
-  const [ok, setOk] = useState(false);
-  useEffect(() => setOk(false), [ph.u]);
-  const showPhoto = !!ph.u && mode === "photo";
+  const key = bikeKey(bike);
+  const ph = useModelPhotos(bike, ver),
+    loaded = usePageLoaded();
+  const [mode, setMode] = useState(() => load("bikeview2", "photo"));
+  const [pick, setPick] = useState(() => load("mphoto-pick", {})[key] || "");
+  const [bad, setBad] = useState({});
+  const [okU, setOkU] = useState("");
+  useEffect(() => {
+    setPick(load("mphoto-pick", {})[key] || "");
+    setBad({});
+  }, [key]);
+  const live = ph.list.filter(p => !bad[p.u]);
+  /* пока ищем на Commons, ничего не грузим — иначе мелькнёт другое фото */
+  const pending = ph.wait || !loaded;
+  const cur = pending ? null : live.find(p => p.id === pick) || live[0] || null;
+  const curU = cur ? cur.u : "",
+    ok = !!curU && okU === curU;
+  const hasPhoto = !!cur || pending && live.length > 0;
+  const showPhoto = mode === "photo" && hasPhoto;
+  function fail(p) {
+    if (!p.web) {
+      PHOTO_SEEN[key] = {};
+      photoCache(key, {});
+    }
+    setBad(b => Object.assign({}, b, {
+      [p.u]: 1
+    }));
+  }
+  /* сервер картинок молчит 12 с — значит, недоступен: остальные фото оттуда тоже не ждём */
+  useEffect(() => {
+    if (!showPhoto || !cur || ok) return;
+    const t = setTimeout(() => setBad(b => {
+      const n = Object.assign({}, b);
+      ph.list.forEach(p => {
+        if (!!p.web === !!cur.web) n[p.u] = 1;
+      });
+      return n;
+    }), 12000);
+    return () => clearTimeout(t);
+  }, [curU, ok, showPhoto]);
+  function another() {
+    const n = live[(live.indexOf(cur) + 1) % live.length];
+    setPick(n.id);
+    const m = load("mphoto-pick", {});
+    delete m[key];
+    m[key] = n.id;
+    const ks = Object.keys(m);
+    if (ks.length > 200) delete m[ks[0]];
+    save("mphoto-pick", m);
+  }
   const cu = props.cu || {},
     setCu = props.setCu;
   /* цвета под свой мотоцикл: заводская раскраска есть не у всех моделей */
@@ -10521,20 +10630,41 @@ function BikeView(props) {
     className: "bike-view"
   }, showPhoto ? /*#__PURE__*/React.createElement("figure", {
     className: "model-photo" + (ok ? " ok" : "") + (running ? " running" : "")
-  }, /*#__PURE__*/React.createElement("img", {
-    src: ph.u,
+  }, cur && /*#__PURE__*/React.createElement("img", {
+    key: "bg" + curU,
+    className: "mp-bg",
+    src: curU,
+    alt: "",
+    "aria-hidden": "true",
+    referrerPolicy: "no-referrer"
+  }), cur && /*#__PURE__*/React.createElement("img", {
+    key: curU,
+    className: "mp-img",
+    src: curU,
     alt: bike.brand + " " + bike.name,
     referrerPolicy: "no-referrer",
-    onLoad: () => setOk(true),
-    onError: () => {
-      photoCache(bikeKey(bike), {});
-      setMode("art");
-    }
-  }), /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("a", {
-    href: ph.page,
+    onLoad: e => {
+      const im = e.currentTarget;
+      if (im.naturalWidth < 120 || im.naturalHeight < 80) fail(cur);else setOkU(curU);
+    },
+    onError: () => fail(cur)
+  }), !ok && /*#__PURE__*/React.createElement("div", {
+    className: "mp-wait",
+    role: "status"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mp-spin"
+  }), "Ищу фото ", bike.brand, " ", bike.name, "…"), ok && /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("a", {
+    href: cur.page,
     target: "_blank",
-    rel: "noopener"
-  }, "Фото: ", ph.by || "Wikimedia Commons", ph.lic ? " · " + ph.lic : ""))) : /*#__PURE__*/React.createElement(BikeSVG, props), ph.u && /*#__PURE__*/React.createElement("div", {
+    rel: "noopener noreferrer"
+  }, cur.web ? "Фото из интернета · Bing" : "Фото: " + (cur.by || "Wikimedia Commons") + (cur.lic ? " · " + cur.lic : ""))), ok && live.length > 1 && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "mp-next",
+    onClick: another
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "reset",
+    s: 15
+  }), "Другое фото")) : /*#__PURE__*/React.createElement(BikeSVG, props), hasPhoto && /*#__PURE__*/React.createElement("div", {
     className: "seg dark sm bv-toggle",
     role: "group",
     "aria-label": "Что показать"
@@ -10543,9 +10673,15 @@ function BikeView(props) {
     className: (showPhoto ? "photo" : "art") === x[0] ? "on" : "",
     onClick: () => {
       setMode(x[0]);
-      save("bikeview", x[0]);
+      save("bikeview2", x[0]);
     }
-  }, x[1]))), !showPhoto && !running && setCu && /*#__PURE__*/React.createElement("div", {
+  }, x[1]))), mode === "photo" && !hasPhoto && ph.list.length > 0 && /*#__PURE__*/React.createElement("p", {
+    className: "bv-note"
+  }, "Фото модели не загрузилось — показан рисунок. ", /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "link inline",
+    onClick: () => setBad({})
+  }, "Попробовать ещё раз")), !showPhoto && !running && setCu && /*#__PURE__*/React.createElement("div", {
     className: "bv-colors"
   }, swatches("Пластик", PLASTIC, "color"), swatches("Наклейки", BIKE_ACCENTS, "accent")));
 }
@@ -11917,6 +12053,7 @@ function EngineExplorer({
   })) : view === "bike" ? /*#__PURE__*/React.createElement(BikeView, {
     eng: eng,
     bike: bike,
+    ver: ver,
     cu: cu,
     setCu: setCu,
     sel: sel,
