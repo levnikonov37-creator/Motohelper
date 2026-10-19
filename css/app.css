@@ -1405,3 +1405,10 @@ body::after { display: none !important; }
   .main .page-anim.pa-r, .main .page-anim.pa-l, .main .mh-enter { animation: none !important; }
   .main .mh-rv, .main .mh-rv:not(.mh-in) { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
+
+/* ===================== v27: поиск по моторам в выборе мотоцикла ===================== */
+.bf-mode { display: flex; width: 100%; margin: 10px 0 8px; }
+.bf-mode button { flex: 1; padding: 9px 12px; font-weight: 600; }
+.bf-hint { margin: 2px 0 10px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.bf-enghints { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.bf-enghints .chip { border-color: rgba(147,197,253,.55); color: #CFE3FF; }

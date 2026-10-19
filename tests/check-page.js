@@ -41,6 +41,19 @@ const server = http.createServer((req, res) => {
     // Поиск в окне «Найди свой мотоцикл»
     await page.getByText("Выбрать", { exact: true }).first().click({ timeout: 10000 });
     const input = page.getByPlaceholder(/Марка, модель или мотор/);
+    // Поиск по мотору: «174» → подсказка ZS174MN-5 → все модели с ним; вкладка «Моторы» понимает русскую раскладку
+    await input.fill("174");
+    const hint = page.locator(".bf-enghints .chip", { hasText: "ZS174MN-5" });
+    await hint.waitFor({ timeout: 5000 });
+    await hint.click();
+    const engHead = await page.locator(".bf-brandhead h3").innerText();
+    if (!/ZS174MN-5/.test(engHead)) errors.push("Поиск мотора: после выбора ZS174MN-5 заголовок «" + engHead + "»");
+    if ((await page.locator(".bf-item").count()) < 10) errors.push("Поиск мотора: мало моделей с ZS174MN-5");
+    await page.getByRole("button", { name: "Моторы", exact: true }).click();
+    await page.getByPlaceholder(/Код мотора/).fill("нб300");
+    const engFound = await page.locator(".bf-item b").allInnerTexts();
+    if (!engFound.includes("ZS174MN-5")) errors.push("Вкладка «Моторы»: «нб300» не нашёл ZS174MN-5, нашёл: " + engFound.join(", "));
+    await page.getByRole("button", { name: "Модели", exact: true }).click();
     await input.fill("DR-Z400S");
     await page.getByText("DR-Z400S").first().waitFor({ timeout: 5000 });
 

@@ -1619,15 +1619,44 @@ function BikeFinder({
     [type, setType] = useState("Все"),
     [brand, setBrand] = useState(null),
     [allBrands, setAllBrands] = useState(false),
-    [limit, setLimit] = useState(40);
+    [limit, setLimit] = useState(40),
+    [mode, setMode] = useState("models"),
+    [engF, setEngF] = useState(null);
+  const aka = id => typeof ENGINE_AKA === "object" && ENGINE_AKA[id] || "";
   const idx = useMemo(() => BIKES.map(b => ({
     b: b,
-    s: bfNorm(b.brand + " " + b.name + " " + b.versions.map(v => bfYears(v.years) + " " + (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name).join(" "))
+    s: bfNorm(b.brand + " " + b.name + " " + b.versions.map(v => bfYears(v.years) + " " + (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name + " " + aka(v.engine)).join(" "))
   })), []);
+  /* Моторы: сколько моделей на каждом, строка для поиска с синонимами («174», «нб300», «зонгшен») */
+  const engIdx = useMemo(() => {
+    const cnt = {},
+      gen = {};
+    BIKES.forEach(b => b.versions.forEach(v => {
+      if (b.brand === "Любая модель") gen[v.engine] = b;else cnt[v.engine] = (cnt[v.engine] || 0) + 1;
+    }));
+    return Object.keys(ENGINES).filter(id => cnt[id] || gen[id]).map(id => {
+      const e = ENGINES[id];
+      return {
+        id: id,
+        e: e,
+        n: cnt[id] || 0,
+        gen: gen[id] || null,
+        s: bfNorm(id + " " + e.code + " " + e.name + " " + (e.maker || "") + " " + aka(id))
+      };
+    }).sort((a, b) => b.n - a.n);
+  }, []);
+  const engMatch = q => {
+    const t = bfTokens(q);
+    return t.length ? engIdx.filter(x => t.every(k => x.s.indexOf(k) >= 0)) : engIdx;
+  };
   const toks = bfTokens(q);
   const types = ["Все"].concat(BF_TYPES.filter(t => BIKES.some(b => b.type === t)));
   const pool = idx.filter(x => (type === "Все" || x.b.type === type) && x.b.brand !== "Любая модель");
-  let list = pool.filter(x => (!brand || x.b.brand === brand) && toks.every(t => x.s.indexOf(t) >= 0)).map(x => x.b);
+  let list = pool.filter(x => (!brand || x.b.brand === brand) && (!engF || x.b.versions.some(v => v.engine === engF)) && toks.every(t => x.s.indexOf(t) >= 0)).map(x => x.b);
+  const engCur = engF ? engIdx.find(x => x.id === engF) : null;
+  if (engCur && engCur.gen && !toks.length) list = [engCur.gen].concat(list);
+  /* запрос похож на код мотора («174», «NB300», «172») — предложим показать все модели с ним */
+  const engHints = toks.length && !engF && toks.join("").length >= 3 ? engMatch(q).filter(x => x.n > 0).slice(0, 3) : [];
   if (toks.length) {
     const f = toks[0];
     const sc = b => (bfNorm(b.name).indexOf(f) === 0 ? 3 : 0) + (bfNorm(b.brand).indexOf(f) === 0 ? 2 : 0) + (bfNorm(b.name).indexOf(f) >= 0 ? 1 : 0);
@@ -1648,10 +1677,30 @@ function BikeFinder({
     return c && Object.keys(c).length;
   }));
   const generic = BIKES.filter(b => b.brand === "Любая модель");
-  const showBrands = !toks.length && !brand;
+  const showBrands = !toks.length && !brand && !engF;
   useEffect(() => {
     setLimit(40);
-  }, [q, type, brand]);
+  }, [q, type, brand, engF, mode]);
+  const pickEngine = id => {
+    setEngF(id);
+    setMode("models");
+    setQ("");
+    setBrand(null);
+  };
+  const EngCard = ({
+    x
+  }) => /*#__PURE__*/React.createElement("div", {
+    className: "bf-item"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "bf-main",
+    onClick: () => pickEngine(x.id)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "bf-brand-s"
+  }, x.e.maker || "Мотор"), /*#__PURE__*/React.createElement("b", null, bfHl(x.e.code, q)), /*#__PURE__*/React.createElement("span", {
+    className: "bf-meta"
+  }, x.e.name, " \xB7 ", x.e.cc, " \u0441\u043C\xB3 \xB7 ", x.e.hp, " \u043B.\u0441.")), /*#__PURE__*/React.createElement("span", {
+    className: "bf-type"
+  }, x.n ? x.n + " " + plural(x.n, "модель", "модели", "моделей") : "без модели"));
   const Card = ({
     b
   }) => {
@@ -1693,7 +1742,7 @@ function BikeFinder({
     value: q,
     onChange: e => setQ(e.target.value),
     autoFocus: !compact,
-    placeholder: "\u041C\u0430\u0440\u043A\u0430, \u043C\u043E\u0434\u0435\u043B\u044C \u0438\u043B\u0438 \u043C\u043E\u0442\u043E\u0440: TT250, Kayo, 172FMM",
+    placeholder: mode === "engines" ? "Код мотора: 174, NB300, 172FMM, CB300" : "Марка, модель или мотор: TT250, Kayo, 174",
     "aria-label": "\u041F\u043E\u0438\u0441\u043A \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u0430",
     enterKeyHint: "search"
   }), q && /*#__PURE__*/React.createElement("button", {
@@ -1704,12 +1753,50 @@ function BikeFinder({
     n: "close",
     s: 16
   }))), /*#__PURE__*/React.createElement("div", {
+    className: "seg bf-mode",
+    role: "group",
+    "aria-label": "Искать"
+  }, [["models", "Модели"], ["engines", "Моторы"]].map(m => /*#__PURE__*/React.createElement("button", {
+    key: m[0],
+    className: mode === m[0] ? "on" : "",
+    "aria-pressed": mode === m[0],
+    onClick: () => {
+      setMode(m[0]);
+      setEngF(null);
+    }
+  }, m[1]))), mode === "engines" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+    className: "bf-hint"
+  }, "Код мотора выбит на картере, обычно слева под цилиндром: ZS174MN-5, 172FMM, 1P60FMK. Можно ввести только цифры — например, «174»."), /*#__PURE__*/React.createElement("div", {
+    className: "bf-list"
+  }, engMatch(q).slice(0, limit).map(x => /*#__PURE__*/React.createElement(EngCard, {
+    key: x.id,
+    x: x
+  }))), engMatch(q).length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "bf-empty"
+  }, /*#__PURE__*/React.createElement("b", null, "Такого мотора нет в базе"), /*#__PURE__*/React.createElement("p", null, "Попробуй только цифры с картера (\xAB174\xBB, \xAB172\xBB) или название (\xABNB300\xBB, \xABCB250\xBB).")), engMatch(q).length > limit && /*#__PURE__*/React.createElement("button", {
+    className: "btn bf-more",
+    onClick: () => setLimit(limit + 40)
+  }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", engMatch(q).length - limit, ")")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "bf-types"
   }, types.map(t => /*#__PURE__*/React.createElement("button", {
     key: t,
     className: "chip" + (type === t ? " on" : ""),
     onClick: () => setType(t)
-  }, t))), brand && !toks.length && /*#__PURE__*/React.createElement("div", {
+  }, t))), engCur && /*#__PURE__*/React.createElement("div", {
+    className: "bf-brandhead"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "link",
+    onClick: () => {
+      setEngF(null);
+      setMode("engines");
+    }
+  }, "\u2190 \u0412\u0441\u0435 \u043C\u043E\u0442\u043E\u0440\u044B"), /*#__PURE__*/React.createElement("h3", null, engCur.e.code, " \xB7 ", engCur.n, " ", plural(engCur.n, "модель", "модели", "моделей"))), engHints.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "bf-enghints"
+  }, engHints.map(x => /*#__PURE__*/React.createElement("button", {
+    key: x.id,
+    className: "chip",
+    onClick: () => pickEngine(x.id)
+  }, "\u041C\u043E\u0442\u043E\u0440 ", x.e.code, " \u2014 \u0432\u0441\u0435 ", x.n, " ", plural(x.n, "модель", "модели", "моделей")))), brand && !toks.length && /*#__PURE__*/React.createElement("div", {
     className: "bf-brandhead"
   }, /*#__PURE__*/React.createElement("button", {
     className: "link",
@@ -1754,7 +1841,7 @@ function BikeFinder({
   }))), list.length > limit && /*#__PURE__*/React.createElement("button", {
     className: "btn bf-more",
     onClick: () => setLimit(limit + 40)
-  }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", list.length - limit, ")")));
+  }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", list.length - limit, ")"))));
 }
 /* ===== Первый заход: приветствие и «С чего начать» ===== */
 const ONB_TILES = [["home", "Главная", "Объёмная модель мотора твоего мотоцикла: крути, заводи, заглядывай внутрь. Совет дня и проверка перед выездом."], ["bike", "Мой мотоцикл", "Характеристики и максимальная скорость, обслуживание по пробегу с журналом работ, тюнинг под цель и бюджет."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["wrench", "Ремонт", "«Что сломалось?» по симптомам, 60+ инструкций со схемами, справочник и коды ошибок."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и расчёт стоимости."]];

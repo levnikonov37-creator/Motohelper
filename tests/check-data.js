@@ -67,6 +67,23 @@ BIKES.forEach((b, i) => {
     }
   });
 });
+// Мотор в названии модели (китайские моторы) должен совпадать с мотором в базе:
+// «K23 NB300» не может стоять на PR300, «с мотором ZS182MN» — на NB300 и т.п.
+const NAME_ENGINE = [
+  [/NB300|174MN-5/i, ["NB300"]], [/174MN-3|CBS300/i, ["CBS300"]], [/\b174\b|174MN(?!-)/i, ["NB300", "CBS300"]],
+  [/CB300|175FMM/i, ["175FMM"]], [/NC300|182MN/i, ["NC300", "NB300E"]], [/YBS/i, ["YBS300", "YBS300G2"]],
+  [/PR250|172FMM-5/i, ["172FMM-5"]], [/PR300/i, ["PR300"]], [/NC250|177MM/i, ["NC250", "NC250E"]], [/NC450|194MQ/i, ["NC450", "NC450C"]],
+];
+const JP_EU = new Set(["Honda", "Yamaha", "Kawasaki", "Suzuki", "KTM", "Husqvarna", "GasGas", "BMW", "Triumph", "Ducati", "Aprilia"]);
+BIKES.forEach((b) => {
+  if (JP_EU.has(b.brand)) return;
+  NAME_ENGINE.forEach(([re, ok]) => {
+    if (re.test(b.name) && !b.versions.some((v) => ok.includes(v.engine)))
+      fail(`${b.brand} ${b.name}: в названии мотор ${b.name.match(re)[0]}, а в базе ${b.versions.map((v) => v.engine).join(", ")}`);
+  });
+});
+Object.keys(ctx.ENGINE_AKA || {}).forEach((id) => ENGINES[id] || fail(`ENGINE_AKA: нет двигателя ${id}`));
+
 const anyIdx = BIKES.findIndex((b) => b.brand === "Любая модель");
 if (anyIdx >= 0 && BIKES.slice(anyIdx).some((b) => b.brand !== "Любая модель")) fail("«Любая модель» должна идти в конце списка");
 
