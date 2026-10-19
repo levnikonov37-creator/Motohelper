@@ -38,6 +38,8 @@ const server = http.createServer((req, res) => {
     page.on("requestfailed", (r) => r.url().startsWith(base) && errors.push("Не загрузился файл: " + r.url()));
     // без онбординга, чтобы сразу попасть в интерфейс
     await page.addInitScript(() => localStorage.setItem("mh2-onboarded", "true"));
+    // фото моделей с Wikimedia Commons в проверке не ищем — всегда показывается рисунок
+    await page.route("https://commons.wikimedia.org/**", (r) => r.fulfill({ contentType: "application/json", body: '{"query":{"pages":[]}}' }));
     await page.goto(base, { waitUntil: "load" });
     await page.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 20000 });
 
@@ -83,6 +85,13 @@ const server = http.createServer((req, res) => {
     const menu = await page.locator(".bmenu").waitFor({ timeout: 3000 }).then(() => true, () => false);
     if (!menu) errors.push("Не открылось меню «Мои мотоциклы» по нажатию на мотоцикл в шапке");
     else await page.keyboard.press("Escape");
+    // Вид «Мотоцикл»: рисунок по геометрии строится, точки узлов на месте
+    await page.getByRole("button", { name: "Главная" }).last().click();
+    await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
+    await page.locator(".bike-svg").first().waitFor({ timeout: 5000 }).catch(() => {});
+    const artPaths = await page.locator(".bike-svg path").count(), artPins = await page.locator(".bike-svg .pin").count();
+    if (artPaths < 60 || artPins < 5) errors.push(`Рисунок мотоцикла не построился: ${artPaths} фигур, ${artPins} точек`);
+    await page.locator(".view-toggle button", { hasText: "Схема" }).first().click();
     console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
 
     // Ввод чисел с клавиатуры: стёр поле и набрал заново — без лишнего «0» впереди, дроби с запятой

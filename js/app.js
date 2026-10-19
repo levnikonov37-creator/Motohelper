@@ -608,62 +608,35 @@ function EditBike({
   }), "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u0432\u0441\u0451 \u043A\u0430\u043A \u0441 \u0437\u0430\u0432\u043E\u0434\u0430"));
 }
 function Maint({
-  eng,
-  mt,
-  setMt,
-  flash,
-  addRows
+  eng
 }) {
   const st = maintItems(eng);
-  function buildTO() {
-    const items = st;
-    const rows = [];
-    const liters = Math.max(1, Math.ceil(Math.max.apply(null, (String(eng.oilVol).match(/\d+(\.\d+)?/g) || ["1"]).map(Number))));
-    items.forEach(it => {
-      const kit = TO_KITS[it.id];
-      if (!kit) return;
-      let workName = kit.work;
-      if (it.id === "valves" && eng.groups.indexOf("dohc") >= 0 && kit.workDohc) workName = kit.workDohc;
-      const w = workName ? WORKS.find(x => x.name === workName) : null;
-      const parts = [];
-      kit.kinds.forEach(k => {
-        const p = partByKind(k, eng);
-        if (p && parts.indexOf(p) < 0) parts.push(p);
-      });
-      if (!w && !parts.length) return;
-      parts.forEach((p, i) => {
-        const q = kit.qtyOil && p.kind === "oil" ? liters : 1;
-        rows.push({
-          work: i === 0 && w ? w.name : "",
-          workPrice: i === 0 && w ? w.price : 0,
-          part: p.name + (q > 1 ? " ×" + q : ""),
-          partPrice: p.price * q
-        });
-      });
-      if (!parts.length && w) rows.push({
-        work: w.name,
-        workPrice: w.price,
-        part: "",
-        partPrice: 0
-      });
-    });
-    if (!rows.length) {
-      flash("Для этих пунктов деталей не нужно");
-      return;
-    }
-    addRows(rows, "Смета на обслуживание собрана");
-  }
   const unit = eng.hours ? "моточ." : "км";
+  /* что купить к обслуживанию: расходники под этот мотор, со ссылками на магазины */
+  const buy = [];
+  st.forEach(it => {
+    const kit = TO_KITS[it.id];
+    if (!kit) return;
+    kit.kinds.forEach(k => {
+      const p = partByKind(k, eng);
+      if (p && buy.indexOf(p) < 0) buy.push(p);
+    });
+  });
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
     className: "plan"
   }, st.map(x => /*#__PURE__*/React.createElement("li", {
     key: x.id
   }, /*#__PURE__*/React.createElement("b", null, x.t), /*#__PURE__*/React.createElement("span", {
     className: "plan-every"
-  }, "\u043A\u0430\u0436\u0434\u044B\u0435 ", num(x.every), " ", unit)))), /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    onClick: () => buildTO(true)
-  }, "\u0421\u043C\u0435\u0442\u0430 \u043D\u0430 \u043F\u043E\u043B\u043D\u043E\u0435 \u043E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u043D\u0438\u0435"), /*#__PURE__*/React.createElement("h2", null, "\u0411\u0435\u0437 \u043F\u0440\u0438\u0432\u044F\u0437\u043A\u0438 \u043A \u043F\u0440\u043E\u0431\u0435\u0433\u0443"), /*#__PURE__*/React.createElement("table", {
+  }, "\u043A\u0430\u0436\u0434\u044B\u0435 ", num(x.every), " ", unit)))), buy.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0427\u0442\u043E \u043A\u0443\u043F\u0438\u0442\u044C \u043A \u0422\u041E"), /*#__PURE__*/React.createElement("ul", {
+    className: "buy-list"
+  }, buy.map(p => /*#__PURE__*/React.createElement("li", {
+    key: p.id
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, p.name), /*#__PURE__*/React.createElement(BuyLinks, {
+    q: buyQuery(p, eng)
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "price"
+  }, rub(p.price)))))), /*#__PURE__*/React.createElement("h2", null, "\u0411\u0435\u0437 \u043F\u0440\u0438\u0432\u044F\u0437\u043A\u0438 \u043A \u043F\u0440\u043E\u0431\u0435\u0433\u0443"), /*#__PURE__*/React.createElement("table", {
     className: "to-table"
   }, /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u0422\u043E\u0440\u043C\u043E\u0437\u043D\u0430\u044F \u0436\u0438\u0434\u043A\u043E\u0441\u0442\u044C"), /*#__PURE__*/React.createElement("td", null, "\u0440\u0430\u0437 \u0432 \u0433\u043E\u0434")), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u041C\u0430\u0441\u043B\u043E \u0432 \u0432\u0438\u043B\u043A\u0435"), /*#__PURE__*/React.createElement("td", null, "\u0440\u0430\u0437 \u0432 \u0441\u0435\u0437\u043E\u043D")), eng.groups.indexOf("liquid") >= 0 && /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u0410\u043D\u0442\u0438\u0444\u0440\u0438\u0437"), /*#__PURE__*/React.createElement("td", null, "\u0440\u0430\u0437 \u0432 1\u20132 \u0441\u0435\u0437\u043E\u043D\u0430")), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u041F\u043E\u0434\u0448\u0438\u043F\u043D\u0438\u043A\u0438 \u0440\u0443\u043B\u0435\u0432\u043E\u0439 \u0438 \u043C\u0430\u044F\u0442\u043D\u0438\u043A\u0430"), /*#__PURE__*/React.createElement("td", null, "\u0441\u043C\u0430\u0437\u043A\u0430 \u043F\u0435\u0440\u0435\u0434 \u0441\u0435\u0437\u043E\u043D\u043E\u043C")))));
 }
@@ -704,7 +677,6 @@ function Parts({
   cart,
   toggleCart,
   setCart,
-  addRows,
   go
 }) {
   const [cat, setCat] = useState("Все");
@@ -713,7 +685,29 @@ function Parts({
   const cats = ["Все"].concat(Array.from(new Set(PARTS.map(p => p.cat))));
   const list = PARTS.filter(p => (cat === "Все" || p.cat === cat) && (!onlyFit || fits(p, eng)) && (!q.trim() || p.name.toLowerCase().indexOf(q.toLowerCase()) >= 0));
   const total = cart.reduce((s, p) => s + p.price, 0);
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, cart.length > 0 && /*#__PURE__*/React.createElement("section", {
+    className: "cart-box"
+  }, /*#__PURE__*/React.createElement("h2", null, "\u041A\u043E\u0440\u0437\u0438\u043D\u0430"), /*#__PURE__*/React.createElement("ul", {
+    className: "buy-list"
+  }, cart.map(c => {
+    const p = partById(c.id) || c;
+    return /*#__PURE__*/React.createElement("li", {
+      key: c.id
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, c.name), /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "pl-r"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "price"
+    }, rub(c.price)), /*#__PURE__*/React.createElement("button", {
+      className: "mini",
+      "aria-label": "\u0423\u0431\u0440\u0430\u0442\u044C \u0438\u0437 \u043A\u043E\u0440\u0437\u0438\u043D\u044B",
+      onClick: () => toggleCart(c)
+    }, /*#__PURE__*/React.createElement(Icon, {
+      n: "close",
+      s: 14
+    }))));
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "toolbar row-gap"
   }, /*#__PURE__*/React.createElement("div", {
     className: "qsearch grow"
@@ -787,177 +781,7 @@ function Parts({
   }, /*#__PURE__*/React.createElement("span", null, cart.length, " ", plural(cart.length, "позиция", "позиции", "позиций"), ", ", /*#__PURE__*/React.createElement("b", null, rub(total))), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: () => setCart([])
-  }, "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C"), /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    onClick: () => {
-      addRows(cart.map(p => ({
-        work: "",
-        workPrice: 0,
-        part: p.name,
-        partPrice: p.price
-      })), "Перенесено в смету");
-      setCart([]);
-    }
-  }, "\u0412 \u0441\u043C\u0435\u0442\u0443")));
-}
-
-/* ---------- Смета ---------- */
-function Estimate({
-  bike,
-  eng,
-  cu,
-  est,
-  setEst,
-  estName,
-  setEstName,
-  saved,
-  setSaved,
-  flash
-}) {
-  const total = est.reduce((s, r) => s + (Number(r.workPrice) || 0) + (Number(r.partPrice) || 0), 0);
-  const works = est.reduce((s, r) => s + (Number(r.workPrice) || 0), 0);
-  const fitParts = PARTS.filter(p => fits(p, eng));
-  const title = (cu.nick ? cu.nick + ", " : "") + bike.brand + " " + bike.name;
-  function upd(i, k, v) {
-    const n = est.slice();
-    n[i] = Object.assign({}, n[i], {
-      [k]: v
-    });
-    if (k === "work") {
-      const w = WORKS.find(x => x.name === v);
-      if (w) n[i].workPrice = w.price;
-    }
-    if (k === "part") {
-      const p = partByName(v);
-      if (p) n[i].partPrice = p.price;
-    }
-    setEst(n);
-  }
-  function text() {
-    const L = ["Смета: " + (estName || "без названия"), title + ", " + eng.code, new Date().toLocaleDateString("ru-RU"), ""];
-    est.forEach((r, i) => L.push(i + 1 + ". " + [r.work && r.work + " — " + rub(r.workPrice), r.part && r.part + " — " + rub(r.partPrice)].filter(Boolean).join("; ")));
-    L.push("", "Работы: " + rub(works), "Запчасти: " + rub(total - works), "Итого: " + rub(total));
-    return L.join("\n");
-  }
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
-    className: "muted"
-  }, title, ", ", eng.code), /*#__PURE__*/React.createElement("label", {
-    className: "f narrow"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "f-label"
-  }, "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435"), /*#__PURE__*/React.createElement("input", {
-    value: estName,
-    onChange: e => setEstName(e.target.value),
-    placeholder: "Например, ТО на 3000 км"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "est"
-  }, est.length === 0 && /*#__PURE__*/React.createElement("p", {
-    className: "empty"
-  }, "\u0414\u043E\u0431\u0430\u0432\u044C \u0441\u0442\u0440\u043E\u043A\u0443 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438\u043B\u0438 \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0438 \u0434\u0435\u0442\u0430\u043B\u0438 \u0438\u0437 \u0434\u0438\u0430\u0433\u043D\u043E\u0441\u0442\u0438\u043A\u0438, \u0442\u044E\u043D\u0438\u043D\u0433\u0430 \u0438 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430."), est.map((r, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    className: "est-row"
-  }, /*#__PURE__*/React.createElement("select", {
-    "aria-label": "\u0420\u0430\u0431\u043E\u0442\u0430",
-    value: r.work,
-    onChange: e => upd(i, "work", e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "\u0420\u0430\u0431\u043E\u0442\u0430\u2026"), WORKS.map(w => /*#__PURE__*/React.createElement("option", {
-    key: w.name,
-    value: w.name
-  }, w.name))), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "\u0426\u0435\u043D\u0430 \u0440\u0430\u0431\u043E\u0442\u044B",
-    type: "number",
-    inputMode: "numeric",
-    value: r.workPrice || "",
-    placeholder: "0",
-    onChange: e => upd(i, "workPrice", Number(e.target.value) || 0)
-  }), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u044C",
-    value: r.part,
-    onChange: e => upd(i, "part", e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u044C\u2026"), r.part && !fitParts.find(p => p.name === r.part) && /*#__PURE__*/React.createElement("option", {
-    value: r.part
-  }, r.part), fitParts.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p.id,
-    value: p.name
-  }, p.name))), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "\u0426\u0435\u043D\u0430 \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0438",
-    type: "number",
-    inputMode: "numeric",
-    value: r.partPrice || "",
-    placeholder: "0",
-    onChange: e => upd(i, "partPrice", Number(e.target.value) || 0)
-  }), /*#__PURE__*/React.createElement("button", {
-    className: "icon-btn",
-    "aria-label": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0441\u0442\u0440\u043E\u043A\u0443",
-    onClick: () => setEst(est.filter((_, j) => j !== i))
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "close",
-    s: 18
-  })))), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => setEst(est.concat([{
-      work: "",
-      workPrice: 0,
-      part: "",
-      partPrice: 0
-    }]))
-  }, "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0441\u0442\u0440\u043E\u043A\u0443")), est.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: "total"
-  }, /*#__PURE__*/React.createElement("span", null, "\u0420\u0430\u0431\u043E\u0442\u044B ", rub(works), ", \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0438 ", rub(total - works)), /*#__PURE__*/React.createElement("b", null, rub(total))), /*#__PURE__*/React.createElement("div", {
-    className: "row-gap"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    onClick: () => {
-      if (!estName.trim()) {
-        flash("Введи название сметы");
-        return;
-      }
-      bumpStat("estimate");
-      setSaved([{
-        id: Date.now(),
-        name: estName.trim(),
-        bike: title,
-        rows: est,
-        total: total,
-        date: new Date().toLocaleDateString("ru-RU")
-      }].concat(saved).slice(0, 30));
-      setEstName("");
-      setEst([]);
-      flash("Смета сохранена");
-    }
-  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => copyText(text()).then(ok => flash(ok ? "Смета скопирована" : "Не удалось скопировать"))
-  }, "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0442\u0435\u043A\u0441\u0442\u043E\u043C"), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => setEst([])
-  }, "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C"))), saved.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0441\u043C\u0435\u0442\u044B"), /*#__PURE__*/React.createElement("ul", {
-    className: "saved"
-  }, saved.map(e => /*#__PURE__*/React.createElement("li", {
-    key: e.id
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, e.name), /*#__PURE__*/React.createElement("span", {
-    className: "muted small"
-  }, e.bike, ", ", e.date, ", ", e.rows.length, " ", plural(e.rows.length, "строка", "строки", "строк"))), /*#__PURE__*/React.createElement("span", {
-    className: "price"
-  }, rub(e.total)), /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
-    onClick: () => {
-      setEst(e.rows);
-      setEstName(e.name);
-      flash("Смета открыта");
-    }
-  }, "\u041E\u0442\u043A\u0440\u044B\u0442\u044C"), /*#__PURE__*/React.createElement("button", {
-    className: "icon-btn",
-    "aria-label": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0441\u043C\u0435\u0442\u0443",
-    onClick: () => setSaved(saved.filter(x => x.id !== e.id))
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "close",
-    s: 18
-  })))))));
+  }, "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C")));
 }
 
 /* ---------- Выбор мотоцикла ---------- */
@@ -1824,7 +1648,7 @@ function BikeFinder({
   }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", list.length - limit, ")"))));
 }
 /* ===== Первый заход: приветствие и «С чего начать» ===== */
-const ONB_TILES = [["home", "Главная", "Объёмная модель мотора твоего мотоцикла: крути, заводи, заглядывай внутрь. Совет дня и проверка перед выездом."], ["bike", "Мой мотоцикл", "Характеристики и максимальная скорость, что и через сколько км обслуживать, тюнинг под цель и бюджет."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["wrench", "Ремонт", "«Что сломалось?» по симптомам, 60+ инструкций со схемами, справочник и коды ошибок."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и расчёт стоимости."]];
+const ONB_TILES = [["home", "Главная", "Объёмная модель мотора твоего мотоцикла: крути, заводи, заглядывай внутрь. Совет дня и проверка перед выездом."], ["bike", "Мой мотоцикл", "Характеристики и максимальная скорость, что и через сколько км обслуживать, тюнинг под цель и бюджет."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["wrench", "Ремонт", "«Что сломалось?» по симптомам, 60+ инструкций со схемами, справочник и коды ошибок."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и ссылки на магазины."]];
 function Onboarding({
   step0,
   sel,
@@ -6715,21 +6539,7 @@ function EngineSVG({
     cy: "391.5",
     r: "2",
     fill: "rgba(255,255,255,.15)"
-  })), running && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#eg-soft)"
-  }, [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => /*#__PURE__*/React.createElement("circle", {
-    key: i,
-    className: "puff",
-    cx: "626",
-    cy: "386",
-    r: 10 + i % 3 * 4,
-    fill: two ? "url(#eg-smoke2t)" : "url(#eg-smoke)",
-    style: {
-      animationDelay: i * 0.13 + "s",
-      "--dx": 12 + i * 17 % 26 + "px",
-      "--dy": -38 - i * 23 % 40 + "px"
-    }
-  }))), running && /*#__PURE__*/React.createElement("circle", {
+  })), running && /*#__PURE__*/React.createElement("circle", {
     cx: "618",
     cy: "393",
     r: "6",
@@ -7988,15 +7798,59 @@ function EngineSVG({
   }))));
 }
 
+/* --- дым из выхлопа: отдельный слой поверх схемы, анимируется без перерисовки самой схемы --- */
+function Smoke({
+  two,
+  rpm,
+  back,
+  style
+}) {
+  const dur = rpm < 2500 ? 1.6 : rpm < 5500 ? 1.05 : 0.7;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "smoke-ov" + (two ? " two" : ""),
+    "aria-hidden": "true",
+    style: Object.assign({
+      "--puff": dur + "s"
+    }, style || {})
+  }, [0, 1, 2, 3, 4, 5].map(i => /*#__PURE__*/React.createElement("i", {
+    key: i,
+    style: {
+      width: (back ? 2.2 : 3.1) + i % 3 * 1.2 + "%",
+      animationDelay: (i * dur / 6).toFixed(2) + "s",
+      "--dx": (back ? -(90 + i * 37 % 120) : 50 + i * 37 % 100) + "%",
+      "--dy": (back ? -60 - i * 53 % 90 : -150 - i * 53 % 150) + "%"
+    }
+  })));
+}
+
 /* --- тахометр --- */
 function Tacho({
   eng,
   rpm,
-  running
+  running,
+  api
 }) {
   const pk = enginePeak(eng),
     max = pk.max,
     ang = v => -120 + 240 * Math.min(1, v / max);
+  const needle = useRef(null),
+    val = useRef(null);
+  useEffect(() => {
+    if (!api) return;
+    let shown = 0;
+    api.current = v => {
+      if (needle.current) needle.current.style.transform = "rotate(" + ang(v) + "deg)";
+      /* цифры — не чаще 10 раз в секунду: смена текста заставляет браузер пересчитывать раскладку */
+      const now = performance.now();
+      if (val.current && now - shown > 100) {
+        shown = now;
+        val.current.textContent = Math.round(v / 50) * 50;
+      }
+    };
+    return () => {
+      api.current = null;
+    };
+  });
   const ticks = [];
   for (let v = 0; v <= max; v += 1000) ticks.push(v);
   const p = (v, r) => {
@@ -8008,10 +7862,15 @@ function Tacho({
       e = p(v2, r);
     return "M" + s[0] + "," + s[1] + " A" + r + "," + r + " 0 " + (ang(v2) - ang(v1) > 180 ? 1 : 0) + ",1 " + e[0] + "," + e[1];
   };
-  return /*#__PURE__*/React.createElement("svg", {
+  /* шкала — неподвижная картинка; стрелка — отдельный слой, поворачивается без перерисовки шкалы */
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tacho-box" + (running ? " on" : ""),
+    role: "img",
+    "aria-label": "Тахометр, " + (running ? rpm : 0) + " об/мин"
+  }, /*#__PURE__*/React.createElement("svg", {
     className: "tacho" + (running ? " on" : ""),
     viewBox: "0 0 120 104",
-    "aria-label": "Тахометр, " + (running ? rpm : 0) + " об/мин"
+    "aria-hidden": "true"
   }, /*#__PURE__*/React.createElement("path", {
     d: arc(0, max, 50),
     fill: "none",
@@ -8041,25 +7900,8 @@ function Tacho({
       textAnchor: "middle",
       className: "tacho-n"
     }, v / 1000));
-  }), /*#__PURE__*/React.createElement("g", {
-    className: "needle",
-    style: {
-      transform: "rotate(" + ang(running ? rpm : 0) + "deg)"
-    }
-  }, /*#__PURE__*/React.createElement("line", {
-    x1: "60",
-    y1: "60",
-    x2: "60",
-    y2: "16",
-    stroke: "#E5E7EB",
-    strokeWidth: "3",
-    strokeLinecap: "round"
-  })), /*#__PURE__*/React.createElement("circle", {
-    cx: "60",
-    cy: "60",
-    r: "5",
-    fill: "#E5E7EB"
   }), /*#__PURE__*/React.createElement("text", {
+    ref: val,
     x: "60",
     y: "88",
     textAnchor: "middle",
@@ -8069,7 +7911,15 @@ function Tacho({
     y: "100",
     textAnchor: "middle",
     className: "tacho-u"
-  }, "\u043E\u0431/\u043C\u0438\u043D \xD71"));
+  }, "\u043E\u0431/\u043C\u0438\u043D \xD71")), /*#__PURE__*/React.createElement("i", {
+    ref: needle,
+    className: "tacho-needle",
+    style: {
+      transform: "rotate(" + ang(running ? rpm : 0) + "deg)"
+    }
+  }), /*#__PURE__*/React.createElement("i", {
+    className: "tacho-hub"
+  }));
 }
 
 /* --- звук мотора: синтез под конкретный двигатель и выхлоп --- */
@@ -9595,6 +9445,7 @@ function Engine3D({
   eng,
   running,
   rpm,
+  rpmLive,
   cut,
   gear,
   sel,
@@ -9617,6 +9468,7 @@ function Engine3D({
   live.current = {
     running: running,
     rpm: rpm,
+    rpmLive: rpmLive,
     cut: cut,
     gear: gear,
     sel: sel,
@@ -9651,7 +9503,10 @@ function Engine3D({
       onFail && onFail();
       return;
     }
-    renderer.setPixelRatio(window.matchMedia && window.matchMedia("(hover: hover)").matches ? Math.min(window.devicePixelRatio || 1, 1.5) : 1);
+    /* чёткость: рисуем в разрешении экрана (до 2×); если телефон не успевает — ступенчато снижаем */
+    let pr = Math.min(window.devicePixelRatio || 1, 2),
+      slowN = 0;
+    renderer.setPixelRatio(pr);
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.toneMapping = T.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.92;
@@ -9937,6 +9792,13 @@ function Engine3D({
       const raw = (t - last) / 1000;
       if (raw < 1 / 40) return;
       last = t;
+      if (raw > 0.048 && raw < 0.5) slowN++;else if (slowN > 0) slowN--;
+      if (slowN > 24 && pr > 1) {
+        pr = Math.max(1, pr - 0.5);
+        renderer.setPixelRatio(pr);
+        slowN = 0;
+        dirty = 3;
+      }
       const dt = Math.min(0.05, raw);
       if (!visible || document.hidden) {
         cancelAnimationFrame(raf);
@@ -9964,7 +9826,8 @@ function Engine3D({
         return;
       }
       dirty--;
-      const speed = reduce ? 0 : L.running ? 0.2 + L.rpm / 5200 : L.cut ? 0.2 : 0;
+      const R = L.rpmLive && L.rpmLive.current && L.rpmLive.current.raf ? L.rpmLive.current.r : L.rpm;
+      const speed = reduce ? 0 : L.running ? 0.2 + R / 5200 : L.cut ? 0.2 : 0;
       const w = speed * Math.PI * 2;
       phi += w * dt;
       placeCam();
@@ -10088,7 +9951,7 @@ function Engine3D({
       heat = L.running ? Math.min(1, heat + dt / 12) : Math.max(0, heat - dt / 25);
       E.exMats.forEach(m => m.emissive.setRGB(0.9 * heat * 0.45, 0.35 * heat * 0.45, 0.05 * heat * 0.45));
       if (L.running && !reduce) {
-        spawnAcc += dt * (5 + L.rpm / 330) * (E.two ? 1.4 : 1);
+        spawnAcc += dt * (5 + R / 330) * (E.two ? 1.4 : 1);
         E.smokeO.getWorldPosition(sp0);
         E.smokeO.getWorldQuaternion(sq);
         ax.set(1, 0, 0).applyQuaternion(sq);
@@ -10100,7 +9963,7 @@ function Engine3D({
           p.position.copy(sp0);
           p.userData.age = 0;
           p.userData.life = 1.1 + Math.random() * 0.9;
-          const sp = (0.6 + L.rpm / 4200) * E.scale;
+          const sp = (0.6 + R / 4200) * E.scale;
           p.userData.v.copy(ax).multiplyScalar(sp).add(new T.Vector3((Math.random() - 0.5) * 0.35, 0.15 + Math.random() * 0.25, (Math.random() - 0.5) * 0.35));
           p.userData.s0 = (0.18 + Math.random() * 0.12) * E.scale;
           p.userData.op = (E.two ? 0.5 : 0.32) * (0.7 + Math.random() * 0.5);
@@ -10398,155 +10261,47 @@ function sprocketPath(cx, cy, r, t) {
   }
   return d + "Z";
 }
-function Wheel({
-  cx,
-  cy,
-  r,
-  knobby,
-  disc,
-  running
-}) {
-  const knobs = [],
-    spokes = [],
-    nips = [],
-    rimR = r - 19;
-  if (knobby) for (let i = 0; i < 36; i++) {
-    const a = i / 36 * Math.PI * 2,
-      w = 0.05,
-      r1 = r - 4,
-      r2 = r + 2.5;
-    knobs.push(/*#__PURE__*/React.createElement("path", {
-      key: i,
-      d: "M" + (cx + r1 * Math.cos(a - w)).toFixed(1) + "," + (cy + r1 * Math.sin(a - w)).toFixed(1) + "L" + (cx + r2 * Math.cos(a - w * 0.7)).toFixed(1) + "," + (cy + r2 * Math.sin(a - w * 0.7)).toFixed(1) + "L" + (cx + r2 * Math.cos(a + w * 0.7)).toFixed(1) + "," + (cy + r2 * Math.sin(a + w * 0.7)).toFixed(1) + "L" + (cx + r1 * Math.cos(a + w)).toFixed(1) + "," + (cy + r1 * Math.sin(a + w)).toFixed(1) + "Z"
-    }));
-  }
-  for (let i = 0; i < 36; i++) {
-    const a = i / 36 * Math.PI * 2,
-      h = a + (i % 2 ? 0.62 : -0.62);
-    spokes.push(/*#__PURE__*/React.createElement("line", {
-      key: i,
-      x1: (cx + 9 * Math.cos(h)).toFixed(1),
-      y1: (cy + 9 * Math.sin(h)).toFixed(1),
-      x2: (cx + (rimR - 2) * Math.cos(a)).toFixed(1),
-      y2: (cy + (rimR - 2) * Math.sin(a)).toFixed(1),
-      stroke: i % 2 ? "#c9d0d6" : "#9aa2aa"
-    }));
-    nips.push(/*#__PURE__*/React.createElement("circle", {
-      key: i,
-      cx: (cx + (rimR - 3) * Math.cos(a)).toFixed(1),
-      cy: (cy + (rimR - 3) * Math.sin(a)).toFixed(1),
-      r: "1.1",
-      fill: "#d9dde0"
-    }));
-  }
-  const dR = r * 0.37,
-    petals = [];
-  for (let i = 0; i < 24; i++) {
-    const a = i / 24 * Math.PI * 2,
-      rr = i % 2 ? dR : dR - 2.6;
-    petals.push((i ? "L" : "M") + (cx + rr * Math.cos(a)).toFixed(1) + "," + (cy + rr * Math.sin(a)).toFixed(1));
-  }
-  return /*#__PURE__*/React.createElement("g", {
-    className: "wheel"
-  }, /*#__PURE__*/React.createElement("circle", {
-    cx: cx,
-    cy: cy,
-    r: r - 7.5,
-    fill: "none",
-    stroke: "url(#bk-tire)",
-    strokeWidth: "15"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: cx,
-    cy: cy,
-    r: r - 11,
-    fill: "none",
-    stroke: "rgba(255,255,255,.07)",
-    strokeWidth: "1.5"
-  }), /*#__PURE__*/React.createElement("g", {
-    className: running ? "spokes run" : "spokes",
-    style: {
-      transformOrigin: cx + "px " + cy + "px"
+/* ===== Мотоцикл: рисунок по реальной геометрии (js/bike-art.js) и настоящее фото модели ===== */
+function bikeArtFor(bike, eng, cu) {
+  const L = bikeLook(bike, eng, cu);
+  const cls = bike.type === "Классика" ? "classic" : L.cls;
+  const g = eng.groups || [],
+    inst = eng.installed || [];
+  const cn = !/^(Honda|Yamaha|Kawasaki|Suzuki|KTM|Husqvarna|GasGas|Beta|Sherco|TM Racing|Fantic|Rieju|BMW|Triumph|Ducati|Aprilia|Harley-Davidson|Royal Enfield)$/.test(bike.brand);
+  const col = window.bikeLivery(bike.brand, bike.name, cu && cu.color);
+  const road = ["naked", "sport", "cruiser", "classic", "tour", "moped", "light", "motard"].indexOf(cls) >= 0;
+  return window.bikeArt({
+    uid: "bk",
+    cls: cls,
+    brand: bike.brand.length <= 12 ? bike.brand : bike.brand.split(/[\s-]/)[0],
+    num: L.num,
+    eng: {
+      stroke: eng.stroke,
+      cc: eng.cc,
+      horiz: g.indexOf("horiz") >= 0,
+      liquid: g.indexOf("liquid") >= 0,
+      efi: g.indexOf("efi") >= 0,
+      layout: eng.layout || "single",
+      dark: g.indexOf("liquid") >= 0 || !cn
+    },
+    col: col,
+    mods: inst,
+    o: {
+      kick: /Кик|кик/.test(eng.start || ""),
+      handguards: ["enduro", "cross", "tour"].indexOf(cls) >= 0 || inst.indexOf("hand") >= 0,
+      plate: road || cls === "enduro",
+      signals: road && cls !== "motard",
+      mirrors: road,
+      usd: L.usd,
+      cast: ["naked", "sport", "cruiser"].indexOf(cls) >= 0 || cls === "tour" && eng.cc >= 700,
+      frontDisc: ["naked", "sport", "tour", "cruiser", "motard"].indexOf(cls) >= 0,
+      twinShock: L.twinShock,
+      swingAlu: L.swingAlu,
+      fenderCol: col.fender,
+      guard: col.guard,
+      number: cls === "cross"
     }
-  }, knobby ? /*#__PURE__*/React.createElement("g", {
-    fill: "#141619",
-    stroke: "#0a0b0c",
-    strokeWidth: ".6"
-  }, knobs) : /*#__PURE__*/React.createElement("circle", {
-    cx: cx,
-    cy: cy,
-    r: r - 1,
-    fill: "none",
-    stroke: "#1b1d20",
-    strokeWidth: "2.5"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: cx,
-    cy: cy,
-    r: rimR,
-    fill: "none",
-    stroke: "url(#bk-rimg)",
-    strokeWidth: "6"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: cx,
-    cy: cy,
-    r: rimR + 3,
-    fill: "none",
-    stroke: "rgba(0,0,0,.45)",
-    strokeWidth: "1"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: cx,
-    cy: cy,
-    r: rimR - 3,
-    fill: "none",
-    stroke: "rgba(0,0,0,.35)",
-    strokeWidth: "1"
-  }), /*#__PURE__*/React.createElement("g", {
-    strokeWidth: "1"
-  }, spokes), nips, disc && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: petals.join("") + "Z",
-    fill: "url(#bk-disc)",
-    stroke: "#5b6269",
-    strokeWidth: ".8"
-  }), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => {
-    const a = i / 12 * Math.PI * 2;
-    return /*#__PURE__*/React.createElement("circle", {
-      key: i,
-      cx: cx + dR * 0.78 * Math.cos(a),
-      cy: cy + dR * 0.78 * Math.sin(a),
-      r: "1.6",
-      fill: "#2b2f34"
-    });
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: cx,
-    cy: cy,
-    r: dR * 0.55,
-    fill: "url(#bk-alu)",
-    stroke: "#5b6269",
-    strokeWidth: ".8"
-  })), /*#__PURE__*/React.createElement("circle", {
-    cx: cx,
-    cy: cy,
-    r: "13",
-    fill: "url(#bk-hub)",
-    stroke: "#4e555c",
-    strokeWidth: ".8"
-  }), [0, 1, 2, 3, 4, 5].map(i => {
-    const a = i / 6 * Math.PI * 2;
-    return /*#__PURE__*/React.createElement("circle", {
-      key: i,
-      cx: cx + 9 * Math.cos(a),
-      cy: cy + 9 * Math.sin(a),
-      r: "1.3",
-      fill: "#3b4248"
-    });
-  }), /*#__PURE__*/React.createElement("polygon", {
-    points: [0, 1, 2, 3, 4, 5].map(i => {
-      const a = i / 6 * Math.PI * 2 + 0.3;
-      return (cx + 4.5 * Math.cos(a)).toFixed(1) + "," + (cy + 4.5 * Math.sin(a)).toFixed(1);
-    }).join(" "),
-    fill: "url(#bk-chrome)",
-    stroke: "#2a2e33",
-    strokeWidth: ".6"
-  })));
+  });
 }
 function BikeSVG({
   eng,
@@ -10556,1683 +10311,44 @@ function BikeSVG({
   onSel,
   running
 }) {
-  const L = bikeLook(bike, eng, cu),
-    g = L.g,
-    liq = eng.groups.indexOf("liquid") >= 0,
-    two = eng.stroke === "2T",
-    dohc = eng.groups.indexOf("dohc") >= 0;
-  const inst = eng.installed || [];
-  const col = plasticFor(bike, cu),
-    colD = shade(col, -0.35),
-    colL = shade(col, 0.25);
-  const light = ["#ECEFF1", "#E5E7EB"].indexOf(col) >= 0;
-  const stripe = L.stripe.toLowerCase() === col.toLowerCase() ? light ? "#1B1F22" : "#FFFFFF" : L.stripe;
-  const fr = L.frameCol,
-    frL = shade(fr, 0.35);
-  const R = [150 * g.s + g.dx, 300 * g.s + g.dy],
-    F = [545 * g.s + g.dx, 292 * g.s + g.dy];
-  const hl = id => "pa" + (sel === id ? " on" : "");
+  const art = useMemo(() => bikeArtFor(bike, eng, cu), [bike, eng, cu]);
+  const vb = art.vb,
+    k = vb[2] / 640;
   const click = id => e => {
     e.stopPropagation();
     onSel(id);
   };
-  const pins = bikePins(bike, eng, cu);
-  const rfB = g.rf / g.s;
-  const muffF = inst.indexOf("slip") >= 0 || inst.indexOf("full") >= 0 || inst.indexOf("silencer2t") >= 0 ? "url(#bk-carbon)" : "url(#bk-chrome)";
-  const hdr = inst.indexOf("full") >= 0 ? "url(#bk-ti)" : "url(#bk-chrome)";
-  const HZ = L.horiz;
-  const hdrHigh = HZ ? "M504,264 C 502,300 446,308 404,302 C 362,296 330,276 304,240 L252,190" : "M451,172 C 480,184 478,236 440,228 C 386,206 336,194 300,186 L226,170";
-  const hdrLow = HZ ? "M504,264 C 500,292 460,302 420,300 L280,290 L222,276" : "M451,172 C 476,190 468,262 430,276 C 390,292 330,294 280,282 L222,274";
-  const portXY = HZ ? [504, 262] : two ? [438, 206] : [451, 172];
-  const Tube = ({
-    d,
-    w,
-    c,
-    hiC
-  }) => /*#__PURE__*/React.createElement("g", {
-    fill: "none",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: d,
-    stroke: "rgba(0,0,0,.35)",
-    strokeWidth: w + 2,
-    transform: "translate(0 1.5)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: d,
-    stroke: c,
-    strokeWidth: w
-  }), /*#__PURE__*/React.createElement("path", {
-    d: d,
-    stroke: hiC || "rgba(255,255,255,.28)",
-    strokeWidth: Math.max(1, w * 0.22),
-    transform: "translate(0 " + -w * 0.22 + ")"
-  }));
-  /* вилка: верх траверсы → ось */
-  const T0 = [482, 104],
-    FA = [545, 292],
-    fd = [(FA[0] - T0[0]) / 198.3, (FA[1] - T0[1]) / 198.3],
-    fp = k => [T0[0] + fd[0] * k, T0[1] + fd[1] * k];
-  const fl = (a, b) => "M" + fp(a)[0].toFixed(1) + "," + fp(a)[1].toFixed(1) + " L" + fp(b)[0].toFixed(1) + "," + fp(b)[1].toFixed(1);
-  const coil = [];
-  for (let i = 0; i <= 12; i++) {
-    const t = i / 12,
-      x = 331 + (299 - 331) * t,
-      y = 172 + (246 - 172) * t;
-    coil.push(/*#__PURE__*/React.createElement("ellipse", {
-      key: i,
-      cx: x,
-      cy: y,
-      rx: "9",
-      ry: "2.4",
-      transform: "rotate(-24 " + x + " " + y + ")",
-      fill: "none",
-      stroke: inst.indexOf("shock-adj") >= 0 ? "#3C7BD9" : stripe === "#FFFFFF" ? "#E5533D" : stripe,
-      strokeWidth: "2.6"
-    }));
-  }
-  return /*#__PURE__*/React.createElement("svg", {
-    className: "bike-svg cls-" + L.cls + (running ? " running" : ""),
-    viewBox: "20 30 640 390",
+  const smoke = art.smoke && running ? {
+    "--sx": ((art.smoke[0] - vb[0]) / vb[2] * 100).toFixed(1) + "%",
+    "--sy": ((art.smoke[1] - vb[1]) / vb[3] * 100).toFixed(1) + "%"
+  } : null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "bike-box"
+  }, /*#__PURE__*/React.createElement("svg", {
+    className: "bike-svg" + (running ? " running" : ""),
+    viewBox: vb.join(" "),
     role: "img",
-    "aria-label": "Мотоцикл " + bike.brand + " " + bike.name + ", класс " + bike.type,
+    "aria-label": "Рисунок " + bike.brand + " " + bike.name,
     onClick: () => onSel(null)
-  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-alu",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#f4f6f8"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".45",
-    stopColor: "#c3c9cf"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#7c858d"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-rimg",
-    x1: "0",
-    y1: "0",
-    x2: "1",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#eef1f3"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".5",
-    stopColor: "#9aa2aa"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#d6dbdf"
-  })), /*#__PURE__*/React.createElement("radialGradient", {
-    id: "bk-hub",
-    cx: ".35",
-    cy: ".3",
-    r: ".8"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#ffffff"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".6",
-    stopColor: "#b9c0c6"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#6b737b"
-  })), /*#__PURE__*/React.createElement("radialGradient", {
-    id: "bk-disc",
-    cx: ".4",
-    cy: ".35",
-    r: ".8"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#e9ecef"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".7",
-    stopColor: "#a9b0b7"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#7b838b"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-tire",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#2c3035"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".5",
-    stopColor: "#17191c"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#0d0e10"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-chrome",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#fafbfc"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".35",
-    stopColor: "#c9cfd4"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".5",
-    stopColor: "#6c737a"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".7",
-    stopColor: "#bcc3c9"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#eceff1"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-ti",
-    x1: "0",
-    y1: "0",
-    x2: "1",
-    y2: "0"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#d9b36c"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".4",
-    stopColor: "#8f6bb0"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".75",
-    stopColor: "#4d7fc4"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#a9b6c9"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-carbon",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#555b61"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".5",
-    stopColor: "#1e2226"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#3a3f45"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-anod",
-    x1: "0",
-    y1: "0",
-    x2: "1",
-    y2: "0"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#4a5057"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".45",
-    stopColor: "#23272b"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#3a3f45"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-gold",
-    x1: "0",
-    y1: "0",
-    x2: "1",
-    y2: "0"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#b88a2e"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".45",
-    stopColor: "#f7e2a4"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#c99a3e"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-stan",
-    x1: "0",
-    y1: "0",
-    x2: "1",
-    y2: "0"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#8e969d"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".4",
-    stopColor: "#f6f8f9"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#9aa2a9"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-pl",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: colL
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".55",
-    stopColor: col
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: colD
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-gloss",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "rgba(255,255,255,.55)"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".35",
-    stopColor: "rgba(255,255,255,0)"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-seat",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#3a3f45"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".4",
-    stopColor: "#1f2327"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#101214"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-case",
-    x1: "0",
-    y1: "0",
-    x2: ".3",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#eef0f2"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".5",
-    stopColor: "#aeb5bc"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#6e7780"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-fin",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#5b6269"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#1d2024"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-glass",
-    x1: "0",
-    y1: "0",
-    x2: "1",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "rgba(210,230,250,.65)"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "rgba(120,160,200,.25)"
-  })), /*#__PURE__*/React.createElement("radialGradient", {
-    id: "bk-lens",
-    cx: ".35",
-    cy: ".35",
-    r: ".75"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#ffffff"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".5",
-    stopColor: "#cfd8df"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#6c7880"
-  })), /*#__PURE__*/React.createElement("radialGradient", {
-    id: "bk-lamp"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#fffdf0"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".6",
-    stopColor: "#ffe9a0"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "#c9a24e"
-  })), /*#__PURE__*/React.createElement("radialGradient", {
-    id: "bk-beam",
-    cx: "0",
-    cy: ".5",
-    r: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "rgba(255,240,180,.35)"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "rgba(255,240,180,0)"
-  })), /*#__PURE__*/React.createElement("radialGradient", {
-    id: "eg-smoke"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "rgba(200,205,210,.55)"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "rgba(200,205,210,0)"
-  })), /*#__PURE__*/React.createElement("linearGradient", {
-    id: "bk-heat",
-    x1: "0",
-    y1: "0",
-    x2: "1",
-    y2: "0"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0",
-    stopColor: "#c89a5a"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: ".5",
-    stopColor: "#7c5ba6"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "1",
-    stopColor: "rgba(150,150,150,0)"
-  })), /*#__PURE__*/React.createElement("pattern", {
-    id: "bk-grip",
-    width: "5",
-    height: "5",
-    patternUnits: "userSpaceOnUse"
-  }, /*#__PURE__*/React.createElement("rect", {
-    width: "5",
-    height: "5",
-    fill: "transparent"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M0 2.5h5",
-    stroke: "rgba(255,255,255,.07)",
-    strokeWidth: "1"
-  })), /*#__PURE__*/React.createElement("filter", {
-    id: "bk-sh",
-    x: "-10%",
-    y: "-10%",
-    width: "120%",
-    height: "130%"
-  }, /*#__PURE__*/React.createElement("feDropShadow", {
-    dx: "0",
-    dy: "2",
-    stdDeviation: "1.6",
-    floodColor: "#000",
-    floodOpacity: ".45"
-  }))), /*#__PURE__*/React.createElement("line", {
-    x1: "20",
-    y1: "393",
-    x2: "660",
-    y2: "393",
-    stroke: "rgba(255,255,255,.12)",
-    strokeWidth: "2",
-    className: running ? "ground run" : "ground",
-    strokeDasharray: running ? "26 18" : "none"
-  }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: (R[0] + F[0]) / 2,
-    cy: "396",
-    rx: (F[0] - R[0]) / 2 + 70,
-    ry: "9",
-    fill: "rgba(0,0,0,.45)"
-  }), /*#__PURE__*/React.createElement("g", {
-    className: hl("wheels"),
-    onClick: click("wheels")
-  }, /*#__PURE__*/React.createElement(Wheel, {
-    cx: R[0],
-    cy: R[1],
-    r: g.rr,
-    knobby: L.knobby,
-    running: running
-  })), /*#__PURE__*/React.createElement("g", {
-    className: hl("wheels"),
-    onClick: click("wheels")
-  }, /*#__PURE__*/React.createElement(Wheel, {
-    cx: F[0],
-    cy: F[1],
-    r: g.rf,
-    knobby: L.knobby,
-    disc: true,
-    running: running
-  })), /*#__PURE__*/React.createElement("g", {
-    className: "bk-body",
-    transform: "translate(" + g.dx + " " + g.dy + ") scale(" + g.s + ")"
-  }, running && L.lights !== "none" && /*#__PURE__*/React.createElement("path", {
-    d: "M520,140 L670,108 L670,192 Z",
-    fill: "url(#bk-beam)"
-  }), /*#__PURE__*/React.createElement("g", {
-    className: hl("frame"),
-    onClick: click("frame")
-  }, L.exhaust === "high" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: hdrHigh,
-    fill: "none",
-    stroke: "#1a1d20",
-    strokeWidth: "12",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: hdrHigh,
-    fill: "none",
-    stroke: hdr,
-    strokeWidth: "9",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: hdrHigh.split(" C ").slice(0, 2).join(" C "),
-    fill: "none",
-    stroke: "url(#bk-heat)",
-    strokeWidth: "9",
-    strokeLinecap: "round",
-    opacity: ".55"
-  }), /*#__PURE__*/React.createElement("g", {
-    transform: "rotate(-15 236 176)",
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M168,160 L280,160 Q290,173 280,186 L168,186 Q158,173 168,160 Z",
-    fill: muffF,
-    stroke: "#1a1d20",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "174",
-    y: "163",
-    width: "100",
-    height: "3",
-    rx: "1.5",
-    fill: "rgba(255,255,255,.35)"
-  }), [180, 268].map(x => /*#__PURE__*/React.createElement("rect", {
-    key: x,
-    x: x,
-    y: "158",
-    width: "5",
-    height: "30",
-    rx: "2",
-    fill: "#2b2f34"
-  })), /*#__PURE__*/React.createElement("path", {
-    d: "M168,165 L152,167 L152,179 L168,181 Z",
-    fill: "url(#bk-alu)",
-    stroke: "#1a1d20",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "152",
-    cy: "173",
-    r: "3",
-    fill: "#0d0e10"
-  }))), L.exhaust === "low" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: hdrLow,
-    fill: "none",
-    stroke: "#1a1d20",
-    strokeWidth: "12",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: hdrLow,
-    fill: "none",
-    stroke: hdr,
-    strokeWidth: "9",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("g", {
-    transform: "rotate(-10 200 262)",
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M144,250 L248,250 Q258,263 248,276 L144,276 Q134,263 144,250 Z",
-    fill: muffF,
-    stroke: "#1a1d20",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "150",
-    y: "253",
-    width: "92",
-    height: "3",
-    rx: "1.5",
-    fill: "rgba(255,255,255,.35)"
-  }))), L.exhaust === "pipe2t" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: "M438,206 C 486,214 486,286 424,292 C 368,298 336,256 306,222",
-    fill: "none",
-    stroke: "#1a1d20",
-    strokeWidth: "24",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M438,206 C 486,214 486,286 424,292 C 368,298 336,256 306,222",
-    fill: "none",
-    stroke: hdr,
-    strokeWidth: "20",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M446,190 C 488,206 482,276 424,284",
-    fill: "none",
-    stroke: "rgba(255,255,255,.45)",
-    strokeWidth: "2.5",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M306,222 L250,190",
-    stroke: "#1a1d20",
-    strokeWidth: "10",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("g", {
-    transform: "rotate(-20 210 180)",
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M162,170 L256,170 Q264,180 256,190 L162,190 Q154,180 162,170 Z",
-    fill: muffF,
-    stroke: "#1a1d20",
-    strokeWidth: ".8"
-  }))), L.exhaust !== "low" ? /*#__PURE__*/React.createElement("path", {
-    d: "M246,166 L256,166 L258,186 L248,186 Z",
-    fill: "url(#bk-alu)",
-    stroke: "#3b4248",
-    strokeWidth: ".7"
-  }) : /*#__PURE__*/React.createElement("path", {
-    d: "M206,258 L216,256 L222,280 L212,282 Z",
-    fill: "url(#bk-alu)",
-    stroke: "#3b4248",
-    strokeWidth: ".7"
-  }), running && [0, 1, 2, 3, 4].map(i => /*#__PURE__*/React.createElement("circle", {
-    key: i,
-    className: "puffL",
-    cx: L.exhaust === "low" ? 128 : 148,
-    cy: L.exhaust === "low" ? 270 : 188,
-    r: "11",
-    fill: "url(#eg-smoke)",
-    style: {
-      animationDelay: i * 0.22 + "s"
+  }, /*#__PURE__*/React.createElement("g", {
+    dangerouslySetInnerHTML: {
+      __html: art.svg
     }
-  }))), /*#__PURE__*/React.createElement("g", {
-    className: hl("chain"),
-    onClick: click("chain")
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M352,258 L150,273",
-    stroke: "#1d2024",
-    strokeWidth: "5"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M352,258 L150,273",
-    stroke: "#7b838b",
-    strokeWidth: "1.6",
-    strokeDasharray: "3 2.2",
-    className: running ? "chain-run" : ""
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M352,278 L150,327",
-    stroke: "#1d2024",
-    strokeWidth: "5"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M352,278 L150,327",
-    stroke: "#7b838b",
-    strokeWidth: "1.6",
-    strokeDasharray: "3 2.2",
-    className: running ? "chain-run" : ""
-  }), /*#__PURE__*/React.createElement("path", {
-    d: sprocketPath(150, 300, 26, 44),
-    fill: "url(#bk-alu)",
-    stroke: "#4e555c",
-    strokeWidth: ".6"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "150",
-    cy: "300",
-    r: "17",
-    fill: "#5b6269"
-  }), [0, 1, 2, 3, 4, 5].map(i => {
-    const a = i / 6 * Math.PI * 2;
-    return /*#__PURE__*/React.createElement("circle", {
-      key: i,
-      cx: 150 + 12 * Math.cos(a),
-      cy: 300 + 12 * Math.sin(a),
-      r: "2.6",
-      fill: "#2b2f34"
-    });
-  }), /*#__PURE__*/React.createElement("path", {
-    d: sprocketPath(352, 268, 9, 14),
-    fill: "#5b6269",
-    stroke: "#2a2e33",
-    strokeWidth: ".5"
-  })), /*#__PURE__*/React.createElement("g", {
-    className: hl("shock"),
-    onClick: click("shock")
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M324,250 L300,252 L158,284 L152,296 L154,310 L162,312 L298,280 L324,274 Z",
-    fill: L.swingAlu ? "url(#bk-alu)" : "url(#bk-anod)",
-    stroke: "#3b4248",
-    strokeWidth: ".9",
-    filter: "url(#bk-sh)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M300,256 L162,288",
-    stroke: "rgba(255,255,255,.55)",
-    strokeWidth: "1.4"
-  }), L.swingAlu && [[262, 272], [222, 281], [186, 289]].map((p, i) => /*#__PURE__*/React.createElement("ellipse", {
-    key: i,
-    cx: p[0],
-    cy: p[1],
-    rx: "9",
-    ry: "4",
-    transform: "rotate(-13 " + p[0] + " " + p[1] + ")",
-    fill: "rgba(0,0,0,.18)"
-  })), /*#__PURE__*/React.createElement("rect", {
-    x: "146",
-    y: "294",
-    width: "20",
-    height: "12",
-    rx: "2",
-    fill: "url(#bk-alu)",
-    stroke: "#3b4248",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "150",
-    cy: "300",
-    r: "5",
-    fill: "url(#bk-chrome)",
-    stroke: "#2a2e33",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M318,262 L338,250 L326,236",
-    fill: "none",
-    stroke: "#1d2024",
-    strokeWidth: "10",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M314,250 L292,270 L262,276",
-    fill: "#454b52",
-    stroke: "#1d2024",
-    strokeWidth: "1"
-  }), L.twinShock ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: "M216,146 L186,290",
-    stroke: "#0d0e10",
-    strokeWidth: "11",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M216,146 L186,290",
-    stroke: "url(#bk-anod)",
-    strokeWidth: "9",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M212,166 L196,242",
-    stroke: "url(#bk-chrome)",
-    strokeWidth: "13",
-    strokeLinecap: "butt",
-    opacity: ".9"
-  }), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => {
-    const t = i / 9,
-      x = 211 - t * 15,
-      y = 168 + t * 72;
-    return /*#__PURE__*/React.createElement("ellipse", {
-      key: i,
-      cx: x,
-      cy: y,
-      rx: "8.5",
-      ry: "2.2",
-      transform: "rotate(-12 " + x + " " + y + ")",
-      fill: "none",
-      stroke: "#1d2024",
-      strokeWidth: "2.2"
-    });
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "216",
-    cy: "146",
-    r: "5",
-    fill: "url(#bk-chrome)",
-    stroke: "#1d2024",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "186",
-    cy: "290",
-    r: "5",
-    fill: "url(#bk-chrome)",
-    stroke: "#1d2024",
-    strokeWidth: ".8"
-  })) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("rect", {
-    x: "309",
-    y: "162",
-    width: "14",
-    height: "96",
-    rx: "5",
-    fill: "url(#bk-anod)",
-    transform: "rotate(24 316 210)"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "335",
-    y: "160",
-    width: "9",
-    height: "34",
-    rx: "4",
-    fill: "url(#bk-gold)",
-    stroke: "#6e5420",
-    strokeWidth: ".6",
-    transform: "rotate(24 339 177)"
-  }), coil, /*#__PURE__*/React.createElement("rect", {
-    x: "305",
-    y: "240",
-    width: "12",
-    height: "18",
-    rx: "3",
-    fill: "url(#bk-chrome)",
-    transform: "rotate(24 311 249)"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "333",
-    cy: "168",
-    r: "4.5",
-    fill: "url(#bk-chrome)",
-    stroke: "#1d2024",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "298",
-    cy: "257",
-    r: "4.5",
-    fill: "url(#bk-chrome)",
-    stroke: "#1d2024",
-    strokeWidth: ".7"
-  })), /*#__PURE__*/React.createElement("circle", {
-    cx: "318",
-    cy: "262",
-    r: "7",
-    fill: "url(#bk-alu)",
-    stroke: "#1d2024",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "318",
-    cy: "262",
-    r: "2.6",
-    fill: "#2a2e33"
-  })), /*#__PURE__*/React.createElement("g", {
-    className: hl("frame"),
-    onClick: click("frame")
-  }, HZ ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Tube, {
-    d: "M482,122 C 456,170 424,196 378,212 L334,232 L322,254",
-    w: 11,
-    c: fr
-  }), /*#__PURE__*/React.createElement(Tube, {
-    d: "M490,158 L474,206 L466,232",
-    w: 7,
-    c: fr
-  }), /*#__PURE__*/React.createElement(Tube, {
-    d: "M378,212 C 330,172 262,150 170,138",
-    w: 6,
-    c: fr
-  }), !L.twinShock && /*#__PURE__*/React.createElement(Tube, {
-    d: "M340,226 L180,150",
-    w: 5,
-    c: fr
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M412,198 L432,190 L434,232 L414,236 Z",
-    fill: fr,
-    stroke: "#0d0e10",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "423",
-    cy: "198",
-    r: "2.4",
-    fill: "url(#bk-chrome)"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "424",
-    cy: "228",
-    r: "2.4",
-    fill: "url(#bk-chrome)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M460,226 L474,226 L470,248 L456,248 Z",
-    fill: fr,
-    stroke: "#0d0e10",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "465",
-    cy: "242",
-    r: "2.2",
-    fill: "url(#bk-chrome)"
-  })) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Tube, {
-    d: "M474,120 L342,150 L322,252",
-    w: 10,
-    c: fr
-  }), /*#__PURE__*/React.createElement(Tube, {
-    d: "M486,156 L460,246 C 448,314 386,324 336,314 L322,266",
-    w: 8,
-    c: fr
-  }), /*#__PURE__*/React.createElement(Tube, {
-    d: "M342,150 L170,138",
-    w: 6,
-    c: fr
-  }), !L.twinShock && /*#__PURE__*/React.createElement(Tube, {
-    d: "M324,212 L178,150",
-    w: 5,
-    c: fr
-  }), /*#__PURE__*/React.createElement(Tube, {
-    d: "M342,150 L336,190",
-    w: 5,
-    c: fr
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M454,224 L468,218 L456,252 L444,246 Z",
-    fill: fr,
-    stroke: "#0d0e10",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "461",
-    cy: "225",
-    r: "2.4",
-    fill: "url(#bk-chrome)"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "451",
-    cy: "244",
-    r: "2.4",
-    fill: "url(#bk-chrome)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M436,300 L450,296 L446,312 L432,314 Z",
-    fill: fr,
-    stroke: "#0d0e10",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "441",
-    cy: "304",
-    r: "2.2",
-    fill: "url(#bk-chrome)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M332,164 L344,160 L350,176 L338,180 Z",
-    fill: fr,
-    stroke: "#0d0e10",
-    strokeWidth: ".7"
-  })), /*#__PURE__*/React.createElement("path", {
-    d: "M304,234 L340,228 L348,282 L310,292 Z",
-    fill: fr,
-    stroke: "#0d0e10",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M308,238 L336,233 L338,246 L310,250 Z",
-    fill: frL,
-    opacity: ".35"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "332",
-    cy: "250",
-    r: "2.6",
-    fill: "url(#bk-chrome)",
-    stroke: "#1d2024",
-    strokeWidth: ".5"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "336",
-    cy: "276",
-    r: "2.6",
-    fill: "url(#bk-chrome)",
-    stroke: "#1d2024",
-    strokeWidth: ".5"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M330,300 L344,296 L348,306 L334,312 Z",
-    fill: fr,
-    stroke: "#0d0e10",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M470,104 L490,110 L500,164 L480,166 Z",
-    fill: fr,
-    stroke: "#0d0e10",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M474,108 L482,110 L488,160 L482,162 Z",
-    fill: frL,
-    opacity: ".5"
-  }), inst.indexOf("frameguard") >= 0 && /*#__PURE__*/React.createElement("path", {
-    d: "M326,214 L360,206 L364,236 L330,244 Z",
-    fill: "#1d2024",
-    opacity: ".85"
-  })), inst.indexOf("skid") >= 0 && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M344,318 L460,300 L466,314 L350,334 Z",
-    fill: "url(#bk-alu)",
-    stroke: "#4e555c",
-    strokeWidth: ".8"
-  }), [370, 400, 430].map(x => /*#__PURE__*/React.createElement("circle", {
-    key: x,
-    cx: x,
-    cy: 322 - (x - 344) * 0.15,
-    r: "2",
-    fill: "#4e555c"
-  }))), /*#__PURE__*/React.createElement("g", {
-    className: hl("engine"),
-    onClick: click("engine"),
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M350,262 C350,234 380,224 420,228 L454,240 C466,262 460,302 432,308 L368,312 C350,308 344,292 350,262Z",
-    fill: "url(#bk-case)",
-    stroke: "#4e555c",
-    strokeWidth: ".9"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M356,250 C 380,236 420,234 450,246",
-    fill: "none",
-    stroke: "rgba(255,255,255,.6)",
-    strokeWidth: "1.4"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "402",
-    cy: "276",
-    r: "21",
-    fill: "url(#bk-case)",
-    stroke: "#4e555c",
-    strokeWidth: ".9"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "402",
-    cy: "276",
-    r: "14",
-    fill: "none",
-    stroke: "rgba(0,0,0,.18)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M388,264 A18,18 0 0,1 414,260",
-    fill: "none",
-    stroke: "rgba(255,255,255,.75)",
-    strokeWidth: "1.6"
-  }), [0, 1, 2, 3, 4, 5].map(i => {
-    const a = i / 6 * Math.PI * 2 + 0.4;
-    return /*#__PURE__*/React.createElement("circle", {
-      key: i,
-      cx: 402 + 18 * Math.cos(a),
-      cy: 276 + 18 * Math.sin(a),
-      r: "1.4",
-      fill: "#4e555c"
-    });
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M346,256 L370,252 L374,282 L350,286 Z",
-    fill: "url(#bk-anod)",
-    stroke: "#1d2024",
-    strokeWidth: ".6"
-  }), L.horiz ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: "M440,236 L496,232 L498,262 L446,268 Z",
-    fill: "url(#bk-fin)",
-    stroke: "#4e555c",
-    strokeWidth: ".8"
-  }), [0, 1, 2, 3, 4, 5].map(i => /*#__PURE__*/React.createElement("rect", {
-    key: i,
-    x: 448 + i * 8,
-    y: "230",
-    width: "3.5",
-    height: "38",
-    rx: "1.5",
-    fill: "url(#bk-fin)",
-    stroke: "#0d0e10",
-    strokeWidth: ".4"
-  })), /*#__PURE__*/React.createElement("path", {
-    d: "M496,230 L512,232 L512,262 L498,264 Z",
-    fill: "url(#bk-case)",
-    stroke: "#4e555c",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "452",
-    y: "212",
-    width: "20",
-    height: "16",
-    rx: "4",
-    fill: "url(#bk-alu)",
-    stroke: "#4e555c",
-    strokeWidth: ".7"
-  })) : /*#__PURE__*/React.createElement(React.Fragment, null, liq ? /*#__PURE__*/React.createElement("path", {
-    d: "M392,232 L430,236 L446,178 L410,170 Z",
-    fill: "url(#bk-case)",
-    stroke: "#4e555c",
-    strokeWidth: ".8"
-  }) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: "M392,232 L430,236 L446,178 L410,170 Z",
-    fill: "#23272b"
-  }), [0, 1, 2, 3, 4, 5, 6].map(i => /*#__PURE__*/React.createElement("path", {
-    key: i,
-    d: "M" + (397 + i * 2.2) + "," + (226 - i * 8.2) + " L" + (437 + i * 1.2) + "," + (231 - i * 8.2),
-    stroke: "url(#bk-fin)",
-    strokeWidth: "4.5",
-    strokeLinecap: "round"
-  }))), !two ? /*#__PURE__*/React.createElement("path", {
-    d: dohc ? "M405,171 L451,179 L457,150 L412,140 Z" : "M407,171 L449,179 L453,156 L413,148 Z",
-    fill: "url(#bk-case)",
-    stroke: "#4e555c",
-    strokeWidth: ".8"
-  }) : /*#__PURE__*/React.createElement("path", {
-    d: "M410,171 L447,179 C 451,160 433,147 414,151 Z",
-    fill: "url(#bk-case)",
-    stroke: "#4e555c",
-    strokeWidth: ".8"
-  }), dohc && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("circle", {
-    cx: "423",
-    cy: "152",
-    r: "5",
-    fill: "url(#bk-chrome)",
-    stroke: "#4e555c",
-    strokeWidth: ".6"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "444",
-    cy: "157",
-    r: "5",
-    fill: "url(#bk-chrome)",
-    stroke: "#4e555c",
-    strokeWidth: ".6"
-  })), /*#__PURE__*/React.createElement("rect", {
-    x: "382",
-    y: "166",
-    width: "22",
-    height: "18",
-    rx: "4",
-    fill: eng.groups.indexOf("efi") >= 0 ? "url(#bk-alu)" : "url(#bk-gold)",
-    stroke: "#6e5420",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "372",
-    y: "170",
-    width: "12",
-    height: "11",
-    rx: "3",
-    fill: "#1d2024"
-  })), /*#__PURE__*/React.createElement("path", {
-    d: "M360,286 L386,302",
-    stroke: "#1d2024",
-    strokeWidth: "4",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "382",
-    y: "298",
-    width: "10",
-    height: "5",
-    rx: "2",
-    fill: "#1d2024"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "330",
-    y: "296",
-    width: "34",
-    height: "7",
-    rx: "2",
-    fill: "url(#bk-anod)",
-    stroke: "#0d0e10",
-    strokeWidth: ".5"
-  }), [334, 340, 346, 352, 358].map(x => /*#__PURE__*/React.createElement("rect", {
-    key: x,
-    x: x,
-    y: "294",
-    width: "2",
-    height: "3",
-    fill: "#0d0e10"
-  })), /Кик|кик/.test(eng.start) && /*#__PURE__*/React.createElement("path", {
-    d: "M430,290 L448,318",
-    stroke: "#1d2024",
-    strokeWidth: "4.5",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M318,300 L300,332",
-    stroke: "#1d2024",
-    strokeWidth: "4",
-    strokeLinecap: "round"
-  })), /*#__PURE__*/React.createElement("g", {
-    className: hl("frame"),
-    onClick: click("frame")
-  }, /*#__PURE__*/React.createElement("rect", {
-    x: portXY[0] - 5,
-    y: portXY[1] - 6,
-    width: "10",
-    height: "12",
-    rx: "2",
-    fill: "url(#bk-alu)",
-    stroke: "#3b4248",
-    strokeWidth: ".7",
-    transform: HZ ? "rotate(90 " + portXY[0] + " " + portXY[1] + ")" : ""
-  })), /*#__PURE__*/React.createElement("g", {
-    className: hl("frame"),
-    onClick: click("frame")
-  }, L.cls === "moped" ? /*#__PURE__*/React.createElement("path", {
-    d: "M232,140 L80,148 Q76,152 80,156 L150,158 C 190,158 220,154 236,150 Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8",
-    filter: "url(#bk-sh)"
-  }) : /*#__PURE__*/React.createElement("path", {
-    d: "M242,140 C 200,134 130,122 66,108 Q57,107 59,115 L68,121 C 130,133 190,144 246,156 Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8",
-    filter: "url(#bk-sh)"
-  }), L.cls !== "moped" && /*#__PURE__*/React.createElement("path", {
-    d: "M232,140 C 190,133 128,121 70,110",
-    fill: "none",
-    stroke: "rgba(255,255,255,.5)",
-    strokeWidth: "1.2"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: L.cls === "moped" ? "M84,150 l12,-1 l0,7 l-12,1z" : "M70,116 l14,3 l-1,7 l-14,-3z",
-    fill: "#e5533d",
-    stroke: "#7a1f16",
-    strokeWidth: ".6",
-    className: running ? "tail on" : "tail"
-  }), L.signals && (L.cls === "moped" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("rect", {
-    x: "80",
-    y: "160",
-    width: "10",
-    height: "5",
-    rx: "2",
-    fill: "#f28c1a"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M88,162 L100,158",
-    stroke: "#1d2024",
-    strokeWidth: "1.6"
-  })) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("rect", {
-    x: "86",
-    y: "124",
-    width: "10",
-    height: "5",
-    rx: "2",
-    fill: "#f28c1a",
-    transform: "rotate(12 91 126)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M96,127 L106,124",
-    stroke: "#1d2024",
-    strokeWidth: "1.6"
-  }))), L.rack && /*#__PURE__*/React.createElement("path", {
-    d: "M120,128 L226,124 M120,128 L124,146 M226,124 L230,140",
-    fill: "none",
-    stroke: "#1d2024",
-    strokeWidth: "4",
-    strokeLinecap: "round"
-  }), L.pannier && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("rect", {
-    x: "96",
-    y: "158",
-    width: "94",
-    height: "62",
-    rx: "8",
-    fill: "url(#bk-anod)",
-    stroke: "#0d0e10",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M100,176 L186,176",
-    stroke: "rgba(255,255,255,.14)",
-    strokeWidth: "1.5"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "136",
-    y: "168",
-    width: "14",
-    height: "6",
-    rx: "2",
-    fill: "url(#bk-alu)"
-  })), L.shrouds || L.cls === "tour" ? /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: ["M336,138 L230,140 C214,160 222,192 248,208 L330,214 Z", "M338,136 L226,138 L238,194 L266,212 L334,214 Z", "M334,138 L234,140 C210,158 216,198 256,210 L326,208 Z"][L.sideV],
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: ["M336,138 L230,140 C214,160 222,192 248,208 L330,214 Z", "M338,136 L226,138 L238,194 L266,212 L334,214 Z", "M334,138 L234,140 C210,158 216,198 256,210 L326,208 Z"][L.sideV],
-    fill: "url(#bk-gloss)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M244,202 L326,209",
-    stroke: stripe,
-    strokeWidth: "4",
-    opacity: ".9"
-  })) : /*#__PURE__*/React.createElement("path", {
-    d: "M332,150 L280,148 L276,192 L322,198 Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8",
-    filter: "url(#bk-sh)"
-  }), L.plates && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ellipse", {
-    cx: "284",
-    cy: "176",
-    rx: "26",
-    ry: "20",
-    fill: light ? "#1e2226" : "#f4f5f2",
-    stroke: "rgba(0,0,0,.25)"
-  }), /*#__PURE__*/React.createElement("text", {
-    x: "284",
-    y: "183",
-    textAnchor: "middle",
-    className: "bk-num",
-    fill: light ? "#f4f5f2" : "#1e2226"
-  }, L.num)), L.cls === "tour" ? /*#__PURE__*/React.createElement("path", {
-    d: "M200,126 C250,118 330,116 372,114 L382,128 L300,136 C 280,140 240,142 222,142 C206,142 196,132 200,126 Z",
-    fill: "url(#bk-seat)",
-    stroke: "#0a0b0c",
-    strokeWidth: ".8"
-  }) : L.cls === "moped" ? /*#__PURE__*/React.createElement("path", {
-    d: "M236,128 C280,122 340,120 376,120 C386,120 386,132 376,134 L244,144 C230,144 228,130 236,128 Z",
-    fill: "url(#bk-seat)",
-    stroke: "#0a0b0c",
-    strokeWidth: ".8"
-  }) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: "M204,126 C 260,121 380,111 448,99 C 461,97 464,109 454,115 L232,142 C 210,145 198,132 204,126 Z",
-    fill: "url(#bk-seat)",
-    stroke: "#0a0b0c",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M204,126 C 260,121 380,111 448,99 C 461,97 464,109 454,115 L232,142 C 210,145 198,132 204,126 Z",
-    fill: "url(#bk-grip)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M214,125 C 280,119 384,109 446,101",
-    fill: "none",
-    stroke: "rgba(255,255,255,.18)",
-    strokeWidth: "1.5"
-  })), L.tank === "big" && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M366,112 C 400,102 440,98 466,102 L480,150 C 450,160 410,164 384,166 Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M366,112 C 400,102 440,98 466,102 L472,124 C 440,118 400,120 372,128 Z",
-    fill: "url(#bk-gloss)"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "424",
-    cy: "104",
-    r: "5",
-    fill: "url(#bk-alu)",
-    stroke: "#4e555c",
-    strokeWidth: ".6"
-  })), L.tank === "classic" && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M372,120 C 386,98 450,94 472,112 L476,140 C 442,152 398,152 378,144 Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M376,118 C 392,102 446,100 468,114 L470,124 C 440,114 400,114 380,128 Z",
-    fill: "url(#bk-gloss)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M392,132 C 420,138 444,136 462,128",
-    fill: "none",
-    stroke: stripe,
-    strokeWidth: "3.5"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "410",
-    y: "128",
-    width: "26",
-    height: "10",
-    rx: "4",
-    fill: "#1d2024",
-    opacity: ".7"
-  })), L.tank === "slim" && /*#__PURE__*/React.createElement("path", {
-    d: "M376,120 L462,112 L472,152 L392,162 Z",
-    fill: col,
-    opacity: ".45",
-    stroke: "rgba(0,0,0,.25)"
-  }), liq && !HZ && /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
-    d: "M440,148 L468,142 L474,214 L446,220 Z",
-    fill: "#23272c",
-    stroke: "#0d0e10",
-    strokeWidth: ".8"
-  }), [0, 1, 2, 3, 4, 5, 6, 7].map(i => /*#__PURE__*/React.createElement("path", {
-    key: i,
-    d: "M" + (442 + i * 0.4) + "," + (156 + i * 8) + " L" + (470 + i * 0.5) + "," + (150 + i * 8),
-    stroke: "#3c434b",
-    strokeWidth: "1.6"
-  })), /*#__PURE__*/React.createElement("circle", {
-    cx: "458",
-    cy: "146",
-    r: "3",
-    fill: "url(#bk-alu)"
-  })), L.shrouds && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: ["M410,110 L478,114 L492,148 L470,226 L436,234 C 440,190 428,150 410,110 Z", "M406,108 L484,112 L494,140 L474,176 L478,224 L438,234 L442,172 Z", "M412,112 L480,116 L490,156 L460,232 L434,236 L444,196 L420,172 Z"][L.shapeV],
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M422,122 L478,126 L486,148 L472,188 L444,196 L436,150 Z",
-    fill: colD,
-    opacity: ".3"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: ["M410,110 L478,114 L492,148 L470,226 L436,234 C 440,190 428,150 410,110 Z", "M406,108 L484,112 L494,140 L474,176 L478,224 L438,234 L442,172 Z", "M412,112 L480,116 L490,156 L460,232 L434,236 L444,196 L420,172 Z"][L.shapeV],
-    fill: "url(#bk-gloss)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M438,214 L480,170",
-    stroke: stripe,
-    strokeWidth: "5",
-    strokeLinecap: "round"
-  }), liq && [0, 1, 2, 3].map(i => /*#__PURE__*/React.createElement("path", {
-    key: i,
-    d: "M" + (438 + i * 2) + "," + (150 + i * 11) + " L" + (466 - i * 2) + "," + (150 + i * 11),
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: "2.6",
-    strokeLinecap: "round"
-  })))), /*#__PURE__*/React.createElement("g", {
-    className: hl("fork"),
-    onClick: click("fork")
-  }, L.usd ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: fl(0, 126),
-    stroke: "#0d0e10",
-    strokeWidth: "17",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: fl(0, 126),
-    stroke: inst.indexOf("fork-cart") >= 0 ? "url(#bk-gold)" : "url(#bk-anod)",
-    strokeWidth: "15",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: fl(4, 122),
-    stroke: "rgba(255,255,255,.28)",
-    strokeWidth: "2.4",
-    strokeLinecap: "round",
-    transform: "translate(-4 1)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: fl(118, 192),
-    stroke: "url(#bk-stan)",
-    strokeWidth: "9.5",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: fl(126, 186),
-    stroke: inst.indexOf("fork-guards") >= 0 ? col : "#1d2024",
-    strokeWidth: "16",
-    strokeLinecap: "round",
-    opacity: ".92"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: fl(132, 180),
-    stroke: "rgba(255,255,255,.15)",
-    strokeWidth: "2",
-    strokeLinecap: "round",
-    transform: "translate(-5 1)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: fl(118, 124),
-    stroke: "#2a2e33",
-    strokeWidth: "17"
-  })) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: fl(0, 80),
-    stroke: "url(#bk-stan)",
-    strokeWidth: "9",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: fl(74, 196),
-    stroke: "#0d0e10",
-    strokeWidth: "15",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: fl(74, 196),
-    stroke: "url(#bk-alu)",
-    strokeWidth: "13",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: fl(70, 80),
-    stroke: "#1d2024",
-    strokeWidth: "14"
-  })), /*#__PURE__*/React.createElement("path", {
-    d: "M534,282 L556,290 L552,304 L530,296 Z",
-    fill: "url(#bk-alu)",
-    stroke: "#3b4248",
-    strokeWidth: ".7"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "545",
-    cy: "292",
-    r: "4",
-    fill: "url(#bk-chrome)",
-    stroke: "#2a2e33",
-    strokeWidth: ".6"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M458,98 L502,108 L499,118 L455,108 Z",
-    fill: "url(#bk-alu)",
-    stroke: "#3b4248",
-    strokeWidth: ".8"
-  }), [466, 492].map(x => /*#__PURE__*/React.createElement("circle", {
-    key: x,
-    cx: x,
-    cy: 104 + (x - 458) * 0.22,
-    r: "1.6",
-    fill: "#3b4248"
-  })), /*#__PURE__*/React.createElement("path", {
-    d: "M472,152 L512,162 L509,172 L469,162 Z",
-    fill: "url(#bk-alu)",
-    stroke: "#3b4248",
-    strokeWidth: ".8"
-  }), [478, 504].map(x => /*#__PURE__*/React.createElement("circle", {
-    key: x,
-    cx: x,
-    cy: 159 + (x - 472) * 0.24,
-    r: "1.6",
-    fill: "#3b4248"
-  }))), /*#__PURE__*/React.createElement("g", {
-    className: hl("brakes"),
-    onClick: click("brakes")
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M518,286 L532,278 L544,300 L530,310 Z",
-    fill: "#a82c22",
-    stroke: "#4a1410",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "522",
-    y: "288",
-    width: "12",
-    height: "4",
-    rx: "1.5",
-    fill: "rgba(255,255,255,.25)",
-    transform: "rotate(-30 528 290)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M508,176 C 520,224 532,254 528,284",
-    fill: "none",
-    stroke: "#0d0e10",
-    strokeWidth: "2.6"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M138,288 L152,284 L156,296 L142,300 Z",
-    fill: "#a82c22",
-    stroke: "#4a1410",
-    strokeWidth: ".7"
-  })), L.fenderLow ? /*#__PURE__*/React.createElement("path", {
-    d: "M" + (545 - rfB * 0.72) + "," + (292 - rfB * 0.6) + " Q545," + (292 - rfB * 1.18) + " " + (545 + rfB * 0.72) + "," + (292 - rfB * 0.6) + " L" + (545 + rfB * 0.68) + "," + (292 - rfB * 0.52) + " Q545," + (292 - rfB * 1.08) + " " + (545 - rfB * 0.68) + "," + (292 - rfB * 0.52) + " Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8",
-    className: hl("fork"),
-    onClick: click("fork"),
-    filter: "url(#bk-sh)"
-  }) : /*#__PURE__*/React.createElement("g", {
-    className: hl("fork"),
-    onClick: click("fork"),
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M460,186 C 492,168 570,166 628,175 Q632,180 625,184 C 572,175 512,178 466,196 Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M466,184 C 498,171 568,168 620,176",
-    fill: "none",
-    stroke: "rgba(255,255,255,.5)",
-    strokeWidth: "1.3"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M524,174 L530,184 M544,173 L548,183",
-    stroke: colD,
-    strokeWidth: "1.4",
-    opacity: ".6"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "486",
-    cy: "175",
-    r: "2.2",
-    fill: "url(#bk-chrome)",
-    stroke: "#1d2024",
-    strokeWidth: ".5"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "500",
-    cy: "173",
-    r: "2.2",
-    fill: "url(#bk-chrome)",
-    stroke: "#1d2024",
-    strokeWidth: ".5"
-  })), /*#__PURE__*/React.createElement("g", {
-    className: hl("electric"),
-    onClick: click("electric")
-  }, L.lights === "mask" && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M494,106 C 510,106 526,112 534,120 L544,176 C 532,184 516,186 504,180 L496,150 Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M498,110 C 512,110 524,114 530,122 L534,140 C 520,134 508,132 500,134 Z",
-    fill: "url(#bk-gloss)"
-  }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "518",
-    cy: "146",
-    rx: "9",
-    ry: "12",
-    fill: running ? "url(#bk-lamp)" : "url(#bk-lens)",
-    stroke: "#3b4248",
-    strokeWidth: ".8",
-    transform: "rotate(-12 518 146)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M506,170 L538,172",
-    stroke: stripe,
-    strokeWidth: "3"
-  })), L.lights === "round" && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("circle", {
-    cx: "522",
-    cy: "138",
-    r: "16",
-    fill: "url(#bk-chrome)",
-    stroke: "#1d2024",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "522",
-    cy: "138",
-    r: "11.5",
-    fill: running ? "url(#bk-lamp)" : "url(#bk-lens)"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "494",
-    cy: "96",
-    r: "8",
-    fill: "#1d2024",
-    stroke: "url(#bk-chrome)",
-    strokeWidth: "1.6"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "494",
-    cy: "96",
-    r: "4.5",
-    fill: "#dfe8d8"
-  })), L.lights === "fairing" && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M488,98 L506,50 L530,56 L536,108 Z",
-    fill: "url(#bk-glass)",
-    stroke: "rgba(255,255,255,.45)",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M484,96 C 506,96 528,100 538,108 L550,166 C 540,186 530,196 522,200 L496,186 Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M486,98 C 506,98 526,102 534,110 L538,130 C 520,124 500,122 488,124 Z",
-    fill: "url(#bk-gloss)"
-  }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "528",
-    cy: "128",
-    rx: "7",
-    ry: "9",
-    fill: running ? "url(#bk-lamp)" : "url(#bk-lens)",
-    stroke: "#3b4248",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "532",
-    cy: "150",
-    rx: "6",
-    ry: "8",
-    fill: running ? "url(#bk-lamp)" : "url(#bk-lens)",
-    stroke: "#3b4248",
-    strokeWidth: ".8"
-  })), L.lights === "none" && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#bk-sh)"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M494,112 C 512,112 526,116 528,120 L534,174 C 522,178 512,178 504,172 Z",
-    fill: "#f4f5f2",
-    stroke: "rgba(0,0,0,.35)",
-    strokeWidth: ".8"
-  }), /*#__PURE__*/React.createElement("text", {
-    x: "516",
-    y: "152",
-    textAnchor: "middle",
-    className: "bk-num",
-    fill: "#1e2226",
-    transform: "rotate(10 516 148)"
-  }, L.num)), L.signals && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("rect", {
-    x: "530",
-    y: "156",
-    width: "10",
-    height: "5",
-    rx: "2",
-    fill: "#f28c1a"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M522,158 L532,158",
-    stroke: "#1d2024",
-    strokeWidth: "1.6"
-  }))), /*#__PURE__*/React.createElement("g", {
-    className: hl("cockpit"),
-    onClick: click("cockpit")
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M474,102 C 466,92 458,86 444,84 L428,82",
-    fill: "none",
-    stroke: "#0d0e10",
-    strokeWidth: "6.5",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M474,102 C 466,92 458,86 444,84 L428,82",
-    fill: "none",
-    stroke: "url(#bk-alu)",
-    strokeWidth: "4.5",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "414",
-    y: "77",
-    width: "22",
-    height: "9",
-    rx: "4",
-    fill: "#141619"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M418,78 v7 M422,78 v7 M426,78 v7 M430,78 v7",
-    stroke: "#2b2f34",
-    strokeWidth: "1"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M448,88 L470,98",
-    stroke: "url(#bk-alu)",
-    strokeWidth: "3",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "447",
-    cy: "87",
-    r: "3",
-    fill: "#1d2024"
-  }), (L.cls === "enduro" || L.cls === "cross" || L.cls === "tour" || inst.indexOf("hand") >= 0) && /*#__PURE__*/React.createElement("path", {
-    d: "M462,92 C 446,64 420,66 410,84 L428,92 Z",
-    fill: "url(#bk-pl)",
-    stroke: "rgba(0,0,0,.4)",
-    strokeWidth: ".8",
-    filter: "url(#bk-sh)"
-  }), L.mirrors && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-    d: "M440,82 L432,50",
-    stroke: "#1d2024",
-    strokeWidth: "2.4"
-  }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "430",
-    cy: "44",
-    rx: "10",
-    ry: "6",
-    fill: "#1d2024",
-    stroke: "url(#bk-chrome)",
-    strokeWidth: "1.8"
-  })), /*#__PURE__*/React.createElement("path", {
-    d: "M440,84 C 470,40 520,70 540,40",
-    fill: "none",
-    stroke: "#141619",
-    strokeWidth: "2"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M450,86 C 476,60 500,90 520,60",
-    fill: "none",
-    stroke: "#141619",
-    strokeWidth: "2"
-  }))), !running && pins.map(p => /*#__PURE__*/React.createElement("g", {
-    key: p.id,
-    className: "pin" + (sel === p.id ? " on" : ""),
-    transform: "translate(" + p.x.toFixed(1) + " " + p.y.toFixed(1) + ")",
+  }), !running && Object.keys(art.pins).map(id => CH_AREAS[id] && /*#__PURE__*/React.createElement("g", {
+    key: id,
+    className: "pin" + (sel === id ? " on" : ""),
+    transform: "translate(" + art.pins[id][0] + " " + art.pins[id][1] + ") scale(" + k.toFixed(2) + ")",
     role: "button",
     tabIndex: "0",
-    "aria-label": CH_AREAS[p.id].t,
-    onClick: click(p.id),
+    "aria-label": CH_AREAS[id].t,
+    onClick: click(id),
     onKeyDown: e => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        onSel(p.id);
+        onSel(id);
       }
     }
-  }, /*#__PURE__*/React.createElement("title", null, CH_AREAS[p.id].t), /*#__PURE__*/React.createElement("circle", {
+  }, /*#__PURE__*/React.createElement("title", null, CH_AREAS[id].t), /*#__PURE__*/React.createElement("circle", {
     className: "pin-hit",
     r: "24"
   }), /*#__PURE__*/React.createElement("circle", {
@@ -12244,7 +10360,141 @@ function BikeSVG({
   }), /*#__PURE__*/React.createElement("circle", {
     className: "pin-core",
     r: "4"
-  }))));
+  })))), smoke && /*#__PURE__*/React.createElement(Smoke, {
+    two: eng.stroke === "2T",
+    rpm: 1600,
+    back: true,
+    style: smoke
+  }));
+}
+
+/* Настоящее фото модели — Wikimedia Commons (свободные лицензии). Ищем по точному названию
+   марки и модели в имени файла; результат (и «не нашли») запоминаем, чтобы не спрашивать каждый раз */
+const PHOTO_DROP = ["enduro"];
+function photoWords(s) {
+  return String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[-.\/'’]/g, "").replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
+}
+function photoModelWords(name) {
+  const clean = String(name).replace(/\([^)]*\)/g, " ").replace(/\b\d{2}\/\d{2}\b/g, " ").replace(/[А-Яа-яЁё]+/g, " ");
+  return photoWords(clean).filter(w => PHOTO_DROP.indexOf(w) < 0);
+}
+const PHOTO_BAD = ["engine", "motor", "dashboard", "cockpit", "speedometer", "instrument", "instruments", "logo", "emblem", "badge", "detail", "details", "closeup", "interior", "crash", "wreck", "accident", "exhaust", "muffler", "seat", "tank", "wheel", "brake", "headlight", "taillight", "fork", "frame", "toy", "lego", "drawing", "sketch", "poster", "brochure", "sticker", "rally", "adventure", "supermoto", "motard", "scrambler", "tracker", "cafe", "police", "concept", "prototype", "custom", "electric", "sidecar", "rider", "riding", "jump"];
+function photoPick(pages, brandW, modelW) {
+  let best = null;
+  (pages || []).forEach(pg => {
+    const ii = pg.imageinfo && pg.imageinfo[0];
+    if (!ii || !/jpe?g|png|webp/.test(ii.mime || "") || !ii.thumburl) return;
+    const t = photoWords(String(pg.title).replace(/^File:/i, "").replace(/\.[a-z0-9]+$/i, ""));
+    if (!brandW.every(w => t.indexOf(w) >= 0) || !modelW.every(w => t.indexOf(w) >= 0)) return;
+    if (t.some(w => PHOTO_BAD.indexOf(w) >= 0 && modelW.indexOf(w) < 0)) return;
+    const a = ii.width / Math.max(1, ii.height);
+    let sc = (ii.width >= 1200 ? 2 : ii.width >= 800 ? 1 : -1) + (a >= 1.25 && a <= 2.1 ? 2 : a >= 1.05 ? 1 : -3);
+    if (t.some(w => ["side", "profile", "left", "right", "studio"].indexOf(w) >= 0)) sc += 1;
+    if (t.length - brandW.length - modelW.length > 7) sc -= 1;
+    if (!best || sc > best.sc) best = {
+      sc: sc,
+      u: ii.thumburl,
+      w: ii.thumbwidth,
+      h: ii.thumbheight,
+      page: ii.descriptionurl,
+      by: String(ii.extmetadata && ii.extmetadata.Artist && ii.extmetadata.Artist.value || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim().slice(0, 48),
+      lic: String(ii.extmetadata && ii.extmetadata.LicenseShortName && ii.extmetadata.LicenseShortName.value || "").slice(0, 24)
+    };
+  });
+  return best && best.sc >= 1 ? best : null;
+}
+async function findModelPhoto(bike) {
+  const brandW = photoWords(bike.brand),
+    modelW = photoModelWords(bike.name);
+  if (!modelW.length) return null;
+  const terms = [bike.brand].concat(String(bike.name).replace(/\([^)]*\)/g, " ").replace(/\b\d{2}\/\d{2}\b/g, " ").replace(/[А-Яа-яЁё]+/g, " ").split(/\s+/).filter(w => w && PHOTO_DROP.indexOf(w.toLowerCase()) < 0));
+  const q = "filetype:bitmap " + terms.map(w => 'intitle:"' + w.replace(/"/g, "") + '"').join(" ");
+  const url = "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&origin=*&generator=search&gsrnamespace=6&gsrlimit=30&gsrsearch=" + encodeURIComponent(q) + "&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Cextmetadata&iiurlwidth=1280&iiextmetadatafilter=Artist%7CLicenseShortName";
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("commons " + r.status);
+  const j = await r.json();
+  return photoPick(j && j.query && j.query.pages, brandW, modelW);
+}
+function photoCache(key, val) {
+  try {
+    const m = JSON.parse(localStorage.getItem("mh2-mphoto") || "{}");
+    if (val === undefined) {
+      const v = m[key];
+      return v && Date.now() - v.t < (v.u ? 60 : 14) * 864e5 ? v : null;
+    }
+    m[key] = Object.assign({
+      t: Date.now()
+    }, val || {});
+    const ks = Object.keys(m);
+    if (ks.length > 300) ks.sort((x, y) => m[x].t - m[y].t).slice(0, ks.length - 300).forEach(x => delete m[x]);
+    localStorage.setItem("mh2-mphoto", JSON.stringify(m));
+  } catch (e) {}
+  return null;
+}
+function useModelPhoto(bike) {
+  const key = bikeKey(bike);
+  const [st, setSt] = useState(() => photoCache(key) || {
+    loading: true
+  });
+  useEffect(() => {
+    const c = photoCache(key);
+    if (c) {
+      setSt(c);
+      return;
+    }
+    let alive = true;
+    setSt({
+      loading: true
+    });
+    findModelPhoto(bike).then(p => {
+      photoCache(key, p || {});
+      if (alive) setSt(photoCache(key) || {});
+    }, () => alive && setSt({}));
+    return () => {
+      alive = false;
+    };
+  }, [key]);
+  return st;
+}
+function BikeView(props) {
+  const {
+    bike,
+    running
+  } = props;
+  const ph = useModelPhoto(bike);
+  const [mode, setMode] = useState(() => load("bikeview", "photo"));
+  const [ok, setOk] = useState(false);
+  useEffect(() => setOk(false), [ph.u]);
+  const showPhoto = !!ph.u && mode === "photo";
+  return /*#__PURE__*/React.createElement("div", {
+    className: "bike-view"
+  }, showPhoto ? /*#__PURE__*/React.createElement("figure", {
+    className: "model-photo" + (ok ? " ok" : "") + (running ? " running" : "")
+  }, /*#__PURE__*/React.createElement("img", {
+    src: ph.u,
+    alt: bike.brand + " " + bike.name,
+    referrerPolicy: "no-referrer",
+    onLoad: () => setOk(true),
+    onError: () => {
+      photoCache(bikeKey(bike), {});
+      setMode("art");
+    }
+  }), /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("a", {
+    href: ph.page,
+    target: "_blank",
+    rel: "noopener"
+  }, "Фото: ", ph.by || "Wikimedia Commons", ph.lic ? " · " + ph.lic : ""))) : /*#__PURE__*/React.createElement(BikeSVG, props), ph.u && /*#__PURE__*/React.createElement("div", {
+    className: "seg dark sm bv-toggle",
+    role: "group",
+    "aria-label": "Что показать"
+  }, [["photo", "Фото"], ["art", "Рисунок"]].map(x => /*#__PURE__*/React.createElement("button", {
+    key: x[0],
+    className: (showPhoto ? "photo" : "art") === x[0] ? "on" : "",
+    onClick: () => {
+      setMode(x[0]);
+      save("bikeview", x[0]);
+    }
+  }, x[1]))));
 }
 function ChassisPanel({
   area,
@@ -12312,7 +10562,9 @@ function ChassisPanel({
     key: p.id
   }, /*#__PURE__*/React.createElement("span", null, p.name, p.info && /*#__PURE__*/React.createElement("small", {
     className: "pinfo"
-  }, p.info)), /*#__PURE__*/React.createElement("span", {
+  }, p.info), /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
     className: "pl-r"
   }, /*#__PURE__*/React.createElement("span", {
     className: "price"
@@ -12456,7 +10708,7 @@ const NAV = [{
 }, {
   id: "parts",
   icon: "cart",
-  label: "Запчасти и смета",
+  label: "Запчасти",
   short: "Запчасти"
 }];
 const BIKE_TABS = [["overview", "Обзор", "Обзор"], ["edit", "Настроить", "Настроить"], ["service", "Обслуживание", "Сервис"], ["tuning", "Тюнинг", "Тюнинг"]];
@@ -12504,7 +10756,6 @@ function App() {
   const [page, setPage] = useState("home");
   const [bikeTab, setBikeTab] = useState("overview");
   const [repairTab, setRepairTab] = useState("find");
-  const [partsTab, setPartsTab] = useState("catalog");
   const [guideOpen, setGuideOpen] = useState(null);
   /* направление выезда раздела: перешёл вправо по меню — выезжает справа, влево — слева */
   const pageDir = useRef({
@@ -12547,9 +10798,6 @@ function App() {
   const [custom, setCustom] = useState(() => load("custom", {}));
   const [maint, setMaint] = useState(() => load("maint", {}));
   const [chats, setChats] = useState(() => load("chats", {}));
-  const [est, setEst] = useState(() => load("est", []));
-  const [estName, setEstName] = useState("");
-  const [saved, setSaved] = useState(() => load("saved", []));
   const [aiDraft, setAiDraft] = useState(null);
   const [garage, setGarage] = useState(() => load("garage", []));
   useEffect(() => save("garage", garage), [garage]);
@@ -12565,8 +10813,6 @@ function App() {
   useEffect(() => save("custom", custom), [custom]);
   useEffect(() => save("maint", maint), [maint]);
   useEffect(() => save("chats", chats), [chats]);
-  useEffect(() => save("est", est), [est]);
-  useEffect(() => save("saved", saved), [saved]);
   useEffect(() => {
     save("theme", theme);
     document.documentElement.setAttribute("data-theme", "dark");
@@ -12664,12 +10910,8 @@ function App() {
         setRepairTab(arg);
         setGuideOpen(null);
       } else setGuideOpen(null);
-    } else if (t === "parts") {
+    } else if (t === "parts" || t === "estimate") {
       setPage("parts");
-      setPartsTab("catalog");
-    } else if (t === "estimate") {
-      setPage("parts");
-      setPartsTab("estimate");
     }
     window.scrollTo({
       top: 0
@@ -12743,11 +10985,6 @@ function App() {
     setProject(has ? cur.filter(x => x !== t.id) : cur.concat([t.id]));
     if (!has) bumpStat("tune");
     flash(has ? "Убрано из проекта" : "Добавлено в проект");
-  }
-  function addRows(rows, msg) {
-    setEst(est.concat(rows));
-    go("estimate");
-    flash(msg);
   }
   function connectAi(url) {
     const u = String(url || "").trim();
@@ -12942,8 +11179,7 @@ function App() {
     },
     project: project,
     setProject: setProject,
-    toggleProject: toggleProject,
-    addRows: addRows
+    toggleProject: toggleProject
   })), page === "ai" && /*#__PURE__*/React.createElement(AiChat, _extends({}, ctx, {
     connectAi: connectAi,
     chat: chat,
@@ -12962,16 +11198,7 @@ function App() {
     treeOpen: treeOpen,
     setTreeOpen: setTreeOpen
   })), page === "parts" && /*#__PURE__*/React.createElement(PartsPage, _extends({}, ctx, {
-    tab: partsTab,
-    setTab: setPartsTab,
-    setCart: setCart,
-    addRows: addRows,
-    est: est,
-    setEst: setEst,
-    estName: estName,
-    setEstName: setEstName,
-    saved: saved,
-    setSaved: setSaved
+    setCart: setCart
   })), page === "home" && /*#__PURE__*/React.createElement("footer", {
     className: "foot"
   }, /*#__PURE__*/React.createElement(BackupBar, {
@@ -13289,6 +11516,10 @@ function EngineExplorer({
     shown: 0
   });
   const snd = useRef(null);
+  /* газ: живые обороты в gas.current.r; React перерисовывает схему и 3D только при смене диапазона оборотов */
+  const tacho = useRef(null);
+  const [viz, setViz] = useState(null);
+  const vrpm = viz != null ? viz : rpm;
   const pins = view === "photo" ? [] : view === "3d" ? enginePins(eng).map(p => ({
     id: p.id,
     t: AREAS[p.id].t
@@ -13339,14 +11570,20 @@ function EngineExplorer({
       G.r = Math.min(top, G.r + up * dt * (1 - 0.45 * G.r / top));
       if (G.r >= top - 30) G.r = top - Math.random() * 260;
     } else G.r = Math.max(G.base, G.r - down * dt);
-    if (t - G.shown > 45) {
-      G.shown = t;
-      setRpm(Math.round(G.r / 50) * 50);
+    if (tacho.current) tacho.current(G.r);
+    if (snd.current) snd.current.setRpm(G.r);
+    const band = G.r < 2500 ? 1600 : G.r < 5500 ? 4000 : 7000;
+    if (band !== G.viz) {
+      G.viz = band;
+      setViz(band);
     }
     if (G.held || G.r > G.base + 1) G.raf = requestAnimationFrame(gasLoop);else {
       G.raf = 0;
       G.last = 0;
-      setRpm(G.base);
+      G.viz = 0;
+      setViz(null);
+      if (tacho.current) tacho.current(G.base);
+      if (snd.current) snd.current.setRpm(G.base);
     }
   }
   function gasDown() {
@@ -13417,7 +11654,8 @@ function EngineExplorer({
   }, /*#__PURE__*/React.createElement("span", null, eng.hp, " \u043B.\u0441."), /*#__PURE__*/React.createElement("span", null, eng.cc, " \u0441\u043C\xB3"), /*#__PURE__*/React.createElement("span", null, eng.stroke, ", ", eng.cam.split(",")[0]), /*#__PURE__*/React.createElement("span", null, efi ? "инжектор" : eng.carb))), /*#__PURE__*/React.createElement(Tacho, {
     eng: eng,
     rpm: rpm,
-    running: running
+    running: running,
+    api: tacho
   })), /*#__PURE__*/React.createElement("div", {
     className: "view-toggle",
     role: "group",
@@ -13438,7 +11676,8 @@ function EngineExplorer({
     eng: eng,
     finish: cu.engFinish,
     running: running,
-    rpm: rpm,
+    rpm: vrpm,
+    rpmLive: gas,
     cut: xray,
     gear: gearN,
     sel: sel,
@@ -13453,14 +11692,19 @@ function EngineExplorer({
       setNo3d(true);
       setView("engine");
     }
-  }) : view === "engine" || view === "3d" ? /*#__PURE__*/React.createElement(EngineSVG, {
+  }) : view === "engine" || view === "3d" ? /*#__PURE__*/React.createElement("div", {
+    className: "eng-box"
+  }, /*#__PURE__*/React.createElement(EngineSVG, {
     eng: eng,
     sel: sel,
     onSel: pick,
     running: running,
     xray: xray,
-    rpm: rpm
-  }) : view === "bike" ? /*#__PURE__*/React.createElement(BikeSVG, {
+    rpm: vrpm
+  }), running && /*#__PURE__*/React.createElement(Smoke, {
+    two: eng.stroke === "2T",
+    rpm: vrpm
+  })) : view === "bike" ? /*#__PURE__*/React.createElement(BikeView, {
     eng: eng,
     bike: bike,
     cu: cu,
@@ -13540,7 +11784,7 @@ function EngineExplorer({
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "photo",
     s: 16
-  }), "\u041A\u0430\u043A \u0432\u044B\u0433\u043B\u044F\u0434\u0438\u0442 ", bike.brand, " ", bike.name), view === "bike" && /*#__PURE__*/React.createElement("small", null, "\u0420\u0438\u0441\u0443\u043D\u043E\u043A \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442 \u043A\u043B\u0430\u0441\u0441 \u0438 \u043A\u043E\u043C\u043F\u043B\u0435\u043A\u0442\u0430\u0446\u0438\u044E, \u0430 \u043D\u0435 \u0437\u0430\u0432\u043E\u0434\u0441\u043A\u043E\u0439 \u0434\u0438\u0437\u0430\u0439\u043D \u043C\u043E\u0434\u0435\u043B\u0438.")), running && sound && /*#__PURE__*/React.createElement("div", {
+  }), "\u041A\u0430\u043A \u0432\u044B\u0433\u043B\u044F\u0434\u0438\u0442 ", bike.brand, " ", bike.name)), running && sound && /*#__PURE__*/React.createElement("div", {
     className: "ex-pick"
   }, /*#__PURE__*/React.createElement("span", null, "\u0412\u044B\u0445\u043B\u043E\u043F \u043D\u0430 \u0441\u043B\u0443\u0445:"), /*#__PURE__*/React.createElement("div", {
     className: "seg dark sm",
@@ -13674,7 +11918,9 @@ function DetailPanel({
       key: p.id
     }, /*#__PURE__*/React.createElement("span", null, p.name, ii && /*#__PURE__*/React.createElement("small", {
       className: "pinfo"
-    }, "\u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430: ", ii.diff, ", ", ii.time)), /*#__PURE__*/React.createElement("span", {
+    }, "\u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430: ", ii.diff, ", ", ii.time), /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
       className: "pl-r"
     }, /*#__PURE__*/React.createElement("span", {
       className: "price"
@@ -14600,7 +12846,9 @@ function SmartDiag({
       className: "plist"
     }, parts.map(p => /*#__PURE__*/React.createElement("li", {
       key: p.id
-    }, /*#__PURE__*/React.createElement("span", null, p.name), /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement("span", null, p.name, /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
       className: "pl-r"
     }, /*#__PURE__*/React.createElement("span", {
       className: "price"
@@ -14779,7 +13027,9 @@ function GuideView({
     className: "plist"
   }, parts.map(p => /*#__PURE__*/React.createElement("li", {
     key: p.id
-  }, /*#__PURE__*/React.createElement("span", null, p.name), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, p.name, /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
     className: "pl-r"
   }, /*#__PURE__*/React.createElement("span", {
     className: "price"
@@ -15348,7 +13598,6 @@ function Tuning({
   setProject,
   toggleProject,
   toggleInstalled,
-  addRows,
   go,
   flash
 }) {
@@ -15504,17 +13753,7 @@ function Tuning({
     className: "warns"
   }, warns.map((w, i) => /*#__PURE__*/React.createElement("li", {
     key: i
-  }, w))), /*#__PURE__*/React.createElement("div", {
-    className: "row-gap"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    onClick: () => addRows(chosen.map(t => ({
-      work: "",
-      workPrice: 0,
-      part: t.title,
-      partPrice: t.price
-    })), "Проект перенесён в смету")
-  }, "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0442\u0438 \u0432 \u0441\u043C\u0435\u0442\u0443")))), /*#__PURE__*/React.createElement(Sprockets, {
+  }, w))))), /*#__PURE__*/React.createElement(Sprockets, {
     eng: eng,
     bike: bike,
     cu: cu
@@ -15616,13 +13855,10 @@ function Tuning({
   }))));
 }
 
-/* ===== Запчасти и смета ===== */
+/* ===== Запчасти ===== */
 function PartsPage(props) {
   const {
-    tab,
-    setTab,
-    cart,
-    est
+    cart
   } = props;
   return /*#__PURE__*/React.createElement("section", {
     className: "page"
@@ -15634,24 +13870,7 @@ function PartsPage(props) {
     }, "\u043F\u043E\u0434 \u0442\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0440")),
     sub: "\u0422\u043E\u043B\u044C\u043A\u043E \u0434\u0435\u0442\u0430\u043B\u0438, \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u043F\u043E\u0434\u0445\u043E\u0434\u044F\u0442 \u043A \u0442\u0432\u043E\u0435\u043C\u0443 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u0443, \u0441 \u0430\u043D\u0430\u043B\u043E\u0433\u0430\u043C\u0438, \u0441\u043B\u043E\u0436\u043D\u043E\u0441\u0442\u044C\u044E \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438 \u0438 \u0441\u043C\u0435\u0442\u043E\u0439.",
     stats: [[cart.length + " " + plural(cart.length, "деталь", "детали", "деталей"), "в корзине"], [rub(cartTotal(cart)), "на сумму"]]
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "tabs",
-    role: "tablist"
-  }, /*#__PURE__*/React.createElement("button", {
-    role: "tab",
-    "aria-selected": tab === "catalog",
-    className: tab === "catalog" ? "on" : "",
-    onClick: () => setTab("catalog")
-  }, "\u041A\u0430\u0442\u0430\u043B\u043E\u0433", cart.length > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "dot"
-  }, cart.length)), /*#__PURE__*/React.createElement("button", {
-    role: "tab",
-    "aria-selected": tab === "estimate",
-    className: tab === "estimate" ? "on" : "",
-    onClick: () => setTab("estimate")
-  }, "\u0421\u043C\u0435\u0442\u0430 \u0440\u0435\u043C\u043E\u043D\u0442\u0430", est.length > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "dot"
-  }, est.length))), tab === "catalog" ? /*#__PURE__*/React.createElement(Parts, props) : /*#__PURE__*/React.createElement(Estimate, props));
+  }), /*#__PURE__*/React.createElement(Parts, props));
 }
 
 /* ===== ИИ: контекст ===== */
@@ -15883,7 +14102,9 @@ function AreaPanel({
     className: "plist"
   }, parts.slice(0, 7).map(p => /*#__PURE__*/React.createElement("li", {
     key: p.id
-  }, /*#__PURE__*/React.createElement("span", null, p.name), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, p.name, /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
     className: "pl-r"
   }, /*#__PURE__*/React.createElement("span", {
     className: "price"
@@ -16166,7 +14387,9 @@ function TreeRunner({
     className: "plist"
   }, s.res.parts.map(p => /*#__PURE__*/React.createElement("li", {
     key: p.id
-  }, /*#__PURE__*/React.createElement("span", null, p.name), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, p.name, /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
     className: "price"
   }, rub(p.price))))), /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
