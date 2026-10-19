@@ -11,6 +11,12 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; ch
 
 const server = http.createServer((req, res) => {
   const url = decodeURIComponent(req.url.split("?")[0]);
+  // ИИ-сервер в проверке — заглушка: настоящий принимает запросы только с сайта на github.io
+  if (url === "/ai-config.json" || url === "/__ai") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    const body = url === "/ai-config.json" ? { endpoint: `http://${req.headers.host}/__ai` } : req.method === "GET" ? { ok: true, images: false } : { response: "Проверка связи." };
+    return res.end(JSON.stringify(body));
+  }
   const file = path.join(root, url === "/" ? "index.html" : url);
   if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
     res.writeHead(404);
