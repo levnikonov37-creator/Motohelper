@@ -2066,11 +2066,9 @@ var BADGES = [
   { id: "photo", t: "Фотограф", d: "Загрузить фото своего мотоцикла", icon: "📸", need: function (s) { return (s.photo || 0) >= 1; } },
   { id: "detective", t: "Детектив", d: "Разобрать 3 причины неисправностей", icon: "🔍", need: function (s) { return (s.diag || 0) >= 3; } },
   { id: "hands", t: "Мастер на все руки", d: "Пройти инструкцию до конца", icon: "🔧", need: function (s) { return (s.guides || 0) >= 1; } },
-  { id: "regular", t: "По регламенту", d: "Отметить 3 работы по ТО", icon: "🛢️", need: function (s) { return (s.to || 0) >= 3; } },
   { id: "tuner", t: "Тюнер", d: "Добавить 3 доработки в проект", icon: "⚡", need: function (s) { return (s.tune || 0) >= 3; } },
   { id: "safety", t: "Безопасность прежде всего", d: "3 раза пройти проверку перед выездом", icon: "🦺", need: function (s) { return (s.preride || 0) >= 3; } },
   { id: "ai", t: "На связи с ИИ", d: "Задать ИИ-механику 5 вопросов", icon: "🤖", need: function (s) { return (s.ai || 0) >= 5; } },
-  { id: "estimate", t: "Сметчик", d: "Сохранить смету ремонта", icon: "🧾", need: function (s) { return (s.estimate || 0) >= 1; } }
 ];
 (function () { var g = BIKES.filter(function (b) { return b.brand === "Любая модель" && b.versions[0].engine === "NC450C"; }); g.forEach(function (b) { b.name = "с мотором ZS194MQ (карбюратор)"; }); })();
 /* ===================== v7: японские мотоциклы, новые китайские ===================== */

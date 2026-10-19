@@ -1473,3 +1473,37 @@ body::after { display: none !important; }
 .bm-foot .btn { flex: 1; }
 @keyframes bmIn { from { opacity: 0; transform: translate3d(0,-8px,0) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ===== v32: «Что купить к ТО» со ссылками на магазины ===== */
+.buy-list { list-style: none; padding: 0; margin: 12px 0 16px; display: grid; gap: 8px; }
+.buy-list li { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.buy-list li b { font-weight: 600; }
+.buy-list .price { white-space: nowrap; font-weight: 700; }
+
+/* ===== v32: без тряски картинки при заведённом моторе — она перерисовывала всю схему каждый кадр
+   (тормоза на телефоне) и размывала изображение. Работу мотора показывают дым, тахометр и звук ===== */
+.engine-svg.running .body, .bike-svg.running .bk-body { animation: none !important; }
+.photo-card.running .photo-img { animation: kenburns 22s ease-in-out infinite alternate !important; }
+/* полоски «мотор работает» едут сдвигом слоя (transform), а не перерисовкой фона каждый кадр */
+.stage::after { left: -40px; will-change: transform; }
+.stage.is-running::after { animation: stripesX 1.4s linear infinite !important; }
+@keyframes stripesX { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(39.6px, 0, 0); } }
+/* тахометр: стрелка — отдельный слой поверх неподвижной шкалы */
+.tacho-box { position: relative; width: 132px; flex: none; }
+.tacho-box .tacho { width: 100%; display: block; }
+.tacho-needle { position: absolute; left: 48.75%; width: 2.5%; top: 15.4%; height: 42.3%; border-radius: 99px; background: #E5E7EB; transform-origin: 50% 100%; will-change: transform; transition: transform .12s linear; }
+.tacho-hub { position: absolute; left: 45.8%; top: 53.5%; width: 8.4%; aspect-ratio: 1; border-radius: 50%; background: #E5E7EB; }
+@media (max-width: 600px) { .tacho-box { width: 84px; } }
+/* схема мотора в обёртке: поверх неё слой дыма */
+.eng-box { position: relative; z-index: 1; width: 100%; max-width: 820px; margin: -6px auto 0; }
+.explorer.compact .eng-box { max-width: 680px; }
+.eng-box .engine-svg { margin: 0; max-width: none; }
+.smoke-ov { position: absolute; inset: 0; pointer-events: none; }
+.smoke-ov i { position: absolute; left: 92.9%; top: 87.7%; aspect-ratio: 1; border-radius: 50%; translate: -50% -50%; background: radial-gradient(circle, rgba(222,226,232,.55) 0%, rgba(222,226,232,.22) 45%, rgba(222,226,232,0) 70%); opacity: 0; will-change: transform, opacity; animation: smk var(--puff, 1.2s) ease-out infinite; }
+.smoke-ov.two i { background: radial-gradient(circle, rgba(178,196,220,.6) 0%, rgba(178,196,220,.25) 45%, rgba(178,196,220,0) 70%); }
+@keyframes smk { 0% { opacity: .95; transform: translate3d(0, 0, 0) scale(.35); } 60% { opacity: .5; } 100% { opacity: 0; transform: translate3d(var(--dx, 60%), var(--dy, -150%), 0) scale(2.6); } }
+
+/* ===== v32: чёткость — тени текста без размытия (размытая тень делала буквы мягкими) ===== */
+.main p, .main h1, .main h2, .main h3, .main small, .main .muted, .main label, .main .f-label, .main .link, .main .stage-hint, .main .page-sub, .main .gb-title, .main .qempty, .main .tags, .foot { text-shadow: 0 1px 0 rgba(0,0,0,.55) !important; }
+.main .grad, .grad { filter: drop-shadow(0 1px 0 rgba(0,0,0,.5)) !important; }
+.photo-hud { text-shadow: 0 1px 0 rgba(0,0,0,.6), 0 0 6px rgba(0,0,0,.45); }

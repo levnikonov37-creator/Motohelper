@@ -608,62 +608,35 @@ function EditBike({
   }), "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u0432\u0441\u0451 \u043A\u0430\u043A \u0441 \u0437\u0430\u0432\u043E\u0434\u0430"));
 }
 function Maint({
-  eng,
-  mt,
-  setMt,
-  flash,
-  addRows
+  eng
 }) {
   const st = maintItems(eng);
-  function buildTO() {
-    const items = st;
-    const rows = [];
-    const liters = Math.max(1, Math.ceil(Math.max.apply(null, (String(eng.oilVol).match(/\d+(\.\d+)?/g) || ["1"]).map(Number))));
-    items.forEach(it => {
-      const kit = TO_KITS[it.id];
-      if (!kit) return;
-      let workName = kit.work;
-      if (it.id === "valves" && eng.groups.indexOf("dohc") >= 0 && kit.workDohc) workName = kit.workDohc;
-      const w = workName ? WORKS.find(x => x.name === workName) : null;
-      const parts = [];
-      kit.kinds.forEach(k => {
-        const p = partByKind(k, eng);
-        if (p && parts.indexOf(p) < 0) parts.push(p);
-      });
-      if (!w && !parts.length) return;
-      parts.forEach((p, i) => {
-        const q = kit.qtyOil && p.kind === "oil" ? liters : 1;
-        rows.push({
-          work: i === 0 && w ? w.name : "",
-          workPrice: i === 0 && w ? w.price : 0,
-          part: p.name + (q > 1 ? " ×" + q : ""),
-          partPrice: p.price * q
-        });
-      });
-      if (!parts.length && w) rows.push({
-        work: w.name,
-        workPrice: w.price,
-        part: "",
-        partPrice: 0
-      });
-    });
-    if (!rows.length) {
-      flash("Для этих пунктов деталей не нужно");
-      return;
-    }
-    addRows(rows, "Смета на обслуживание собрана");
-  }
   const unit = eng.hours ? "моточ." : "км";
+  /* что купить к обслуживанию: расходники под этот мотор, со ссылками на магазины */
+  const buy = [];
+  st.forEach(it => {
+    const kit = TO_KITS[it.id];
+    if (!kit) return;
+    kit.kinds.forEach(k => {
+      const p = partByKind(k, eng);
+      if (p && buy.indexOf(p) < 0) buy.push(p);
+    });
+  });
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
     className: "plan"
   }, st.map(x => /*#__PURE__*/React.createElement("li", {
     key: x.id
   }, /*#__PURE__*/React.createElement("b", null, x.t), /*#__PURE__*/React.createElement("span", {
     className: "plan-every"
-  }, "\u043A\u0430\u0436\u0434\u044B\u0435 ", num(x.every), " ", unit)))), /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    onClick: () => buildTO(true)
-  }, "\u0421\u043C\u0435\u0442\u0430 \u043D\u0430 \u043F\u043E\u043B\u043D\u043E\u0435 \u043E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u043D\u0438\u0435"), /*#__PURE__*/React.createElement("h2", null, "\u0411\u0435\u0437 \u043F\u0440\u0438\u0432\u044F\u0437\u043A\u0438 \u043A \u043F\u0440\u043E\u0431\u0435\u0433\u0443"), /*#__PURE__*/React.createElement("table", {
+  }, "\u043A\u0430\u0436\u0434\u044B\u0435 ", num(x.every), " ", unit)))), buy.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0427\u0442\u043E \u043A\u0443\u043F\u0438\u0442\u044C \u043A \u0422\u041E"), /*#__PURE__*/React.createElement("ul", {
+    className: "buy-list"
+  }, buy.map(p => /*#__PURE__*/React.createElement("li", {
+    key: p.id
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, p.name), /*#__PURE__*/React.createElement(BuyLinks, {
+    q: buyQuery(p, eng)
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "price"
+  }, rub(p.price)))))), /*#__PURE__*/React.createElement("h2", null, "\u0411\u0435\u0437 \u043F\u0440\u0438\u0432\u044F\u0437\u043A\u0438 \u043A \u043F\u0440\u043E\u0431\u0435\u0433\u0443"), /*#__PURE__*/React.createElement("table", {
     className: "to-table"
   }, /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u0422\u043E\u0440\u043C\u043E\u0437\u043D\u0430\u044F \u0436\u0438\u0434\u043A\u043E\u0441\u0442\u044C"), /*#__PURE__*/React.createElement("td", null, "\u0440\u0430\u0437 \u0432 \u0433\u043E\u0434")), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u041C\u0430\u0441\u043B\u043E \u0432 \u0432\u0438\u043B\u043A\u0435"), /*#__PURE__*/React.createElement("td", null, "\u0440\u0430\u0437 \u0432 \u0441\u0435\u0437\u043E\u043D")), eng.groups.indexOf("liquid") >= 0 && /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u0410\u043D\u0442\u0438\u0444\u0440\u0438\u0437"), /*#__PURE__*/React.createElement("td", null, "\u0440\u0430\u0437 \u0432 1\u20132 \u0441\u0435\u0437\u043E\u043D\u0430")), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u041F\u043E\u0434\u0448\u0438\u043F\u043D\u0438\u043A\u0438 \u0440\u0443\u043B\u0435\u0432\u043E\u0439 \u0438 \u043C\u0430\u044F\u0442\u043D\u0438\u043A\u0430"), /*#__PURE__*/React.createElement("td", null, "\u0441\u043C\u0430\u0437\u043A\u0430 \u043F\u0435\u0440\u0435\u0434 \u0441\u0435\u0437\u043E\u043D\u043E\u043C")))));
 }
@@ -704,7 +677,6 @@ function Parts({
   cart,
   toggleCart,
   setCart,
-  addRows,
   go
 }) {
   const [cat, setCat] = useState("Все");
@@ -713,7 +685,29 @@ function Parts({
   const cats = ["Все"].concat(Array.from(new Set(PARTS.map(p => p.cat))));
   const list = PARTS.filter(p => (cat === "Все" || p.cat === cat) && (!onlyFit || fits(p, eng)) && (!q.trim() || p.name.toLowerCase().indexOf(q.toLowerCase()) >= 0));
   const total = cart.reduce((s, p) => s + p.price, 0);
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, cart.length > 0 && /*#__PURE__*/React.createElement("section", {
+    className: "cart-box"
+  }, /*#__PURE__*/React.createElement("h2", null, "\u041A\u043E\u0440\u0437\u0438\u043D\u0430"), /*#__PURE__*/React.createElement("ul", {
+    className: "buy-list"
+  }, cart.map(c => {
+    const p = partById(c.id) || c;
+    return /*#__PURE__*/React.createElement("li", {
+      key: c.id
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, c.name), /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "pl-r"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "price"
+    }, rub(c.price)), /*#__PURE__*/React.createElement("button", {
+      className: "mini",
+      "aria-label": "\u0423\u0431\u0440\u0430\u0442\u044C \u0438\u0437 \u043A\u043E\u0440\u0437\u0438\u043D\u044B",
+      onClick: () => toggleCart(c)
+    }, /*#__PURE__*/React.createElement(Icon, {
+      n: "close",
+      s: 14
+    }))));
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "toolbar row-gap"
   }, /*#__PURE__*/React.createElement("div", {
     className: "qsearch grow"
@@ -787,177 +781,7 @@ function Parts({
   }, /*#__PURE__*/React.createElement("span", null, cart.length, " ", plural(cart.length, "позиция", "позиции", "позиций"), ", ", /*#__PURE__*/React.createElement("b", null, rub(total))), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: () => setCart([])
-  }, "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C"), /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    onClick: () => {
-      addRows(cart.map(p => ({
-        work: "",
-        workPrice: 0,
-        part: p.name,
-        partPrice: p.price
-      })), "Перенесено в смету");
-      setCart([]);
-    }
-  }, "\u0412 \u0441\u043C\u0435\u0442\u0443")));
-}
-
-/* ---------- Смета ---------- */
-function Estimate({
-  bike,
-  eng,
-  cu,
-  est,
-  setEst,
-  estName,
-  setEstName,
-  saved,
-  setSaved,
-  flash
-}) {
-  const total = est.reduce((s, r) => s + (Number(r.workPrice) || 0) + (Number(r.partPrice) || 0), 0);
-  const works = est.reduce((s, r) => s + (Number(r.workPrice) || 0), 0);
-  const fitParts = PARTS.filter(p => fits(p, eng));
-  const title = (cu.nick ? cu.nick + ", " : "") + bike.brand + " " + bike.name;
-  function upd(i, k, v) {
-    const n = est.slice();
-    n[i] = Object.assign({}, n[i], {
-      [k]: v
-    });
-    if (k === "work") {
-      const w = WORKS.find(x => x.name === v);
-      if (w) n[i].workPrice = w.price;
-    }
-    if (k === "part") {
-      const p = partByName(v);
-      if (p) n[i].partPrice = p.price;
-    }
-    setEst(n);
-  }
-  function text() {
-    const L = ["Смета: " + (estName || "без названия"), title + ", " + eng.code, new Date().toLocaleDateString("ru-RU"), ""];
-    est.forEach((r, i) => L.push(i + 1 + ". " + [r.work && r.work + " — " + rub(r.workPrice), r.part && r.part + " — " + rub(r.partPrice)].filter(Boolean).join("; ")));
-    L.push("", "Работы: " + rub(works), "Запчасти: " + rub(total - works), "Итого: " + rub(total));
-    return L.join("\n");
-  }
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
-    className: "muted"
-  }, title, ", ", eng.code), /*#__PURE__*/React.createElement("label", {
-    className: "f narrow"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "f-label"
-  }, "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435"), /*#__PURE__*/React.createElement("input", {
-    value: estName,
-    onChange: e => setEstName(e.target.value),
-    placeholder: "Например, ТО на 3000 км"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "est"
-  }, est.length === 0 && /*#__PURE__*/React.createElement("p", {
-    className: "empty"
-  }, "\u0414\u043E\u0431\u0430\u0432\u044C \u0441\u0442\u0440\u043E\u043A\u0443 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438\u043B\u0438 \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0438 \u0434\u0435\u0442\u0430\u043B\u0438 \u0438\u0437 \u0434\u0438\u0430\u0433\u043D\u043E\u0441\u0442\u0438\u043A\u0438, \u0442\u044E\u043D\u0438\u043D\u0433\u0430 \u0438 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430."), est.map((r, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    className: "est-row"
-  }, /*#__PURE__*/React.createElement("select", {
-    "aria-label": "\u0420\u0430\u0431\u043E\u0442\u0430",
-    value: r.work,
-    onChange: e => upd(i, "work", e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "\u0420\u0430\u0431\u043E\u0442\u0430\u2026"), WORKS.map(w => /*#__PURE__*/React.createElement("option", {
-    key: w.name,
-    value: w.name
-  }, w.name))), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "\u0426\u0435\u043D\u0430 \u0440\u0430\u0431\u043E\u0442\u044B",
-    type: "number",
-    inputMode: "numeric",
-    value: r.workPrice || "",
-    placeholder: "0",
-    onChange: e => upd(i, "workPrice", Number(e.target.value) || 0)
-  }), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u044C",
-    value: r.part,
-    onChange: e => upd(i, "part", e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u044C\u2026"), r.part && !fitParts.find(p => p.name === r.part) && /*#__PURE__*/React.createElement("option", {
-    value: r.part
-  }, r.part), fitParts.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p.id,
-    value: p.name
-  }, p.name))), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "\u0426\u0435\u043D\u0430 \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0438",
-    type: "number",
-    inputMode: "numeric",
-    value: r.partPrice || "",
-    placeholder: "0",
-    onChange: e => upd(i, "partPrice", Number(e.target.value) || 0)
-  }), /*#__PURE__*/React.createElement("button", {
-    className: "icon-btn",
-    "aria-label": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0441\u0442\u0440\u043E\u043A\u0443",
-    onClick: () => setEst(est.filter((_, j) => j !== i))
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "close",
-    s: 18
-  })))), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => setEst(est.concat([{
-      work: "",
-      workPrice: 0,
-      part: "",
-      partPrice: 0
-    }]))
-  }, "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0441\u0442\u0440\u043E\u043A\u0443")), est.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: "total"
-  }, /*#__PURE__*/React.createElement("span", null, "\u0420\u0430\u0431\u043E\u0442\u044B ", rub(works), ", \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0438 ", rub(total - works)), /*#__PURE__*/React.createElement("b", null, rub(total))), /*#__PURE__*/React.createElement("div", {
-    className: "row-gap"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    onClick: () => {
-      if (!estName.trim()) {
-        flash("Введи название сметы");
-        return;
-      }
-      bumpStat("estimate");
-      setSaved([{
-        id: Date.now(),
-        name: estName.trim(),
-        bike: title,
-        rows: est,
-        total: total,
-        date: new Date().toLocaleDateString("ru-RU")
-      }].concat(saved).slice(0, 30));
-      setEstName("");
-      setEst([]);
-      flash("Смета сохранена");
-    }
-  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => copyText(text()).then(ok => flash(ok ? "Смета скопирована" : "Не удалось скопировать"))
-  }, "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0442\u0435\u043A\u0441\u0442\u043E\u043C"), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => setEst([])
-  }, "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C"))), saved.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0441\u043C\u0435\u0442\u044B"), /*#__PURE__*/React.createElement("ul", {
-    className: "saved"
-  }, saved.map(e => /*#__PURE__*/React.createElement("li", {
-    key: e.id
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, e.name), /*#__PURE__*/React.createElement("span", {
-    className: "muted small"
-  }, e.bike, ", ", e.date, ", ", e.rows.length, " ", plural(e.rows.length, "строка", "строки", "строк"))), /*#__PURE__*/React.createElement("span", {
-    className: "price"
-  }, rub(e.total)), /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
-    onClick: () => {
-      setEst(e.rows);
-      setEstName(e.name);
-      flash("Смета открыта");
-    }
-  }, "\u041E\u0442\u043A\u0440\u044B\u0442\u044C"), /*#__PURE__*/React.createElement("button", {
-    className: "icon-btn",
-    "aria-label": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0441\u043C\u0435\u0442\u0443",
-    onClick: () => setSaved(saved.filter(x => x.id !== e.id))
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "close",
-    s: 18
-  })))))));
+  }, "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C")));
 }
 
 /* ---------- Выбор мотоцикла ---------- */
@@ -1824,7 +1648,7 @@ function BikeFinder({
   }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", list.length - limit, ")"))));
 }
 /* ===== Первый заход: приветствие и «С чего начать» ===== */
-const ONB_TILES = [["home", "Главная", "Объёмная модель мотора твоего мотоцикла: крути, заводи, заглядывай внутрь. Совет дня и проверка перед выездом."], ["bike", "Мой мотоцикл", "Характеристики и максимальная скорость, что и через сколько км обслуживать, тюнинг под цель и бюджет."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["wrench", "Ремонт", "«Что сломалось?» по симптомам, 60+ инструкций со схемами, справочник и коды ошибок."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и расчёт стоимости."]];
+const ONB_TILES = [["home", "Главная", "Объёмная модель мотора твоего мотоцикла: крути, заводи, заглядывай внутрь. Совет дня и проверка перед выездом."], ["bike", "Мой мотоцикл", "Характеристики и максимальная скорость, что и через сколько км обслуживать, тюнинг под цель и бюджет."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["wrench", "Ремонт", "«Что сломалось?» по симптомам, 60+ инструкций со схемами, справочник и коды ошибок."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и ссылки на магазины."]];
 function Onboarding({
   step0,
   sel,
@@ -6715,21 +6539,7 @@ function EngineSVG({
     cy: "391.5",
     r: "2",
     fill: "rgba(255,255,255,.15)"
-  })), running && /*#__PURE__*/React.createElement("g", {
-    filter: "url(#eg-soft)"
-  }, [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => /*#__PURE__*/React.createElement("circle", {
-    key: i,
-    className: "puff",
-    cx: "626",
-    cy: "386",
-    r: 10 + i % 3 * 4,
-    fill: two ? "url(#eg-smoke2t)" : "url(#eg-smoke)",
-    style: {
-      animationDelay: i * 0.13 + "s",
-      "--dx": 12 + i * 17 % 26 + "px",
-      "--dy": -38 - i * 23 % 40 + "px"
-    }
-  }))), running && /*#__PURE__*/React.createElement("circle", {
+  })), running && /*#__PURE__*/React.createElement("circle", {
     cx: "618",
     cy: "393",
     r: "6",
@@ -7988,15 +7798,57 @@ function EngineSVG({
   }))));
 }
 
+/* --- дым из выхлопа: отдельный слой поверх схемы, анимируется без перерисовки самой схемы --- */
+function Smoke({
+  two,
+  rpm
+}) {
+  const dur = rpm < 2500 ? 1.6 : rpm < 5500 ? 1.05 : 0.7;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "smoke-ov" + (two ? " two" : ""),
+    "aria-hidden": "true",
+    style: {
+      "--puff": dur + "s"
+    }
+  }, [0, 1, 2, 3, 4, 5].map(i => /*#__PURE__*/React.createElement("i", {
+    key: i,
+    style: {
+      width: 3.1 + i % 3 * 1.2 + "%",
+      animationDelay: (i * dur / 6).toFixed(2) + "s",
+      "--dx": 50 + i * 37 % 100 + "%",
+      "--dy": -150 - i * 53 % 150 + "%"
+    }
+  })));
+}
+
 /* --- тахометр --- */
 function Tacho({
   eng,
   rpm,
-  running
+  running,
+  api
 }) {
   const pk = enginePeak(eng),
     max = pk.max,
     ang = v => -120 + 240 * Math.min(1, v / max);
+  const needle = useRef(null),
+    val = useRef(null);
+  useEffect(() => {
+    if (!api) return;
+    let shown = 0;
+    api.current = v => {
+      if (needle.current) needle.current.style.transform = "rotate(" + ang(v) + "deg)";
+      /* цифры — не чаще 10 раз в секунду: смена текста заставляет браузер пересчитывать раскладку */
+      const now = performance.now();
+      if (val.current && now - shown > 100) {
+        shown = now;
+        val.current.textContent = Math.round(v / 50) * 50;
+      }
+    };
+    return () => {
+      api.current = null;
+    };
+  });
   const ticks = [];
   for (let v = 0; v <= max; v += 1000) ticks.push(v);
   const p = (v, r) => {
@@ -8008,10 +7860,15 @@ function Tacho({
       e = p(v2, r);
     return "M" + s[0] + "," + s[1] + " A" + r + "," + r + " 0 " + (ang(v2) - ang(v1) > 180 ? 1 : 0) + ",1 " + e[0] + "," + e[1];
   };
-  return /*#__PURE__*/React.createElement("svg", {
+  /* шкала — неподвижная картинка; стрелка — отдельный слой, поворачивается без перерисовки шкалы */
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tacho-box" + (running ? " on" : ""),
+    role: "img",
+    "aria-label": "Тахометр, " + (running ? rpm : 0) + " об/мин"
+  }, /*#__PURE__*/React.createElement("svg", {
     className: "tacho" + (running ? " on" : ""),
     viewBox: "0 0 120 104",
-    "aria-label": "Тахометр, " + (running ? rpm : 0) + " об/мин"
+    "aria-hidden": "true"
   }, /*#__PURE__*/React.createElement("path", {
     d: arc(0, max, 50),
     fill: "none",
@@ -8041,25 +7898,8 @@ function Tacho({
       textAnchor: "middle",
       className: "tacho-n"
     }, v / 1000));
-  }), /*#__PURE__*/React.createElement("g", {
-    className: "needle",
-    style: {
-      transform: "rotate(" + ang(running ? rpm : 0) + "deg)"
-    }
-  }, /*#__PURE__*/React.createElement("line", {
-    x1: "60",
-    y1: "60",
-    x2: "60",
-    y2: "16",
-    stroke: "#E5E7EB",
-    strokeWidth: "3",
-    strokeLinecap: "round"
-  })), /*#__PURE__*/React.createElement("circle", {
-    cx: "60",
-    cy: "60",
-    r: "5",
-    fill: "#E5E7EB"
   }), /*#__PURE__*/React.createElement("text", {
+    ref: val,
     x: "60",
     y: "88",
     textAnchor: "middle",
@@ -8069,7 +7909,15 @@ function Tacho({
     y: "100",
     textAnchor: "middle",
     className: "tacho-u"
-  }, "\u043E\u0431/\u043C\u0438\u043D \xD71"));
+  }, "\u043E\u0431/\u043C\u0438\u043D \xD71")), /*#__PURE__*/React.createElement("i", {
+    ref: needle,
+    className: "tacho-needle",
+    style: {
+      transform: "rotate(" + ang(running ? rpm : 0) + "deg)"
+    }
+  }), /*#__PURE__*/React.createElement("i", {
+    className: "tacho-hub"
+  }));
 }
 
 /* --- звук мотора: синтез под конкретный двигатель и выхлоп --- */
@@ -9595,6 +9443,7 @@ function Engine3D({
   eng,
   running,
   rpm,
+  rpmLive,
   cut,
   gear,
   sel,
@@ -9617,6 +9466,7 @@ function Engine3D({
   live.current = {
     running: running,
     rpm: rpm,
+    rpmLive: rpmLive,
     cut: cut,
     gear: gear,
     sel: sel,
@@ -9651,7 +9501,10 @@ function Engine3D({
       onFail && onFail();
       return;
     }
-    renderer.setPixelRatio(window.matchMedia && window.matchMedia("(hover: hover)").matches ? Math.min(window.devicePixelRatio || 1, 1.5) : 1);
+    /* чёткость: рисуем в разрешении экрана (до 2×); если телефон не успевает — ступенчато снижаем */
+    let pr = Math.min(window.devicePixelRatio || 1, 2),
+      slowN = 0;
+    renderer.setPixelRatio(pr);
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.toneMapping = T.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.92;
@@ -9937,6 +9790,13 @@ function Engine3D({
       const raw = (t - last) / 1000;
       if (raw < 1 / 40) return;
       last = t;
+      if (raw > 0.048 && raw < 0.5) slowN++;else if (slowN > 0) slowN--;
+      if (slowN > 24 && pr > 1) {
+        pr = Math.max(1, pr - 0.5);
+        renderer.setPixelRatio(pr);
+        slowN = 0;
+        dirty = 3;
+      }
       const dt = Math.min(0.05, raw);
       if (!visible || document.hidden) {
         cancelAnimationFrame(raf);
@@ -9964,7 +9824,8 @@ function Engine3D({
         return;
       }
       dirty--;
-      const speed = reduce ? 0 : L.running ? 0.2 + L.rpm / 5200 : L.cut ? 0.2 : 0;
+      const R = L.rpmLive && L.rpmLive.current && L.rpmLive.current.raf ? L.rpmLive.current.r : L.rpm;
+      const speed = reduce ? 0 : L.running ? 0.2 + R / 5200 : L.cut ? 0.2 : 0;
       const w = speed * Math.PI * 2;
       phi += w * dt;
       placeCam();
@@ -10088,7 +9949,7 @@ function Engine3D({
       heat = L.running ? Math.min(1, heat + dt / 12) : Math.max(0, heat - dt / 25);
       E.exMats.forEach(m => m.emissive.setRGB(0.9 * heat * 0.45, 0.35 * heat * 0.45, 0.05 * heat * 0.45));
       if (L.running && !reduce) {
-        spawnAcc += dt * (5 + L.rpm / 330) * (E.two ? 1.4 : 1);
+        spawnAcc += dt * (5 + R / 330) * (E.two ? 1.4 : 1);
         E.smokeO.getWorldPosition(sp0);
         E.smokeO.getWorldQuaternion(sq);
         ax.set(1, 0, 0).applyQuaternion(sq);
@@ -10100,7 +9961,7 @@ function Engine3D({
           p.position.copy(sp0);
           p.userData.age = 0;
           p.userData.life = 1.1 + Math.random() * 0.9;
-          const sp = (0.6 + L.rpm / 4200) * E.scale;
+          const sp = (0.6 + R / 4200) * E.scale;
           p.userData.v.copy(ax).multiplyScalar(sp).add(new T.Vector3((Math.random() - 0.5) * 0.35, 0.15 + Math.random() * 0.25, (Math.random() - 0.5) * 0.35));
           p.userData.s0 = (0.18 + Math.random() * 0.12) * E.scale;
           p.userData.op = (E.two ? 0.5 : 0.32) * (0.7 + Math.random() * 0.5);
@@ -12312,7 +12173,9 @@ function ChassisPanel({
     key: p.id
   }, /*#__PURE__*/React.createElement("span", null, p.name, p.info && /*#__PURE__*/React.createElement("small", {
     className: "pinfo"
-  }, p.info)), /*#__PURE__*/React.createElement("span", {
+  }, p.info), /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
     className: "pl-r"
   }, /*#__PURE__*/React.createElement("span", {
     className: "price"
@@ -12456,7 +12319,7 @@ const NAV = [{
 }, {
   id: "parts",
   icon: "cart",
-  label: "Запчасти и смета",
+  label: "Запчасти",
   short: "Запчасти"
 }];
 const BIKE_TABS = [["overview", "Обзор", "Обзор"], ["edit", "Настроить", "Настроить"], ["service", "Обслуживание", "Сервис"], ["tuning", "Тюнинг", "Тюнинг"]];
@@ -12504,7 +12367,6 @@ function App() {
   const [page, setPage] = useState("home");
   const [bikeTab, setBikeTab] = useState("overview");
   const [repairTab, setRepairTab] = useState("find");
-  const [partsTab, setPartsTab] = useState("catalog");
   const [guideOpen, setGuideOpen] = useState(null);
   /* направление выезда раздела: перешёл вправо по меню — выезжает справа, влево — слева */
   const pageDir = useRef({
@@ -12547,9 +12409,6 @@ function App() {
   const [custom, setCustom] = useState(() => load("custom", {}));
   const [maint, setMaint] = useState(() => load("maint", {}));
   const [chats, setChats] = useState(() => load("chats", {}));
-  const [est, setEst] = useState(() => load("est", []));
-  const [estName, setEstName] = useState("");
-  const [saved, setSaved] = useState(() => load("saved", []));
   const [aiDraft, setAiDraft] = useState(null);
   const [garage, setGarage] = useState(() => load("garage", []));
   useEffect(() => save("garage", garage), [garage]);
@@ -12565,8 +12424,6 @@ function App() {
   useEffect(() => save("custom", custom), [custom]);
   useEffect(() => save("maint", maint), [maint]);
   useEffect(() => save("chats", chats), [chats]);
-  useEffect(() => save("est", est), [est]);
-  useEffect(() => save("saved", saved), [saved]);
   useEffect(() => {
     save("theme", theme);
     document.documentElement.setAttribute("data-theme", "dark");
@@ -12664,12 +12521,8 @@ function App() {
         setRepairTab(arg);
         setGuideOpen(null);
       } else setGuideOpen(null);
-    } else if (t === "parts") {
+    } else if (t === "parts" || t === "estimate") {
       setPage("parts");
-      setPartsTab("catalog");
-    } else if (t === "estimate") {
-      setPage("parts");
-      setPartsTab("estimate");
     }
     window.scrollTo({
       top: 0
@@ -12743,11 +12596,6 @@ function App() {
     setProject(has ? cur.filter(x => x !== t.id) : cur.concat([t.id]));
     if (!has) bumpStat("tune");
     flash(has ? "Убрано из проекта" : "Добавлено в проект");
-  }
-  function addRows(rows, msg) {
-    setEst(est.concat(rows));
-    go("estimate");
-    flash(msg);
   }
   function connectAi(url) {
     const u = String(url || "").trim();
@@ -12942,8 +12790,7 @@ function App() {
     },
     project: project,
     setProject: setProject,
-    toggleProject: toggleProject,
-    addRows: addRows
+    toggleProject: toggleProject
   })), page === "ai" && /*#__PURE__*/React.createElement(AiChat, _extends({}, ctx, {
     connectAi: connectAi,
     chat: chat,
@@ -12962,16 +12809,7 @@ function App() {
     treeOpen: treeOpen,
     setTreeOpen: setTreeOpen
   })), page === "parts" && /*#__PURE__*/React.createElement(PartsPage, _extends({}, ctx, {
-    tab: partsTab,
-    setTab: setPartsTab,
-    setCart: setCart,
-    addRows: addRows,
-    est: est,
-    setEst: setEst,
-    estName: estName,
-    setEstName: setEstName,
-    saved: saved,
-    setSaved: setSaved
+    setCart: setCart
   })), page === "home" && /*#__PURE__*/React.createElement("footer", {
     className: "foot"
   }, /*#__PURE__*/React.createElement(BackupBar, {
@@ -13289,6 +13127,10 @@ function EngineExplorer({
     shown: 0
   });
   const snd = useRef(null);
+  /* газ: живые обороты в gas.current.r; React перерисовывает схему и 3D только при смене диапазона оборотов */
+  const tacho = useRef(null);
+  const [viz, setViz] = useState(null);
+  const vrpm = viz != null ? viz : rpm;
   const pins = view === "photo" ? [] : view === "3d" ? enginePins(eng).map(p => ({
     id: p.id,
     t: AREAS[p.id].t
@@ -13339,14 +13181,20 @@ function EngineExplorer({
       G.r = Math.min(top, G.r + up * dt * (1 - 0.45 * G.r / top));
       if (G.r >= top - 30) G.r = top - Math.random() * 260;
     } else G.r = Math.max(G.base, G.r - down * dt);
-    if (t - G.shown > 45) {
-      G.shown = t;
-      setRpm(Math.round(G.r / 50) * 50);
+    if (tacho.current) tacho.current(G.r);
+    if (snd.current) snd.current.setRpm(G.r);
+    const band = G.r < 2500 ? 1600 : G.r < 5500 ? 4000 : 7000;
+    if (band !== G.viz) {
+      G.viz = band;
+      setViz(band);
     }
     if (G.held || G.r > G.base + 1) G.raf = requestAnimationFrame(gasLoop);else {
       G.raf = 0;
       G.last = 0;
-      setRpm(G.base);
+      G.viz = 0;
+      setViz(null);
+      if (tacho.current) tacho.current(G.base);
+      if (snd.current) snd.current.setRpm(G.base);
     }
   }
   function gasDown() {
@@ -13417,7 +13265,8 @@ function EngineExplorer({
   }, /*#__PURE__*/React.createElement("span", null, eng.hp, " \u043B.\u0441."), /*#__PURE__*/React.createElement("span", null, eng.cc, " \u0441\u043C\xB3"), /*#__PURE__*/React.createElement("span", null, eng.stroke, ", ", eng.cam.split(",")[0]), /*#__PURE__*/React.createElement("span", null, efi ? "инжектор" : eng.carb))), /*#__PURE__*/React.createElement(Tacho, {
     eng: eng,
     rpm: rpm,
-    running: running
+    running: running,
+    api: tacho
   })), /*#__PURE__*/React.createElement("div", {
     className: "view-toggle",
     role: "group",
@@ -13438,7 +13287,8 @@ function EngineExplorer({
     eng: eng,
     finish: cu.engFinish,
     running: running,
-    rpm: rpm,
+    rpm: vrpm,
+    rpmLive: gas,
     cut: xray,
     gear: gearN,
     sel: sel,
@@ -13453,14 +13303,19 @@ function EngineExplorer({
       setNo3d(true);
       setView("engine");
     }
-  }) : view === "engine" || view === "3d" ? /*#__PURE__*/React.createElement(EngineSVG, {
+  }) : view === "engine" || view === "3d" ? /*#__PURE__*/React.createElement("div", {
+    className: "eng-box"
+  }, /*#__PURE__*/React.createElement(EngineSVG, {
     eng: eng,
     sel: sel,
     onSel: pick,
     running: running,
     xray: xray,
-    rpm: rpm
-  }) : view === "bike" ? /*#__PURE__*/React.createElement(BikeSVG, {
+    rpm: vrpm
+  }), running && /*#__PURE__*/React.createElement(Smoke, {
+    two: eng.stroke === "2T",
+    rpm: vrpm
+  })) : view === "bike" ? /*#__PURE__*/React.createElement(BikeSVG, {
     eng: eng,
     bike: bike,
     cu: cu,
@@ -13674,7 +13529,9 @@ function DetailPanel({
       key: p.id
     }, /*#__PURE__*/React.createElement("span", null, p.name, ii && /*#__PURE__*/React.createElement("small", {
       className: "pinfo"
-    }, "\u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430: ", ii.diff, ", ", ii.time)), /*#__PURE__*/React.createElement("span", {
+    }, "\u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430: ", ii.diff, ", ", ii.time), /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
       className: "pl-r"
     }, /*#__PURE__*/React.createElement("span", {
       className: "price"
@@ -14600,7 +14457,9 @@ function SmartDiag({
       className: "plist"
     }, parts.map(p => /*#__PURE__*/React.createElement("li", {
       key: p.id
-    }, /*#__PURE__*/React.createElement("span", null, p.name), /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement("span", null, p.name, /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
       className: "pl-r"
     }, /*#__PURE__*/React.createElement("span", {
       className: "price"
@@ -14779,7 +14638,9 @@ function GuideView({
     className: "plist"
   }, parts.map(p => /*#__PURE__*/React.createElement("li", {
     key: p.id
-  }, /*#__PURE__*/React.createElement("span", null, p.name), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, p.name, /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
     className: "pl-r"
   }, /*#__PURE__*/React.createElement("span", {
     className: "price"
@@ -15348,7 +15209,6 @@ function Tuning({
   setProject,
   toggleProject,
   toggleInstalled,
-  addRows,
   go,
   flash
 }) {
@@ -15504,17 +15364,7 @@ function Tuning({
     className: "warns"
   }, warns.map((w, i) => /*#__PURE__*/React.createElement("li", {
     key: i
-  }, w))), /*#__PURE__*/React.createElement("div", {
-    className: "row-gap"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    onClick: () => addRows(chosen.map(t => ({
-      work: "",
-      workPrice: 0,
-      part: t.title,
-      partPrice: t.price
-    })), "Проект перенесён в смету")
-  }, "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0442\u0438 \u0432 \u0441\u043C\u0435\u0442\u0443")))), /*#__PURE__*/React.createElement(Sprockets, {
+  }, w))))), /*#__PURE__*/React.createElement(Sprockets, {
     eng: eng,
     bike: bike,
     cu: cu
@@ -15616,13 +15466,10 @@ function Tuning({
   }))));
 }
 
-/* ===== Запчасти и смета ===== */
+/* ===== Запчасти ===== */
 function PartsPage(props) {
   const {
-    tab,
-    setTab,
-    cart,
-    est
+    cart
   } = props;
   return /*#__PURE__*/React.createElement("section", {
     className: "page"
@@ -15634,24 +15481,7 @@ function PartsPage(props) {
     }, "\u043F\u043E\u0434 \u0442\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0440")),
     sub: "\u0422\u043E\u043B\u044C\u043A\u043E \u0434\u0435\u0442\u0430\u043B\u0438, \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u043F\u043E\u0434\u0445\u043E\u0434\u044F\u0442 \u043A \u0442\u0432\u043E\u0435\u043C\u0443 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u0443, \u0441 \u0430\u043D\u0430\u043B\u043E\u0433\u0430\u043C\u0438, \u0441\u043B\u043E\u0436\u043D\u043E\u0441\u0442\u044C\u044E \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438 \u0438 \u0441\u043C\u0435\u0442\u043E\u0439.",
     stats: [[cart.length + " " + plural(cart.length, "деталь", "детали", "деталей"), "в корзине"], [rub(cartTotal(cart)), "на сумму"]]
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "tabs",
-    role: "tablist"
-  }, /*#__PURE__*/React.createElement("button", {
-    role: "tab",
-    "aria-selected": tab === "catalog",
-    className: tab === "catalog" ? "on" : "",
-    onClick: () => setTab("catalog")
-  }, "\u041A\u0430\u0442\u0430\u043B\u043E\u0433", cart.length > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "dot"
-  }, cart.length)), /*#__PURE__*/React.createElement("button", {
-    role: "tab",
-    "aria-selected": tab === "estimate",
-    className: tab === "estimate" ? "on" : "",
-    onClick: () => setTab("estimate")
-  }, "\u0421\u043C\u0435\u0442\u0430 \u0440\u0435\u043C\u043E\u043D\u0442\u0430", est.length > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "dot"
-  }, est.length))), tab === "catalog" ? /*#__PURE__*/React.createElement(Parts, props) : /*#__PURE__*/React.createElement(Estimate, props));
+  }), /*#__PURE__*/React.createElement(Parts, props));
 }
 
 /* ===== ИИ: контекст ===== */
@@ -15883,7 +15713,9 @@ function AreaPanel({
     className: "plist"
   }, parts.slice(0, 7).map(p => /*#__PURE__*/React.createElement("li", {
     key: p.id
-  }, /*#__PURE__*/React.createElement("span", null, p.name), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, p.name, /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
     className: "pl-r"
   }, /*#__PURE__*/React.createElement("span", {
     className: "price"
@@ -16166,7 +15998,9 @@ function TreeRunner({
     className: "plist"
   }, s.res.parts.map(p => /*#__PURE__*/React.createElement("li", {
     key: p.id
-  }, /*#__PURE__*/React.createElement("span", null, p.name), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, p.name, /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
     className: "price"
   }, rub(p.price))))), /*#__PURE__*/React.createElement("button", {
     className: "btn primary",

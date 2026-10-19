@@ -2,7 +2,7 @@
    Онлайн: всегда свежая версия с сервера (и она же сохраняется в кэш).
    Без сети: сайт открывается из кэша. ИИ-механику интернет нужен всегда.
    При изменении списка файлов увеличь VERSION. */
-const VERSION = "mh-v1";
+const VERSION = "mh-v2";
 const CORE = [
   "./", "index.html", "manifest.webmanifest",
   "css/app.css", "js/data.js", "js/app.js", "js/motion.js",
@@ -42,9 +42,11 @@ self.addEventListener("fetch", (e) => {
     })));
     return;
   }
-  // свои файлы — сначала сеть, без сети — кэш
+  // свои файлы — сначала сеть, без сети — кэш. no-cache: браузер не берёт свою копию
+  // (GitHub Pages разрешает хранить её 10 минут), а сверяется с сервером — обновления видны сразу
+  const fresh = req.mode === "navigate" ? fetch(req.url, { cache: "no-cache", credentials: "same-origin" }) : fetch(req, { cache: "no-cache" });
   e.respondWith(
-    fetch(req).then((res) => {
+    fresh.then((res) => {
       if (res.ok) {
         const copy = res.clone();
         caches.open(VERSION).then((c) => c.put(req, copy));
