@@ -214,34 +214,6 @@ function maintStatus(eng, mt) {
     });
   });
 }
-function MaintRow({
-  x,
-  onDone
-}) {
-  return /*#__PURE__*/React.createElement("li", {
-    className: "m-" + x.state
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "m-top"
-  }, /*#__PURE__*/React.createElement("b", null, x.t), /*#__PURE__*/React.createElement("span", {
-    className: "m-left"
-  }, x.state === "none" ? "нет отметки" : x.left <= 0 ? "пора! просрочено на " + num(-x.left) + " " + x.unit : "через " + num(x.left) + " " + x.unit)), /*#__PURE__*/React.createElement("div", {
-    className: "m-bar"
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: Math.min(100, (x.pct || 0) * 100) + "%"
-    }
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "m-foot"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "muted small"
-  }, "\u043A\u0430\u0436\u0434\u044B\u0435 ", num(x.every), " ", x.unit, x.last != null ? ", последний раз на " + num(x.last) : ""), onDone && /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
-    onClick: onDone
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "check",
-    s: 16
-  }), "\u0421\u0434\u0435\u043B\u0430\u043D\u043E")));
-}
 function Val({
   v,
   stock
@@ -642,10 +614,9 @@ function Maint({
   flash,
   addRows
 }) {
-  const st = maintStatus(eng, mt);
-  const dueN = st.filter(x => x.state === "due" || x.state === "soon").length;
-  function buildTO(all) {
-    const items = all ? st : st.filter(x => x.state === "due" || x.state === "soon");
+  const st = maintItems(eng);
+  function buildTO() {
+    const items = st;
     const rows = [];
     const liters = Math.max(1, Math.ceil(Math.max.apply(null, (String(eng.oilVol).match(/\d+(\.\d+)?/g) || ["1"]).map(Number))));
     items.forEach(it => {
@@ -683,84 +654,16 @@ function Maint({
     addRows(rows, "Смета на обслуживание собрана");
   }
   const unit = eng.hours ? "моточ." : "км";
-  const [odo, setOdo] = useState(mt.odo || "");
-  useEffect(() => {
-    setOdo(mt.odo || "");
-  }, [mt.odo]);
-  function done(id) {
-    bumpStat("to");
-    const it = maintItems(eng).find(x => x.id === id);
-    const last = Object.assign({}, mt.last || {}, {
-      [id]: Number(mt.odo) || 0
-    });
-    const log = [{
-      d: new Date().toLocaleDateString("ru-RU"),
-      odo: Number(mt.odo) || 0,
-      t: it ? it.t : id
-    }].concat(mt.log || []).slice(0, 60);
-    setMt({
-      last: last,
-      log: log
-    });
-    flash("Записал в журнал: " + (it ? it.t : id));
-  }
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: "odo"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "f"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "f-label"
-  }, eng.hours ? "Моточасы сейчас" : "Пробег сейчас, км"), /*#__PURE__*/React.createElement("input", {
-    type: "number",
-    inputMode: "numeric",
-    value: odo,
-    onChange: e => setOdo(e.target.value),
-    onBlur: () => setMt({
-      odo: Number(odo) || 0
-    }),
-    onKeyDown: e => {
-      if (e.key === "Enter") {
-        setMt({
-          odo: Number(odo) || 0
-        });
-        flash("Пробег сохранён");
-      }
-    },
-    placeholder: "0"
-  })), /*#__PURE__*/React.createElement("button", {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
+    className: "plan"
+  }, st.map(x => /*#__PURE__*/React.createElement("li", {
+    key: x.id
+  }, /*#__PURE__*/React.createElement("b", null, x.t), /*#__PURE__*/React.createElement("span", {
+    className: "plan-every"
+  }, "\u043A\u0430\u0436\u0434\u044B\u0435 ", num(x.every), " ", unit)))), /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
-    onClick: () => {
-      setMt({
-        odo: Number(odo) || 0
-      });
-      flash("Пробег сохранён");
-    }
-  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043F\u0440\u043E\u0431\u0435\u0433")), null, /*#__PURE__*/React.createElement("div", {
-    className: "row-gap"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn primary",
-    disabled: !dueN,
-    onClick: () => buildTO(false)
-  }, dueN ? "Смета на обслуживание (пора: " + dueN + ")" : "Пока ничего не пора"), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
     onClick: () => buildTO(true)
-  }, "Смета на полное обслуживание")), /*#__PURE__*/React.createElement("ul", {
-    className: "mlist"
-  }, st.map(x => /*#__PURE__*/React.createElement(MaintRow, {
-    key: x.id,
-    x: x,
-    onDone: () => done(x.id)
-  }))), /*#__PURE__*/React.createElement("h2", null, "\u0416\u0443\u0440\u043D\u0430\u043B \u0440\u0430\u0431\u043E\u0442"), (mt.log || []).length === 0 ? /*#__PURE__*/React.createElement("p", {
-    className: "muted"
-  }, "\u041F\u043E\u043A\u0430 \u043F\u0443\u0441\u0442\u043E. \u041D\u0430\u0436\u0438\u043C\u0430\u0439 \xAB\u0421\u0434\u0435\u043B\u0430\u043D\u043E\xBB \u043F\u043E\u0441\u043B\u0435 \u0440\u0430\u0431\u043E\u0442 \u2014 \u0437\u0434\u0435\u0441\u044C \u043F\u043E\u044F\u0432\u0438\u0442\u0441\u044F \u0438\u0441\u0442\u043E\u0440\u0438\u044F \u043E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u043D\u0438\u044F.") : /*#__PURE__*/React.createElement("ul", {
-    className: "log"
-  }, mt.log.map((l, i) => /*#__PURE__*/React.createElement("li", {
-    key: i
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "log-d"
-  }, l.d), /*#__PURE__*/React.createElement("b", null, l.t), /*#__PURE__*/React.createElement("span", {
-    className: "muted"
-  }, num(l.odo), " ", unit)))), /*#__PURE__*/React.createElement("h2", null, "\u0411\u0435\u0437 \u043F\u0440\u0438\u0432\u044F\u0437\u043A\u0438 \u043A \u043F\u0440\u043E\u0431\u0435\u0433\u0443"), /*#__PURE__*/React.createElement("table", {
+  }, "\u0421\u043C\u0435\u0442\u0430 \u043D\u0430 \u043F\u043E\u043B\u043D\u043E\u0435 \u043E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u043D\u0438\u0435"), /*#__PURE__*/React.createElement("h2", null, "\u0411\u0435\u0437 \u043F\u0440\u0438\u0432\u044F\u0437\u043A\u0438 \u043A \u043F\u0440\u043E\u0431\u0435\u0433\u0443"), /*#__PURE__*/React.createElement("table", {
     className: "to-table"
   }, /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u0422\u043E\u0440\u043C\u043E\u0437\u043D\u0430\u044F \u0436\u0438\u0434\u043A\u043E\u0441\u0442\u044C"), /*#__PURE__*/React.createElement("td", null, "\u0440\u0430\u0437 \u0432 \u0433\u043E\u0434")), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u041C\u0430\u0441\u043B\u043E \u0432 \u0432\u0438\u043B\u043A\u0435"), /*#__PURE__*/React.createElement("td", null, "\u0440\u0430\u0437 \u0432 \u0441\u0435\u0437\u043E\u043D")), eng.groups.indexOf("liquid") >= 0 && /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u0410\u043D\u0442\u0438\u0444\u0440\u0438\u0437"), /*#__PURE__*/React.createElement("td", null, "\u0440\u0430\u0437 \u0432 1\u20132 \u0441\u0435\u0437\u043E\u043D\u0430")), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "\u041F\u043E\u0434\u0448\u0438\u043F\u043D\u0438\u043A\u0438 \u0440\u0443\u043B\u0435\u0432\u043E\u0439 \u0438 \u043C\u0430\u044F\u0442\u043D\u0438\u043A\u0430"), /*#__PURE__*/React.createElement("td", null, "\u0441\u043C\u0430\u0437\u043A\u0430 \u043F\u0435\u0440\u0435\u0434 \u0441\u0435\u0437\u043E\u043D\u043E\u043C")))));
 }
@@ -778,6 +681,24 @@ function Issues({
 }
 
 /* ---------- Запчасти ---------- */
+/* Где купить: поиск детали на площадках, в новой вкладке. Код мотора добавляется, если деталь под конкретный мотор */
+const SHOPS = [["Авито", "https://www.avito.ru/rossiya?q="], ["Ozon", "https://www.ozon.ru/search/?text="], ["WB", "https://www.wildberries.ru/catalog/0/search.aspx?search="], ["Маркет", "https://market.yandex.ru/search?text="]];
+function buyQuery(p, eng) {
+  const own = (p.fit || []).indexOf(eng.id) >= 0 && p.name.toLowerCase().indexOf(String(eng.code).toLowerCase()) < 0;
+  return p.name.replace(/\s*\([^)]*\)/g, "") + (own ? " " + eng.code : "");
+}
+function BuyLinks({
+  q
+}) {
+  return /*#__PURE__*/React.createElement("span", {
+    className: "pbuy"
+  }, SHOPS.map(sh => /*#__PURE__*/React.createElement("a", {
+    key: sh[0],
+    href: sh[1] + encodeURIComponent(q),
+    target: "_blank",
+    rel: "noopener"
+  }, sh[0])));
+}
 function Parts({
   eng,
   cart,
@@ -847,7 +768,9 @@ function Parts({
         className: "link inline",
         onClick: () => go("repair", gd.id)
       }, "\u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F")));
-    })()), /*#__PURE__*/React.createElement("span", {
+    })(), ok && /*#__PURE__*/React.createElement(BuyLinks, {
+      q: buyQuery(p, eng)
+    })), /*#__PURE__*/React.createElement("span", {
       className: "price"
     }, rub(p.price)), /*#__PURE__*/React.createElement("button", {
       className: "btn sm" + (inC ? "" : " primary"),
@@ -1386,6 +1309,20 @@ async function findAiEndpoint() {
   } catch (e) {}
   return null;
 }
+/* Умеет ли сервер ИИ смотреть фото: GET на адрес сервера отдаёт {"images": true}. Старый сервер — без фото */
+async function probeWorker(url) {
+  try {
+    const r = await fetch(url, {
+      method: "GET",
+      cache: "no-store"
+    });
+    if (!r.ok) return {};
+    const j = await r.json();
+    return j && typeof j === "object" ? j : {};
+  } catch (e) {
+    return {};
+  }
+}
 function makeWorkerAI(url) {
   const fn = async (turns, opts) => {
     opts = opts || {};
@@ -1401,7 +1338,10 @@ function makeWorkerAI(url) {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
+        body: JSON.stringify(opts.images && opts.images.length ? {
+          messages: msgs,
+          images: await Promise.all(opts.images.map(f => typeof f === "string" ? f : readPhoto(f)))
+        } : {
           messages: msgs
         }),
         signal: opts.signal
@@ -1884,7 +1824,7 @@ function BikeFinder({
   }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", list.length - limit, ")"))));
 }
 /* ===== Первый заход: приветствие и «С чего начать» ===== */
-const ONB_TILES = [["home", "Главная", "Объёмная модель мотора твоего мотоцикла: крути, заводи, заглядывай внутрь. Совет дня и проверка перед выездом."], ["bike", "Мой мотоцикл", "Характеристики и максимальная скорость, обслуживание по пробегу с журналом работ, тюнинг под цель и бюджет."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["wrench", "Ремонт", "«Что сломалось?» по симптомам, 60+ инструкций со схемами, справочник и коды ошибок."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и расчёт стоимости."]];
+const ONB_TILES = [["home", "Главная", "Объёмная модель мотора твоего мотоцикла: крути, заводи, заглядывай внутрь. Совет дня и проверка перед выездом."], ["bike", "Мой мотоцикл", "Характеристики и максимальная скорость, что и через сколько км обслуживать, тюнинг под цель и бюджет."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["wrench", "Ремонт", "«Что сломалось?» по симптомам, 60+ инструкций со схемами, справочник и коды ошибок."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и расчёт стоимости."]];
 function Onboarding({
   step0,
   sel,
@@ -1961,7 +1901,7 @@ function StartGuide({
 }) {
   const s = useStats();
   const [hide, setHide] = useState(() => load("startHide", false));
-  const items = [[load("picked", false), "Выбери свой мотоцикл", "Выбрать", () => setPicker(true)], [(mt.odo || 0) > 0, "Укажи пробег — подскажу, когда обслуживание", "Указать", () => go("bike", "service")], [(s.start || 0) > 0 || (s.xray || 0) > 0, "Заведи мотор или загляни внутрь", "К мотору", () => {
+  const items = [[load("picked", false), "Выбери свой мотоцикл", "Выбрать", () => setPicker(true)], [(s.start || 0) > 0 || (s.xray || 0) > 0, "Заведи мотор или загляни внутрь", "К мотору", () => {
     const st = document.querySelector(".stage");
     if (st) window.scrollTo({
       top: st.getBoundingClientRect().top + window.scrollY - 70,
@@ -12418,7 +12358,11 @@ function CompareView({
   const b2 = other.b,
     v2 = b2.versions[other.vi] || b2.versions[0];
   const e2 = buildSpec(b2, v2, {});
-  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на обслуживание", toCost(eng), toCost(e2), "₽", -1], ["Слабых мест (серьёзных)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng).ok).length, TUNING.filter(t => tuningFor(t, e2).ok).length, "", 1]];
+  const kp = (k, e) => {
+    const p = k.split(" ").map(x => partByKind(x, e)).find(Boolean);
+    return p ? p.price : "—";
+  };
+  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Макс. скорость", speedFor(eng, bike, {}, []).v, speedFor(e2, b2, {}, []).v, "км/ч", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на обслуживание", toCost(eng), toCost(e2), "₽", -1], ["Слабых мест (серьёзных)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Поршень", kp("piston", eng), kp("piston", e2), "₽", -1], ["Комплект сцепления", kp("clutchdiscs", eng), kp("clutchdiscs", e2), "₽", -1], ["Свеча", kp("spark spark2", eng), kp("spark spark2", e2), "₽", -1], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng).ok).length, TUNING.filter(t => tuningFor(t, e2).ok).length, "", 1]];
   const fmtv = (v, u) => typeof v === "number" ? u === "₽" ? rub(v) : num(v) + (u ? " " + u : "") : v;
   return /*#__PURE__*/React.createElement("section", {
     className: "panel compare"
@@ -12636,13 +12580,19 @@ function App() {
         if (!fn) {
           const ep = await findAiEndpoint();
           if (!alive) return;
-          if (ep) setAi({
-            state: "ready",
-            fn: makeWorkerAI(ep),
-            images: false,
-            provider: "worker",
-            endpoint: ep
-          });else setAi({
+          if (ep) {
+            setAi({
+              state: "ready",
+              fn: makeWorkerAI(ep),
+              images: false,
+              provider: "worker",
+              endpoint: ep
+            });
+            probeWorker(ep).then(c => alive && c.images && setAi(a => a.endpoint === ep ? Object.assign({}, a, {
+              images: true,
+              imageTypes: ["image/jpeg"]
+            }) : a));
+          } else setAi({
             state: "off",
             fn: null,
             images: false
@@ -12812,6 +12762,10 @@ function App() {
         provider: "worker",
         endpoint: u
       });
+      probeWorker(u).then(c => c.images && setAi(a => a.endpoint === u ? Object.assign({}, a, {
+        images: true,
+        imageTypes: ["image/jpeg"]
+      }) : a));
       flash("ИИ-сервер подключён");
     } else setAi({
       state: "off",
@@ -12839,6 +12793,10 @@ function App() {
       }]).slice(-12));
       flash("Добавлено в гараж");
     }
+  }
+  const [bmenu, setBmenu] = useState(false);
+  function openBikeMenu() {
+    if (!garage.length && !bfRecent().length) setPicker(true);else setBmenu(!bmenu);
   }
   function switchBike(g) {
     setSel({
@@ -12931,7 +12889,9 @@ function App() {
     className: "top-actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "chip bike-chip",
-    onClick: () => setPicker(true)
+    "aria-haspopup": "menu",
+    "aria-expanded": bmenu,
+    onClick: openBikeMenu
   }, /*#__PURE__*/React.createElement("span", {
     className: "bc-code"
   }, eng.code), cu.nick || bike.name), /*#__PURE__*/React.createElement("button", {
@@ -12941,7 +12901,26 @@ function App() {
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "help",
     s: 18
-  })))), /*#__PURE__*/React.createElement("main", {
+  })))), bmenu && /*#__PURE__*/React.createElement(BikeMenu, {
+    garage: garage,
+    sel: sel,
+    custom: custom,
+    inGarage: inGarage,
+    toggleGarage: toggleGarage,
+    onSwitch: it => {
+      setSel({
+        key: it.g.key,
+        vi: it.g.vi
+      });
+      setBmenu(false);
+      flash("Выбран " + (it.c.nick || it.b.name));
+    },
+    onOther: () => {
+      setBmenu(false);
+      setPicker(true);
+    },
+    onClose: () => setBmenu(false)
+  }), /*#__PURE__*/React.createElement("main", {
     className: "main"
   }, !intro && /*#__PURE__*/React.createElement("div", {
     key: page,
@@ -13717,6 +13696,69 @@ function DetailPanel({
     className: "muted"
   }, "\u041E\u0442\u0434\u0435\u043B\u044C\u043D\u044B\u0445 \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0435\u0439 \u0432 \u0431\u0430\u0437\u0435 \u043D\u0435\u0442 \u2014 \u0434\u0435\u0442\u0430\u043B\u044C \u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F \u0432 \u0441\u0431\u043E\u0440\u0435."))));
 }
+/* Быстрое переключение: гараж + недавние, по нажатию на мотоцикл в шапке */
+function BikeMenu({
+  garage,
+  sel,
+  custom,
+  inGarage,
+  toggleGarage,
+  onSwitch,
+  onOther,
+  onClose
+}) {
+  const seen = {};
+  const list = garage.concat(bfRecent().map(k => ({
+    key: k,
+    vi: 0
+  }))).filter(g => {
+    if (seen[g.key]) return false;
+    seen[g.key] = 1;
+    return true;
+  }).map(g => {
+    const b = BIKES.find(x => bikeKey(x) === g.key);
+    if (!b) return null;
+    const v = b.versions[g.vi] || b.versions[0],
+      c = (custom || {})[g.key + "|" + g.vi] || {},
+      e = ENGINES[c.engine || v.engine] || {};
+    return {
+      g: g,
+      b: b,
+      c: c,
+      e: e,
+      star: garage.some(x => x.key === g.key && x.vi === g.vi)
+    };
+  }).filter(Boolean).slice(0, 8);
+  useEffect(() => {
+    const h = e => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, []);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "bmenu-ov",
+    onClick: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bmenu",
+    role: "menu",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("h4", null, "\u041C\u043E\u0438 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u044B"), list.map(it => {
+    const on = it.g.key === sel.key && it.g.vi === sel.vi;
+    return /*#__PURE__*/React.createElement("button", {
+      key: it.g.key + "|" + it.g.vi,
+      role: "menuitem",
+      className: "bm-item" + (on ? " on" : ""),
+      onClick: () => onSwitch(it)
+    }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, it.c.nick || it.b.name), /*#__PURE__*/React.createElement("small", null, it.b.brand, " \xB7 ", it.e.code || "")), /*#__PURE__*/React.createElement("i", null, on ? "сейчас" : it.star ? "★" : ""));
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "bm-foot"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: toggleGarage
+  }, inGarage ? "★ В гараже" : "☆ В гараж"), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: onOther
+  }, "+ \u0414\u0440\u0443\u0433\u043E\u0439"))));
+}
 function GarageBar({
   garage,
   sel,
@@ -13954,9 +13996,6 @@ function Home(props) {
     askAi
   } = props;
   const [q, setQ] = useState("");
-  const st = maintStatus(eng, mt);
-  const urgent = st.filter(x => x.state === "due" || x.state === "soon").sort((a, b) => b.pct - a.pct);
-  const tracked = st.filter(x => x.state !== "none").length;
   const qq = q.trim().toLowerCase();
   const symAll = [].concat.apply([], SYMPTOMS.map(c => c.items));
   const results = qq.length < 2 ? [] : [].concat(BIKES.filter(b => b.brand !== "Любая модель" && (b.brand + " " + b.name).toLowerCase().indexOf(qq) >= 0).slice(0, 5).map(b => ({
@@ -14113,17 +14152,13 @@ function Home(props) {
   }, /*#__PURE__*/React.createElement("h2", null, "\u041E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u043D\u0438\u0435"), /*#__PURE__*/React.createElement("button", {
     className: "link",
     onClick: () => go("bike", "service")
-  }, "\u041E\u0442\u043A\u0440\u044B\u0442\u044C")), tracked === 0 ? /*#__PURE__*/React.createElement("p", {
-    className: "muted"
-  }, "Укажи пробег и когда последний раз менял масло — подскажу, когда следующее обслуживание.") : urgent.length === 0 ? /*#__PURE__*/React.createElement("p", null, "\u0412\u0441\u0451 \u043F\u043E \u0433\u0440\u0430\u0444\u0438\u043A\u0443. \u041F\u0440\u043E\u0431\u0435\u0433 ", num(mt.odo), " ", eng.hours ? "моточ." : "км", ".") : /*#__PURE__*/React.createElement("ul", {
-    className: "mlist compact"
-  }, urgent.slice(0, 3).map(x => /*#__PURE__*/React.createElement(MaintRow, {
-    key: x.id,
-    x: x
-  }))), tracked === 0 && /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => go("bike", "service")
-  }, "\u0423\u043A\u0430\u0437\u0430\u0442\u044C \u043F\u0440\u043E\u0431\u0435\u0433")), /*#__PURE__*/React.createElement("div", {
+  }, "\u041E\u0442\u043A\u0440\u044B\u0442\u044C")), /*#__PURE__*/React.createElement("ul", {
+    className: "plan compact"
+  }, maintItems(eng).slice(0, 4).map(x => /*#__PURE__*/React.createElement("li", {
+    key: x.id
+  }, /*#__PURE__*/React.createElement("b", null, x.t), /*#__PURE__*/React.createElement("span", {
+    className: "plan-every"
+  }, "\u043A\u0430\u0436\u0434\u044B\u0435 ", num(x.every), " ", eng.hours ? "моточ." : "км"))))), /*#__PURE__*/React.createElement("div", {
     className: "panel"
   }, /*#__PURE__*/React.createElement("div", {
     className: "panel-head"
@@ -15633,10 +15668,7 @@ function aiCardBase(eng, bike, ver, cu, mt) {
   const inst = TUNING.filter(t => eng.installed.indexOf(t.id) >= 0).map(t => t.title);
   if (inst.length) L.push("Установлено владельцем: " + inst.join(", ") + ".");
   if (cu.notes) L.push("Заметки владельца: " + cu.notes);
-  if (mt && mt.odo) {
-    const st = maintStatus(eng, mt).filter(x => x.state !== "none");
-    L.push("Пробег: " + mt.odo + (eng.hours ? " моточасов" : " км") + "." + (st.length ? " ТО: " + st.map(x => x.t + " — " + (x.left <= 0 ? "просрочено" : "через " + x.left + " " + x.unit)).join("; ") + "." : ""));
-  }
+
   L.push("Известные слабые места этого мотора: " + eng.issues.map(i => i.t + " (" + i.fix + ")").join("; "));
   return L.join("\n");
 }
@@ -16283,7 +16315,7 @@ function BackupBar({
         return;
       }
       const when = obj.date ? new Date(obj.date).toLocaleDateString("ru-RU") : "?";
-      if (!window.confirm("Заменить данные на этом устройстве копией от " + when + "? Гараж, журнал обслуживания и сметы станут как в файле.")) return;
+      if (!window.confirm("Заменить данные на этом устройстве копией от " + when + "? Гараж, настройки и сметы станут как в файле.")) return;
       try {
         backupRestore(obj);
         location.reload();
@@ -16563,7 +16595,7 @@ function AiChat({
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "ai",
     s: 26
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A"), /*#__PURE__*/React.createElement("p", null, "\u0417\u043D\u0430\u0435\u0442 \u0442\u0432\u043E\u0439 ", bike.brand, " ", bike.name, ": ", eng.code, ", ", efi ? "инжектор" : eng.carb, eng.installed.length ? ", доработки" : "", mt.odo ? ", пробег " + num(mt.odo) : "", "."))), ready && /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A"), /*#__PURE__*/React.createElement("p", null, "\u0417\u043D\u0430\u0435\u0442 \u0442\u0432\u043E\u0439 ", bike.brand, " ", bike.name, ": ", eng.code, ", ", efi ? "инжектор" : eng.carb, eng.installed.length ? ", доработки" : "", "."))), ready && /*#__PURE__*/React.createElement("div", {
     className: "ai-tools"
   }, ai.provider === "claude" && /*#__PURE__*/React.createElement("div", {
     className: "seg sm",

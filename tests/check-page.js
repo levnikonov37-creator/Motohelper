@@ -68,6 +68,15 @@ const server = http.createServer((req, res) => {
       await page.getByRole("button", { name: tab }).last().click({ timeout: 5000 });
       await page.waitForTimeout(400);
     }
+    // Запчасти: у деталей есть ссылки на поиск в магазинах
+    await page.getByRole("button", { name: "Запчасти" }).last().click();
+    const ozon = await page.locator('.pbuy a[href*="ozon.ru"]').first().getAttribute("href", { timeout: 5000 }).catch(() => null);
+    if (!ozon) errors.push("Запчасти: нет ссылок на магазины");
+    // Шапка: меню «Мои мотоциклы» открывается и закрывается
+    await page.locator(".bike-chip").click();
+    const menu = await page.locator(".bmenu").waitFor({ timeout: 3000 }).then(() => true, () => false);
+    if (!menu) errors.push("Не открылось меню «Мои мотоциклы» по нажатию на мотоцикл в шапке");
+    else await page.keyboard.press("Escape");
     console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
 
     // Ввод чисел с клавиатуры: стёр поле и набрал заново — без лишнего «0» впереди, дроби с запятой
