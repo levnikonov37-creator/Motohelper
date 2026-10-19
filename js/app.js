@@ -691,13 +691,14 @@ function Parts({
   q0
 }) {
   const [cat, setCat] = useState("Все");
-  const [q, setQ] = useState(q0 || "");
+  /* запрос из поиска по сайту: q0 = { q, n } — n меняется при каждом переходе, даже к той же детали */
+  const [q, setQ] = useState(q0 ? q0.q : "");
   useEffect(() => {
     if (q0) {
-      setQ(q0);
+      setQ(q0.q);
       setCat("Все");
     }
-  }, [q0]);
+  }, [q0 && q0.n]);
   const [onlyFit, setOnlyFit] = useState(true);
   const cats = ["Все"].concat(Array.from(new Set(PARTS.map(p => p.cat))));
   /* слова в любом порядке, русская раскладка вместо латиницы, код мотора («174», «182») */
@@ -10292,8 +10293,8 @@ function bikeArtFor(bike, eng, cu) {
   return window.bikeArt({
     uid: "bk",
     cls: cls,
-    brand: bike.brand.length <= 12 ? bike.brand : bike.brand.split(/[\s-]/)[0],
-    model: bike.name,
+    brand: bike.brand === "Любая модель" ? "" : bike.brand.length <= 12 ? bike.brand : bike.brand.split(/[\s-]/)[0],
+    model: bike.brand === "Любая модель" ? "" : bike.name,
     num: L.num,
     eng: {
       stroke: eng.stroke,
@@ -10819,7 +10820,7 @@ function App() {
   const [page, setPage] = useState("home");
   const [bikeTab, setBikeTab] = useState("overview");
   const [rv, setRv] = useState("hub");
-  const [partsQ, setPartsQ] = useState("");
+  const [partsQ, setPartsQ] = useState(null);
   /* направление выезда раздела: перешёл вправо по меню — выезжает справа, влево — слева */
   const pageDir = useRef({
     page: "home",
@@ -11095,7 +11096,10 @@ function App() {
       page: "repair",
       rv: !arg ? "hub" : GUIDES.find(g => g.id === arg) ? "guide:" + arg : arg === "faults" || arg === "codes" ? "ref" : arg
     });else if (t === "parts" || t === "estimate") {
-      setPartsQ(arg && arg.q || "");
+      setPartsQ(arg && arg.q ? {
+        q: arg.q,
+        n: Date.now()
+      } : null);
       navTo({
         page: "parts"
       });
