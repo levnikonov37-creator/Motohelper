@@ -1259,8 +1259,12 @@ function maintItems(e) {
   r = r.filter(function (x) {
     if (x.id === "valves") return e.stroke !== "2T" && e.valveInt !== 0;
     if (x.id === "camchain") return e.stroke !== "2T" && !/Шестерн|шестерн|Ремень|ремень|Вал|вал/.test(e.timing || "");
+    /* у скутеров (вариатор), а также на ремне и кардане цепи нет */
+    if (x.id === "chain") return !e.cvt && !/ремень|кардан/i.test(e.gearbox || "");
+    if (x.id === "fork" && e.cvt) return false;
     return true;
   });
+  if (e.cvt) r.push({ id: "cvtbelt", t: "Ремень вариатора", every: 10000 }, { id: "rollers", t: "Ролики вариатора", every: 8000 }, { id: "gearoil", t: "Масло в редукторе", every: 5000 });
   if (e.groups.indexOf("liquid") >= 0) r.push({ id: "coolant", t: "Антифриз", every: 10000 });
   return r;
 }
@@ -2272,7 +2276,11 @@ GUIDES.push(
 );
 /* ===================== v9: популярные мотоциклы со всего мира ===================== */
 function ensureSpark(id, k) {
-  var e = ENGINES[id]; if (PARTS.some(function (p) { return p.kind === "spark" && p.fit && p.fit.indexOf(id) >= 0; })) return;
+  var e = ENGINES[id];
+  /* у каких моторов уже есть своя свеча: считаем один раз, дальше дополняем — перебирать тысячи деталей на каждый мотор долго */
+  if (!ensureSpark.has) { ensureSpark.has = {}; PARTS.forEach(function (p) { if (p.kind === "spark" && p.fit) p.fit.forEach(function (f) { ensureSpark.has[f] = 1; }); }); }
+  if (ensureSpark.has[id]) return;
+  ensureSpark.has[id] = 1;
   var p = P(id + "-spark", "Свеча " + e.spark.split(" /")[0], r50(600 * (k || 1)), "Расходники", "spark", [id]); p.info = "Под " + e.code; PARTS.unshift(p);
 }
 function W(id, o, k) { J(id, o); ENGINES[id].groups.push(o.region || "eu"); genKit(id, k || 2.4); ensureSpark(id, k || 2.4); }
@@ -2452,6 +2460,8 @@ function speedFor(eng, bike, cu, items, opt) {
   var gain = typeof tuneGain === "function" ? tuneGain(items) : 0;
   var hp = cu.hp && !opt.ignoreUserHp ? Number(cu.hp) : (eng.stockHp || eng.hp) * (1 + gain / 100);
   var red = (typeof enginePeak === "function" ? enginePeak(eng).red : 9000);
+  /* скутер: вариатор, звёзд нет — topRatio мотора уже полное передаточное, колесо 10–13" */
+  if (eng.cvt) { r = f = 1; if (!cu.rim) { rim = 12; circ = tireCirc(12, 75); } }
   var vGear = red / (topRatio(eng) * (r / f)) * circ * 60 / 1000;
   var vPow = solveVPower(hp * 745.7 * 0.87, P) * 3.6;
   var v = Math.min(vGear, vPow);
@@ -5785,7 +5795,57 @@ function tiresFor(bike, e) {
   G("Honda", "Chaly 50 (CF50)", MP, [["CRF50F", "1972–1999", { hp: 3.4, approx: true }]]);
 })();
 
+/* ===================== v31: скутеры — вариатор вместо цепи ===================== */
+var NO_CVT_GUIDES = ["chain", "chain-replace", "csseal", "sprocket-change", "clutch-cable", "clutch-replace", "moped-clutch", "forkseals", "fork-oil"];
+GUIDES.push({ id: "cvt", title: "Вариатор скутера: ремень, ролики, сцепление", area: null, time: "1–1.5 ч", diff: "средне", only: ["cvt"],
+  tools: ["Ключи и головки 8–24 мм", "Держатель вариатора (или ударный гайковёрт)", "Штангенциркуль", "Очиститель тормозов"],
+  parts: ["cvtbelt", "rollers"],
+  steps: [
+    "Сними пластик и крышку вариатора (болты по кругу, обычно М6). Запомни, где длинные болты.",
+    "Застопори крыльчатку держателем и открути гайку ведущего шкива. Сними щёчку, ремень и ведущий шкив с роликами.",
+    "Ремень: трещины, расслоение, «ступеньки» — менять. Ширина меньше нормы на 1 мм и больше — менять (ширина нового указана на нём).",
+    "Ролики: плоские лыски или износ по диаметру на 0.5 мм — меняй весь комплект. Проверь скользящую втулку и пластиковые направляющие.",
+    "Сцепление: колодки тоньше 1.5–2 мм или блестят — менять. Колокол без синевы и борозд, пружины целые.",
+    "Протри шкивы очистителем: масло и смазка на рабочих поверхностях вызывают пробуксовку. Ролики ставь сухими.",
+    "Собери в обратном порядке, гайку шкива затяни моментом по мануалу (обычно 35–55 Н·м у 50-кубовых, до 80–100 Н·м у 125–150).",
+    "Проверь масло в редукторе (заднем мосту): меняй каждые 5000 км, обычно 0.1–0.2 л трансмиссионного 80W-90."
+  ] });
+PARTS.push(P("cvtbelt", "Ремень вариатора", 900, "Трансмиссия", "cvtbelt", ["cvt"]), P("rollers", "Ролики вариатора (комплект)", 600, "Трансмиссия", "rollers", ["cvt"]), P("cvtclutch", "Колодки сцепления вариатора", 900, "Трансмиссия", "cvtclutch", ["cvt"]), P("gearoil", "Масло в редуктор 80W-90", 350, "Смазки", "gearoil", ["cvt"]));
+/* ===================== v31: аналоги свечей (NGK ↔ Denso ↔ Torch) ===================== */
+var SPARK_X = {
+  "C7HSA": ["U22FS-U", "A7TC"], "CR7HSA": ["U22FSR-U", "A7RTC"], "CR6HSA": ["U20FSR-U", "A6RTC"], "C6HSA": ["U20FS-U", "A6TC"],
+  "D8EA": ["X24ES-U", "D8TC"], "DR8EA": ["X24ESR-U", "D8RTC"], "DR8ES": ["X24ESR-U", ""], "D7EA": ["X22ES-U", "D7TC"],
+  "DPR8EA-9": ["X24EPR-U9", ""], "DPR7EA-9": ["X22EPR-U9", ""], "DPR9EA-9": ["X27EPR-U9", ""],
+  "CR7E": ["U22ESR-N", ""], "CR8E": ["U24ESR-N", ""], "CR9E": ["U27ESR-N", ""], "CR6E": ["U20ESR-N", ""],
+  "CR8EH-9": ["U24ETR", ""], "CR9EH-9": ["U27ETR", ""], "CPR7EA-9": ["U22EPR9", ""], "CPR8EA-9": ["U24EPR9", ""], "CPR6EA-9": ["U20EPR9", ""],
+  "B7ES": ["W22ES-U", ""], "B8ES": ["W24ES-U", ""], "B9ES": ["W27ES-U", ""], "BR7ES": ["W22ESR-U", ""], "BR8ES": ["W24ESR-U", ""], "BR9ES": ["W27ESR-U", ""],
+  "BPR6ES": ["W20EPR-U", ""], "BPR7ES": ["W22EPR-U", ""], "BP6ES": ["W20EP-U", ""], "BP7ES": ["W22EP-U", ""],
+  "CR8EIX": ["IU24", ""], "CR9EIX": ["IU27", ""], "DR8EIX": ["IX24B", ""], "CR7EIX": ["IU22", ""]
+};
+/* по строке свечи мотора («NGK CR7HSA / A7TC») — список аналогов */
+function sparkCross(str) {
+  var s = String(str || "").toUpperCase(), out = [];
+  Object.keys(SPARK_X).forEach(function (k) {
+    var x = SPARK_X[k], torch = x[1];
+    var hit = new RegExp("(^|[^A-Z0-9])" + k.replace("-", "\\-") + "([^A-Z0-9-]|$)").test(s) || torch && new RegExp("(^|[^A-Z0-9])" + torch + "([^A-Z0-9]|$)").test(s);
+    if (hit && !out.some(function (o) { return o[0] === "NGK " + k; })) out.push(["NGK " + k, "Denso " + x[0]].concat(torch ? ["Torch " + torch] : []));
+  });
+  return out;
+}
 /* @@DB-FRAGMENTS@@ */
+/* ===================== v31: после всех моторов — вариатор, цепи по размеру, фильтр китайских DOHC только им ===================== */
+(function () {
+  var ids = Object.keys(ENGINES);
+  ids.forEach(function (id) { var e = ENGINES[id]; if (e.cvt && e.groups.indexOf("cvt") < 0) e.groups.push("cvt"); });
+  var noChain = function (e) { return e.cvt || /ремень|кардан/i.test(e.gearbox || ""); };
+  var of = partById("of-dohc");
+  if (of) of.fit = ids.filter(function (id) { var e = ENGINES[id]; return e.groups.indexOf("dohc") >= 0 && !e.jp; });
+  var c520 = partById("ch-520"), c520x = partById("ch-520x");
+  var big = ids.filter(function (id) { var e = ENGINES[id]; return e.groups.indexOf("big") >= 0 && !noChain(e); });
+  var by = function (lo, hi) { return big.filter(function (id) { var c = ENGINES[id].cc; return c > lo && c <= hi; }); };
+  if (c520) { c520.fit = by(0, 520); c520x.fit = by(0, 520); }
+  PARTS.push(P("ch-525", "Цепь 525 X-ring (110–120 звеньев)", 6500, "Трансмиссия", "chain", by(520, 900)), P("ch-530", "Цепь 530 X-ring (110–120 звеньев)", 8500, "Трансмиссия", "chain", by(900, 3000)));
+})();
 sortBikes();
 /* ===================== v26: детали 174 и 182 больше не путаются ===================== */
 /* Детали мотора подписаны его кодом. NB300 сначала по ошибке был заведён как ZS182MN, код исправили на ZS174MN-5
@@ -5795,7 +5855,9 @@ sortBikes();
   var codes = ids.map(function (k) { return ENGINES[k].code; }).filter(Boolean).sort(function (a, b) { return b.length - a.length; });
   function ends(s, t) { return s.length > t.length && s.slice(-t.length - 1) === " " + t; }
   PARTS.forEach(function (p) {
-    var own = ids.find(function (k) { return p.id.indexOf(k + "-") === 0; });
+    /* самый длинный id мотора, с которого начинается id детали («172FMM-3A-pis» → 172FMM-3A) */
+    var own = null;
+    for (var i = p.id.lastIndexOf("-"); i > 0 && !own; i = p.id.lastIndexOf("-", i - 1)) if (ENGINES[p.id.slice(0, i)]) own = p.id.slice(0, i);
     if (!own) return;
     var e = ENGINES[own], mine = e.code;
     if (ends(p.name, mine)) return;

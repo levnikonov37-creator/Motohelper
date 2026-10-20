@@ -1620,3 +1620,4 @@ body::after { display: none !important; }
 .wr-legend i { width: 34px; height: 8px; border-radius: 4px; grid-row: span 2; box-shadow: 0 0 0 1px rgba(255,255,255,.2); }
 .wr-legend span { color: var(--muted); font-size: 13px; }
 .wr-guides { margin-top: 12px; }
+.actions4.rhub .act-main { grid-column: 1 / -1; }

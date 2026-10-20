@@ -666,9 +666,24 @@ function Issues({
 /* ---------- Запчасти ---------- */
 /* Где купить: поиск детали на площадках, в новой вкладке. Код мотора добавляется, если деталь под конкретный мотор */
 const SHOPS = [["Авито", "https://www.avito.ru/rossiya?q="], ["Ozon", "https://www.ozon.ru/search/?text="], ["WB", "https://www.wildberries.ru/catalog/0/search.aspx?search="], ["Маркет", "https://market.yandex.ru/search?text="]];
-function buyQuery(p, eng) {
-  const own = (p.fit || []).indexOf(eng.id) >= 0 && p.name.toLowerCase().indexOf(String(eng.code).toLowerCase()) < 0;
-  return p.name.replace(/\s*\([^)]*\)/g, "") + (own ? " " + eng.code : "");
+/* Запрос в магазин: что за деталь + к чему.
+   Ходовая — по модели мотоцикла; мотор японцев/европейцев — по модели (продавцы пишут так), китайцев — по коду мотора;
+   свечи, масло, инструмент — по самому названию (там уже маркировка). */
+const BUY_BIKE_CATS = ["Подвеска", "Тормоза", "Колёса", "Рама", "Защита"],
+  BUY_PLAIN_CATS = ["Инструмент", "Экипировка", "Поход", "Смазки"];
+function buyQuery(p, eng, bike) {
+  bike = bike || window.mhBike;
+  const code = String(eng.code || "").replace(/\s*\([^)]*\)/g, "");
+  let name = p.name;
+  if (eng.code && name.slice(-String(eng.code).length) === eng.code) name = name.slice(0, -String(eng.code).length);
+  name = name.replace(/\s*\([^)]*\)/g, "").split(" / ")[0].trim();
+  const model = bike && bike.brand !== "Любая модель" ? bike.brand + " " + bike.name.replace(/\s*\([^)]*\)/g, "").replace(/\b\d{2}\/\d{2}\b/, "").trim() : "";
+  if (BUY_PLAIN_CATS.indexOf(p.cat) >= 0 || p.kind === "spark" || p.kind === "oil" || /NGK|Denso|Motul|Liqui|Castrol|DID|RK /.test(name)) return name;
+  if (BUY_BIKE_CATS.indexOf(p.cat) >= 0) return model ? name + " " + model : name + " мотоцикл";
+  const engineSpecific = (p.fit || []).indexOf(eng.id) >= 0;
+  if (eng.jp && model) return name + " " + model;
+  if (engineSpecific || /двигател|цилиндр|поршн|клапан|распредвал|коленвал|статор|прокладк/i.test(name)) return name + " " + code;
+  return name + (model ? " " + model : " " + code);
 }
 function BuyLinks({
   q
@@ -684,9 +699,14 @@ function BuyLinks({
 }
 /* видео по работе: поиск сразу на нескольких площадках (YouTube в России бывает медленным) */
 const VIDEO = [["VK Видео", "https://vkvideo.ru/?q=", "vk"], ["Rutube", "https://rutube.ru/search/?query=", "rt"], ["YouTube", "https://www.youtube.com/results?search_query=", "yt"], ["Яндекс Видео", "https://yandex.ru/video/search?text=", "ya"]];
-function videoQuery(title, eng, bike) {
-  const who = eng.jp && bike && bike.brand !== "Любая модель" ? bike.brand + " " + bike.name : eng.code;
-  return title.replace(/\s*\([^)]*\)/g, "") + " " + who;
+/* Видео: работа по мотору — с кодом мотора (китайцы) или моделью (японцы/европейцы); работа по ходовой — с моделью.
+   Длинные заголовки укорачиваем до сути, чтобы поиск не терялся */
+function videoQuery(title, eng, bike, area) {
+  const model = bike && bike.brand !== "Любая модель" ? bike.brand + " " + bike.name.replace(/\s*\([^)]*\)/g, "").replace(/\b\d{2}\/\d{2}\b/, "").trim() : "";
+  const engineWork = area && typeof AREAS === "object" && AREAS[area];
+  const t = title.replace(/\s*\([^)]*\)/g, "").split(/[:—]/)[0].trim();
+  const who = engineWork && !eng.jp ? eng.code : model || eng.code;
+  return (t + " " + who + (eng.cvt ? " скутер" : " мотоцикл")).replace(/\s+/g, " ");
 }
 function VideoLinks({
   q
@@ -1501,7 +1521,7 @@ const BF_ALIAS = {
   "стн": "stn"
 };
 const BF_POPULAR = ["Motoland", "Kayo", "Regulmoto", "BSE", "Avantis", "Progasi", "Racer", "Irbis", "Stels", "Sharmax", "STN", "CFMOTO", "Honda", "Yamaha", "Kawasaki", "Suzuki", "KTM", "Husqvarna"];
-const BF_TYPES = ["Эндуро", "Питбайк", "Кросс-эндуро", "Мотард", "Тур-эндуро", "Лёгкий эндуро", "Мопед", "Спорт", "Нейкед", "Турер", "Чоппер", "Триал", "Классика"];
+const BF_TYPES = ["Эндуро", "Питбайк", "Кросс-эндуро", "Мотард", "Тур-эндуро", "Лёгкий эндуро", "Мопед", "Скутер", "Спорт", "Нейкед", "Турер", "Чоппер", "Триал", "Классика"];
 function bfNorm(s) {
   return String(s || "").toLowerCase().replace(/ё/g, "е").replace(/[\s\-_.\/«»"]+/g, "");
 }
@@ -10235,7 +10255,7 @@ function Engine3D({
 /* ===== Мотоцикл целиком v7: внешний вид зависит от класса и комплектации ===== */
 function bikeClass(bike, eng) {
   const t = bike.type;
-  if (t === "Мопед") return "moped";
+  if (t === "Мопед" || t === "Скутер") return "moped";
   if (t === "Спорт") return "sport";
   if (t === "Чоппер") return "cruiser";
   if (t === "Нейкед") return "naked";
@@ -10647,6 +10667,7 @@ const PHOTO_WIKI = /^(Honda|Yamaha|Kawasaki|Suzuki|KTM|Husqvarna|Husaberg|GasGas
 const PHOTO_KIND = {
   "Питбайк": ["питбайк", "pit bike"],
   "Мопед": ["мопед", "moped"],
+  "Скутер": ["скутер", "scooter"],
   "Кросс-эндуро": ["мотоцикл", "кроссовый мотоцикл"],
   "Мотард": ["мотоцикл", "мотард"],
   "Спорт": ["мотоцикл", "спортбайк"],
@@ -11095,13 +11116,14 @@ const RV_TITLE = {
   guides: "Все инструкции",
   ref: "Справочник",
   wiring: "Схема электрики",
-  specs: "Шины и моменты затяжки"
+  specs: "Шины и моменты затяжки",
+  buy: "Проверка б/у перед покупкой"
 };
 function diagFor(eng) {
   return DIAG.filter(d => !d.only || d.only.some(g => eng.groups.indexOf(g) >= 0));
 }
 function guidesFor(eng) {
-  return GUIDES.filter(g => !g.only || g.only.some(x => x === eng.id || eng.groups.indexOf(x) >= 0));
+  return GUIDES.filter(g => (!g.only || g.only.some(x => x === eng.id || eng.groups.indexOf(x) >= 0)) && !(eng.cvt && NO_CVT_GUIDES.indexOf(g.id) >= 0));
 }
 function okFor(item, eng) {
   if (item.only && !item.only.some(x => x === eng.id || eng.groups.indexOf(x) >= 0)) return false;
@@ -11555,6 +11577,8 @@ function App() {
       vi: g.vi
     });
   }
+  /* текущий мотоцикл — для точных запросов в магазины и видео */
+  window.mhBike = bike;
   const ctx = {
     eng,
     bike,
@@ -11581,7 +11605,10 @@ function App() {
     custom,
     openSearch
   };
-  const sameEngineBikes = BIKES.filter(b => b !== bike && b.brand !== "Любая модель" && b.versions.some(v => v.engine === eng.id));
+  /* доноры: тот же мотор, его инжекторная/карбюраторная версия (SHARE) или мотор с тем же кодом */
+  const base = c => String(c || "").split(" ")[0];
+  const kin = id => id === eng.id || SHARE[id] === eng.id || SHARE[eng.id] === id || ENGINES[id] && base(ENGINES[id].code) === base(eng.code) && ENGINES[id].cc === eng.cc;
+  const sameEngineBikes = BIKES.filter(b => b !== bike && b.brand !== "Любая модель" && b.versions.some(v => kin(v.engine))).sort((a, b) => (b.versions.some(v => v.engine === eng.id) ? 1 : 0) - (a.versions.some(v => v.engine === eng.id) ? 1 : 0));
   const themeLabel = theme === "dark" ? "тёмная" : theme === "light" ? "светлая" : "как в системе";
   return /*#__PURE__*/React.createElement("div", {
     className: "shell"
@@ -13234,6 +13261,9 @@ function SearchSheet({
 /* ===== Ремонт и ТО: всё про починку в одном разделе ===== */
 /* пункт ТО → инструкция, как его сделать (первая, что подходит мотору) */
 const TO_GUIDE = {
+  cvtbelt: ["cvt"],
+  rollers: ["cvt"],
+  gearoil: ["cvt"],
   oil: ["oil", "oil2t-mix"],
   air: ["airfilter"],
   chain: ["chain"],
@@ -13354,7 +13384,7 @@ function RepairPage(props) {
     title: RV_TITLE[kind]
   }), kind === "find" && /*#__PURE__*/React.createElement(SmartDiag, props), kind === "to" && /*#__PURE__*/React.createElement(Maint, props), kind === "units" && /*#__PURE__*/React.createElement(UnitsGrid, props), kind === "guides" && /*#__PURE__*/React.createElement(GuidesList, _extends({}, props, {
     setGuideOpen: g => setRv("guide:" + g)
-  })), kind === "ref" && /*#__PURE__*/React.createElement(RefView, props), kind === "wiring" && /*#__PURE__*/React.createElement(WiringView, props), kind === "specs" && /*#__PURE__*/React.createElement(SpecsView, props));
+  })), kind === "ref" && /*#__PURE__*/React.createElement(RefView, props), kind === "wiring" && /*#__PURE__*/React.createElement(WiringView, props), kind === "specs" && /*#__PURE__*/React.createElement(SpecsView, props), kind === "buy" && /*#__PURE__*/React.createElement(BuyCheckView, props));
 }
 /* начало раздела: поиск по ремонту и четыре входа */
 function RepairHub(props) {
@@ -13378,7 +13408,7 @@ function RepairHub(props) {
     placeholder: "Что случилось или что нужно сделать?"
   }), /*#__PURE__*/React.createElement("div", {
     className: "actions4 rhub"
-  }, [["diag", "Что сломалось?", "find", " act-main"], ["list", "ТО по пробегу", "to", ""], ["engine", "Узлы мотоцикла", "units", ""], ["book", "Все инструкции", "guides", ""], ["bolt", "Схема электрики", "wiring", ""], ["tire", "Шины и затяжка", "specs", ""]].map(a => /*#__PURE__*/React.createElement("button", {
+  }, [["diag", "Что сломалось?", "find", " act-main"], ["list", "ТО по пробегу", "to", ""], ["engine", "Узлы мотоцикла", "units", ""], ["book", "Все инструкции", "guides", ""], ["bolt", "Схема электрики", "wiring", ""], ["tire", "Шины и затяжка", "specs", ""], ["check", "Проверка б/у", "buy", ""]].map(a => /*#__PURE__*/React.createElement("button", {
     key: a[2],
     className: "act" + a[3],
     onClick: () => setRv(a[2])
@@ -13877,7 +13907,7 @@ function GuideView({
   }), /*#__PURE__*/React.createElement("div", {
     className: "g-video"
   }, /*#__PURE__*/React.createElement("b", null, "\u0412\u0438\u0434\u0435\u043E \u043F\u043E \u0442\u0435\u043C\u0435"), /*#__PURE__*/React.createElement(VideoLinks, {
-    q: videoQuery(guide.title, eng, bike)
+    q: videoQuery(guide.title, eng, bike, guide.area)
   })), guide.tools.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0418\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442"), /*#__PURE__*/React.createElement("div", {
     className: "tags"
   }, guide.tools.map(t => /*#__PURE__*/React.createElement("span", {
@@ -14145,6 +14175,60 @@ function WiringView({
     n: "book",
     s: 18
   }), g[1]))));
+}
+/* ===== Проверка б/у перед покупкой: общий чек-лист + слабые места именно этого мотора ===== */
+function buyChecks(eng, bike) {
+  const two = eng.stroke === "2T",
+    efi = eng.groups.indexOf("efi") >= 0,
+    el = /Электро|электро/.test(eng.start || ""),
+    cvt = !!eng.cvt;
+  const S = [["Документы и номера", ["Номер рамы (VIN) и мотора совпадают с документами (ПТС/ЭПТС или договор с ГТД). Номер не перебит, площадка без следов шлифовки.", eng.jp ? "Год выпуска по VIN совпадает с заявленным." : "На картере выбит код мотора — сверь с " + eng.code + ": под видом одного мотора иногда продают другой.", "Продавец — владелец по документам, мотоцикл не в залоге и не в розыске (проверка на сайте ГИБДД и в реестре залогов)."]], ["Холодный пуск", ["Договорись, чтобы мотор был холодным — тёплый скрывает проблемы с пуском.", el ? "Стартер крутит бодро, без треска обгонной муфты." : "Заводится с 1–3 ударов кика.", efi ? "При включении зажигания насос жужжит 2–3 с, «чек» гаснет после пуска." : "Без подсоса держит холостые после прогрева, на подсосе не захлёбывается.", two ? "Дым сизый и умеренный — норма для 2T; густой белый после прогрева — плохо." : "Нет сизого дыма на перегазовке (масло горит — кольца/колпачки) и белого густого (антифриз)."]], ["Мотор " + eng.code, [two ? "Компрессия в норме (" + (eng.compression || "смотри характеристики") + "), без потерь при повторном замере." : "Компрессия: норма " + (eng.compression || "смотри характеристики") + "; разница между цилиндрами не больше 10%.", two ? "Нет звона поршня на перегазовке, сцепление не ведёт." : "Нет стука на холостых и шуршания цепи ГРМ на перегазовке.", "Нет течей масла: крышки, сальник у передней звезды, прокладка цилиндра.", "Масло на щупе не чёрное и без эмульсии (белая пена — вода или антифриз)."]]];
+  if (eng.issues && eng.issues.length) S.push(["Слабые места этой модели — проверь особенно", eng.issues.map(i => i.t + " — " + (i.fix || ""))]);
+  S.push(["Ходовая", [cvt ? "Вариатор: плавный старт без рывков и вибрации, нет свиста ремня." : "Цепь и звёзды: зубья не «акульи», цепь не оттягивается от задней звезды больше чем на ползвена.", "Вилка: нет масла на перьях, при нажатии на тормоз и раскачке нет стука.", "Рулевая колонка: колесо в воздухе, руль ходит свободно без «щелчка» в центре; на тормозе нет люфта.", "Колёса: нет люфта подшипников, спицы целые и одинаково звенят, обода без вмятин.", "Тормоза: диски без глубоких борозд, колодки не стёрты в металл, рычаг не проваливается."]], ["Рама и пластик", ["Нет сварки и трещин на раме и маятнике (особенно у рулевой колонки и креплений подрамника).", "Следы падений: погнутые рычаги, подножки, задиры на крышках двигателя, новый пластик на старом мотоцикле.", "Руль стоит ровно относительно колеса — иначе может быть повёрнута вилка или рама."]], ["Электрика", ["Работают фара, стоп, поворотники, сигнал.", el ? "Зарядка на 3000–5000 об/мин: 13.5–14.8 В на аккумуляторе." : "Свет не гаснет и не перегорает на оборотах.", "Нет «колхоза» в проводке: скрутки, изолента, лишние провода к CDI/ЭБУ."]], ["Тест-драйв", [cvt ? "Разгон ровный, максималка соответствует объёму, на горке не теряет тягу." : "Передачи включаются чётко, не выбивает под газом, нейтраль находится.", cvt ? "Тормоза держат, скутер не уводит в сторону." : "Сцепление не буксует на резком газе на 3–4 передаче и не ведёт при выжатом рычаге.", "Мотоцикл едет прямо, не виляет на отпущенном руле, тормоза не уводят в сторону.", "После поездки — проверь, не появились ли течи и нет ли запаха горелого."]]);
+  return S;
+}
+function BuyCheckView({
+  eng,
+  bike,
+  go
+}) {
+  const S = buyChecks(eng, bike);
+  const [done, setDone] = useState({});
+  const total = S.reduce((n, s) => n + s[1].length, 0),
+    got = Object.keys(done).filter(k => done[k]).length;
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+    className: "muted"
+  }, "Чек-лист для ", bike.brand === "Любая модель" ? "мотоцикла с мотором " + eng.code : bike.brand + " " + bike.name, ". Отмечай по ходу осмотра: ", got, " из ", total, "."), /*#__PURE__*/React.createElement("div", {
+    className: "g-progress"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: got / total * 100 + "%"
+    }
+  })), S.map((s, si) => /*#__PURE__*/React.createElement(React.Fragment, {
+    key: si
+  }, /*#__PURE__*/React.createElement("h2", null, s[0]), /*#__PURE__*/React.createElement("ol", {
+    className: "g-steps"
+  }, s[1].map((t, i) => {
+    const k = si + ":" + i;
+    return /*#__PURE__*/React.createElement("li", {
+      key: k,
+      className: done[k] ? "done" : ""
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "g-check",
+      "aria-pressed": !!done[k],
+      "aria-label": "Проверено",
+      onClick: () => setDone(Object.assign({}, done, {
+        [k]: !done[k]
+      }))
+    }, done[k] ? /*#__PURE__*/React.createElement(Icon, {
+      n: "check",
+      s: 16
+    }) : i + 1), /*#__PURE__*/React.createElement("p", null, t));
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "g-video"
+  }, /*#__PURE__*/React.createElement("b", null, "Видео"), /*#__PURE__*/React.createElement(VideoLinks, {
+    q: "как проверить б/у " + (eng.jp && bike.brand !== "Любая модель" ? bike.brand + " " + bike.name : eng.code) + " перед покупкой"
+  })));
 }
 /* ===== Шины и моменты затяжки под свой мотоцикл ===== */
 function SpecsView({
@@ -14454,6 +14538,12 @@ function Sprockets({
     max: "60",
     onChange: e => set(Number(e.target.value) || 0)
   }));
+  /* у скутера вариатор — звёзд нет */
+  if (eng.cvt) return /*#__PURE__*/React.createElement("div", {
+    className: "panel sprockets"
+  }, /*#__PURE__*/React.createElement("h2", null, "Вариатор"), /*#__PURE__*/React.createElement("p", {
+    className: "muted"
+  }, "Передаточное у скутера меняет вариатор: на разгон влияют грузики (ролики) и пружина сцепления, на максималку — ремень и ролики. Тяжелее ролики — выше максималка, но вялее разгон; легче — резвее со старта."));
   return /*#__PURE__*/React.createElement("div", {
     className: "panel sprockets"
   }, /*#__PURE__*/React.createElement("h2", null, "\u041A\u0430\u043B\u044C\u043A\u0443\u043B\u044F\u0442\u043E\u0440 \u0437\u0432\u0451\u0437\u0434"), null, /*#__PURE__*/React.createElement("div", {
@@ -15087,13 +15177,13 @@ function Overview({
     })], ["Зазор", /*#__PURE__*/React.createElement(Val, {
       v: eng.gap,
       stock: S.gap
-    })], ["Затяжка", eng.sparkTorque], ["Масло", /*#__PURE__*/React.createElement(Val, {
+    })]].concat(sparkCross(eng.spark).length ? [["Аналоги свечи", sparkCross(eng.spark).map(x => x.join(" = ")).join("; ")]] : [], [["Затяжка", eng.sparkTorque], ["Масло", /*#__PURE__*/React.createElement(Val, {
       v: eng.oil,
       stock: S.oil
     })], ["Объём", /*#__PURE__*/React.createElement(Val, {
       v: eng.oilVol,
       stock: S.oilVol
-    })]].concat(eng.coolant ? [["Антифриз", eng.coolant]] : [])
+    })]]).concat(eng.coolant ? [["Антифриз", eng.coolant]] : [])
   }];
   const inst = TUNING.filter(t => eng.installed.indexOf(t.id) >= 0);
   function card() {
@@ -15141,9 +15231,11 @@ function Overview({
   }), "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u0445\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A\u0438"), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: card
-  }, "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0443")), sameEngineBikes.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0422\u0430\u043A\u043E\u0439 \u0436\u0435 \u043C\u043E\u0442\u043E\u0440 \u0441\u0442\u043E\u0438\u0442 \u043D\u0430"), null, /*#__PURE__*/React.createElement("div", {
+  }, "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0443")), sameEngineBikes.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "Детали мотора подходят от"), /*#__PURE__*/React.createElement("p", {
+    className: "muted"
+  }, "У этих моделей тот же мотор ", eng.code, ": поршень, прокладки, сцепление, клапаны, статор и другие детали мотора взаимозаменяемы — можно брать с донора или искать запчасти по любой из них. Ходовая (вилка, колёса, тормоза) у них своя."), /*#__PURE__*/React.createElement("div", {
     className: "tags"
-  }, sameEngineBikes.map(b => /*#__PURE__*/React.createElement("button", {
+  }, sameEngineBikes.slice(0, 24).map(b => /*#__PURE__*/React.createElement("button", {
     key: bikeKey(b),
     className: "chip",
     onClick: () => onPickBike(b)
