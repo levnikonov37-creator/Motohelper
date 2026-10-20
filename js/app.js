@@ -742,10 +742,16 @@ function Parts({
     }
   }, [q0 && q0.n]);
   const [onlyFit, setOnlyFit] = useState(true);
-  const cats = ["Все"].concat(Array.from(new Set(PARTS.map(p => p.cat))));
+  const [lim, setLim] = useState(60);
+  /* деталей десятки тысяч: категории и «подходит к мотору» считаем один раз, показываем порциями */
+  const cats = useMemo(() => ["Все"].concat(Array.from(new Set(PARTS.map(p => p.cat)))), []);
+  const mine = useMemo(() => PARTS.filter(p => fits(p, eng)), [eng]);
+  const myGuides = useMemo(() => guidesFor(eng), [eng]);
+  useEffect(() => setLim(60), [q, cat, onlyFit, eng]);
   /* слова в любом порядке, русская раскладка вместо латиницы, код мотора («174», «182») */
   const toks = srTokens(q);
-  const list = PARTS.filter(p => (cat === "Все" || p.cat === cat) && (!onlyFit || fits(p, eng)) && (!toks.length || srMatch(p.name + " " + p.cat, toks) > 0));
+  const listAll = (onlyFit ? mine : PARTS).filter(p => (cat === "Все" || p.cat === cat) && (!toks.length || srMatch(p.name + " " + p.cat, toks) > 0));
+  const list = listAll.slice(0, lim);
   const total = cart.reduce((s, p) => s + p.price, 0);
   return /*#__PURE__*/React.createElement(React.Fragment, null, cart.length > 0 && /*#__PURE__*/React.createElement("section", {
     className: "cart-box"
@@ -815,7 +821,7 @@ function Parts({
     }, "\u041D\u0435 \u0434\u043B\u044F ", eng.code), (() => {
       const ii = installInfo(p.kind);
       if (!ii) return null;
-      const gd = ii.guide && guidesFor(eng).find(g => g.id === ii.guide);
+      const gd = ii.guide && myGuides.find(g => g.id === ii.guide);
       return /*#__PURE__*/React.createElement("span", {
         className: "pinst"
       }, "\u0423\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430: ", /*#__PURE__*/React.createElement("b", {
@@ -836,7 +842,12 @@ function Parts({
       n: "check",
       s: 16
     }) : "+"));
-  }), list.length === 0 && /*#__PURE__*/React.createElement("li", {
+  }), listAll.length > lim && /*#__PURE__*/React.createElement("li", {
+    className: "more-li"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn bf-more",
+    onClick: () => setLim(lim + 60)
+  }, "Показать ещё (", listAll.length - lim, ")")), list.length === 0 && /*#__PURE__*/React.createElement("li", {
     className: "empty"
   }, "\u041D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u0421\u043D\u0438\u043C\u0438 \u0444\u0438\u043B\u044C\u0442\u0440 \u0441\u043E\u0432\u043C\u0435\u0441\u0442\u0438\u043C\u043E\u0441\u0442\u0438 \u0438\u043B\u0438 \u0438\u0437\u043C\u0435\u043D\u0438 \u0437\u0430\u043F\u0440\u043E\u0441.")), cart.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "cartbar"
@@ -12872,7 +12883,7 @@ function PreRide({
       done: {}
     };
   });
-  const items = PRERIDE.filter(p => !p[2] || eng.groups.indexOf(p[2]) >= 0);
+  const items = PRERIDE.filter(p => !p[2] || eng.groups.indexOf(p[2]) >= 0).map(p => p[0] === "fuel" ? [p[0], eng.stroke === "2T" ? eng.groups.indexOf("efi") >= 0 || eng.cvt ? "Бензин и масло 2T в бачке" : "Бензин (смесь с маслом 2T!)" : "Бензин"].concat(p.slice(2)) : eng.cvt && p[0] === "chain" ? null : p).filter(Boolean);
   const n = items.filter(i => st.done[i[0]]).length;
   const pct = n / items.length;
   function tog(id) {
@@ -13092,7 +13103,12 @@ function siteSearch(q, ctx, opt) {
   FAULTS.forEach((f, i) => add("Неисправность", f.s, () => go("repair", "ref"), "", 1, "f" + i));
   if (!repairOnly) {
     TUNING.filter(t => tuningFor(t, eng).ok).forEach(t => add("Тюнинг", t.title, () => go("tuning"), t.cat, 1, "t" + t.id));
-    PARTS.forEach(p => fits(p, eng) && add("Запчасть", p.name, () => go("parts", {
+    /* детали под мотор считаем один раз на мотор, а не на каждую букву */
+    if (siteSearch.eng !== eng) {
+      siteSearch.eng = eng;
+      siteSearch.parts = PARTS.filter(p => fits(p, eng));
+    }
+    siteSearch.parts.forEach(p => add("Запчасть", p.name, () => go("parts", {
       q: p.name
     }), "", 1, "p" + p.id, rub(p.price)));
     BIKES.forEach(b => {
@@ -14495,6 +14511,74 @@ function Meter({
     }
   })));
 }
+/* ===== Жиклёры под погоду и высоту: смесь беднеет/богатеет вместе с плотностью воздуха ===== */
+function airDensityRatio(alt, temp) {
+  const p = Math.pow(1 - 2.2557e-5 * alt, 5.2559),
+    t = 293.15 / (273.15 + temp);
+  return p * t;
+}
+function jetNum(s) {
+  const m = String(s || "").match(/\d+(\.\d+)?/g);
+  if (!m) return 0;
+  const n = m.map(Number);
+  return n.length > 1 ? (n[0] + n[1]) / 2 : n[0];
+}
+function JetWeather({
+  eng
+}) {
+  const [alt, setAlt] = useState(() => load("jw-alt", 200));
+  const [temp, setTemp] = useState(() => load("jw-temp", 20));
+  if (eng.groups.indexOf("carb") < 0) return null;
+  const main = jetNum(eng.jetMain),
+    pilot = jetNum(eng.jetPilot);
+  if (!main) return null;
+  const r = airDensityRatio(Number(alt) || 0, Number(temp)),
+    k = Math.sqrt(r);
+  const step = main >= 100 ? 2.5 : 1;
+  const round = v => Math.round(v / step) * step;
+  const nm = round(main * k),
+    np = pilot ? Math.round(pilot * k) : 0;
+  const d = (r - 1) * 100;
+  const needle = d < -6 ? "клипса на 1 канавку выше (беднее)" : d > 6 ? "клипса на 1 канавку ниже (богаче)" : "без изменений";
+  const set = (f, key) => e => {
+    f(e.target.value);
+    save(key, e.target.value);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "panel jetw"
+  }, /*#__PURE__*/React.createElement("h2", null, "Жиклёры под погоду и высоту"), /*#__PURE__*/React.createElement("p", {
+    className: "muted"
+  }, "Базовые цифры ", eng.code, " — для 20 °C у моря. В горах и в жару воздух реже — смесь богатеет, в мороз — беднеет."), /*#__PURE__*/React.createElement("div", {
+    className: "jetw-in"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "f"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "f-label"
+  }, "Высота, м"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    inputMode: "numeric",
+    value: alt,
+    min: "0",
+    max: "4500",
+    step: "100",
+    onChange: set(setAlt, "jw-alt")
+  })), /*#__PURE__*/React.createElement("label", {
+    className: "f"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "f-label"
+  }, "Температура, °C"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    inputMode: "numeric",
+    value: temp,
+    min: "-30",
+    max: "45",
+    onChange: set(setTemp, "jw-temp")
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "jetw-out"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Плотность воздуха"), /*#__PURE__*/React.createElement("b", null, (d >= 0 ? "+" : "") + d.toFixed(0) + "%")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Главный жиклёр"), /*#__PURE__*/React.createElement("b", null, nm, " ", /*#__PURE__*/React.createElement("small", null, "(база ", eng.jetMain, ")"))), np > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Холостой"), /*#__PURE__*/React.createElement("b", null, np, " ", /*#__PURE__*/React.createElement("small", null, "(база ", eng.jetPilot, ")"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Игла"), /*#__PURE__*/React.createElement("b", null, needle))), /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, "Это стартовая точка. Окончательно — по цвету свечи после проезда на полном газу (светло-коричневая — норма)."));
+}
 function Sprockets({
   eng,
   bike,
@@ -14751,6 +14835,8 @@ function Tuning({
     eng: eng,
     bike: bike,
     cu: cu
+  }), /*#__PURE__*/React.createElement(JetWeather, {
+    eng: eng
   }), /*#__PURE__*/React.createElement("div", {
     className: "list-head"
   }, /*#__PURE__*/React.createElement("h2", null, "\u0412\u0441\u0435 \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u0434\u043B\u044F ", eng.code), /*#__PURE__*/React.createElement("button", {
@@ -14868,6 +14954,27 @@ function PartsPage(props) {
 }
 
 /* ===== ИИ: контекст ===== */
+/* ИИ видит не только свой мотоцикл: модели и моторы, названные в вопросе, ищем по всей базе */
+function aiLookup(text) {
+  const toks = bfTokens(String(text).replace(/[?!.,;:()«»"]/g, " ")).filter(t => t.length >= 3 || /\d/.test(t) && /[a-zа-я]/.test(t));
+  if (!toks.length) return "";
+  const hit = [];
+  BIKES.forEach(b => {
+    if (b.brand === "Любая модель" || hit.length >= 8) return;
+    const nb = bfNorm(b.brand),
+      nn = bfNorm(b.name);
+    const brandHit = toks.some(t => bfHas(nb, t)),
+      nameHit = toks.some(t => t.length >= 2 && bfHas(nn, t) && !bfHas(nb, t));
+    if (brandHit && nameHit) hit.push(b);
+  });
+  /* моторы — по коду с буквами («nb300», «172fmm»); голое число («250») подходит слишком многим, его берём, только если моделей не нашлось */
+  const used = t => hit.some(b => bfHas(bfNorm(b.name), t));
+  const engToks = toks.filter(t => !used(t) && (/[a-zа-я]/.test(t) && /\d/.test(t) || !hit.length && /^\d{3}$/.test(t)));
+  const engs = Object.keys(ENGINES).filter(id => engToks.some(t => bfHas(bfNorm(ENGINES[id].code + " " + (ENGINE_AKA[id] || "")), t))).slice(0, 3);
+  if (!hit.length && !engs.length) return "";
+  const line = e => e.code + " — " + e.cc + " см³, " + e.hp + " л.с., " + e.stroke + ", " + e.cam + ", " + e.cooling + ", питание: " + e.carb + ", свеча " + e.spark + ", клапаны " + e.valveIn + "/" + e.valveEx + ", масло " + e.oil + " " + e.oilVol;
+  return "\n\n=== ИЗ БАЗЫ ПО ВОПРОСУ (другие модели и моторы) ===\n" + hit.map(b => b.brand + " " + b.name + " (" + b.type + "): " + b.versions.map(v => (v.years ? v.years + ": " : "") + line(ENGINES[v.engine])).join("; ")).concat(engs.map(id => "Мотор " + line(ENGINES[id]))).join("\n");
+}
 function aiCardBase(eng, bike, ver, cu, mt) {
   const S = eng.stock,
     efi = eng.groups.indexOf("efi") >= 0;
@@ -15120,8 +15227,108 @@ function AreaPanel({
     s: 18
   }), "\u0421\u043F\u0440\u043E\u0441\u0438\u0442\u044C \u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A\u0430 \u043F\u0440\u043E \u044D\u0442\u043E\u0442 \u0443\u0437\u0435\u043B"))));
 }
+/* ===== «Сообщить о неточности»: сообщение уходит владельцу сайта через сервер ИИ (хранится в Cloudflare KV) ===== */
+function FeedbackBox({
+  eng,
+  bike,
+  ver,
+  ai,
+  flash
+}) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
+  const [contact, setContact] = useState("");
+  const [st, setSt] = useState("");
+  const info = (bike.brand === "Любая модель" ? "" : bike.brand + " " + bike.name) + (ver && ver.years ? " (" + ver.years + ")" : "");
+  async function send() {
+    if (!text.trim()) return;
+    setSt("busy");
+    let ep = ai && ai.endpoint;
+    try {
+      if (!ep) {
+        const r = await fetch("ai-config.json", {
+          cache: "no-cache"
+        });
+        ep = r.ok ? (await r.json()).endpoint : "";
+      }
+      const r2 = ep ? await fetch(ep, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          feedback: {
+            bike: info,
+            engine: eng.code,
+            text: text,
+            contact: contact,
+            page: location.href
+          }
+        })
+      }) : null;
+      const j = r2 ? await r2.json().catch(() => ({})) : {};
+      if (j.ok) {
+        setSt("ok");
+        setText("");
+        flash && flash("Спасибо! Сообщение отправлено");
+      } else setSt("fail");
+    } catch (e) {
+      setSt("fail");
+    }
+  }
+  function copy() {
+    const t = "MotoHelper: " + info + ", мотор " + eng.code + "\n" + text;
+    try {
+      navigator.clipboard.writeText(t);
+      flash && flash("Текст скопирован");
+    } catch (e) {}
+  }
+  if (!open) return /*#__PURE__*/React.createElement("button", {
+    className: "btn fb-open",
+    onClick: () => setOpen(true)
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "edit",
+    s: 17
+  }), "Нашёл неточность? Сообщи");
+  return /*#__PURE__*/React.createElement("div", {
+    className: "panel fb-box"
+  }, /*#__PURE__*/React.createElement("h3", null, "Что не так с ", info || eng.code, "?"), /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, "Например: «у моего другой мотор», «свеча не та», «объём масла 1.3 л». Модель и мотор подставятся сами."), /*#__PURE__*/React.createElement("textarea", {
+    value: text,
+    rows: 4,
+    maxLength: 2000,
+    placeholder: "Что неверно и как правильно",
+    onChange: e => setText(e.target.value)
+  }), /*#__PURE__*/React.createElement("input", {
+    value: contact,
+    maxLength: 120,
+    placeholder: "Как с тобой связаться (необязательно)",
+    onChange: e => setContact(e.target.value)
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "row-gap"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: st === "busy" || !text.trim(),
+    onClick: send
+  }, st === "busy" ? "Отправляю…" : "Отправить"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => {
+      setOpen(false);
+      setSt("");
+    }
+  }, "Закрыть")), st === "ok" && /*#__PURE__*/React.createElement("p", {
+    className: "ok-msg"
+  }, "Спасибо! Проверим и поправим."), st === "fail" && /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, "Не получилось отправить — сервер сайта пока не принимает сообщения. ", /*#__PURE__*/React.createElement("button", {
+    className: "link inline",
+    onClick: copy
+  }, "Скопировать текст"), ", чтобы переслать владельцу сайта."));
+}
 function Overview({
   eng,
+  ai,
   sameEngineBikes,
   onPickBike,
   setTab,
@@ -15239,7 +15446,13 @@ function Overview({
     key: bikeKey(b),
     className: "chip",
     onClick: () => onPickBike(b)
-  }, b.brand, " ", b.name)))));
+  }, b.brand, " ", b.name)))), /*#__PURE__*/React.createElement(FeedbackBox, {
+    eng: eng,
+    bike: bike,
+    ver: ver,
+    ai: ai,
+    flash: flash
+  }));
 }
 function TreeRunner({
   eng,
@@ -15742,7 +15955,7 @@ function AiChat({
     setBusy(true);
     const c = new AbortController();
     ctl.current = c;
-    const context = AI_RULES + (ai.provider === "worker" ? "\nВсегда отвечай только на русском языке." : "") + "\n\n=== КАРТОЧКА МОТОЦИКЛА ===\n" + aiCard(eng, bike, ver, cu, mt) + "\n\n=== КАТАЛОГ ЗАПЧАСТЕЙ (ID|название|цена ₽) ===\n" + aiCatalog(eng, ai.provider === "worker" ? 40 : 220);
+    const context = AI_RULES + (ai.provider === "worker" ? "\nВсегда отвечай только на русском языке." : "") + "\n\n=== КАРТОЧКА МОТОЦИКЛА ===\n" + aiCard(eng, bike, ver, cu, mt) + "\n\n=== КАТАЛОГ ЗАПЧАСТЕЙ (ID|название|цена ₽) ===\n" + aiCatalog(eng, ai.provider === "worker" ? 40 : 220) + aiLookup(history.slice(-3).filter(m => m.role === "user").map(m => m.text).join(" "));
     const turns = [{
       role: "user",
       content: context
