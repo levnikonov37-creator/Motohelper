@@ -7822,6 +7822,13 @@ function sparkCross(str) {
   G("SSR", "SR110TR", P, [["152FMH", "", { approx: true }]]);
 })();
 
+/* fixE("ID", { valveIn, spark, oilVol, ... }) — уточнить поля существующего мотора (код и объём не меняются: по ним подписаны детали) */
+function fixE(id, o) {
+  var e = ENGINES[id];
+  if (!e) throw new Error("fixE: нет двигателя " + id);
+  if ("code" in o || "cc" in o) throw new Error("fixE: код и объём меняются через новый мотор и setEngine");
+  Object.assign(e, o);
+}
 /* @@DB-FRAGMENTS@@ */
 /* ===================== v35: Keeway K-Light 202 и Kayo TS90 — свой объём ===================== */
 CL("V223KW", "V250LF", { code: "Keeway V223", name: "Keeway V-twin 223 воздушный (K-Light 202, Superlight 200)", cc: 223, hp: 17, torque: "16 Н·м" }, 1.1);
