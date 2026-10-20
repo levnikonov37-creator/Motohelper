@@ -211,7 +211,11 @@ const server = http.createServer((req, res) => {
       for (let i = 0; i < 50; i++) {
         const keys = await caches.keys();
         const c = keys.length && (await caches.open(keys[0]));
-        if (c && (await c.match("vendor/three.min.js"))) return reg.active && reg.active.state;
+        if (c && (await c.match("vendor/three.min.js"))) {
+          // кэш готов; воркер мог ещё не закончить activate — подождём его
+          for (let j = 0; j < 50 && reg.active && reg.active.state !== "activated"; j++) await new Promise((r) => setTimeout(r, 100));
+          return reg.active && reg.active.state;
+        }
         await new Promise((r) => setTimeout(r, 100));
       }
       return "без 3D в кэше";
