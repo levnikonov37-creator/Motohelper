@@ -7567,6 +7567,261 @@ function sparkCross(str) {
   G("Yezdi", "Adventure", AD, [["IN_JAWA334", "2022+"]]);
 })();
 
+/* ===================== v36: китайские, корейские и тайваньские марки ===================== */
+(function () {
+  var NK = "Нейкед", SP = "Спорт", CH = "Чоппер", TR = "Турер", AD = "Тур-эндуро", CL_ = "Классика";
+  var E = "Эндуро", P = "Питбайк", M = "Мотард", L = "Лёгкий эндуро";
+
+  /* ===================== МОТОРЫ: Китай ===================== */
+  /* вертикальный 125 GN125-типа (Qianjiang/Keeway, Haojue, Lifan) — копия Suzuki GN125, регулировка клапанов винтом */
+  CL("CN_157FMI", "CB150", { code: "157FMI", name: "157FMI · вертикальный 125 (GN125-тип)", maker: "Qianjiang (Keeway) / Haojue / Lifan",
+    cc: 124, hp: 11, torque: "9.5 Н·м", compression: "≈ 9.5 бар", carb: "PZ26 / Mikuni VM22", jetMain: "100–105", jetPilot: "35", needle: "3 канавка",
+    idle: "1400–1600", start: "Электро + кик", gearbox: "5 ст.", valveIn: "0.08–0.13 мм", valveEx: "0.13–0.18 мм", spark: "NGK D8EA / D8TC", gap: "0.6–0.7 мм",
+    oilVol: "≈ 1.0 л", oilInt: 2000, valveInt: 4000,
+    issues: [{ t: "Шумит цепь ГРМ, натяжитель подклинивает", sev: "med", fix: "Натяжитель и успокоитель вместе с цепью." },
+      { t: "Течь масла по крышке клапанов и патрубку", sev: "low", fix: "Новые прокладки/кольца, затяжка по моменту." },
+      { t: "Слабое реле-регулятор — садится АКБ", sev: "med", fix: "Проверить заряд 13.8–14.5 В, заменить регулятор." }] }, 1.0);
+  RE("KEE_125L", { region: "cn", code: "QJ 125 LC", name: "Keeway / QJ 125 жидкостный (RKF 125)", maker: "Qianjiang (Keeway)", groups: ["liquid", "efi", "4t", "small"],
+    cam: "SOHC, 4 клапана", cc: 125, hp: 12.8, torque: "≈ 10 Н·м", compression: "≈ 11.6 бар", carb: "Инжектор (ранние партии — карбюратор)",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", spark: "NGK CR8E", gap: "0.6–0.7 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.1 л", oilInt: 3000, valveInt: 6000, coolant: "≈ 0.8 л", redline: 10500,
+    issues: [{ t: "Датчики и разъёмы впрыска боятся воды", sev: "med", fix: "Диэлектрическая смазка в разъёмы, не мыть напором." },
+      { t: "Цепь ГРМ при редкой смене масла", sev: "med", fix: "Масло каждые 3000 км." }] }, 1.0);
+  RE("KEE_V302", { region: "cn", code: "QJ V2 298", name: "Keeway / QJ V-twin 298 (V302C)", maker: "Qianjiang (Keeway)", layout: "vtwin",
+    groups: ["liquid", "efi", "4t", "big"], cam: "SOHC, 8 клапанов, V-twin", cc: 298, hp: 29.5, torque: "≈ 26.5 Н·м", compression: "≈ 11.5 бар", gearbox: "6 ст., ремень",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", spark: "NGK CR8E", sparkTorque: "12 Н·м", oilVol: "≈ 2.0 л", oilInt: 5000, valveInt: 12000, coolant: "≈ 1.2 л", redline: 9500,
+    issues: [{ t: "Ремень привода: износ и натяжение", sev: "med", fix: "Проверять натяжение и трещины каждые 5000 км." },
+      { t: "Перегрев в пробках", sev: "low", fix: "Проверить включение вентилятора и уровень антифриза." }] }, 1.1);
+  RE("LIF_T400", { region: "cn", code: "LF400 (KPT400)", name: "Lifan 378 (рядная двойка: KPT 400)", maker: "Lifan", layout: "twin", crankPhase: 180,
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 378, hp: 42, torque: "≈ 35 Н·м", compression: "≈ 11.5 бар",
+    valveIn: "0.10–0.15 мм", valveEx: "0.20–0.25 мм", spark: "NGK CR8EIX", oilVol: "≈ 2.6 л", oilInt: 5000, valveInt: 12000, coolant: "≈ 1.5 л", redline: 10500,
+    issues: [{ t: "Редкие оригинальные запчасти мотора", sev: "med", fix: "Расходники заказывать заранее." },
+      { t: "Вибрации на высоких оборотах", sev: "low", fix: "Проверить затяжку креплений мотора и глушителя." }] }, 1.2);
+  CL("VOGE500", "VOGE525", { code: "LX471", name: "Loncin / Voge 471 (рядная двойка: 500R / 500DS / 500AC)", cc: 471, hp: 47, torque: "44.5 Н·м" }, 1.3);
+  RE("CFM_400", { region: "cn", code: "CF 400 2V", name: "CFMOTO 400 (рядная двойка 180°: 400NK / 400GT)", maker: "CFMOTO", layout: "twin", crankPhase: 180,
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 400, hp: 41, torque: "≈ 35 Н·м", compression: "≈ 11.3 бар",
+    valveIn: "0.10–0.20 мм", valveEx: "0.20–0.30 мм", spark: "NGK CPR8EA-9", oil: "10W-40 / 15W-40 (JASO MA)", oilVol: "≈ 2.6 л", oilInt: 6000, valveInt: 24000, coolant: "≈ 1.5 л", redline: 10500,
+    issues: [{ t: "Реле-регулятор и разъём генератора греются", sev: "med", fix: "Проверить разъём, при оплавлении — паять напрямую." },
+      { t: "Датчики EFI и корродирующие разъёмы", sev: "low", fix: "Чистка и диэлектрическая смазка." }] }, 1.2);
+  CL("CFM_650", "CFM_400", { code: "CF 650 2V", name: "CFMOTO 649 (рядная двойка 180°: 650NK / 650MT / 650GT / 650TR-G)", cc: 649, hp: 61, torque: "≈ 56 Н·м", compression: "≈ 11.3 бар", oilVol: "≈ 2.8 л", redline: 10000 }, 1.3);
+  RE("CFM_1250", { region: "cn", code: "CF 1279 V2", name: "CFMOTO 1279 V-twin 75° (1250TR-G, на базе KTM LC8)", maker: "CFMOTO", layout: "vtwin", vAngle: 75,
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 8 клапанов, V-twin 75°", cc: 1279, hp: 140, torque: "≈ 120 Н·м", compression: "≈ 13 бар", fuel: "АИ-95/98",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", spark: "NGK LKAR8AI-9", oilVol: "≈ 4 л", oilInt: 7500, valveInt: 30000, coolant: "≈ 2.5 л", redline: 9500,
+    issues: [{ t: "Сложная электроника, дилерская диагностика", sev: "med", fix: "Обновления ЭБУ у дилера." },
+      { t: "Нагрев заднего цилиндра в пробках", sev: "low", fix: "Следить за вентиляторами и уровнем ОЖ." }] }, 1.8);
+  RE("CFM_PAPIO", { region: "cn", code: "CF 126", name: "CFMOTO 126 горизонтальный (Papio)", maker: "CFMOTO", groups: ["horiz", "air", "efi", "4t", "small"],
+    cooling: "Воздушное", cam: "SOHC, 2 клапана", cc: 126, hp: 9.5, torque: "≈ 10 Н·м", compression: "≈ 9.5 бар", gearbox: "4 ст.",
+    valveIn: "0.05–0.08 мм", valveEx: "0.05–0.08 мм", spark: "NGK CR7HSA", gap: "0.6–0.7 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.0 л", oilInt: 3000, valveInt: 6000, coolant: "—",
+    issues: [{ t: "Клапаны зажимаются — проверять зазоры", sev: "med", fix: "Регулировка на холодную каждые 6000 км." },
+      { t: "Цепь ГРМ при редкой смене масла", sev: "low", fix: "Масло каждые 3000 км." }] }, 1.0);
+  CL("ZON_155", "S125Z", { code: "Zontes 155", name: "Zontes 155 (ZT155 U1 / G1)", cc: 155, hp: 16, torque: "≈ 13.5 Н·м",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", spark: "NGK CR8E", oilVol: "≈ 1.2 л", oilInt: 4000, valveInt: 8000, coolant: "≈ 0.9 л",
+    issues: [{ t: "Много электроники (бесключевой доступ, электро-замок) — капризы при разряде АКБ", sev: "med", fix: "Держать АКБ заряженной, зимой — на подзарядку." },
+      { t: "Цепь ГРМ и натяжитель", sev: "low", fix: "Масло по регламенту, при стуке — менять натяжитель." }] }, 1.0);
+  RE("ZON_703", { region: "cn", code: "Zontes 699 I3", name: "Zontes 699 (рядная тройка: 703F / 703RR)", maker: "Zontes", layout: "i3",
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 12 клапанов, 3 цилиндра", cc: 699, hp: 95, torque: "≈ 75 Н·м", compression: "≈ 12 бар",
+    valveIn: "0.10–0.20 мм", valveEx: "0.20–0.30 мм", spark: "NGK LMAR8A-9", oilVol: "≈ 3.2 л", oilInt: 6000, valveInt: 24000, coolant: "≈ 2 л", redline: 11000,
+    issues: [{ t: "Новый мотор — мало статистики и запчастей", sev: "med", fix: "Обслуживание у дилера, запчасти заранее." },
+      { t: "Электроника (TFT, ride-by-wire) требует прошивок", sev: "low", fix: "Обновления у дилера." }] }, 1.4);
+  RE("QJ_I4_921", { region: "cn", code: "QJ 921 I4", name: "QJMotor 921 (рядная четвёрка: SRK 921)", maker: "QJMotor", layout: "i4",
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 16 клапанов, 4 цилиндра", cc: 921, hp: 130, torque: "≈ 98 Н·м", compression: "≈ 12.5 бар",
+    valveIn: "0.10–0.20 мм", valveEx: "0.20–0.30 мм", spark: "NGK CR9EIX", oilVol: "≈ 3.8 л", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.5 л", redline: 11500,
+    issues: [{ t: "Сильный нагрев в городе", sev: "low", fix: "Следить за вентилятором и антифризом." },
+      { t: "Редкие запчасти мотора", sev: "med", fix: "Заказ через дилера заранее." }] }, 1.6);
+
+  /* ===================== МОТОРЫ: Корея (Hyosung, Daelim) ===================== */
+  var HYO_ISS = [{ t: "Реле-регулятор выходит из строя (типичная болезнь Hyosung)", sev: "high", fix: "Проверять заряд 14–14.5 В, ставить регулятор MOSFET." },
+    { t: "Обгонная муфта стартера проскальзывает", sev: "med", fix: "Замена муфты/роликов, качественный АКБ." },
+    { t: "Шум натяжителей цепей ГРМ", sev: "med", fix: "Заменить натяжители, масло чаще." }];
+  RE("HYO_V125", { region: "jp", code: "Hyosung 125 V2", name: "Hyosung 125 V-twin 75° (GT125 / GV125 Aquila)", maker: "Hyosung", layout: "vtwin", vAngle: 75,
+    groups: ["dohc", "air", "carb", "4t", "small"], cooling: "Воздушно-масляное", cam: "DOHC, 8 клапанов, V-twin 75°", cc: 125, hp: 13.5, torque: "≈ 10 Н·м", compression: "≈ 11.5 бар",
+    ignition: "CDI", gearbox: "5 ст.", carb: "Mikuni BDS26 ×2", jetMain: "по мануалу", jetPilot: "по мануалу", idle: "1300–1500",
+    valveIn: "0.10–0.15 мм", valveEx: "0.20–0.25 мм", spark: "NGK CR8E", gap: "0.7–0.8 мм", sparkTorque: "11 Н·м", oil: "10W-40 (JASO MA)", oilVol: "≈ 1.8 л", oilInt: 4000, valveInt: 12000, coolant: "—", redline: 11500, issues: HYO_ISS }, 1.5);
+  RE("HYO_V250C", { region: "jp", code: "Hyosung 250 V2 (карб.)", name: "Hyosung 250 V-twin 75° карбюратор (GT250 / GV250, до 2009)", maker: "Hyosung", layout: "vtwin", vAngle: 75,
+    groups: ["dohc", "air", "carb", "4t", "big"], cooling: "Воздушно-масляное", cam: "DOHC, 8 клапанов, V-twin 75°", cc: 249, hp: 28, torque: "≈ 22 Н·м", compression: "≈ 10.3 бар",
+    ignition: "CDI", gearbox: "5 ст.", carb: "Mikuni BDS26 ×2", jetMain: "по мануалу", jetPilot: "по мануалу", idle: "1300–1500",
+    valveIn: "0.10–0.15 мм", valveEx: "0.20–0.25 мм", spark: "NGK CR8E", gap: "0.7–0.8 мм", sparkTorque: "11 Н·м", oil: "10W-40 (JASO MA)", oilVol: "≈ 2.4 л", oilInt: 4000, valveInt: 12000, coolant: "—", redline: 11000,
+    issues: HYO_ISS.concat([{ t: "Синхронизация карбюраторов сбивается — неровный холостой", sev: "low", fix: "Синхронизация по вакуумметрам." }]) }, 1.6);
+  CL("HYO_V250I", "HYO_V250C", { code: "Hyosung 250 V2 EFI", name: "Hyosung 250 V-twin 75° инжектор (GT250 / GV250, 2010+)", groups: ["dohc", "air", "efi", "4t", "big", "jp"],
+    ignition: "ЭБУ (EFI)", carb: "Инжектор (Delphi)", jetMain: "—", jetPilot: "—", needle: "—", idle: "1400–1500",
+    issues: HYO_ISS.concat([{ t: "Датчики EFI (Delphi) и топливный насос", sev: "med", fix: "Диагностика сканером, фильтр насоса." }]) }, 1.6);
+  RE("HYO_V650C", { region: "jp", code: "Hyosung 650 V2 (карб.)", name: "Hyosung 647 V-twin 90° карбюратор (GT650 / GV650, до 2008)", maker: "Hyosung", layout: "vtwin", vAngle: 90,
+    groups: ["dohc", "liquid", "carb", "4t", "big"], cam: "DOHC, 8 клапанов, V-twin 90°", cc: 647, hp: 79, torque: "≈ 68 Н·м", compression: "≈ 11.6 бар",
+    ignition: "CDI", carb: "Mikuni BDSR39 ×2", jetMain: "по мануалу", jetPilot: "по мануалу", idle: "1200–1400",
+    valveIn: "0.10–0.20 мм", valveEx: "0.20–0.30 мм", spark: "NGK CR8E", gap: "0.7–0.8 мм", sparkTorque: "11 Н·м", oilVol: "≈ 3.0 л", oilInt: 6000, valveInt: 24000, coolant: "≈ 1.8 л", redline: 10500,
+    issues: HYO_ISS.concat([{ t: "Ржавеет бак изнутри — грязь в карбюраторах", sev: "med", fix: "Фильтр топлива, обработка бака." }]) }, 1.9);
+  CL("HYO_V650I", "HYO_V650C", { code: "Hyosung 650 V2 EFI", name: "Hyosung 647 V-twin 90° инжектор (GT650 / GV650, 2009+)", groups: ["dohc", "liquid", "efi", "4t", "big", "jp"],
+    hp: 74, ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—", idle: "1300–1400",
+    issues: HYO_ISS.concat([{ t: "Топливный насос и датчики EFI", sev: "med", fix: "Диагностика, замена насоса/фильтра." }]) }, 1.9);
+  CL("HYO_V678", "HYO_V650I", { code: "Hyosung 678 V2", name: "Hyosung 678 V-twin 90° (ST7)", cc: 678, hp: 65, torque: "≈ 65 Н·м", gearbox: "5 ст., ремень", redline: 9500 }, 1.9);
+  RE("HYO_GD250", { region: "jp", code: "Hyosung GD250", name: "Hyosung 249 одноцилиндровый DOHC (GD250N / GD250R)", maker: "Hyosung",
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 4 клапана", cc: 249, hp: 27.6, torque: "≈ 22 Н·м", compression: "≈ 11.5 бар",
+    valveIn: "0.10–0.15 мм", valveEx: "0.20–0.25 мм", spark: "NGK CR8E", sparkTorque: "11 Н·м", oilVol: "≈ 1.8 л", oilInt: 5000, valveInt: 12000, coolant: "≈ 1 л", redline: 10500,
+    issues: [{ t: "Реле-регулятор (как у всех Hyosung)", sev: "med", fix: "Контроль напряжения заряда." }, { t: "Вибрации на высоких оборотах", sev: "low", fix: "Проверить крепления, утяжелители руля." }] }, 1.5);
+  CL("HYO_V300", "HYO_V250I", { code: "Hyosung 300 V2", name: "Hyosung 296 V-twin 75° (GV300S Bolt)", cc: 296, hp: 30, torque: "≈ 26 Н·м" }, 1.6);
+  RE("HYO_S125", { region: "jp", code: "Hyosung 125 1V", name: "Hyosung 125 одноцилиндровый воздушный (RT125 Karion / RX125 / GA125)", maker: "Hyosung",
+    groups: ["air", "carb", "4t", "small"], cooling: "Воздушное", cam: "SOHC, 2 клапана", cc: 124, hp: 12, torque: "≈ 10 Н·м", compression: "≈ 9.5 бар",
+    ignition: "CDI", gearbox: "5 ст.", carb: "Mikuni VM22", jetMain: "по мануалу", jetPilot: "по мануалу", idle: "1400–1600",
+    valveIn: "0.08–0.13 мм", valveEx: "0.13–0.18 мм", spark: "NGK DR8EA", gap: "0.6–0.7 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.2 л", oilInt: 3000, valveInt: 6000, coolant: "—",
+    issues: [{ t: "Реле-регулятор", sev: "med", fix: "Контроль заряда." }, { t: "Натяжитель цепи ГРМ", sev: "low", fix: "Менять при стуке." }] }, 1.3);
+  RE("DAE_250", { region: "jp", code: "Daelim VJF250", name: "Daelim 247 одноцилиндровый DOHC (VJF250)", maker: "Daelim",
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 4 клапана", cc: 247, hp: 21, torque: "≈ 19 Н·м", compression: "≈ 11 бар", gearbox: "5 ст.",
+    valveIn: "0.10–0.15 мм", valveEx: "0.20–0.25 мм", spark: "NGK CR8E", sparkTorque: "11 Н·м", oilVol: "≈ 1.6 л", oilInt: 4000, valveInt: 12000, coolant: "≈ 1 л", redline: 10500,
+    issues: [{ t: "Запчасти Daelim редкие — бренд ушёл с рынка", sev: "med", fix: "Расходники подбирать по каталогам аналогов." }, { t: "Реле-регулятор", sev: "low", fix: "Контроль заряда." }] }, 1.4);
+  RE("DAE_125C", { region: "jp", code: "Daelim 125 DOHC", name: "Daelim 124 DOHC воздушно-масляный (Roadwin 125, карбюратор)", maker: "Daelim",
+    groups: ["dohc", "air", "carb", "4t", "small"], cooling: "Воздушно-масляное", cam: "DOHC, 4 клапана", cc: 124, hp: 14, torque: "≈ 11 Н·м", compression: "≈ 11 бар",
+    ignition: "CDI", gearbox: "5 ст.", carb: "Keihin (по году)", jetMain: "по мануалу", jetPilot: "по мануалу", idle: "1400–1600",
+    valveIn: "0.08–0.12 мм", valveEx: "0.15–0.20 мм", spark: "NGK CR7HSA", gap: "0.6–0.7 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.2 л", oilInt: 3000, valveInt: 8000, coolant: "—", redline: 11000,
+    issues: [{ t: "Запчасти Daelim редкие", sev: "med", fix: "Подбор по каталогам аналогов." }, { t: "Цепь ГРМ при редкой смене масла", sev: "low", fix: "Масло каждые 3000 км." }] }, 1.3);
+  CL("DAE_125I", "DAE_125C", { code: "Daelim 125 DOHC FI", name: "Daelim 124 DOHC воздушно-масляный (Roadwin R 125 FI)", groups: ["dohc", "air", "efi", "4t", "small", "jp"],
+    ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—" }, 1.3);
+  RE("DAE_V125", { region: "jp", code: "Daelim 125 V2", name: "Daelim 125 V-twin воздушный (VL125 Daystar / VS125 Evolution)", maker: "Daelim", layout: "vtwin",
+    groups: ["air", "carb", "4t", "small"], cooling: "Воздушное", cam: "SOHC, 4 клапана, V-twin", cc: 125, hp: 12, torque: "≈ 10 Н·м", compression: "≈ 10 бар",
+    ignition: "CDI", gearbox: "5 ст.", carb: "Keihin ×1", jetMain: "по мануалу", jetPilot: "по мануалу", idle: "1300–1500",
+    valveIn: "0.05–0.08 мм", valveEx: "0.08–0.10 мм", spark: "NGK CR7HSA", gap: "0.6–0.7 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.3 л", oilInt: 3000, valveInt: 6000, coolant: "—", redline: 10500,
+    issues: [{ t: "Перегрев заднего цилиндра в пробках", sev: "low", fix: "Не стоять подолгу на холостых, масло качественное." }, { t: "Запчасти Daelim редкие", sev: "med", fix: "Подбор по каталогам аналогов." }] }, 1.3);
+
+  /* ===================== МОТОРЫ: Тайвань (SYM, Kymco) ===================== */
+  RE("SYMM_125", { region: "jp", code: "SYM 125 (Wolf)", name: "SYM 124 воздушный (Wolf 125 / Husky 125)", maker: "SYM",
+    groups: ["air", "carb", "4t", "small"], cooling: "Воздушное", cam: "SOHC, 2 клапана", cc: 124, hp: 10.5, torque: "≈ 9.5 Н·м", compression: "≈ 9.5 бар",
+    ignition: "CDI", gearbox: "5 ст.", carb: "Keihin PB", jetMain: "по мануалу", jetPilot: "по мануалу", idle: "1400–1600",
+    valveIn: "0.05–0.08 мм", valveEx: "0.08–0.10 мм", spark: "NGK CR7HSA", gap: "0.6–0.7 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.0 л", oilInt: 3000, valveInt: 6000, coolant: "—",
+    issues: [{ t: "Простой надёжный мотор (Honda-тип) — главное масло", sev: "low", fix: "Масло каждые 3000 км." }, { t: "Засор карбюратора после хранения", sev: "low", fix: "Сливать бензин на зиму." }] }, 1.2);
+  RE("SYMM_250", { region: "jp", code: "SYM 250 LC", name: "SYM 249 жидкостный (Wolf T2 250i)", maker: "SYM",
+    groups: ["liquid", "efi", "4t", "big"], cam: "SOHC, 4 клапана", cc: 249, hp: 25, torque: "≈ 23 Н·м", compression: "≈ 10.5 бар", gearbox: "5 ст.",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", spark: "NGK CR7E", sparkTorque: "12 Н·м", oilVol: "≈ 1.5 л", oilInt: 4000, valveInt: 12000, coolant: "≈ 1 л",
+    issues: [{ t: "Редкие запчасти на мотоциклы SYM в РФ", sev: "med", fix: "Заказ заранее, аналоги по каталогам." }, { t: "Реле-регулятор", sev: "low", fix: "Контроль заряда." }] }, 1.3);
+  RE("KYMM_V250", { region: "jp", code: "Kymco V2 250", name: "Kymco 249 V-twin 90° (Venox 250)", maker: "Kymco", layout: "vtwin", vAngle: 90,
+    groups: ["dohc", "liquid", "carb", "4t", "big"], cam: "DOHC, 8 клапанов, V-twin 90°", cc: 249, hp: 28, torque: "≈ 20 Н·м", compression: "≈ 11.5 бар",
+    ignition: "CDI", gearbox: "5 ст.", carb: "Keihin ×2", jetMain: "по мануалу", jetPilot: "по мануалу", idle: "1300–1500",
+    valveIn: "0.10–0.15 мм", valveEx: "0.20–0.25 мм", spark: "NGK CR8E", sparkTorque: "11 Н·м", oilVol: "≈ 2.0 л", oilInt: 4000, valveInt: 12000, coolant: "≈ 1.2 л", redline: 12000,
+    issues: [{ t: "Синхронизация карбюраторов", sev: "low", fix: "Синхронизация по вакуумметрам." }, { t: "Запчасти мотора только под заказ", sev: "med", fix: "Расходники заранее." }] }, 1.4);
+  RE("KYMM_125", { region: "jp", code: "Kymco 125", name: "Kymco 124 воздушный (Pulsar 125 / Hipster 125 / K-Pipe 125)", maker: "Kymco",
+    groups: ["air", "carb", "4t", "small"], cooling: "Воздушное", cam: "SOHC, 2 клапана", cc: 124, hp: 10, torque: "≈ 9.5 Н·м", compression: "≈ 9.5 бар",
+    ignition: "CDI", gearbox: "5 ст.", carb: "Keihin PB", jetMain: "по мануалу", jetPilot: "по мануалу", idle: "1400–1600",
+    valveIn: "0.05–0.08 мм", valveEx: "0.08–0.10 мм", spark: "NGK CR7HSA", gap: "0.6–0.7 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.0 л", oilInt: 3000, valveInt: 6000, coolant: "—",
+    issues: [{ t: "Надёжный Honda-подобный мотор, слабое место — масло", sev: "low", fix: "Масло каждые 3000 км." }, { t: "Реле-регулятор", sev: "low", fix: "Контроль заряда." }] }, 1.2);
+
+  /* ===================== ИСПРАВЛЕНИЯ ===================== */
+  setEngine("Keeway", "RKF 125", 0, "KEE_125L");                       // RKF 125 — свой жидкостный QJ 125 4V, не Zontes
+  setEngine("Keeway", "RKV 125", 0, "CN_157FMI");                      // RKV 125 (2013–2022) — воздушный 2V 124 см³
+  setEngine("Keeway", "Superlight 125", 0, "CN_157FMI", { approx: true }); // вертикальный 125, не горизонтальный питбайковый 154FMI
+  setEngine("Keeway", "V302C", 0, "KEE_V302");                          // V-twin 298, а не рядная двойка Benelli 300
+  setEngine("Voge", "300AC", 0, "VOGE300", { hp: 26 });                 // Loncin 292, не CFMOTO 292
+  setEngine("Voge", "500R", 0, "VOGE500");                              // 471 см³, не 494
+  setEngine("Voge", "500DS", 0, "VOGE500");
+  setEngine("Voge", "525ACX", 0, "VOGE525");                            // точный мотор, снят ≈
+  setEngine("CFMOTO", "450CL-C", 0, "CF450");                           // тот же 449 двойка 270°, снят ≈
+  setEngine("Lifan", "KP Mini 200", 0, "S200LF");                       // KPM 200 — тот же 198 жидкостный
+
+  /* ===================== CFMOTO ===================== */
+  G("CFMOTO", "400NK", NK, [["CFM_400", "2013–2019"]]);
+  G("CFMOTO", "400GT", TR, [["CFM_400", "2015–2019"]]);
+  G("CFMOTO", "650NK", NK, [["CFM_650", "2012–2022"]]);
+  G("CFMOTO", "650MT", AD, [["CFM_650", "2016–2023", { hp: 70 }]]);
+  G("CFMOTO", "650GT", TR, [["CFM_650", "2019–2023", { hp: 70 }]]);
+  G("CFMOTO", "650TR-G", TR, [["CFM_650", "2013–2018"]]);
+  G("CFMOTO", "800MT-X", AD, [["T800C", "2025+"]]);
+  G("CFMOTO", "1250TR-G", TR, [["CFM_1250", "2022+"]]);
+  G("CFMOTO", "Papio", NK, [["CFM_PAPIO", "2020+"]]);
+
+  /* ===================== Voge ===================== */
+  G("Voge", "500AC", CL_, [["VOGE500", "2021+"]]);
+  G("Voge", "500DSX", AD, [["VOGE500", "2020–2022"]]);
+  G("Voge", "525R", NK, [["VOGE525", "2023+"]]);
+  G("Voge", "300ACX", CL_, [["VOGE300", "2022+", { hp: 26 }]]);
+  G("Voge", "650DS", AD, [["ROTAX652", "2020–2022", { hp: 48 }]]);
+  G("Voge", "650DSX", AD, [["ROTAX652", "2021+", { hp: 48 }]]);
+
+  /* ===================== QJMotor ===================== */
+  G("QJMotor", "SRK 921", NK, [["QJ_I4_921", "2024+"]]);
+  G("QJMotor", "SRT 700 / 700X", AD, [["T700BN", "2022+"]]);
+  G("QJMotor", "SRK 700", NK, [["T700BN", "2023+"]]);
+  G("QJMotor", "SRC 500", CL_, [["TRK502", "2022+", { approx: true }]]);
+
+  /* ===================== Zontes ===================== */
+  G("Zontes", "ZT125-U1", NK, [["S125Z", "2020+"]]);
+  G("Zontes", "ZT155-U1", NK, [["ZON_155", "2021+"]]);
+  G("Zontes", "ZT155-G1", NK, [["ZON_155", "2021+"]]);
+  G("Zontes", "ZT703F", AD, [["ZON_703", "2024+"]]);
+  G("Zontes", "ZT703RR", SP, [["ZON_703", "2024+"]]);
+
+  /* ===================== Lifan, Keeway, Haojue ===================== */
+  G("Lifan", "KPT 200", AD, [["S200LF", "2018+"]]);
+  G("Lifan", "KPT 400", AD, [["LIF_T400", "2020+"]]);
+  G("Keeway", "K-Light 125", CH, [["CN_157FMI", "2015+"]]);
+  G("Keeway", "RKS 125", NK, [["CN_157FMI", "2013–2020", { approx: true }]]);
+  G("Keeway", "RKS 150", NK, [["CB150", "2016+", { approx: true }]]);
+  G("Keeway", "TX 125", L, [["CN_157FMI", "2009–2016", { approx: true }]]);
+  G("Haojue", "HJ125-8", NK, [["CN_157FMI", "", { approx: true }]]);
+  G("Haojue", "TR150", CL_, [["S160HJ", "2021+", { approx: true, hp: 13 }]]);
+
+  /* ===================== Hyosung ===================== */
+  G("Hyosung", "GT125", NK, [["HYO_V125", "2003–2016"]]);
+  G("Hyosung", "GT125R", SP, [["HYO_V125", "2006–2016"]]);
+  G("Hyosung", "GT250", NK, [["HYO_V250C", "2004–2009"], ["HYO_V250I", "2010+"]]);
+  G("Hyosung", "GT250R", SP, [["HYO_V250C", "2006–2009"], ["HYO_V250I", "2010+"]]);
+  G("Hyosung", "GT650 / GT650S", NK, [["HYO_V650C", "2004–2008"], ["HYO_V650I", "2009+"]]);
+  G("Hyosung", "GT650R", SP, [["HYO_V650C", "2006–2008"], ["HYO_V650I", "2009+"]]);
+  G("Hyosung", "GV125 Aquila", CH, [["HYO_V125", "2000–2014"]]);
+  G("Hyosung", "GV250 Aquila", CH, [["HYO_V250C", "2001–2009"], ["HYO_V250I", "2010–2017"]]);
+  G("Hyosung", "GV250 DRA", CH, [["HYO_V250I", "2018+"]]);
+  G("Hyosung", "GV300S Bolt", CH, [["HYO_V300", "2017+"]]);
+  G("Hyosung", "GV650 Aquila", CH, [["HYO_V650C", "2005–2008"], ["HYO_V650I", "2009+"]]);
+  G("Hyosung", "ST7", CH, [["HYO_V678", ""]]);
+  G("Hyosung", "GD250N", NK, [["HYO_GD250", "2016+"]]);
+  G("Hyosung", "GD250R", SP, [["HYO_GD250", "2016+"]]);
+  G("Hyosung", "RT125 Karion", L, [["HYO_S125", "2001+"]]);
+  G("Hyosung", "RX125", L, [["HYO_S125", "", { approx: true }]]);
+  G("Hyosung", "GA125 Cruise II", CH, [["HYO_S125", "", { approx: true }]]);
+
+  /* ===================== Daelim, SYM, Kymco (только мотоциклы) ===================== */
+  G("Daelim", "VJF250", NK, [["DAE_250", "2011–2017"]]);
+  G("Daelim", "Roadwin 125", NK, [["DAE_125C", "2005–2012"]]);
+  G("Daelim", "Roadwin R 125 FI", NK, [["DAE_125I", "2013+"]]);
+  G("Daelim", "VL125 Daystar", CH, [["DAE_V125", "2001–2011"]]);
+  G("Daelim", "VS125 Evolution", CH, [["DAE_V125", "", { approx: true }]]);
+  G("SYM", "Wolf 125", CL_, [["SYMM_125", ""]]);
+  G("SYM", "Husky 125", L, [["SYMM_125", "", { approx: true }]]);
+  G("SYM", "Wolf T2 250i", NK, [["SYMM_250", "2014+"]]);
+  G("Kymco", "Venox 250", CH, [["KYMM_V250", "2002–2010"]]);
+  G("Kymco", "Pulsar 125", NK, [["KYMM_125", ""]]);
+  G("Kymco", "Hipster 125", CL_, [["KYMM_125", "", { approx: true }]]);
+  G("Kymco", "K-Pipe 125", NK, [["KYMM_125", "2013+", { approx: true }]]);
+
+  /* ===================== китайские дорожные (РФ) ===================== */
+  G("Stels", "600 Benelli", NK, [["I4_600C", "2013–2015"]]);
+  G("Stels", "SB 200", CL_, [["CG200", "", { approx: true }]]);
+  G("Irbis", "VJ 250", SP, [["172FMM", "", { approx: true }]]);
+  G("Irbis", "GR 250", E, [["172FMM", "", { approx: true }]]);
+  G("Irbis", "Garpia 250", CH, [["V250LF", "", { approx: true }]]);
+  G("Racer", "Magnum RC250-C5B", CH, [["167FMM", "", { approx: true }]]);   // в объявлениях — «166FMM нижневальный» (CG-тип)
+  G("Racer", "Skyway RC250-CS", SP, [["172FMM", "", { approx: true }]]);
+  G("Racer", "Caiman RC250XZR-X", E, [["172FMM-5", "2025+", { approx: true }]]);
+  G("Baltmotors", "Classic 200", CL_, [["CG200", "", { approx: true }]]);
+  G("Baltmotors", "Street 250 DD", NK, [["172FMM", "", { approx: true }]]);
+  G("Baltmotors", "Motard 200 DD", M, [["CG200", "", { approx: true }]]);
+  G("Baltmotors", "Enduro 200 DD", L, [["CG200", "", { approx: true }]]);
+  G("Geon", "X-Road 200", L, [["CG200", "", { approx: true }]]);
+  G("Motoland", "Forester 200", L, [["CG200", "", { approx: true }]]);
+
+  /* ===================== эндуро и питбайки (по карточкам маркетплейсов) ===================== */
+  G("Kayo", "K2 Pro 300", E, [["PR300", "2024+"]]);
+  G("Kayo", "T1 300 Enduro", E, [["PR300", ""]]);
+  G("Kayo", "K3 300 MX", E, [["PR300", ""]]);
+  G("Kayo", "K3 300 Road", E, [["PR300", ""]]);
+  G("Motoland", "X3 250 PRO", E, [["172FMM", ""]]);
+  G("Motoland", "SMX300", E, [["175FMM", ""]]);
+  G("Motoland", "SMX300 S4 PRO", E, [["NB300", ""]]);
+  G("Motoland", "300 DF Big Bore", E, [["CBS300", ""]]);
+  G("Avantis", "Just PR300S", E, [["PR300", "2025+"]]);
+  G("EX-Moto", "YR3 NB300", E, [["NB300", ""]]);
+  G("OXO", "Rage PR300", E, [["PR300", ""]]);
+  G("OXO", "Rage NB300", E, [["NB300", ""]]);
+  G("PWR", "FS250", E, [["172FMM-3A", ""]]);
+  G("SSR", "SR70", P, [["147FMD", "", { approx: true }]]);
+  G("SSR", "SR110TR", P, [["152FMH", "", { approx: true }]]);
+})();
+
 /* @@DB-FRAGMENTS@@ */
 /* ===================== v35: Keeway K-Light 202 и Kayo TS90 — свой объём ===================== */
 CL("V223KW", "V250LF", { code: "Keeway V223", name: "Keeway V-twin 223 воздушный (K-Light 202, Superlight 200)", cc: 223, hp: 17, torque: "16 Н·м" }, 1.1);
