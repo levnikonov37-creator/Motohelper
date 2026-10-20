@@ -1621,3 +1621,22 @@ body::after { display: none !important; }
 .wr-legend span { color: var(--muted); font-size: 13px; }
 .wr-guides { margin-top: 12px; }
 .actions4.rhub .act-main { grid-column: 1 / -1; }
+.jetw-in { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 420px; }
+.jetw-out { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 12px 0 6px; }
+.jetw-out > div { padding: 10px 12px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+.jetw-out span { font-size: 13px; color: var(--muted); }
+.jetw-out b { font: 600 18px var(--cond); }
+.jetw-out b small { font: 500 12px var(--body, inherit); color: var(--muted); }
+.parts .more-li { list-style: none; border: 0; background: none; justify-content: center; }
+.fb-open { margin-top: 22px; }
+.fb-box { margin-top: 22px; max-width: 620px; display: grid; gap: 10px; }
+.fb-box h3, .fb-box p { margin: 0; }
+.fb-box textarea, .fb-box input { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--ink); font: inherit; resize: vertical; }
+/* ===== v38: карточки деталей, аккуратнее списки ===== */
+.parts { border-top: 0; display: grid; gap: 8px; }
+.parts li { padding: 12px 12px 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 1px 0 rgba(255,255,255,.03) inset; transition: border-color .2s ease; }
+.parts li:hover { border-color: rgba(255,255,255,.22); }
+.parts li b { font-weight: 600; line-height: 1.3; }
+.parts li .pc { font: 600 11.5px var(--cond); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.parts li .price { font: 600 16px var(--cond); white-space: nowrap; }
+.parts .more-li { padding: 4px 0; }
