@@ -1261,6 +1261,8 @@ function maintItems(e) {
     if (x.id === "camchain") return e.stroke !== "2T" && !/Шестерн|шестерн|Ремень|ремень|Вал|вал/.test(e.timing || "");
     /* у скутеров (вариатор), а также на ремне и кардане цепи нет */
     if (x.id === "chain") return !e.cvt && !/ремень|кардан/i.test(e.gearbox || "");
+    /* у 2T масло не меняют, а доливают в бачок или мешают с бензином; у 2T-мотоцикла остаётся масло КПП */
+    if (x.id === "oil" && e.stroke === "2T") { if (e.cvt) return false; x.t = "Масло КПП"; x.every = 5000; }
     if (x.id === "fork" && e.cvt) return false;
     return true;
   });
@@ -6768,6 +6770,433 @@ function sparkCross(str) {
   G("Montesa", "Cota 4RT", TRL, [["MONT_4RT249", "2005–2013"]]);
   G("Fantic", "Caballero 700", NK, [["T700", "2023+"]]);
   G("Rieju", "MR 200", KX, [["GG_EC200", "2021+"]]);
+})();
+
+/* ===================== v33: скутеры (вариатор) ===================== */
+(function () {
+  /* ===================== СКУТЕРЫ (вариатор CVT) ===================== */
+  var SC = "Скутер", A = { approx: true };
+  function x(base, o) { var r = {}, k; for (k in base) r[k] = base[k]; for (k in o) r[k] = o[k]; return r; }
+  /* topRatio под максималку: speedFor для cvt берёт колесо 12" (окружность ≈ 1.429 м), v = red / tr × 1.429 × 0.06 */
+  function sp(red, kmh) { return { redline: red, topRatio: Math.round(red * 0.08573 / kmh * 100) / 100 }; }
+  /* мотор: W + общие скутерные поля (у CL поля копируются, groups задаём новым массивом) */
+  function S(id, o, k) { W(id, x(BASE, o), k); }
+
+  var BASE = { cvt: true, layout: "single", gearbox: "Вариатор (CVT)", start: "Электро + кик", ignition: "CDI", idle: "1600–1800",
+    fuel: "АИ-92 / АИ-95", gap: "0.6–0.7 мм", sparkTorque: "10–12 Н·м", timing: "Цепь ГРМ", oilInt: 3000, valveInt: 6000,
+    jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу" };
+  var T2 = { stroke: "2T", cam: "Лепестковый клапан (у Honda Dio — золотник/лепесток)", cooling: "Воздушное", timing: "—",
+    valveIn: "—", valveEx: "—", valveInt: 0, oilInt: 5000, idle: "1700–1900",
+    fuel: "АИ-92 / АИ-95 (масло подаёт насос — смесь не нужна)",
+    oil: "Масло 2T (полусинтетика/синтетика, JASO FC/FD) — в отдельный бачок; в редуктор — 80W-90 (или SAE 10W-40)" };
+  var F4 = { stroke: "4T", cam: "SOHC, 2 клапана", cooling: "Воздушное", oil: "10W-40 (JASO MB/MA); в редуктор — 80W-90 / SAE 10W-30" };
+  var LQ = { cooling: "Жидкостное", oil: "10W-30 / 10W-40 (JASO MB); в редуктор — 80W-90" };
+  var FI = { carb: "Инжектор", ignition: "ЭБУ (инжектор)", jetMain: "—", jetPilot: "—", needle: "—", idle: "1500–1700" };
+  var BIG = { start: "Электро", ignition: "ЭБУ (инжектор)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—", idle: "1300–1500",
+    oilInt: 6000, valveInt: 12000, sparkTorque: "11–12 Н·м", gap: "0.8–0.9 мм" };
+
+  /* --- типовые слабые места --- */
+  var BELT = { t: "Ремень вариатора изнашивается и рвётся — скутер перестаёт ехать", sev: "med", fix: "Менять по пробегу (8–15 тыс. км) и по ширине, возить запасной; при замене — осмотр щёк вариатора." };
+  var ROLL = { t: "Ролики вариатора с лысками — рывки, вялый разгон, падает максималка", sev: "med", fix: "Ролики комплектом (≈ каждые 8 тыс. км), смазать втулку и скользящие щёки, проверить вариатор на люфт." };
+  var CLU = { t: "Сцепление вариатора: колодки и колокол — дёргание при трогании, пробуксовка", sev: "med", fix: "Колодки сцепления и пружины по износу, колокол — если есть ступенька/овал." };
+  var STR = { t: "Стартер и бендикс: щелчок без прокрутки, проскальзывание", sev: "low", fix: "Зарядить/заменить АКБ, почистить и смазать бендикс, щётки стартера." };
+  var CARB = { t: "Карбюратор: засорение жиклёров, плохой холостой, не работает автообогатитель (электроподсос)", sev: "med", fix: "Чистка карбюратора, проверка электроподсоса (сопротивление ≈ 5–10 Ом, горячий при работе)." };
+  var PUMP = { t: "Масло 2T: пустой бачок, треснувшие трубки или неисправный насос — задир поршня", sev: "high", fix: "Не ездить с пустым бачком, менять трубки насоса, после разборки — прокачать насос." };
+  var PIS2 = { t: "Износ ЦПГ 2T и коренных подшипников (особенно после «тюнинга» и езды на максималке)", sev: "med", fix: "Компрессия ≥ 7–8 бар, поршень/цилиндр по износу, сальники коленвала при подсосе." };
+  var VAL = { t: "Клапаны зажимаются — тяжёлый пуск на горячую, потеря компрессии", sev: "med", fix: "Регулировка зазоров на холодную по регламенту." };
+  var GRM = { t: "Натяжитель цепи ГРМ — шум на холодную", sev: "low", fix: "Натяжитель и успокоитель цепи, цепь — по вытяжке." };
+  var EFIW = { t: "Инжектор: грязная форсунка, слабый бензонасос, мотор не заводится на севшей АКБ", sev: "med", fix: "Свежий бензин, фильтр насоса, заряженная АКБ; чистка форсунки." };
+  var IDST = { t: "Система Start&Stop/ACG-стартер: при слабой АКБ отключается, не заводится", sev: "low", fix: "Проверить АКБ (≥ 12.4 В в покое), клеммы и реле." };
+  var COOL = { t: "Охлаждение: забитый радиатор, термостат, течь помпы", sev: "med", fix: "Антифриз по регламенту (≈ 2 года), чистка радиатора, сальник помпы." };
+  var GEAR = { t: "Масло в редукторе не меняют годами — гул и износ подшипников редуктора", sev: "low", fix: "Менять масло редуктора каждые 5–10 тыс. км, проверить сапун." };
+  var OLD = { t: "Возраст японских б/у (20–30 лет): трещины пластика, проводка, коррозия, износ ЦПГ", sev: "med", fix: "При покупке: компрессия, люфты колёс и маятника двигателя, проверка зарядки." };
+  var REG = { t: "Реле-регулятор и генератор: недозаряд/перезаряд, перегорают лампы", sev: "low", fix: "Проверить зарядку 13.5–14.5 В на оборотах, разъёмы регулятора." };
+
+  /* ===================== КИТАЙСКИЕ МОТОРЫ GY6 / 1E40QMB ===================== */
+  var CN = { region: "cn", jp: false, maker: "GY6 (Китай: Lifan / Zongshen / Jonway / Qingqi и др.)" };
+  S("CN_139QMB", x(F4, x(CN, x(sp(8000, 50), { code: "139QMB", name: "139QMB · скутерный GY6 50 (4T 49)", groups: ["horiz", "air", "carb", "4t", "small"],
+    cc: 49.5, hp: 3, torque: "≈ 3 Н·м", compression: "≈ 10–12 бар", carb: "PD18J / PZ18 (≈ 18 мм)", jetMain: "≈ 72–80", jetPilot: "≈ 35", needle: "2–3 канавка",
+    valveIn: "0.05 мм", valveEx: "0.08 мм", spark: "NGK C7HSA (A7TC)", oilVol: "≈ 0.8 л; редуктор ≈ 0.11 л", oilInt: 2000, valveInt: 3000,
+    issues: [VAL, CARB, ROLL, { t: "Шпильки головки и сальник коленвала со стороны вариатора — течи масла", sev: "low", fix: "Подтяжка/замена шпилек, сальник 19×30×5 (по размеру)." }] }))), 1.0);
+  S("CN_152QMI", x(F4, x(CN, x(sp(8000, 95), { code: "152QMI", name: "152QMI · скутерный GY6 125 (4T 125)", groups: ["horiz", "air", "carb", "4t", "small"],
+    cc: 124.6, hp: 8.5, torque: "≈ 8 Н·м", compression: "≈ 11–12 бар", carb: "PD24J (CVK-тип ≈ 24 мм)", jetMain: "≈ 102–108", jetPilot: "≈ 35–38", needle: "3 канавка",
+    valveIn: "0.08–0.10 мм", valveEx: "0.10–0.12 мм", spark: "NGK C7HSA (A7TC / CR7HSA)", oilVol: "≈ 0.9 л; редуктор ≈ 0.15 л", oilInt: 2500, valveInt: 4000,
+    issues: [VAL, CARB, BELT, { t: "Перегрев при долгой езде на максималке (воздушное охлаждение, кожух)", sev: "med", fix: "Целый кожух и крыльчатка, правильная смесь, масло чаще." }] }))), 1.1);
+  CL("CN_157QMJ", "CN_152QMI", x(sp(8000, 105), { code: "157QMJ", name: "157QMJ · скутерный GY6 150 (4T 150)", groups: ["horiz", "air", "carb", "4t", "small", "cn"],
+    cc: 149.6, hp: 9.5, torque: "≈ 9.5 Н·м", carb: "PD24J (CVK ≈ 24 мм)", jetMain: "≈ 105–112", oilVol: "≈ 0.9–1.0 л; редуктор ≈ 0.15 л" }), 1.1);
+  S("CN_1E40QMB", x(T2, x(CN, x(sp(8500, 55), { code: "1E40QMB", name: "1E40QMB · скутерный 2T 50 (копия Yamaha Jog)", groups: ["horiz", "air", "carb", "2t", "small"],
+    cc: 49.3, hp: 3.5, torque: "≈ 3.5 Н·м", compression: "≈ 7–9 бар", carb: "PZ12 / PZ14 (≈ 12–14 мм)", jetMain: "≈ 70–80", jetPilot: "≈ 35", needle: "2 канавка",
+    spark: "NGK BR7HS (BP7HS)", oilVol: "редуктор ≈ 0.11 л; бачок 2T ≈ 1.2 л",
+    issues: [PUMP, PIS2, CARB, { t: "Шайба/ограничитель в вариаторе и «задушенный» выпуск у новых — скутер не едет быстрее 40–45 км/ч", sev: "low", fix: "Ограничители снимают на свой риск: растёт нагрузка на ЦПГ." }] }))), 1.0);
+
+  /* ===================== HONDA ===================== */
+  var H = { region: "jp", maker: "Honda" };
+  S("HON_AF18E", x(T2, x(H, x(sp(9000, 60), { code: "AF18E / AF24E", name: "Honda Dio AF18 / Tact AF24 / Giorno AF24 (2T 49)", groups: ["air", "carb", "2t", "small"],
+    cc: 49.4, hp: 6, torque: "≈ 7 Н·м", compression: "≈ 8–9 бар", carb: "Keihin PA (≈ 12 мм)", spark: "NGK BR6HSA (BPR6HSA)",
+    oilVol: "редуктор ≈ 0.1 л (0.12 при разборке); бачок 2T ≈ 1.2 л", issues: [OLD, PUMP, CARB, ROLL] }))), 1.4);
+  CL("HON_AF34E", "HON_AF18E", x(sp(9000, 62), { code: "AF27E / AF34E", name: "Honda Super Dio AF27/28, Dio AF34/35 (ZX), Tact AF30/31/51 (2T 49)",
+    groups: ["air", "carb", "2t", "small", "jp"], hp: 7.2, torque: "≈ 7 Н·м",
+    issues: [PUMP, PIS2, CARB, CLU, { t: "Тюнинг ZX (снятие ограничителя, ЦПГ 70 см³) — перегрев и задиры", sev: "med", fix: "При покупке проверить компрессию и стоковость, жиклёр под ЦПГ." }] }), 1.4);
+  S("HON_AF56E", x(F4, x(H, x(sp(8000, 55), { code: "AF56E / AF61E", name: "Honda Smart Dio AF56/57, Today AF61, Dio AF62, Zoomer AF58 (4T 49, карбюратор)", groups: ["air", "carb", "4t", "small"],
+    cc: 49.5, hp: 4.5, torque: "≈ 4 Н·м", compression: "≈ 12 бар", carb: "Keihin с автообогатителем (≈ 14 мм)",
+    valveIn: "0.10–0.14 мм", valveEx: "0.15–0.19 мм", spark: "NGK CR7HSA", oilVol: "≈ 0.7 л (0.8 при разборке); редуктор ≈ 0.1 л", oilInt: 3000, valveInt: 6000,
+    issues: [VAL, CARB, ROLL, STR] }))), 1.4);
+  CL("HON_AF68E", "HON_AF56E", x(FI, { code: "AF67E / AF68E (FI)", name: "Honda Dio AF68, Today AF67, Giorno AF70, Zoomer AF58 FI (4T 49, инжектор PGM-FI)",
+    groups: ["air", "efi", "4t", "small", "jp"], ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", issues: [EFIW, VAL, ROLL, STR] }), 1.4);
+  CL("HON_AF74E", "HON_AF68E", { code: "AF74E (eSP)", name: "Honda Tact AF75 / Giorno AF77 (4T 49 eSP, инжектор)", hp: 4.5,
+    issues: [EFIW, IDST, ROLL, { t: "ACG-стартер (генератор-стартер) — при севшей АКБ не заводится, кика нет у части версий", sev: "low", fix: "Следить за АКБ, зимой — на зарядку." }] }, 1.5);
+  S("HON_HF05E", x(T2, x(H, x(sp(8500, 80), { code: "HF05E", name: "Honda Lead 90 (2T 86)", groups: ["air", "carb", "2t", "small"],
+    cc: 86, hp: 8, torque: "≈ 9 Н·м", compression: "≈ 8–9 бар", carb: "Keihin PB", spark: "NGK BR6HSA",
+    oilVol: "редуктор ≈ 0.12 л; бачок 2T ≈ 1.2 л", issues: [OLD, PUMP, CARB, CLU] }))), 1.4);
+  S("HON_JF06E", x(F4, x(LQ, x(H, x(sp(8000, 85), { code: "JF06E", name: "Honda Lead 100 (4T 102, жидкостный)", groups: ["liquid", "carb", "4t", "small"],
+    cc: 102, hp: 8.5, torque: "≈ 9 Н·м", compression: "≈ 12 бар", carb: "Keihin CV", valveIn: "0.14–0.18 мм", valveEx: "0.23–0.27 мм",
+    spark: "NGK CR7HSA", oilVol: "≈ 0.8 л (0.9 при разборке); редуктор ≈ 0.12 л", coolant: "≈ 0.6 л", issues: [OLD, COOL, CARB, BELT] })))), 1.5);
+  S("HON_JF19E", x(F4, x(LQ, x(H, x(FI, x(sp(8000, 90), { code: "JF19E", name: "Honda Lead 110 (4T 108, жидкостный, PGM-FI)", groups: ["liquid", "efi", "4t", "small"],
+    cc: 108, hp: 9, torque: "≈ 9.5 Н·м", compression: "≈ 12 бар", ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI",
+    valveIn: "0.14–0.18 мм", valveEx: "0.23–0.27 мм", spark: "NGK CPR7EA-9", oilVol: "≈ 0.8 л (0.9 при разборке); редуктор ≈ 0.12 л", coolant: "≈ 0.6 л",
+    issues: [EFIW, COOL, BELT, CLU] }))))), 1.5);
+  CL("HON_JF45E", "HON_JF19E", x(sp(8500, 100), { code: "JF45E (eSP)", name: "Honda Lead 125 (4T 124 eSP, жидкостный)", cc: 124.8, hp: 11.4, torque: "≈ 11.7 Н·м",
+    spark: "NGK CPR8EA-9", issues: [EFIW, IDST, BELT, COOL] }), 1.6);
+  S("HON_JF13E", x(F4, x(H, x(sp(8000, 85), { code: "JF13E", name: "Honda Spacy 100 (4T 102, карбюратор)", groups: ["air", "carb", "4t", "small"],
+    cc: 102, hp: 7.5, torque: "≈ 8 Н·м", compression: "≈ 11 бар", carb: "Keihin CV", valveIn: "0.14–0.18 мм", valveEx: "0.23–0.27 мм",
+    spark: "NGK CR7HSA", oilVol: "≈ 0.8 л (0.9 при разборке); редуктор ≈ 0.12 л", issues: [VAL, CARB, BELT, ROLL] }))), 1.4);
+  S("HON_JF31E", x(F4, x(H, x(FI, x(sp(8000, 88), { code: "JF31E", name: "Honda Dio 110 (4T 109, PGM-FI)", groups: ["air", "efi", "4t", "small"],
+    cc: 108.2, hp: 8.4, torque: "≈ 9 Н·м", compression: "≈ 12 бар", ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI",
+    valveIn: "0.14–0.18 мм", valveEx: "0.23–0.27 мм", spark: "NGK CPR7EA-9", oilVol: "≈ 0.7 л (0.8 при разборке); редуктор ≈ 0.12 л",
+    issues: [EFIW, VAL, BELT, ROLL] })))), 1.4);
+  /* PCX / SH / ADV */
+  S("HON_JF28E", x(F4, x(LQ, x(H, x(FI, x(sp(8500, 100), { code: "JF28E", name: "Honda PCX125 JF28 (4T 125, жидкостный, 2 клапана)", groups: ["liquid", "efi", "4t", "small"],
+    cc: 124.9, hp: 11.5, torque: "≈ 11.6 Н·м", compression: "≈ 13 бар (степень 11:1)", ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI",
+    valveIn: "0.14–0.18 мм", valveEx: "0.23–0.27 мм", spark: "NGK CPR8EA-9", oilVol: "≈ 0.8 л (0.9 при разборке); редуктор ≈ 0.12 л", coolant: "≈ 0.6 л", oilInt: 4000, valveInt: 12000,
+    issues: [IDST, BELT, CLU, COOL] }))))), 1.6);
+  CL("HON_JF56E", "HON_JF28E", { code: "JF56E / JF81E (eSP)", name: "Honda PCX125 JF56/JF81 · SH125i 2013–2019 (4T 125 eSP, жидкостный)", hp: 12.2, torque: "≈ 11.8 Н·м",
+    issues: [IDST, BELT, CLU, { t: "Гул/скрип из вариатора, износ втулки ведомого шкива", sev: "low", fix: "Смазать ведомый шкив, заменить сальники и игольчатый подшипник ведомого." }] }, 1.6);
+  CL("HON_JK05E", "HON_JF28E", { code: "JK05E (eSP+)", name: "Honda PCX125 2021+ (4T 125 eSP+, 4 клапана)", cam: "SOHC, 4 клапана", hp: 12.5, torque: "≈ 11.8 Н·м",
+    compression: "≈ 13 бар (степень 11.5:1)", spark: "NGK LMAR8L-9", issues: [IDST, BELT, CLU, EFIW] }, 1.7);
+  CL("HON_KF12E", "HON_JF28E", x(sp(8500, 110), { code: "KF12E / KF18E / KF30E", name: "Honda PCX150 · SH150i 2013–2019 · ADV150 (4T 149, жидкостный, 2 клапана)",
+    cc: 149.3, hp: 13.6, torque: "≈ 13.6 Н·м", compression: "≈ 13 бар (степень 10.6:1)", issues: [IDST, BELT, CLU, COOL] }), 1.6);
+  CL("HON_KF47E", "HON_JF28E", x(sp(8500, 115), { code: "KF47E (eSP+)", name: "Honda PCX160 · ADV160 (4T 157 eSP+, 4 клапана)", cam: "SOHC, 4 клапана",
+    cc: 156.9, hp: 15.8, torque: "≈ 14.7 Н·м", compression: "≈ 13 бар (степень 12:1)", spark: "NGK LMAR8L-9", issues: [IDST, BELT, CLU, EFIW] }), 1.7);
+  CL("HON_SH125A", "HON_JF28E", { code: "SH125/150 (2001–2012)", name: "Honda SH125 / SH150 2001–2012 (4T 125/150, жидкостный)", hp: 12.5, torque: "≈ 11.5 Н·м",
+    spark: "NGK CR8EH-9", issues: [OLD, BELT, CLU, COOL] }, 1.6);
+  CL("HON_SH150A", "HON_SH125A", x(sp(8500, 110), { code: "SH150 (2001–2012)", name: "Honda SH150 2001–2012 (4T 153, жидкостный)", cc: 152.7, hp: 14 }), 1.6);
+  /* Forza / Fusion / Foresight / Silver Wing */
+  S("HON_MF13E", x(LQ, x(H, x(BIG, x(sp(8500, 110), { code: "MF13E", name: "Honda Forza 125 (4T 125, жидкостный, 4 клапана)", stroke: "4T", groups: ["liquid", "efi", "4t", "small"],
+    cam: "SOHC, 4 клапана", cc: 124.9, hp: 15, torque: "≈ 12.5 Н·м", compression: "≈ 13 бар (степень 11.5:1)", ignition: "ЭБУ (PGM-FI)", start: "Электро (ACG, Start&Stop)",
+    valveIn: "0.14–0.18 мм", valveEx: "0.23–0.27 мм", spark: "NGK LMAR8L-9", oilVol: "≈ 1.3 л (1.5 при разборке); редуктор ≈ 0.18 л", coolant: "≈ 0.8 л", oilInt: 6000, valveInt: 12000,
+    issues: [IDST, BELT, CLU, EFIW] })))), 1.8);
+  S("HON_MF02E", x(LQ, x(H, x(sp(7500, 120), { code: "MF02E", name: "Honda Fusion / Helix CN250 (4T 244, жидкостный)", stroke: "4T", groups: ["liquid", "carb", "4t", "big"],
+    cam: "SOHC, 2 клапана", cc: 244, hp: 20, torque: "≈ 21 Н·м", compression: "≈ 12 бар", start: "Электро", carb: "Keihin CV (≈ 30 мм)", idle: "1300–1500",
+    valveIn: "0.10–0.14 мм", valveEx: "0.10–0.14 мм", spark: "NGK DPR7EA-9", gap: "0.8–0.9 мм", oilVol: "≈ 1.3 л (1.5 при разборке); редуктор ≈ 0.15 л", coolant: "≈ 1.5 л", oilInt: 4000, valveInt: 12000,
+    issues: [OLD, CARB, BELT, COOL] }))), 1.8);
+  S("HON_MF04E", x(LQ, x(H, x(sp(8000, 130), { code: "MF04E / MF06E", name: "Honda Foresight 250 / Forza 250 MF06 (4T 249, карбюратор)", stroke: "4T", groups: ["liquid", "carb", "4t", "big"],
+    cam: "SOHC, 4 клапана", cc: 249, hp: 22, torque: "≈ 23 Н·м", compression: "≈ 12 бар", start: "Электро", carb: "Keihin CV", idle: "1300–1500",
+    valveIn: "0.14–0.18 мм", valveEx: "0.23–0.27 мм", spark: "NGK CR8EH-9", gap: "0.8–0.9 мм", oilVol: "≈ 1.4 л (1.6 при разборке); редуктор ≈ 0.18 л", coolant: "≈ 1.2 л", oilInt: 4000, valveInt: 12000,
+    issues: [OLD, CARB, BELT, REG] }))), 1.8);
+  CL("HON_MF08E", "HON_MF04E", x(FI, { code: "MF08E / MF10E", name: "Honda Forza 250 MF08/MF10 · Faze (4T 249, PGM-FI)", groups: ["liquid", "efi", "4t", "big", "jp"],
+    hp: 23, ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", idle: "1300–1500", issues: [EFIW, BELT, CLU, REG] }), 1.8);
+  S("HON_NSS300", x(LQ, x(H, x(BIG, x(sp(8000, 140), { code: "NSS300 (279)", name: "Honda Forza 300 / NSS300 2013–2020 (4T 279, жидкостный)", stroke: "4T", groups: ["liquid", "efi", "4t", "big"],
+    cam: "SOHC, 4 клапана", cc: 279, hp: 25, torque: "≈ 27 Н·м", compression: "≈ 13 бар (степень 10.5:1)", ignition: "ЭБУ (PGM-FI)",
+    valveIn: "0.14–0.18 мм", valveEx: "0.23–0.27 мм", spark: "NGK LMAR8L-9", oilVol: "≈ 1.5 л (1.7 при разборке); редуктор ≈ 0.22 л", coolant: "≈ 1 л",
+    issues: [BELT, CLU, EFIW, COOL] })))), 1.9);
+  CL("HON_NSS350", "HON_NSS300", x(sp(8000, 145), { code: "NSS350 (330)", name: "Honda Forza 350 / ADV350 2021+ (4T 330, жидкостный)", cc: 330, hp: 29, torque: "≈ 31.5 Н·м" }), 2.0);
+  S("HON_NF01E", x(LQ, x(H, x(BIG, x(sp(8500, 145), { code: "NF01E", name: "Honda Silver Wing 400 (рядная двойка 399)", stroke: "4T", layout: "twin", crankPhase: 180,
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 399, hp: 37, torque: "≈ 36 Н·м", compression: "≈ 12 бар", ignition: "ЭБУ (PGM-FI)",
+    valveIn: "0.14–0.18 мм", valveEx: "0.23–0.27 мм", spark: "NGK CPR8EA-9", oilVol: "≈ 2.5 л с фильтром; редуктор ≈ 0.25 л", coolant: "≈ 1.9 л", valveInt: 24000,
+    issues: [BELT, CLU, REG, COOL] })))), 2.0);
+  CL("HON_PF01E", "HON_NF01E", x(sp(8000, 165), { code: "PF01E", name: "Honda Silver Wing 600 / FJS600 (рядная двойка 582)", cc: 582, hp: 50, torque: "≈ 54 Н·м",
+    oilVol: "≈ 2.8 л с фильтром; редуктор ≈ 0.25 л", coolant: "≈ 2 л" }), 2.1);
+
+  /* ===================== YAMAHA ===================== */
+  var Y = { region: "jp", maker: "Yamaha" };
+  S("YAM_3KJ", x(T2, x(Y, x(sp(9000, 60), { code: "3KJ", name: "Yamaha Jog 3KJ (2T 49)", groups: ["air", "carb", "2t", "small"],
+    cc: 49, hp: 6.3, torque: "≈ 7 Н·м", compression: "≈ 8–9 бар", carb: "Teikei / Mikuni (≈ 12 мм)", spark: "NGK BR7HS (BPR7HS)",
+    oilVol: "редуктор ≈ 0.11 л; бачок 2T ≈ 1.2 л", issues: [OLD, PUMP, CARB, ROLL] }))), 1.4);
+  CL("YAM_3YK", "YAM_3KJ", x(sp(9000, 62), { code: "3YK / 5BM / 4JP", name: "Yamaha Jog Artistic 3YK/5BM · Jog Aprio · Axis 50 · Gear 2T (2T 49)", hp: 6.8,
+    issues: [PUMP, PIS2, CARB, CLU] }), 1.4);
+  CL("YAM_3VR", "YAM_3KJ", x(sp(8500, 80), { code: "3VR", name: "Yamaha Axis 90 (2T 89)", cc: 89, hp: 8, torque: "≈ 9 Н·м", oilVol: "редуктор ≈ 0.12 л; бачок 2T ≈ 1.2 л",
+    issues: [OLD, PUMP, CARB, CLU] }), 1.4);
+  CL("YAM_5FA", "YAM_3KJ", x(sp(8500, 85), { code: "5FA / 4VP", name: "Yamaha Grand Axis 100 / BWS 100 (2T 101)", cc: 101, hp: 9, torque: "≈ 10 Н·м", carb: "Mikuni (≈ 18 мм)",
+    oilVol: "редуктор ≈ 0.12 л; бачок 2T ≈ 1.4 л", issues: [OLD, PUMP, PIS2, CLU] }), 1.4);
+  S("YAM_MINA_AC", x(T2, { region: "eu", maker: "Minarelli (Yamaha / MBK)", code: "Minarelli AC (горизонтальный)", name: "Minarelli 50 воздушный · Yamaha BWS 50 / Neo's 50 / Jog R (2T 49)",
+    groups: ["air", "carb", "2t", "small"], cc: 49, hp: 4.5, torque: "≈ 5 Н·м", compression: "≈ 8–9 бар", carb: "Dell'Orto PHVA 12", redline: 8500, topRatio: Math.round(8500 * 0.08573 / 55 * 100) / 100,
+    spark: "NGK BR7HS", oilVol: "редуктор ≈ 0.11 л; бачок 2T ≈ 1.2 л",
+    issues: [PUMP, PIS2, CARB, { t: "Ограничители (шайба в вариаторе, CDI, глушитель) у европейских версий — 45 км/ч", sev: "low", fix: "Разблокировка законна не везде и греет ЦПГ." }] }), 1.4);
+  CL("YAM_MINA_LC", "YAM_MINA_AC", { code: "Minarelli LC (горизонтальный)", name: "Minarelli 50 жидкостный · Yamaha Aerox 50 / Jog RR · Aprilia SR 50 1997–2004 (2T 49)",
+    groups: ["liquid", "carb", "2t", "small", "eu"], cooling: "Жидкостное", hp: 6, torque: "≈ 5.5 Н·м", coolant: "≈ 0.8 л", spark: "NGK BR8ES",
+    issues: [PUMP, PIS2, COOL, CARB] }, 1.5);
+  S("YAM_SA36J", x(F4, x(Y, x(FI, x(sp(8000, 55), { code: "A314E (SA36J/SA39J)", name: "Yamaha Jog SA36J/SA39J · Vino · Gear 4T (4T 49, инжектор)", groups: ["air", "efi", "4t", "small"],
+    cc: 49, hp: 4.5, torque: "≈ 4 Н·м", compression: "≈ 12 бар", valveIn: "0.10–0.14 мм", valveEx: "0.17–0.21 мм", spark: "NGK CR7E",
+    oilVol: "≈ 0.8 л; редуктор ≈ 0.1 л", issues: [EFIW, VAL, ROLL, STR] })))), 1.4);
+  S("YAM_NMAX125", x(F4, x(LQ, x(Y, x(FI, x(sp(8500, 105), { code: "Blue Core 125 (VVA)", name: "Yamaha NMAX 125 (4T 125, жидкостный, 4 клапана, VVA)", groups: ["liquid", "efi", "4t", "small"],
+    cam: "SOHC, 4 клапана, VVA", cc: 124.7, hp: 12.2, torque: "≈ 11.2 Н·м", compression: "≈ 13 бар (степень 11.2:1)", ignition: "ЭБУ (TCI)",
+    valveIn: "0.10–0.14 мм", valveEx: "0.24–0.28 мм", spark: "NGK CPR8EA-9", oilVol: "≈ 0.9 л (1.0 при разборке); редуктор ≈ 0.10 л", coolant: "≈ 0.6 л", oilInt: 4000, valveInt: 12000,
+    issues: [BELT, CLU, EFIW, { t: "Соленоид/механизм VVA — подклинивание, неровный подхват на 6–7 тыс. об/мин", sev: "low", fix: "Проверка соленоида VVA и разъёма, свежее масло." }] }))))), 1.6);
+  CL("YAM_NMAX155", "YAM_NMAX125", x(sp(8500, 115), { code: "Blue Core 155 (VVA)", name: "Yamaha NMAX 155 / Aerox 155 (4T 155, жидкостный, VVA)", cc: 155.1, hp: 15, torque: "≈ 13.9 Н·м" }), 1.6);
+  CL("YAM_XMAX125B", "YAM_NMAX125", x(sp(9000, 110), { code: "Blue Core 125 (XMAX)", name: "Yamaha XMAX 125 2018+ (4T 125, VVA)", hp: 14, torque: "≈ 11.7 Н·м", spark: "NGK LMAR8A-9",
+    oilVol: "≈ 1.3 л (1.5 при разборке); редуктор ≈ 0.15 л" }), 1.7);
+  S("YAM_YP125C", x(LQ, { region: "eu", maker: "Yamaha / Minarelli", code: "YP125 (Minarelli 4T)", name: "Yamaha Majesty 125 / XMAX 125 2006–2009 (4T 125, карбюратор)", stroke: "4T",
+    groups: ["liquid", "carb", "4t", "small"], cam: "SOHC, 4 клапана", cc: 124.8, hp: 13.6, torque: "≈ 11.5 Н·м", compression: "≈ 12 бар", carb: "Keihin CVK (≈ 26 мм)",
+    redline: 9000, topRatio: Math.round(9000 * 0.08573 / 105 * 100) / 100, idle: "1500–1700",
+    valveIn: "0.10–0.14 мм", valveEx: "0.20–0.24 мм", spark: "NGK CR8E", gap: "0.7–0.8 мм", oilVol: "≈ 1.1 л (1.2 при разборке); редуктор ≈ 0.15 л", coolant: "≈ 0.9 л",
+    issues: [CARB, BELT, CLU, COOL] }), 1.6);
+  CL("YAM_YP125F", "YAM_YP125C", x(FI, { code: "YP125 (Minarelli 4T FI)", name: "Yamaha XMAX 125 2010–2017 (4T 125, инжектор)", groups: ["liquid", "efi", "4t", "small", "eu"], hp: 14,
+    issues: [EFIW, BELT, CLU, COOL] }), 1.6);
+  S("YAM_YP250C", x(LQ, x(Y, x(sp(8000, 125), { code: "4HC / SG03J", name: "Yamaha Majesty 250 1995–2006 / XMAX 250 2005–2009 (4T 249, карбюратор)", stroke: "4T",
+    groups: ["liquid", "carb", "4t", "big"], cam: "SOHC, 4 клапана", cc: 249, hp: 20, torque: "≈ 21 Н·м", compression: "≈ 12 бар", start: "Электро", carb: "Mikuni BSR / Keihin CV", idle: "1300–1500",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", spark: "NGK CR7E", gap: "0.7–0.8 мм", oilVol: "≈ 1.4 л (1.6 при разборке); редуктор ≈ 0.25 л", coolant: "≈ 1.4 л", oilInt: 4000, valveInt: 12000,
+    issues: [OLD, CARB, BELT, REG] }))), 1.8);
+  CL("YAM_YP250F", "YAM_YP250C", x(FI, { code: "SG20J / YP250R (FI)", name: "Yamaha Majesty 250 2007+ / XMAX 250 2010–2017 (4T 249, инжектор)", groups: ["liquid", "efi", "4t", "big", "jp"],
+    hp: 21, idle: "1300–1500", issues: [EFIW, BELT, CLU, REG] }), 1.8);
+  S("YAM_XMAX300", x(LQ, x(Y, x(BIG, x(sp(8000, 140), { code: "Blue Core 300", name: "Yamaha XMAX 300 2017+ (4T 292, жидкостный)", stroke: "4T", groups: ["liquid", "efi", "4t", "big"],
+    cam: "SOHC, 4 клапана", cc: 292, hp: 28, torque: "≈ 29 Н·м", compression: "≈ 13 бар (степень 10.9:1)", ignition: "ЭБУ (TCI)",
+    valveIn: "0.10–0.14 мм", valveEx: "0.24–0.28 мм", spark: "NGK LMAR8A-9", oilVol: "≈ 1.5 л (1.7 при разборке); редуктор ≈ 0.25 л", coolant: "≈ 1.2 л",
+    issues: [BELT, CLU, EFIW, { t: "Скрип/люфт ведомого шкива и подшипников сцепления", sev: "low", fix: "Смазка ведомого шкива, игольчатый подшипник, сальники." }] })))), 1.9);
+  CL("YAM_XMAX250B", "YAM_XMAX300", x(sp(8000, 130), { code: "Blue Core 250", name: "Yamaha XMAX 250 2018+ (4T 249, жидкостный)", cc: 249, hp: 23, torque: "≈ 24 Н·м" }), 1.9);
+  S("YAM_YP400", x(LQ, x(Y, x(BIG, x(sp(8000, 155), { code: "YP400 (395)", name: "Yamaha Majesty 400 / XMAX 400 (4T 395, DOHC)", stroke: "4T", groups: ["dohc", "liquid", "efi", "4t", "big"],
+    cam: "DOHC, 4 клапана", cc: 395, hp: 33, torque: "≈ 35 Н·м", compression: "≈ 12 бар (степень 10.6:1)", ignition: "ЭБУ (TCI)",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", spark: "NGK CR7E", oilVol: "≈ 1.9 л (2.1 с фильтром); редуктор ≈ 0.25 л", coolant: "≈ 1.5 л", valveInt: 24000,
+    issues: [BELT, CLU, REG, COOL] })))), 2.0);
+  S("YAM_TMAX500C", x(LQ, x(Y, x(BIG, x(sp(8000, 160), { code: "XP500 (5GJ)", name: "Yamaha TMAX 500 2001–2003 (рядная двойка 499, карбюраторы)", stroke: "4T", layout: "twin", crankPhase: 360,
+    groups: ["dohc", "liquid", "carb", "4t", "big"], cam: "DOHC, 8 клапанов, 2 цилиндра, поршень-балансир", cc: 499, hp: 40, torque: "≈ 45 Н·м", compression: "≈ 12 бар (степень 10.1:1)",
+    ignition: "TCI", carb: "Mikuni BSR33 ×2", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", spark: "NGK CR7E", oilVol: "≈ 2.7 л (2.9 с фильтром, сухой картер); масло в цепной передаче ≈ 0.3 л", coolant: "≈ 1.5 л", valveInt: 40000,
+    issues: [OLD, BELT, CLU, { t: "Ремень и сцепление дорогие, у б/у — сухие подшипники маятника и рулевой", sev: "med", fix: "Ремень по регламенту (≈ 20 тыс. км), смазка подшипников подвески." }] })))), 2.1);
+  CL("YAM_TMAX500F", "YAM_TMAX500C", x(FI, { code: "XP500 (FI)", name: "Yamaha TMAX 500 2004–2011 (рядная двойка 499, инжектор)", groups: ["dohc", "liquid", "efi", "4t", "big", "jp"],
+    hp: 43, torque: "≈ 46 Н·м", ignition: "ЭБУ (TCI)", idle: "1300–1500", issues: [BELT, CLU, EFIW, REG] }), 2.1);
+  CL("YAM_TMAX530", "YAM_TMAX500F", x(sp(8000, 165), { code: "XP530", name: "Yamaha TMAX 530 2012–2019 (рядная двойка 530)", cc: 530, hp: 46, torque: "≈ 52 Н·м", spark: "NGK LMAR8A-9",
+    oilVol: "≈ 2.9 л с фильтром (сухой картер)", issues: [BELT, CLU, EFIW, { t: "Ремень вторичной передачи (530) — трещины и износ зубьев", sev: "med", fix: "Осмотр ремня каждые 10 тыс. км, замена ≈ 20–30 тыс. км." }] }), 2.2);
+  CL("YAM_TMAX560", "YAM_TMAX530", x(sp(8000, 170), { code: "XP560", name: "Yamaha TMAX 560 2020+ (рядная двойка 562)", cc: 562, hp: 47.6, torque: "≈ 55.7 Н·м" }), 2.3);
+  S("YAM_CYGNUS", x(F4, x(Y, x(FI, x(sp(8500, 100), { code: "Cygnus 125 (SE44J)", name: "Yamaha Cygnus X 125 (4T 124, воздушный, 4 клапана)", groups: ["air", "efi", "4t", "small"],
+    cam: "SOHC, 4 клапана", cc: 124, hp: 12, torque: "≈ 11 Н·м", compression: "≈ 12 бар", valveIn: "0.10–0.14 мм", valveEx: "0.16–0.20 мм", spark: "NGK CR7E",
+    oilVol: "≈ 1.0 л; редуктор ≈ 0.12 л", issues: [EFIW, VAL, BELT, CLU] })))), 1.5);
+
+  /* ===================== SUZUKI ===================== */
+  var Z = { region: "jp", maker: "Suzuki" };
+  S("SUZ_2T50", x(T2, x(Z, x(sp(9000, 60), { code: "A-серия 2T 49 (CA1)", name: "Suzuki Sepia / ZZ / Lets 2 / Address V50 2T (2T 49)", groups: ["air", "carb", "2t", "small"],
+    cc: 49, hp: 6.5, torque: "≈ 6.5 Н·м", compression: "≈ 8–9 бар", carb: "Mikuni (≈ 12 мм)", spark: "NGK BPR7HS (BR7HSA)",
+    oilVol: "редуктор ≈ 0.11 л; бачок 2T ≈ 1.1 л", issues: [OLD, PUMP, CARB, ROLL] }))), 1.4);
+  S("SUZ_CA42A", x(F4, x(Z, x(FI, x(sp(8000, 55), { code: "A402 (CA42A/CA41A)", name: "Suzuki Address V50 4T / Lets 4 / Lets 5 (4T 49, инжектор)", groups: ["air", "efi", "4t", "small"],
+    cc: 49, hp: 4, torque: "≈ 3.8 Н·м", compression: "≈ 12 бар", valveIn: "0.05–0.10 мм", valveEx: "0.08–0.13 мм", spark: "NGK CR7HSA",
+    oilVol: "≈ 0.65 л; редуктор ≈ 0.1 л", issues: [EFIW, VAL, ROLL, STR] })))), 1.4);
+  S("SUZ_CZ41A", x(F4, x(Z, x(sp(7000, 50), { code: "CZ41A", name: "Suzuki Choinori (4T 49, карбюратор)", groups: ["air", "carb", "4t", "small"],
+    cc: 49, hp: 2.3, torque: "≈ 3.4 Н·м", compression: "≈ 11 бар", carb: "Mikuni (≈ 12 мм)", valveIn: "0.05–0.10 мм", valveEx: "0.08–0.13 мм", spark: "NGK CR6HSA",
+    oilVol: "≈ 0.6 л; редуктор ≈ 0.1 л", issues: [VAL, CARB, ROLL, { t: "Слабая динамика — с ездоком > 80 кг на подъёмах тянет 30–40 км/ч", sev: "low", fix: "Конструктивно; ролики полегче немного помогают." }] }))), 1.3);
+  CL("SUZ_CE11A", "SUZ_2T50", x(sp(8500, 85), { code: "CE11A", name: "Suzuki Address V100 (2T 99)", cc: 99, hp: 9, torque: "≈ 10 Н·м", carb: "Mikuni (≈ 18 мм)", spark: "NGK BR8HSA",
+    oilVol: "редуктор ≈ 0.12 л; бачок 2T ≈ 1.2 л", issues: [OLD, PUMP, PIS2, CLU] }), 1.4);
+  S("SUZ_CF46A", x(F4, x(Z, x(FI, x(sp(8500, 95), { code: "F4 (CF46A/CF4EA)", name: "Suzuki Address V125 / V125G / V125S (4T 124, инжектор)", groups: ["air", "efi", "4t", "small"],
+    cc: 124, hp: 10, torque: "≈ 9.6 Н·м", compression: "≈ 12 бар", valveIn: "0.05–0.10 мм", valveEx: "0.08–0.13 мм", spark: "NGK CR7HSA",
+    oilVol: "≈ 0.8 л; редуктор ≈ 0.12 л", issues: [EFIW, VAL, BELT, { t: "Подшипник и сальник коленвала со стороны вариатора, гул на пробеге 30+ тыс.", sev: "low", fix: "Замена подшипников при капремонте." }] })))), 1.5);
+  CL("SUZ_UK110", "SUZ_CF46A", x(sp(8000, 90), { code: "UK110", name: "Suzuki Address 110 2015+ (4T 113, инжектор)", cc: 113, hp: 9.1, torque: "≈ 9 Н·м" }), 1.4);
+  S("SUZ_AN125", x(LQ, x(Z, x(FI, x(sp(9000, 105), { code: "AN125 (CF41A)", name: "Suzuki Burgman 125 / 150 (4T 125/150, жидкостный, 4 клапана)", stroke: "4T", groups: ["liquid", "efi", "4t", "small"],
+    cam: "SOHC, 4 клапана", cc: 124, hp: 12, torque: "≈ 10.5 Н·м", compression: "≈ 12 бар", valveIn: "0.10–0.20 мм", valveEx: "0.20–0.30 мм", spark: "NGK CR7E", gap: "0.7–0.8 мм",
+    oilVol: "≈ 1.2 л с фильтром; редуктор ≈ 0.15 л", coolant: "≈ 1 л", start: "Электро", oilInt: 6000, valveInt: 12000, issues: [EFIW, BELT, CLU, COOL] })))), 1.6);
+  CL("SUZ_UH200", "SUZ_AN125", x(sp(9000, 120), { code: "UH200", name: "Suzuki Burgman 200 (4T 200, жидкостный)", cc: 200, hp: 18, torque: "≈ 16.5 Н·м",
+    groups: ["liquid", "efi", "4t", "small", "jp"] }), 1.7);
+  CL("SUZ_AN150", "SUZ_AN125", x(sp(9000, 110), { code: "AN150 (CG43A)", name: "Suzuki Burgman 150 (4T 150, жидкостный)", cc: 150, hp: 14, torque: "≈ 13 Н·м",
+    groups: ["liquid", "efi", "4t", "small", "jp"] }), 1.6);
+  S("SUZ_CJ41A", x(LQ, x(Z, x(sp(8500, 130), { code: "J4 (CJ41A/CJ42A)", name: "Suzuki Burgman / Skywave 250 1998–2006 (4T 249, DOHC, карбюратор)", stroke: "4T",
+    groups: ["dohc", "liquid", "carb", "4t", "big"], cam: "DOHC, 4 клапана", cc: 249, hp: 24, torque: "≈ 23 Н·м", compression: "≈ 12 бар", start: "Электро", carb: "Mikuni BSR (≈ 30 мм)", idle: "1300–1500",
+    valveIn: "0.10–0.20 мм", valveEx: "0.20–0.30 мм", spark: "NGK CR7E", gap: "0.7–0.8 мм", oilVol: "≈ 1.6 л (1.8 с фильтром); редуктор ≈ 0.18 л", coolant: "≈ 1.3 л", oilInt: 5000, valveInt: 24000,
+    issues: [OLD, CARB, BELT, REG] }))), 1.8);
+  CL("SUZ_CJ43A", "SUZ_CJ41A", x(FI, { code: "J4 FI (CJ43A–CJ46A)", name: "Suzuki Burgman / Skywave 250 2007+ (4T 249, DOHC, инжектор)", groups: ["dohc", "liquid", "efi", "4t", "big", "jp"],
+    hp: 24, idle: "1300–1500", issues: [EFIW, BELT, CLU, REG] }), 1.8);
+  S("SUZ_AN400C", x(LQ, x(Z, x(sp(8000, 150), { code: "AN400 (CK41A)", name: "Suzuki Burgman / Skywave 400 1998–2006 (4T 385, DOHC, карбюратор)", stroke: "4T",
+    groups: ["dohc", "liquid", "carb", "4t", "big"], cam: "DOHC, 4 клапана", cc: 385, hp: 32, torque: "≈ 33 Н·м", compression: "≈ 12 бар", start: "Электро", carb: "Mikuni BSR36", idle: "1300–1500",
+    valveIn: "0.10–0.20 мм", valveEx: "0.20–0.30 мм", spark: "NGK CR7E", gap: "0.7–0.8 мм", oilVol: "≈ 2.4 л (2.6 с фильтром); редуктор ≈ 0.25 л", coolant: "≈ 1.5 л", oilInt: 6000, valveInt: 24000,
+    issues: [OLD, CARB, BELT, REG] }))), 2.0);
+  CL("SUZ_AN400F", "SUZ_AN400C", x(FI, x(sp(8000, 160), { code: "AN400 FI (CK43A/CK44A)", name: "Suzuki Burgman / Skywave 400 2006+ (4T 400, DOHC, инжектор)", groups: ["dohc", "liquid", "efi", "4t", "big", "jp"],
+    cc: 400, hp: 34, torque: "≈ 35 Н·м", idle: "1200–1400", issues: [EFIW, BELT, CLU, REG] })), 2.0);
+  S("SUZ_AN650", x(LQ, x(Z, x(BIG, x(sp(7500, 180), { code: "AN650 (CP51A)", name: "Suzuki Burgman / Skywave 650 (рядная двойка 638, SECVT)", stroke: "4T", layout: "twin", crankPhase: 360,
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 638, hp: 55, torque: "≈ 62 Н·м", compression: "≈ 12 бар (степень 11.2:1)",
+    gearbox: "Вариатор (CVT) с электроприводом SECVT", valveIn: "0.10–0.20 мм", valveEx: "0.20–0.30 мм", spark: "NGK CR8E", oilVol: "≈ 3.4 л (3.8 с фильтром); редуктор ≈ 0.3 л", coolant: "≈ 2.3 л", valveInt: 24000,
+    issues: [{ t: "Электропривод вариатора SECVT: ошибка «FI/CVT», мотор-редуктор и датчики шкива", sev: "high", fix: "Диагностика SECVT, чистка разъёмов, мотор привода; ремонт дорогой — проверять до покупки." }, BELT, REG, COOL] })))), 2.3);
+
+  /* ===================== KYMCO / SYM (Тайвань) ===================== */
+  CL("KYM_50", "CN_139QMB", { code: "Kymco 4T 50 (GY6-тип)", name: "Kymco / SYM 4T 50 — Agility 50, Orbit 50 (родоначальник GY6 50)", maker: "Kymco / SYM", hp: 3.3,
+    valveIn: "0.10 мм", valveEx: "0.10 мм", spark: "NGK C7HSA" }, 1.2);
+  CL("KYM_125", "CN_152QMI", { code: "Kymco/SYM 125 (GY6-тип)", name: "Kymco Agility 125 / Like 125 · SYM Symphony 125 (4T 125, воздушный)", maker: "Kymco / SYM", hp: 9.5,
+    torque: "≈ 9 Н·м", valveIn: "0.10 мм", valveEx: "0.10 мм", spark: "NGK CR7HSA" }, 1.3);
+  S("KYM_300", x(LQ, x(BIG, x(sp(8000, 140), { region: "cn", jp: false, maker: "Kymco", code: "Kymco 300 (SK60)", name: "Kymco Downtown 300i (4T 299, жидкостный, 4 клапана)", stroke: "4T",
+    groups: ["liquid", "efi", "4t", "big"], cam: "SOHC, 4 клапана", cc: 299, hp: 28, torque: "≈ 28 Н·м", compression: "≈ 12 бар", ignition: "ЭБУ",
+    valveIn: "0.10 мм", valveEx: "0.15 мм", spark: "NGK CR7E", oilVol: "≈ 1.4 л; редуктор ≈ 0.2 л", coolant: "≈ 1.3 л", issues: [BELT, CLU, EFIW, COOL] }))), 1.5);
+  CL("KYM_400", "KYM_300", x(sp(8000, 155), { code: "Kymco 400 (SK80)", name: "Kymco Xciting 400i (4T 399, жидкостный, 4 клапана)", cc: 399, hp: 35, torque: "≈ 38 Н·м",
+    oilVol: "≈ 1.7 л; редуктор ≈ 0.25 л", spark: "NGK LMAR8A-9" }), 1.6);
+  CL("SYM_300", "KYM_300", x(sp(8000, 135), { maker: "SYM", code: "SYM 300 (GTS 300i)", name: "SYM Joymax 300i / GTS 300i (4T 278, жидкостный)", cc: 278, hp: 25, torque: "≈ 25 Н·м" }), 1.5);
+  CL("SYM_400", "KYM_300", x(sp(8000, 155), { maker: "SYM", code: "SYM 400 (Maxsym)", name: "SYM Maxsym 400i (4T 399, DOHC, жидкостный)", groups: ["dohc", "liquid", "efi", "4t", "big", "cn"],
+    cam: "DOHC, 4 клапана", cc: 399, hp: 33, torque: "≈ 35 Н·м", oilVol: "≈ 1.7 л; редуктор ≈ 0.25 л" }), 1.6);
+
+  /* ===================== PIAGGIO / VESPA / APRILIA / GILERA / PEUGEOT ===================== */
+  var PG = { region: "eu", maker: "Piaggio" };
+  S("PIA_2T50", x(T2, x(PG, x(sp(8000, 50), { code: "Hi-Per2 AC (C26)", name: "Piaggio 50 2T воздушный · Zip / Typhoon / Fly / Vespa LX 50 2T (2T 49)", groups: ["air", "carb", "2t", "small"],
+    cc: 49.4, hp: 4, torque: "≈ 4.5 Н·м", compression: "≈ 8–9 бар", carb: "Dell'Orto PHVA 12", spark: "NGK B9ES (BR9ES)",
+    oilVol: "редуктор ≈ 0.08 л; бачок 2T ≈ 1.3 л", issues: [PUMP, PIS2, CARB, { t: "Ограничители 45 км/ч (шайба в вариаторе, выпуск) у европейских версий", sev: "low", fix: "Разблокировка повышает нагрузку на ЦПГ." }] }))), 1.6);
+  CL("PIA_LC50", "PIA_2T50", x(sp(8500, 55), { code: "Hi-Per2 Pro LC", name: "Piaggio 50 2T жидкостный · Aprilia SR 50 2005+ / Gilera Runner 50 (2T 49)",
+    groups: ["liquid", "carb", "2t", "small", "eu"], cooling: "Жидкостное", hp: 5, coolant: "≈ 0.8 л", spark: "NGK BR9ES", issues: [PUMP, PIS2, COOL, CARB] }), 1.6);
+  S("PIA_LEADER125", x(F4, x(PG, x(FI, x(sp(8500, 95), { code: "Leader 125 (M38/M68)", name: "Piaggio Leader 125/150 · Vespa LX · Liberty · Fly (4T 125/150, воздушный)", groups: ["air", "efi", "4t", "small"],
+    cc: 124, hp: 10.3, torque: "≈ 9.6 Н·м", compression: "≈ 11–12 бар", valveIn: "0.10 мм", valveEx: "0.15 мм", spark: "NGK CR8EB",
+    oilVol: "≈ 1.0 л (0.85 при замене); редуктор ≈ 0.1 л", issues: [EFIW, VAL, BELT, { t: "Гул и течь сальника колеса/редуктора, ржавчина рамы и кузова у старых Vespa", sev: "low", fix: "Сальники редуктора, антикор кузова." }] })))), 1.8);
+  CL("PIA_LEADER150", "PIA_LEADER125", x(sp(8500, 100), { code: "Leader 150 (M39/M69)", name: "Piaggio Leader 150 · Vespa LX 150 / Liberty 150 (4T 151, воздушный)", cc: 150.6, hp: 11.6, torque: "≈ 11.5 Н·м" }), 1.8);
+  CL("PIA_IGET125", "PIA_LEADER125", { code: "i-get 125 (3 клапана)", name: "Piaggio i-get 125/150 · Vespa Primavera / Sprint · Liberty 2016+ (4T 125/150, 3 клапана)",
+    cam: "SOHC, 3 клапана", hp: 10.7, torque: "≈ 10.4 Н·м", spark: "NGK CR7EB", issues: [EFIW, BELT, CLU, STR] }, 1.8);
+  CL("PIA_IGET150", "PIA_IGET125", x(sp(8500, 100), { code: "i-get 150 (3 клапана)", name: "Piaggio i-get 150 · Vespa Primavera / Sprint 150 (4T 155, 3 клапана)", cc: 154.8, hp: 12.7, torque: "≈ 12.8 Н·м" }), 1.8);
+  S("PIA_QUASAR300", x(LQ, x(PG, x(BIG, x(sp(8000, 125), { code: "Quasar 300 (M45)", name: "Piaggio Quasar 250/300 · Vespa GTS 300 ie / Beverly 300 / MP3 300 / Aprilia SR Max 300 (4T 278)", stroke: "4T",
+    groups: ["liquid", "efi", "4t", "big"], cam: "SOHC, 4 клапана", cc: 278, hp: 22, torque: "≈ 22 Н·м", compression: "≈ 12 бар (степень 11:1)", ignition: "ЭБУ",
+    valveIn: "0.10 мм", valveEx: "0.15 мм", spark: "NGK CR8EKB", oilVol: "≈ 1.3 л; редуктор ≈ 0.25 л", coolant: "≈ 1.5 л", oilInt: 10000, valveInt: 10000,
+    issues: [BELT, CLU, { t: "Регулятор напряжения и разъёмы — недозаряд, ошибки ЭБУ", sev: "med", fix: "Проверка зарядки, чистка разъёмов, регулятор." }, COOL] })))), 2.0);
+  CL("PIA_HPE300", "PIA_QUASAR300", x(sp(8250, 130), { code: "HPE 300", name: "Piaggio HPE 300 · Vespa GTS 300 HPE 2019+ (4T 278)", hp: 23.8, torque: "≈ 26 Н·м" }), 2.1);
+  S("PIA_MASTER500", x(LQ, x(PG, x(BIG, x(sp(7500, 150), { code: "Master 500 (M33)", name: "Piaggio Master 500 · MP3 500 / Beverly 500 / Gilera Nexus 500 (4T 493, DOHC)", stroke: "4T",
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 4 клапана", cc: 493, hp: 39, torque: "≈ 44 Н·м", compression: "≈ 12 бар", ignition: "ЭБУ",
+    valveIn: "0.15 мм", valveEx: "0.15 мм", spark: "NGK CR7EKB", oilVol: "≈ 1.7 л; редуктор ≈ 0.4 л", coolant: "≈ 2 л", oilInt: 10000, valveInt: 20000,
+    issues: [BELT, CLU, REG, COOL] })))), 2.2);
+  S("PEU_LC50", x(T2, { region: "eu", maker: "Peugeot", code: "Peugeot 50 LC (горизонтальный)", name: "Peugeot 50 2T жидкостный · Speedfight 2/3 (2T 49)", groups: ["liquid", "carb", "2t", "small"],
+    cooling: "Жидкостное", cc: 49.1, hp: 5, torque: "≈ 5 Н·м", compression: "≈ 8–9 бар", carb: "Gurtner PY12 / Dell'Orto PHVA 12", redline: 8500, topRatio: Math.round(8500 * 0.08573 / 55 * 100) / 100,
+    spark: "NGK BR7ES", coolant: "≈ 0.8 л", oilVol: "редуктор ≈ 0.09 л; бачок 2T ≈ 1.2 л", issues: [PUMP, PIS2, COOL, CARB] }), 1.5);
+  CL("PEU_AC50", "PEU_LC50", { code: "Peugeot 50 AC (горизонтальный)", name: "Peugeot 50 2T воздушный · Vivacity / Buxy / Zenith (2T 49)", groups: ["air", "carb", "2t", "small", "eu"],
+    cooling: "Воздушное", coolant: "", hp: 4.5, spark: "NGK BR7HS", issues: [PUMP, PIS2, CARB, ROLL] }, 1.5);
+
+  /* ===================== МОДЕЛИ ===================== */
+  /* Honda */
+  addBike("Honda", "Dio AF18", SC, "HON_AF18E");
+  addBike("Honda", "Super Dio AF27", SC, "HON_AF34E", { hp: 7 });
+  addBike("Honda", "Dio AF34", SC, "HON_AF34E");
+  addBike("Honda", "Dio AF35 ZX", SC, "HON_AF34E");
+  addBike("Honda", "Smart Dio AF56", SC, "HON_AF56E");
+  addBike("Honda", "Dio AF62", SC, "HON_AF56E");
+  addBike("Honda", "Dio AF68", SC, "HON_AF68E");
+  addBike("Honda", "Dio 110", SC, "HON_JF31E");
+  addBike("Honda", "Tact AF24", SC, "HON_AF18E", { hp: 5.5 });
+  addBike("Honda", "Tact AF30 / AF31", SC, "HON_AF34E", { hp: 6.8 });
+  addBike("Honda", "Tact AF51", SC, "HON_AF34E", { hp: 6.8 });
+  addBike("Honda", "Tact AF75", SC, "HON_AF74E");
+  G("Honda", "Giorno", SC, [["HON_AF18E", "1992–1999 (AF24, 2T)"], ["HON_AF68E", "2011–2016 (AF70)"], ["HON_AF74E", "2017+ (AF77)"]]);
+  G("Honda", "Today", SC, [["HON_AF56E", "2002–2007 (AF61)"], ["HON_AF68E", "2008–2016 (AF67)"]]);
+  G("Honda", "Zoomer AF58", SC, [["HON_AF56E", "2001–2006"], ["HON_AF68E", "2007+", A]]);
+  addBike("Honda", "Lead 90", SC, "HON_HF05E");
+  addBike("Honda", "Lead 100", SC, "HON_JF06E");
+  addBike("Honda", "Lead 110", SC, "HON_JF19E");
+  addBike("Honda", "Lead 125", SC, "HON_JF45E");
+  addBike("Honda", "Spacy 100", SC, "HON_JF13E");
+  G("Honda", "PCX 125", SC, [["HON_JF28E", "2010–2012 (JF28)"], ["HON_JF56E", "2013–2017 (JF56)"], ["HON_JF56E", "2018–2020 (JF81)"], ["HON_JK05E", "2021+ (JK05)"]]);
+  G("Honda", "PCX 150", SC, [["HON_KF12E", "2012–2014 (KF12)"], ["HON_KF12E", "2015–2017 (KF18)"], ["HON_KF12E", "2018–2020 (KF30)"]]);
+  addBike("Honda", "PCX 160", SC, "HON_KF47E");
+  addBike("Honda", "ADV 150", SC, "HON_KF12E", { hp: 14.3 });
+  addBike("Honda", "ADV 160", SC, "HON_KF47E", { hp: 16 });
+  G("Honda", "SH 125", SC, [["HON_SH125A", "2001–2012"], ["HON_JF56E", "2013–2019"], ["HON_JK05E", "2020+", { approx: true, hp: 13.6 }]]);
+  G("Honda", "SH 150", SC, [["HON_SH150A", "2001–2012"], ["HON_KF12E", "2013–2019", { hp: 14.5 }], ["HON_KF47E", "2020+", { approx: true, hp: 16.3 }]]);
+  G("Honda", "Forza 125", SC, [["HON_MF13E", "2015–2020"], ["HON_MF13E", "2021+"]]);
+  G("Honda", "Forza 250", SC, [["HON_MF04E", "2000–2003 (MF06)"], ["HON_MF08E", "2004–2007 (MF08)"], ["HON_MF08E", "2008–2012 (MF10)"]]);
+  G("Honda", "Forza 300", SC, [["HON_NSS300", "2013–2017", { hp: 27 }], ["HON_NSS300", "2018–2020"]]);
+  addBike("Honda", "Forza 350", SC, "HON_NSS350");
+  addBike("Honda", "ADV 350", SC, "HON_NSS350");
+  addBike("Honda", "Faze 250", SC, "HON_MF08E", { approx: true, hp: 22 });
+  addBike("Honda", "Foresight 250", SC, "HON_MF04E");
+  addBike("Honda", "Fusion 250 (CN250)", SC, "HON_MF02E");
+  addBike("Honda", "Silver Wing 400", SC, "HON_NF01E");
+  addBike("Honda", "Silver Wing 600", SC, "HON_PF01E");
+
+  /* Yamaha */
+  addBike("Yamaha", "Jog 3KJ", SC, "YAM_3KJ");
+  addBike("Yamaha", "Jog Artistic 3YK", SC, "YAM_3YK");
+  addBike("Yamaha", "Jog 5BM", SC, "YAM_3YK");
+  addBike("Yamaha", "Jog Aprio", SC, "YAM_3YK");
+  addBike("Yamaha", "Jog SA36J", SC, "YAM_SA36J");
+  addBike("Yamaha", "Jog SA39J", SC, "YAM_SA36J");
+  addBike("Yamaha", "Vino SA37J", SC, "YAM_SA36J");
+  addBike("Yamaha", "Jog R", SC, "YAM_MINA_AC");
+  addBike("Yamaha", "Jog RR", SC, "YAM_MINA_LC");
+  addBike("Yamaha", "Axis 50", SC, "YAM_3YK", { approx: true });
+  addBike("Yamaha", "Axis 90", SC, "YAM_3VR");
+  G("Yamaha", "Gear", SC, [["YAM_3YK", "1996–2006 (4KN, 2T)", A], ["YAM_SA36J", "2007+ (UA06J, 4T)", A]]);
+  addBike("Yamaha", "Grand Axis 100", SC, "YAM_5FA");
+  addBike("Yamaha", "BWS 50", SC, "YAM_MINA_AC");
+  addBike("Yamaha", "BWS 100", SC, "YAM_5FA");
+  addBike("Yamaha", "Aerox 50", SC, "YAM_MINA_LC");
+  addBike("Yamaha", "Aerox 155", SC, "YAM_NMAX155");
+  addBike("Yamaha", "Neo's 50", SC, "YAM_MINA_AC");
+  G("Yamaha", "NMAX 125", SC, [["YAM_NMAX125", "2015–2020"], ["YAM_NMAX125", "2021+"]]);
+  G("Yamaha", "NMAX 155", SC, [["YAM_NMAX155", "2016–2020"], ["YAM_NMAX155", "2021+", { hp: 15.4 }]]);
+  G("Yamaha", "XMAX 125", SC, [["YAM_YP125C", "2006–2009"], ["YAM_YP125F", "2010–2017"], ["YAM_XMAX125B", "2018+"]]);
+  G("Yamaha", "XMAX 250", SC, [["YAM_YP250C", "2005–2009", A], ["YAM_YP250F", "2010–2017"], ["YAM_XMAX250B", "2018+"]]);
+  addBike("Yamaha", "XMAX 300", SC, "YAM_XMAX300");
+  addBike("Yamaha", "XMAX 400", SC, "YAM_YP400");
+  G("Yamaha", "TMAX 500", SC, [["YAM_TMAX500C", "2001–2003"], ["YAM_TMAX500F", "2004–2007"], ["YAM_TMAX500F", "2008–2011", { hp: 44 }]]);
+  G("Yamaha", "TMAX 530", SC, [["YAM_TMAX530", "2012–2016"], ["YAM_TMAX530", "2017–2019"]]);
+  addBike("Yamaha", "TMAX 560", SC, "YAM_TMAX560");
+  addBike("Yamaha", "Majesty 125", SC, "YAM_YP125C");
+  G("Yamaha", "Majesty 250", SC, [["YAM_YP250C", "1995–1999 (4HC)"], ["YAM_YP250C", "2000–2006 (SG03J)"], ["YAM_YP250F", "2007+ (SG20J)"]]);
+  G("Yamaha", "Majesty 400", SC, [["YAM_YP400", "2004–2014", { hp: 34 }]]);
+  addBike("Yamaha", "Cygnus X 125", SC, "YAM_CYGNUS");
+
+  /* Suzuki */
+  G("Suzuki", "Address V50", SC, [["SUZ_2T50", "1990–2005 (2T)", A], ["SUZ_CA42A", "2006+ (4T, CA42A/CA44A)"]]);
+  addBike("Suzuki", "Address V100", SC, "SUZ_CE11A");
+  addBike("Suzuki", "Address V125", SC, "SUZ_CF46A");
+  addBike("Suzuki", "Address 110", SC, "SUZ_UK110");
+  addBike("Suzuki", "Lets 2", SC, "SUZ_2T50", { hp: 6 });
+  addBike("Suzuki", "Lets 4", SC, "SUZ_CA42A");
+  addBike("Suzuki", "Lets 5", SC, "SUZ_CA42A");
+  addBike("Suzuki", "Sepia", SC, "SUZ_2T50", { hp: 6.8 });
+  addBike("Suzuki", "Sepia ZZ", SC, "SUZ_2T50", { hp: 7.2 });
+  addBike("Suzuki", "ZZ", SC, "SUZ_2T50", { hp: 7.2 });
+  addBike("Suzuki", "Choinori", SC, "SUZ_CZ41A");
+  G("Suzuki", "Burgman 125", SC, [["SUZ_AN125", "2002–2006", A], ["SUZ_AN125", "2007–2013"], ["SUZ_AN125", "2014+"]]);
+  addBike("Suzuki", "Burgman 150", SC, "SUZ_AN150");
+  addBike("Suzuki", "Burgman 200", SC, "SUZ_UH200");
+  G("Suzuki", "Burgman 250 / Skywave 250", SC, [["SUZ_CJ41A", "1998–2006"], ["SUZ_CJ43A", "2007+"]]);
+  G("Suzuki", "Burgman 400 / Skywave 400", SC, [["SUZ_AN400C", "1998–2006"], ["SUZ_AN400F", "2006–2016"], ["SUZ_AN400F", "2017+", { hp: 31 }]]);
+  G("Suzuki", "Burgman 650 / Skywave 650", SC, [["SUZ_AN650", "2002–2012"], ["SUZ_AN650", "2013+"]]);
+
+  /* Kymco / SYM */
+  addBike("Kymco", "Agility 50", SC, "KYM_50");
+  addBike("Kymco", "Agility 125", SC, "KYM_125");
+  addBike("Kymco", "Like 125", SC, "KYM_125");
+  addBike("Kymco", "Downtown 300i", SC, "KYM_300");
+  addBike("Kymco", "Xciting 400i", SC, "KYM_400");
+  addBike("SYM", "Orbit 50", SC, "KYM_50");
+  addBike("SYM", "Symphony 125", SC, "KYM_125", { hp: 9 });
+  addBike("SYM", "Joymax 300i", SC, "SYM_300");
+  addBike("SYM", "Maxsym 400i", SC, "SYM_400");
+
+  /* Piaggio / Vespa / Aprilia / Gilera / Peugeot */
+  addBike("Piaggio", "Zip 50 2T", SC, "PIA_2T50");
+  addBike("Piaggio", "Typhoon 50", SC, "PIA_2T50");
+  addBike("Piaggio", "Fly 50 2T", SC, "PIA_2T50");
+  G("Piaggio", "Liberty 125", SC, [["PIA_LEADER125", "2004–2015"], ["PIA_IGET125", "2016+"]]);
+  addBike("Piaggio", "Fly 125", SC, "PIA_LEADER125");
+  addBike("Piaggio", "Beverly 300", SC, "PIA_QUASAR300");
+  addBike("Piaggio", "Beverly 500", SC, "PIA_MASTER500");
+  addBike("Piaggio", "MP3 300", SC, "PIA_QUASAR300");
+  addBike("Piaggio", "MP3 500", SC, "PIA_MASTER500");
+  addBike("Vespa", "LX 50 2T", SC, "PIA_2T50");
+  addBike("Vespa", "LX 125", SC, "PIA_LEADER125");
+  addBike("Vespa", "LX 150", SC, "PIA_LEADER150");
+  addBike("Vespa", "Primavera 125", SC, "PIA_IGET125");
+  addBike("Vespa", "Primavera 150", SC, "PIA_IGET150");
+  addBike("Vespa", "Sprint 125", SC, "PIA_IGET125");
+  G("Vespa", "GTS 300", SC, [["PIA_QUASAR300", "2008–2018 (ie)"], ["PIA_HPE300", "2019+ (HPE)"]]);
+  G("Aprilia", "SR 50", SC, [["YAM_MINA_LC", "1997–2004 (Minarelli)", A], ["PIA_LC50", "2005+ (Piaggio)"]]);
+  addBike("Aprilia", "SR Max 300", SC, "PIA_QUASAR300");
+  addBike("Gilera", "Runner 50", SC, "PIA_LC50");
+  addBike("Gilera", "Nexus 500", SC, "PIA_MASTER500", { approx: true });
+  addBike("Peugeot", "Speedfight 50", SC, "PEU_LC50");
+  addBike("Peugeot", "Vivacity 50", SC, "PEU_AC50");
+
+  /* китайские скутеры в России (мотор по каталогам продавцов — у разных партий может отличаться) */
+  addBike("Stels", "Tactic 50", SC, "CN_139QMB", A);
+  addBike("Stels", "Tactic 150", SC, "CN_157QMJ", A);
+  addBike("Stels", "Skif 50", SC, "CN_1E40QMB");
+  addBike("Racer", "Meteor 50", SC, "CN_139QMB", A);
+  addBike("Racer", "Stells 150", SC, "CN_157QMJ", A);
+  addBike("Irbis", "Nirvana 50", SC, "CN_139QMB", A);
+  addBike("Irbis", "Nirvana 150", SC, "CN_157QMJ", A);
+  addBike("Irbis", "Centurion 50", SC, "CN_139QMB", A);
+  addBike("Irbis", "Grace 50", SC, "CN_139QMB", A);
+  addBike("Viper", "Storm 50", SC, "CN_139QMB", A);
+  addBike("Любая модель", "скутер с мотором 139QMB (GY6 50)", SC, "CN_139QMB");
+  addBike("Любая модель", "скутер с мотором 1E40QMB (2T 50)", SC, "CN_1E40QMB");
+  addBike("Любая модель", "скутер с мотором 152QMI (GY6 125)", SC, "CN_152QMI");
+  addBike("Любая модель", "скутер с мотором 157QMJ (GY6 150)", SC, "CN_157QMJ");
 })();
 
 /* @@DB-FRAGMENTS@@ */
