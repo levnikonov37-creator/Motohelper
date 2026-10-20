@@ -1582,3 +1582,41 @@ body::after { display: none !important; }
 .bike-view .bv-toggle button:not(.on) { color: #F2F3F0; }
 .bv-note { margin: 8px 6px 0; font-size: 13px; color: var(--stage-muted); }
 .bv-note .link { color: var(--stage-ink); }
+
+/* ===== v37: видео к инструкциям, схемы электрики, моменты затяжки, шины ===== */
+.g-video { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0 4px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
+.g-video > b { font: 600 15px var(--cond); }
+.vlinks { display: flex; flex-wrap: wrap; gap: 6px; }
+.vlink { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 5px 12px 5px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface2); color: var(--ink); font-weight: 600; font-size: 14px; text-decoration: none; }
+.vlink .ico { color: #E5533D; }
+.vlink.v-vk .ico { color: #2787F5; }
+.vlink.v-rt .ico { color: #00A3FF; }
+.vlink.v-ya .ico { color: #FC3F1D; }
+.vlink:active { transform: scale(.96); }
+.actions4.rhub { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 900px) { .actions4.rhub { grid-template-columns: repeat(3, 1fr); } }
+.wr-head { margin: 0 0 10px; }
+.wr-head b { font: 600 17px var(--cond); }
+.wr-head p { margin: 4px 0 0; max-width: 70ch; }
+.wr-wrap { max-width: 560px; border-radius: 18px; padding: 10px; background: #15181C; border: 1px solid rgba(255,255,255,.08); }
+.wr-svg { display: block; width: 100%; height: auto; }
+.wr-wire { transition: opacity .2s ease; }
+.wr-wire.dim { opacity: .18; }
+.wr-node { cursor: pointer; outline: none; }
+.wr-node rect { fill: #262C32; stroke: #4A535B; stroke-width: 1.5; transition: fill .2s, stroke .2s; }
+.wr-node:hover rect, .wr-node:focus-visible rect { stroke: #E5E7EB; }
+.wr-node.on rect { fill: #E5E7EB; stroke: #E5E7EB; }
+.wr-lbl { height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; font: 600 11.5px/1.15 var(--cond); color: #EEF0EC; overflow: hidden; }
+.wr-node.on .wr-lbl { color: #1B1F22; }
+.wr-tip { margin: 8px 2px 0; }
+.wr-info { margin-top: 12px; max-width: 560px; }
+.wr-info h3 { margin: 0 0 4px; }
+.wr-info p { margin: 0 0 8px; }
+.wr-info table { width: 100%; border-collapse: collapse; }
+.wr-info th, .wr-info td { text-align: left; padding: 6px 4px; border-top: 1px solid var(--line); vertical-align: top; font-size: 14px; }
+.wr-info th { font-weight: 500; color: var(--muted); width: 55%; }
+.wr-legend { list-style: none; margin: 6px 0 14px; padding: 0; display: grid; gap: 8px; max-width: 560px; }
+.wr-legend li { display: grid; grid-template-columns: 34px auto; column-gap: 10px; align-items: center; }
+.wr-legend i { width: 34px; height: 8px; border-radius: 4px; grid-row: span 2; box-shadow: 0 0 0 1px rgba(255,255,255,.2); }
+.wr-legend span { color: var(--muted); font-size: 13px; }
+.wr-guides { margin-top: 12px; }
