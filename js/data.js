@@ -5172,6 +5172,619 @@ function tiresFor(bike, e) {
   g("PW80", PB, [["YAM_PW80", "1983–2006"]]);
 })();
 
+/* ===================== v30: Honda — свои моторы вместо сборных и чужих, новые модели ===================== */
+(function () {
+  var NK = "Нейкед", SP = "Спорт", CH = "Чоппер", TR = "Турер", AD = "Тур-эндуро", EN = "Эндуро", LE = "Лёгкий эндуро",
+    MO = "Мотард", KR = "Кросс-эндуро", PB = "Питбайк", KL = "Классика", MP = "Мопед", A = { approx: true };
+  function x(base, o) { var r = {}, k; for (k in base) r[k] = base[k]; for (k in o) r[k] = o[k]; return r; }
+  /* поколения у существующей модели: версия 0 сохраняет прежний смысл (setEngine), остальные поколения — addVersion */
+  function gens(name, list) {
+    list.forEach(function (g, i) {
+      var e = ENGINES[g[0]];
+      if (i === 0) setEngine("Honda", name, 0, g[0], x({ years: g[1], label: g[1] + " · " + e.code + ", " + e.cc + " см³" }, g[2] || {}));
+      else addVersion("Honda", name, g[0], g[1], g[2]);
+    });
+  }
+  var H = { region: "jp", maker: "Honda" };
+  var I4 = x(H, { layout: "i4", cam: "DOHC, 16 клапанов, 4 цилиндра" });
+  var CARB = { groups: ["dohc", "liquid", "carb", "4t", "big"], ignition: "Транзисторное (TCI)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу" };
+  var EFI = { groups: ["dohc", "liquid", "efi", "4t", "big"] };
+  var REG = { t: "Реле-регулятор напряжения перегревается и выходит из строя (типично для Honda тех лет)", sev: "med", fix: "Проверка зарядки 13.5–14.5 В на 5000 об/мин, регулятор MOSFET (FH020AA/FH847) и чистые разъёмы статора." };
+  var CCT = { t: "Автоматический натяжитель цепи ГРМ — лязг на холодную", sev: "med", fix: "Замена натяжителя (у многих — на ручной), цепь — по износу." };
+  var SYNC = { t: "Карбюраторы ×4: забитые жиклёры, рассинхрон, задубевшие мембраны", sev: "med", fix: "Ультразвуковая чистка, ремкомплекты, синхронизация вакуумметром." };
+  var OLD = { t: "Возраст 20–35 лет: износ ЦПГ, сальники, проводка, коррозия", sev: "high", fix: "Компрессия по цилиндрам при покупке (разброс не больше 1 бар), ревизия проводки." };
+
+  /* ================= МОТОРЫ: рядные четвёрки 250–400 ================= */
+  RE("HON_MC22E", x(CARB, x(I4, { code: "MC14E (MC22)", name: "Honda CBR250RR MC22 (рядная четвёрка 249, 19 000 об/мин)",
+    cam: "DOHC, 16 клапанов, шестерённый привод распредвалов", cc: 249, hp: 45, torque: "≈ 25 Н·м", compression: "≈ 13 бар (степень 11.5:1)", redline: 19000,
+    carb: "Keihin ×4 (CV)", idle: "1500–1700", valveIn: "0.13–0.19 мм", valveEx: "0.19–0.25 мм", spark: "NGK CR9EH-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oil: "10W-40 (JASO MA)", oilVol: "≈ 2.4 л с фильтром", oilInt: 5000, valveInt: 16000, coolant: "≈ 1.6 л", fuel: "АИ-95", topRatio: 2.9,
+    issues: [OLD, SYNC, REG] })), 1.9);
+  CL("HON_MC31E", "HON_MC22E", { code: "MC14E (Hornet 250)", name: "Honda Hornet 250 / Jade (рядная четвёрка 249)", hp: 40, torque: "≈ 24 Н·м", redline: 16000,
+    spark: "NGK CR8EH-9", issues: [REG, SYNC, { t: "Мотор живёт на высоких оборотах — масло и ЦПГ изнашиваются быстрее", sev: "med", fix: "Масло каждые 4–5 тыс. км, контроль расхода масла." }] }, 1.8);
+  RE("HON_NC23E", x(CARB, x(I4, { code: "NC23E", name: "Honda CBR400RR / CB-1 (рядная четвёрка 399, шестерни ГРМ)",
+    cam: "DOHC, 16 клапанов, шестерённый привод распредвалов", cc: 399, hp: 59, torque: "≈ 39 Н·м", compression: "≈ 13 бар (степень 11.3:1)", redline: 14000,
+    carb: "Keihin VP ×4", idle: "1200–1400", valveIn: "0.13–0.19 мм", valveEx: "0.19–0.25 мм", spark: "NGK CR9EH-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 3.4 л с фильтром", oilInt: 5000, valveInt: 16000, coolant: "≈ 2 л", fuel: "АИ-95", topRatio: 2.6,
+    issues: [{ t: "Вой шестерён привода распредвалов — норма; стук и металлический звон — износ", sev: "med", fix: "Слушать на холостых и на сбросе, сравнить с исправным." }, OLD, REG] })), 1.8);
+  RE("HON_NC30E", x(CARB, x(H, { code: "NC30E", name: "Honda VFR400R / RVF400 (V4 90°, 399, шестерни ГРМ)", layout: "vtwin", vAngle: 90,
+    cam: "DOHC, 16 клапанов, V4 90°, шестерённый привод распредвалов", cc: 399, hp: 59, torque: "≈ 39 Н·м", compression: "≈ 13 бар (степень 11.3:1)", redline: 14500,
+    carb: "Keihin VP ×4", idle: "1200–1400", valveIn: "0.13–0.19 мм", valveEx: "0.20–0.26 мм", spark: "NGK CR9EH-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 3.3 л с фильтром", oilInt: 5000, valveInt: 16000, coolant: "≈ 2.3 л", fuel: "АИ-95", topRatio: 2.6,
+    issues: [REG, { t: "Перегрев в пробках: вентилятор, термовыключатель, засорённые соты", sev: "med", fix: "Проверить включение вентилятора, промыть радиатор, свежий антифриз." }, { t: "Редкий мотор: запчасти ЦПГ и прокладки — только б/у или под заказ", sev: "med", fix: "Искать донора заранее." }] })), 1.9);
+  RE("HON_NC31E", x(CARB, x(I4, { code: "NC31 (NC23E)", name: "Honda CB400 Super Four NC31 / CB400 Four (рядная четвёрка 399)",
+    cc: 399, hp: 53, torque: "≈ 36 Н·м", compression: "≈ 12.5 бар (степень 11.3:1)", redline: 13000,
+    carb: "Keihin VP ×4 (32 мм)", idle: "1200–1400", valveIn: "0.13–0.19 мм", valveEx: "0.22–0.28 мм", spark: "NGK CR8EH-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 3.6 л с фильтром", oilInt: 6000, valveInt: 16000, coolant: "≈ 2.1 л", fuel: "АИ-92/95", topRatio: 2.5,
+    issues: [REG, CCT, SYNC, { t: "Расход масла после 60–80 тыс. км — колпачки и кольца", sev: "med", fix: "Замер компрессии, колпачки, при износе — кольца." }] })), 1.7);
+  CL("HON_NC39E", "HON_NC31E", { code: "NC39 HYPER VTEC", name: "Honda CB400 Super Four NC39 HYPER VTEC (рядная четвёрка 399, карбюраторы)",
+    cam: "DOHC, 16 клапанов, HYPER VTEC (2/4 клапана на цилиндр)", hp: 53, torque: "≈ 37 Н·м", redline: 13500,
+    issues: [{ t: "HYPER VTEC не включается или включается рывком — соленоид, грязное масло, датчики", sev: "med", fix: "Свежее масло нужного уровня, проверка соленоида VTEC и его фильтра-сетки." }, REG, CCT, SYNC] }, 1.7);
+  CL("HON_NC42E", "HON_NC39E", { code: "NC42 HYPER VTEC Revo", name: "Honda CB400 Super Four NC42 HYPER VTEC Revo (рядная четвёрка 399, инжектор)",
+    cam: "DOHC, 16 клапанов, HYPER VTEC Revo", hp: 56, torque: "≈ 39 Н·м", redline: 13500, groups: ["dohc", "liquid", "efi", "4t", "big", "jp"],
+    ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", jetMain: "—", jetPilot: "—", needle: "—", idle: "1200–1400",
+    issues: [{ t: "VTEC Revo: переключение 2/4 клапана зависит от оборотов и передачи — рывок обычно от грязного масла или соленоида", sev: "low", fix: "Масло по регламенту, проверка соленоида." }, REG, CCT] }, 1.8);
+  /* ================= 600 ================= */
+  RE("HON_PC19E", x(CARB, x(I4, { code: "PC19E", name: "Honda CBR600F 1987–1990 (рядная четвёрка 598)",
+    cc: 598, hp: 85, torque: "≈ 55 Н·м", compression: "≈ 12 бар (степень 11:1)", redline: 12000,
+    carb: "Keihin ×4 (32 мм)", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.19–0.25 мм", spark: "NGK DPR9EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 3.4 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.4 л", fuel: "АИ-95",
+    issues: [OLD, SYNC, REG] })), 2.0);
+  RE("HON_PC25E", x(CARB, x(I4, { code: "PC25E", name: "Honda CBR600F2 / F3 1991–1998 (рядная четвёрка 599)",
+    cc: 599, hp: 100, torque: "≈ 63 Н·м", compression: "≈ 12.5 бар (степень 12:1)", redline: 13000,
+    carb: "Keihin CV ×4 (34 мм)", idle: "1200–1400", valveIn: "0.13–0.19 мм", valveEx: "0.22–0.28 мм", spark: "NGK CR9EH-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 3.6 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.6 л", fuel: "АИ-95",
+    issues: [REG, CCT, SYNC] })), 2.1);
+  CL("HON_PC34E", "HON_PC25E", { code: "PC34E", name: "Honda CB600F Hornet 1998–2006 / CBF600 2004–2007 (рядная четвёрка 599, карбюраторы)",
+    hp: 95, torque: "≈ 63 Н·м", redline: 13000, spark: "NGK CR8EH-9",
+    issues: [REG, CCT, { t: "Холодный пуск: обогатитель и подсос через патрубки карбюраторов", sev: "low", fix: "Новые патрубки, регулировка троса обогатителя, синхронизация." }] }, 2.1);
+  RE("HON_PC35E", x(CARB, x(I4, { code: "PC35E", name: "Honda CBR600F4 1999–2000 (рядная четвёрка 599, карбюраторы)",
+    cc: 599, hp: 110, torque: "≈ 64 Н·м", compression: "≈ 13 бар (степень 12:1)", redline: 14000,
+    carb: "Keihin CV ×4 (36.5 мм)", idle: "1200–1400", valveIn: "0.13–0.19 мм", valveEx: "0.24–0.30 мм", spark: "NGK CR9EH-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 3.6 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.5 л", fuel: "АИ-95",
+    issues: [REG, { t: "Статор генератора греется — пробой обмотки", sev: "med", fix: "Замер сопротивления фаз и изоляции на массу, замена статора." }, CCT] })), 2.1);
+  CL("HON_PC35F", "HON_PC35E", { code: "PC35E (F4i)", name: "Honda CBR600F4i 2001–2006 (рядная четвёрка 599, инжектор)", hp: 110, torque: "≈ 65 Н·м",
+    groups: ["dohc", "liquid", "efi", "4t", "big", "jp"], ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", jetMain: "—", jetPilot: "—", needle: "—",
+    issues: [REG, { t: "Статор и разъём статор–регулятор подгорают", sev: "med", fix: "Перепаять разъём напрямую, проверить фазы статора." }, { t: "Реле бензонасоса и сам насос у старых", sev: "low", fix: "Проверка реле, давление топлива." }] }, 2.1);
+  RE("HON_PC37E", x(EFI, x(I4, { code: "PC37E", name: "Honda CBR600RR 2003–2006 (рядная четвёрка 599)",
+    cc: 599, hp: 117, torque: "≈ 66 Н·м", compression: "≈ 13.5 бар (степень 12:1)", redline: 15000,
+    carb: "Инжектор PGM-DSFI", idle: "1200–1400", valveIn: "0.17–0.23 мм", valveEx: "0.25–0.31 мм", spark: "NGK IMR9C-9HES", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.6 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.6 л", fuel: "АИ-95/98",
+    issues: [{ t: "Регулятор и статор — самая частая поломка CBR600RR 2003–2006", sev: "high", fix: "Регулятор MOSFET, проверка статора и разъёма, вольтметр в кабину." }, CCT,
+      { t: "Трековое прошлое: КПП, сцепление, рама после падений", sev: "med", fix: "Осмотр рамы и подрамника, проверка переключения всех передач под нагрузкой." }] })), 2.3);
+  CL("HON_PC40E", "HON_PC37E", { code: "PC40E", name: "Honda CBR600RR 2007+ (рядная четвёрка 599)", hp: 120, torque: "≈ 66 Н·м", redline: 15000,
+    issues: [{ t: "Натяжитель цепи ГРМ — треск на холодную (2007–2009)", sev: "med", fix: "Обновлённый натяжитель Honda, проверка цепи." }, REG,
+      { t: "Трековое прошлое: КПП, сцепление, рама", sev: "med", fix: "Осмотр рамы, проверка КПП под нагрузкой." }] }, 2.3);
+  CL("HON_PC41E", "HON_PC37E", { code: "PC41E", name: "Honda CB600F Hornet 2007–2013 / CBR600F 2011–2013 / CBF600 2008–2013 (рядная четвёрка 599)",
+    hp: 102, torque: "≈ 64 Н·м", redline: 13500, compression: "≈ 13 бар (степень 12:1)", fuel: "АИ-95",
+    issues: [REG, CCT, { t: "Ошибки датчиков (HISS, наклона, TPS) после мойки и падений", sev: "low", fix: "Сушка и смазка разъёмов, считать код по миганию FI." }] }, 2.2);
+  /* ================= 900–1300 ================= */
+  RE("HON_SC28E", x(CARB, x(I4, { code: "SC28E", name: "Honda CBR900RR Fireblade 1992–1995 (рядная четвёрка 893)",
+    cc: 893, hp: 124, torque: "≈ 87 Н·м", compression: "≈ 12.5 бар (степень 11:1)", redline: 11500,
+    carb: "Keihin CV ×4 (38 мм)", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.22–0.28 мм", spark: "NGK CR9EH-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 3.6 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.9 л", fuel: "АИ-95",
+    issues: [REG, CCT, SYNC] })), 2.3);
+  CL("HON_SC33E", "HON_SC28E", { code: "SC33E", name: "Honda CBR900RR Fireblade 1996–1999 (рядная четвёрка 918)", cc: 918, hp: 128, torque: "≈ 91 Н·м" }, 2.3);
+  RE("HON_SC44E", x(EFI, x(I4, { code: "SC44E", name: "Honda CBR929RR Fireblade 2000–2001 (рядная четвёрка 929)",
+    cc: 929, hp: 150, torque: "≈ 103 Н·м", compression: "≈ 13 бар (степень 11.3:1)", redline: 12000,
+    carb: "Инжектор PGM-FI", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.24–0.30 мм", spark: "NGK IMR9C-9HES", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.6 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.9 л", fuel: "АИ-95/98",
+    issues: [REG, CCT, { t: "Клапан выпуска H-TEV — тросы и сервопривод закисают", sev: "low", fix: "Смазать тросы, проверить сервопривод." }] })), 2.4);
+  CL("HON_SC50E", "HON_SC44E", { code: "SC50E", name: "Honda CBR954RR Fireblade 2002–2003 (рядная четвёрка 954)", cc: 954, hp: 154, torque: "≈ 104 Н·м" }, 2.4);
+  RE("HON_SC57E", x(EFI, x(I4, { code: "SC57E", name: "Honda CBR1000RR Fireblade 2004–2007 (рядная четвёрка 998)",
+    cc: 998, hp: 172, torque: "≈ 115 Н·м", compression: "≈ 13.5 бар (степень 11.9:1)", redline: 12500,
+    carb: "Инжектор PGM-DSFI", idle: "1200–1400", valveIn: "0.17–0.23 мм", valveEx: "0.25–0.31 мм", spark: "NGK IMR9C-9HES", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.6 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 3 л", fuel: "АИ-98",
+    issues: [REG, CCT, { t: "Трековое прошлое: сцепление, КПП, рама", sev: "med", fix: "Осмотр рамы и подрамника, проверка КПП под нагрузкой." }] })), 2.5);
+  CL("HON_SC59E", "HON_SC57E", { code: "SC59E", name: "Honda CBR1000RR Fireblade 2008–2016 (рядная четвёрка 999)", cc: 999, hp: 178, torque: "≈ 112 Н·м", redline: 13000,
+    compression: "≈ 13.5 бар (степень 12.3:1)",
+    issues: [{ t: "Натяжитель цепи ГРМ — треск на холодный пуск (особенно 2008–2011)", sev: "med", fix: "Обновлённый натяжитель, проверка цепи и успокоителей." }, REG,
+      { t: "Статор генератора греется", sev: "low", fix: "Замер фаз, замена статора и регулятора парой." }] }, 2.5);
+  CL("HON_SC77E", "HON_SC59E", { code: "SC77E", name: "Honda CBR1000RR Fireblade 2017–2019 / CB1000 Hornet (рядная четвёрка 999)", hp: 189, torque: "≈ 114 Н·м", redline: 13000,
+    compression: "≈ 13.5 бар (степень 13:1)", spark: "NGK IMR9E-9HES", oilVol: "≈ 3.7 л с фильтром",
+    issues: [{ t: "Сложная электроника (ride-by-wire, IMU, квикшифтер) — диагностика у дилера", sev: "med", fix: "Сканер с поддержкой Honda, оригинальные датчики." }, REG,
+      { t: "Трековое прошлое: сцепление, КПП, рама", sev: "med", fix: "Осмотр рамы, проверка КПП." }] }, 2.6);
+  RE("HON_SC82E", x(EFI, x(I4, { code: "SC82E", name: "Honda CBR1000RR-R Fireblade 2020+ (рядная четвёрка 999, короткоходная)",
+    cam: "DOHC, 16 клапанов, рокеры (finger follower)", cc: 999, hp: 217, torque: "≈ 113 Н·м", compression: "≈ 14 бар (степень 13:1)", redline: 14500,
+    carb: "Инжектор PGM-FI, ride-by-wire", idle: "1300–1500", valveIn: "0.17–0.23 мм", valveEx: "0.25–0.31 мм", spark: "NGK SILMAR9B9", gap: "0.8–0.9 мм", sparkTorque: "13 Н·м",
+    oilVol: "≈ 4 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 3.3 л", fuel: "АИ-98",
+    issues: [{ t: "Высокооборотистый мотор: регламент клапанов и масла не пропускать", sev: "med", fix: "Масло только 10W-30/10W-40 JASO MA2, клапаны по пробегу." },
+      { t: "Сложная электроника и датчики — диагностика у дилера", sev: "med", fix: "Сканер Honda, оригинальные датчики." }, { t: "Дорогие запчасти и пластик", sev: "low", fix: "Слайдеры, защита крышек двигателя." }] })), 2.8);
+  RE("HON_SC60E", x(EFI, x(I4, { code: "SC60E", name: "Honda CB1000R 2008–2016 (рядная четвёрка 998 от CBR1000RR)",
+    cc: 998, hp: 125, torque: "≈ 100 Н·м", compression: "≈ 13 бар (степень 11.2:1)", redline: 11000,
+    carb: "Инжектор PGM-FI", idle: "1100–1300", valveIn: "0.17–0.23 мм", valveEx: "0.25–0.31 мм", spark: "NGK IMR9C-9HES", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.6 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 3 л", fuel: "АИ-95",
+    issues: [REG, CCT, { t: "Резкий отклик газа на малых оборотах", sev: "low", fix: "Синхронизация дросселей, чистка, свежая прошивка у дилера." }] })), 2.4);
+  CL("HON_SC80E", "HON_SC60E", { code: "SC80E", name: "Honda CB1000R 2018+ (рядная четвёрка 998 от CBR1000RR SC59)", hp: 145, torque: "≈ 104 Н·м", redline: 11500,
+    compression: "≈ 13.5 бар (степень 11.6:1)", spark: "NGK IMR9E-9HES" }, 2.5);
+  RE("HON_SC48E", x(EFI, x(I4, { code: "SC48E", name: "Honda CB900F Hornet / 919 (рядная четвёрка 919 от CBR900RR)",
+    cc: 919, hp: 109, torque: "≈ 91 Н·м", compression: "≈ 12.5 бар (степень 10.8:1)", redline: 11000,
+    carb: "Инжектор PGM-FI", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.24–0.30 мм", spark: "NGK IMR9C-9HES", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.7 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.9 л", fuel: "АИ-95",
+    issues: [REG, CCT, { t: "Рывки на малом газе — синхронизация дросселей", sev: "low", fix: "Синхронизация, чистка дроссельного узла." }] })), 2.3);
+  RE("HON_SC58E", x(EFI, x(I4, { code: "SC58E", name: "Honda CBF1000 2006–2010 (рядная четвёрка 998, мягкий тюнинг)",
+    cc: 998, hp: 98, torque: "≈ 97 Н·м", compression: "≈ 12.5 бар (степень 11.2:1)", redline: 10500,
+    carb: "Инжектор PGM-FI", idle: "1100–1300", valveIn: "0.17–0.23 мм", valveEx: "0.25–0.31 мм", spark: "NGK IMR9C-9HES", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.7 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 3 л", fuel: "АИ-92/95",
+    issues: [REG, { t: "Ресурсный, «ленивый» мотор — проблемы в основном от возраста и сырости", sev: "low", fix: "Разъёмы, массы, свечные колпачки." }, CCT] })), 2.3);
+  CL("HON_SC64E", "HON_SC58E", { code: "SC64E", name: "Honda CBF1000F 2010–2013 (рядная четвёрка 998)", hp: 108, torque: "≈ 105 Н·м" }, 2.3);
+  RE("HON_SC24E", x(CARB, x(I4, { code: "SC24E", name: "Honda CBR1000F 1987–1999 (рядная четвёрка 998)",
+    cc: 998, hp: 135, torque: "≈ 103 Н·м", compression: "≈ 12 бар (степень 10.5:1)", redline: 11000,
+    carb: "Keihin CV ×4 (38 мм)", idle: "1000–1200", valveIn: "0.13–0.19 мм", valveEx: "0.20–0.26 мм", spark: "NGK DPR8EV-9", gap: "0.8–0.9 мм", sparkTorque: "14 Н·м",
+    oilVol: "≈ 3.8 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 3.4 л", fuel: "АИ-95",
+    issues: [OLD, SYNC, REG] })), 2.3);
+  CL("HON_SC30E", "HON_SC24E", { code: "SC30E", name: "Honda CB1000 Big One (рядная четвёрка 998 от CBR1000F)", hp: 98, torque: "≈ 85 Н·м", redline: 10000, spark: "NGK DPR8EA-9" }, 2.3);
+  RE("HON_SC38E", x(CARB, x(I4, { code: "SC38E", name: "Honda X4 / CB1300 SC40 (рядная четвёрка 1284, карбюраторы)",
+    cc: 1284, hp: 100, torque: "≈ 120 Н·м", compression: "≈ 12 бар (степень 9.6:1)", redline: 9500,
+    carb: "Keihin CV ×4 (36 мм)", idle: "1000–1200", valveIn: "0.13–0.19 мм", valveEx: "0.20–0.26 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "14 Н·м",
+    oilVol: "≈ 4.1 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 3.5 л", fuel: "АИ-92/95", gearbox: "5 ст.", topRatio: 1.45,
+    issues: [REG, SYNC, { t: "Сцепление и его гидропривод при мощном моменте и прогазовках", sev: "low", fix: "Диски и пружины, свежая жидкость в гидроприводе." }] })), 2.4);
+  CL("HON_SC54E", "HON_SC38E", { code: "SC54E", name: "Honda CB1300 Super Four SC54 2003+ (рядная четвёрка 1284, инжектор)", hp: 116, torque: "≈ 117 Н·м",
+    groups: ["dohc", "liquid", "efi", "4t", "big", "jp"], ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", jetMain: "—", jetPilot: "—", needle: "—", gearbox: "5 ст. (с 2014 — 6 ст.)",
+    issues: [REG, { t: "Тяжёлый мотоцикл: подшипники рулевой и маятника, сальники вилки", sev: "low", fix: "Ревизия ходовой при покупке." }, CCT] }, 2.4);
+  RE("HON_SC35E", x(EFI, x(I4, { code: "SC35E", name: "Honda CBR1100XX Super Blackbird / X-11 (рядная четвёрка 1137)",
+    cc: 1137, hp: 164, torque: "≈ 124 Н·м", compression: "≈ 13 бар (степень 11:1)", redline: 10800,
+    carb: "Инжектор PGM-FI (1996–1998 — карбюраторы)", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.20–0.26 мм", spark: "NGK IMR9B-9H", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.9 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 3.4 л", fuel: "АИ-95", topRatio: 1.45,
+    issues: [{ t: "Реле-регулятор — главная болячка Blackbird", sev: "high", fix: "Регулятор MOSFET, проверка статора и разъёма." }, { t: "Натяжитель цепи ГРМ — лязг на холодную (известная проблема)", sev: "med", fix: "Обновлённый или ручной натяжитель." },
+      { t: "Перегрев в пробках, слабый вентилятор", sev: "low", fix: "Проверка вентилятора и термовыключателя." }] })), 2.5);
+  CL("HON_SC35C", "HON_SC35E", { code: "SC35E (карб.)", name: "Honda CBR1100XX 1996–1998 (рядная четвёрка 1137, карбюраторы)",
+    groups: ["dohc", "liquid", "carb", "4t", "big", "jp"], ignition: "Транзисторное (TCI)", carb: "Keihin CV ×4 (42 мм)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    issues: [{ t: "Реле-регулятор — главная болячка Blackbird", sev: "high", fix: "Регулятор MOSFET." }, CCT, SYNC] }, 2.5);
+  RE("HON_RC42E", x(H, { code: "RC42E", name: "Honda CB750 RC42 / Seven Fifty (рядная четвёрка 747, воздушно-масляная)", layout: "i4",
+    cam: "DOHC, 16 клапанов, гидрокомпенсаторы", groups: ["dohc", "air", "carb", "4t", "big"], cooling: "Воздушно-масляное", ignition: "Транзисторное (TCI)",
+    cc: 747, hp: 73, torque: "≈ 64 Н·м", compression: "≈ 12 бар (степень 9.3:1)", redline: 9500, gearbox: "5 ст.",
+    carb: "Keihin CV ×4 (34 мм)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1000–1200",
+    valveIn: "гидрокомпенсаторы", valveEx: "гидрокомпенсаторы", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oil: "10W-40 (JASO MA)", oilVol: "≈ 3.6 л с фильтром", oilInt: 6000, valveInt: 0, topRatio: 1.6,
+    issues: [{ t: "Гидрокомпенсаторы стучат на холодную — старое масло или забитые каналы", sev: "med", fix: "Свежее масло нужной вязкости, промывка; если стук не уходит — замена компенсаторов." },
+      REG, SYNC] }), 2.0);
+  RE("HON_SC65E", x(H, { code: "SC65E", name: "Honda CB1100 / EX / RS (рядная четвёрка 1140, воздушно-масляная)", layout: "i4",
+    cam: "DOHC, 16 клапанов", groups: ["dohc", "air", "efi", "4t", "big"], cooling: "Воздушно-масляное",
+    cc: 1140, hp: 88, torque: "≈ 93 Н·м", compression: "≈ 12 бар (степень 9.5:1)", redline: 8500, gearbox: "5 ст. (2014+ — 6 ст.)",
+    carb: "Инжектор PGM-FI", idle: "900–1100", valveIn: "0.13–0.17 мм", valveEx: "0.20–0.24 мм", spark: "NGK DPR7EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 4 л с фильтром", oilInt: 6000, valveInt: 24000, topRatio: 1.45,
+    issues: [{ t: "Жар от мотора на ноги в пробках — воздушник", sev: "low", fix: "Не стоять долго на холостых, масло по уровню." },
+      { t: "Хром и полированный алюминий корродируют от реагентов", sev: "low", fix: "Мойка после дождя, полироль/воск." }, REG] }), 2.3);
+  /* ================= V4 ================= */
+  var V4 = x(H, { layout: "vtwin", vAngle: 90 });
+  RE("HON_RC24E", x(CARB, x(V4, { code: "RC24E", name: "Honda VFR750F RC24 1986–1989 (V4 90°, 748, шестерни ГРМ)",
+    cam: "DOHC, 16 клапанов, V4 90°, шестерённый привод распредвалов", cc: 748, hp: 105, torque: "≈ 75 Н·м", compression: "≈ 12 бар (степень 10.5:1)", redline: 11500,
+    carb: "Keihin CV ×4", idle: "1000–1200", valveIn: "0.13–0.19 мм", valveEx: "0.20–0.26 мм", spark: "NGK DPR9EA-9", gap: "0.8–0.9 мм", sparkTorque: "14 Н·м",
+    oilVol: "≈ 3.5 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.7 л", fuel: "АИ-95", topRatio: 2.0,
+    issues: [REG, OLD, SYNC] })), 2.2);
+  CL("HON_RC36E", "HON_RC24E", { code: "RC36E", name: "Honda VFR750F RC36 1990–1997 (V4 90°, 748, шестерни ГРМ)", hp: 100, torque: "≈ 72 Н·м", spark: "NGK CR9EH-9" }, 2.2);
+  RE("HON_RC46E", x(EFI, x(V4, { code: "RC46E", name: "Honda VFR800 FI 1998–2001 (V4 90°, 781, шестерни ГРМ)",
+    cam: "DOHC, 16 клапанов, V4 90°, шестерённый привод распредвалов", cc: 781, hp: 106, torque: "≈ 80 Н·м", compression: "≈ 12.5 бар (степень 11.6:1)", redline: 11500,
+    carb: "Инжектор PGM-FI", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.24–0.30 мм", spark: "NGK IMR9B-9H", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.8 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.7 л", fuel: "АИ-95", topRatio: 2.0,
+    issues: [{ t: "Реле-регулятор и статор — классика VFR", sev: "high", fix: "Регулятор MOSFET, проверка статора и разъёма, вольтметр." }, { t: "Коллектор выпуска гниёт", sev: "low", fix: "Осмотр, нержавеющий коллектор." }, OLD] })), 2.3);
+  CL("HON_RC46V", "HON_RC46E", { code: "RC46E VTEC", name: "Honda VFR800 VTEC 2002–2013 / Crossrunner 2011–2014 (V4 90°, 781, VTEC)",
+    cam: "DOHC, 16 клапанов, V4 90°, цепь ГРМ, VTEC (2/4 клапана)", hp: 110, torque: "≈ 80 Н·м",
+    issues: [{ t: "Реле-регулятор и статор — классика VFR", sev: "high", fix: "Регулятор MOSFET, проверка статора." }, { t: "Резкое включение VTEC на 6800 об/мин", sev: "low", fix: "Особенность; проверить соленоид и масло." }, CCT] }, 2.3);
+  CL("HON_RC79E", "HON_RC46V", { code: "RC79E", name: "Honda VFR800F 2014+ / VFR800X Crossrunner 2015+ (V4 90°, 781, VTEC)", hp: 106, torque: "≈ 75 Н·м",
+    issues: [{ t: "Регулятор напряжения — проверять зарядку", sev: "low", fix: "Вольтметр, разъёмы статора." }, CCT, { t: "Тепло от заднего цилиндра на ноги", sev: "low", fix: "Особенность V4." }] }, 2.3);
+  RE("HON_SC63E", x(EFI, x(H, { code: "SC63E", name: "Honda VFR1200F / Crosstourer (V4 76°, 1237, Unicam)", layout: "vtwin", vAngle: 76,
+    cam: "Unicam SOHC, 16 клапанов, V4 76°", cc: 1237, hp: 173, torque: "≈ 129 Н·м", compression: "≈ 13 бар (степень 12:1)", redline: 10200, gearbox: "6 ст., кардан (опция DCT)",
+    carb: "Инжектор PGM-FI, ride-by-wire", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.27–0.33 мм", spark: "NGK IFR8H11", gap: "1.0–1.1 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 4 л с фильтром", oilInt: 12000, valveInt: 32000, coolant: "≈ 3.1 л", fuel: "АИ-95", topRatio: 1.5,
+    issues: [{ t: "DCT: масло и фильтры DCT, адаптация сцеплений", sev: "med", fix: "Регламент DCT, диагностика у дилера." }, { t: "Кардан: масло в главной передаче, шлицы", sev: "low", fix: "Масло редуктора, смазка шлицов при замене шины." },
+      { t: "Жар на ноги от задних цилиндров", sev: "low", fix: "Особенность компоновки." }] })), 2.6);
+  RE("HON_SC26E", x(CARB, x(H, { code: "SC26E", name: "Honda ST1100 Pan-European (продольный V4 90°, 1084, ремни ГРМ)", layout: "vtwin", vAngle: 90,
+    cam: "DOHC, 16 клапанов, V4 90°, зубчатые ремни ГРМ", cc: 1084, hp: 100, torque: "≈ 110 Н·м", compression: "≈ 12 бар (степень 10:1)", redline: 8500, gearbox: "5 ст., кардан",
+    carb: "Keihin CV ×4", idle: "900–1100", valveIn: "0.13–0.19 мм", valveEx: "0.20–0.26 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 4 л с фильтром", oilInt: 8000, valveInt: 24000, coolant: "≈ 3.5 л", fuel: "АИ-92/95", topRatio: 1.35,
+    issues: [{ t: "Ремни ГРМ — замена по пробегу и возрасту (≈ 100 тыс. км или 8–10 лет)", sev: "high", fix: "Ремни и ролики комплектом, иначе обрыв и гнутые клапаны." },
+      REG, { t: "Связанные тормоза (LBS/ABS) и их возраст", sev: "low", fix: "Прокачка всех контуров, ревизия суппортов." }] })), 2.3);
+  RE("HON_SC51E", x(EFI, x(H, { code: "SC51E", name: "Honda ST1300 Pan-European (продольный V4 90°, 1261)", layout: "vtwin", vAngle: 90,
+    cam: "DOHC, 16 клапанов, V4 90°", cc: 1261, hp: 125, torque: "≈ 117 Н·м", compression: "≈ 12.5 бар (степень 10.8:1)", redline: 8500, gearbox: "5 ст., кардан",
+    carb: "Инжектор PGM-FI", idle: "900–1100", valveIn: "0.13–0.19 мм", valveEx: "0.20–0.26 мм", spark: "NGK IMR9C-9HES", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 4.2 л с фильтром", oilInt: 12000, valveInt: 32000, coolant: "≈ 3.5 л", fuel: "АИ-92/95", topRatio: 1.3,
+    issues: [{ t: "Раскачка («weave») на скорости с кофрами и топ-кейсом", sev: "low", fix: "Подшипники рулевой, давление в шинах, правильная загрузка." },
+      { t: "Связанные тормоза ABS — прокачка по схеме", sev: "low", fix: "Прокачка по мануалу, свежая жидкость." }, REG] })), 2.4);
+  RE("HON_RC43E", x(CARB, x(V4, { code: "RC43E", name: "Honda Magna 750 / VF750C (V4 90°, 748)",
+    cam: "DOHC, 16 клапанов, V4 90°", cc: 748, hp: 88, torque: "≈ 69 Н·м", compression: "≈ 12 бар (степень 10.5:1)", redline: 10000, gearbox: "5 ст.",
+    carb: "Keihin CV ×4", idle: "1000–1200", valveIn: "0.13–0.19 мм", valveEx: "0.20–0.26 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 3.4 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.5 л", fuel: "АИ-92/95", topRatio: 1.7,
+    issues: [REG, SYNC, { t: "Задние цилиндры греются сильнее — следить за антифризом", sev: "low", fix: "Свежий антифриз, вентилятор." }] })), 2.1);
+  /* ================= спорт V-twin ================= */
+  RE("HON_SC36E", x(CARB, x(H, { code: "SC36E", name: "Honda VTR1000F Firestorm (V-twin 90°, 996)", layout: "vtwin", vAngle: 90, crankPhase: 360,
+    cam: "DOHC, 8 клапанов, V-twin 90°", cc: 996, hp: 110, torque: "≈ 97 Н·м", compression: "≈ 12.5 бар (степень 9.4:1)", redline: 10000,
+    carb: "Keihin CV ×2 (48 мм)", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.24–0.30 мм", spark: "NGK DPR9EA-9", gap: "0.8–0.9 мм", sparkTorque: "14 Н·м",
+    oilVol: "≈ 3.8 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.8 л", fuel: "АИ-95", topRatio: 1.7,
+    issues: [REG, { t: "Маленький бак — запас хода 180–200 км", sev: "low", fix: "Особенность модели." }, { t: "Сбои зажигания и холостых от карбюраторов", sev: "low", fix: "Чистка, синхронизация." }] })), 2.2);
+  RE("HON_SC45E", x(EFI, x(H, { code: "SC45E", name: "Honda VTR1000 SP-1 / SP-2 RC51 (V-twin 90°, 999, шестерни ГРМ)", layout: "vtwin", vAngle: 90, crankPhase: 360,
+    cam: "DOHC, 8 клапанов, V-twin 90°, шестерённый привод распредвалов", cc: 999, hp: 133, torque: "≈ 102 Н·м", compression: "≈ 13 бар (степень 10.8:1)", redline: 11000,
+    carb: "Инжектор PGM-FI (2 форсунки на цилиндр)", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.24–0.30 мм", spark: "NGK IMR9B-9H", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.8 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.9 л", fuel: "АИ-98", topRatio: 1.75,
+    issues: [REG, { t: "Перегрев в городе — боковые радиаторы и вентиляторы", sev: "med", fix: "Чистые соты, исправные вентиляторы." }, { t: "Трековое прошлое", sev: "med", fix: "Осмотр рамы и КПП." }] })), 2.5);
+  /* ================= 2T спорт ================= */
+  RE("HON_MC21E", x(H, { code: "MC16E/MC21E", name: "Honda NSR250R (2T V-twin 90°, 249)", stroke: "2T", layout: "vtwin", vAngle: 90,
+    cam: "Лепестковый клапан, клапан выпуска RC", groups: ["2t", "liquid", "carb", "big"], cc: 249, hp: 45, torque: "≈ 37 Н·м", compression: "≈ 9 бар", redline: 11500,
+    ignition: "PGM (ЭБУ), у MC28 — карта-ключ PGM-IV", carb: "Keihin PE ×2 (28 мм)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1300–1500",
+    fuel: "АИ-95/98, масло 2T — в отдельный бачок", valveIn: "—", valveEx: "—", spark: "NGK BR9ECM", gap: "0.7–0.8 мм", sparkTorque: "18 Н·м",
+    oil: "2T масло (раздельная смазка) + трансмиссионное в КПП", oilVol: "КПП ≈ 0.9 л, бачок 2T ≈ 1.2 л", oilInt: 6000, valveInt: 0, coolant: "≈ 1.3 л", topRatio: 2.4,
+    issues: [{ t: "Блок PGM (зажигание и сервопривод клапана RC) — отказы и подделки", sev: "high", fix: "Проверить, что клапан RC отрабатывает при включении; запасной блок PGM — ценность." },
+      { t: "Клапаны выпуска RC закоксовываются", sev: "med", fix: "Чистка каждые 10–15 тыс. км." }, { t: "Сальники коленвала и поршни — возраст", sev: "high", fix: "Компрессия по цилиндрам, тест на подсос." }] }), 1.9);
+
+  /* ================= МОДЕЛИ: исправления ================= */
+  setEngine("Honda", "CB400 Super Four (NC39)", 0, "HON_NC39E", { years: "1999–2007", label: "1999–2007 · NC39 HYPER VTEC, 399 см³" });
+  setEngine("Honda", "CB400 Super Four VTEC Revo (NC42)", 0, "HON_NC42E", { years: "2008–2022", label: "2008–2022 · NC42 HYPER VTEC Revo, 399 см³" });
+  gens("CB400 Super Bol d'Or", [["HON_NC42E", "2008–2022"], ["HON_NC39E", "2005–2007"]]);
+  gens("CB600F Hornet", [["HON_PC34E", "1998–2002"], ["HON_PC34E", "2003–2006", { hp: 97 }], ["HON_PC41E", "2007–2013"]]);
+  gens("CBF600", [["HON_PC34E", "2004–2007", { hp: 78 }], ["HON_PC41E", "2008–2013", { hp: 77 }]]);
+  gens("CBR600RR", [["HON_PC40E", "2007–2016"], ["HON_PC37E", "2003–2006"], ["HON_PC40E", "2021+", { hp: 121 }]]);
+  gens("CBR1000RR Fireblade", [["HON_SC77E", "2017–2019"], ["HON_SC57E", "2004–2007"], ["HON_SC59E", "2008–2016"]]);
+  gens("CBR1000RR-R Fireblade SP", [["HON_SC82E", "2020+"]]);
+  gens("CB1300 Super Four", [["HON_SC54E", "2003–2013"], ["HON_SC38E", "1998–2002"], ["HON_SC54E", "2014+ (6 ст.)", { hp: 113 }]]);
+  gens("CB750 (RC42)", [["HON_RC42E", "1992–2008"]]);
+
+  /* ================= МОДЕЛИ: новые ================= */
+  G("Honda", "CB400 Super Four (NC31)", NK, [["HON_NC31E", "1992–1998"]]);
+  G("Honda", "CB400 Four (NC36)", KL, [["HON_NC31E", "1997–2001"]]);
+  G("Honda", "CB-1 (NC27)", NK, [["HON_NC23E", "1989–1990", { hp: 57 }]]);
+  G("Honda", "CBR400RR", SP, [["HON_NC23E", "1988–1989 (NC23)"], ["HON_NC23E", "1990–1999 (NC29)"]]);
+  G("Honda", "VFR400R (NC30)", SP, [["HON_NC30E", "1989–1993"]]);
+  G("Honda", "RVF400 (NC35)", SP, [["HON_NC30E", "1994–1996", { hp: 53 }]]);
+  G("Honda", "CBR250R (MC19)", SP, [["HON_MC22E", "1988–1989"]]);
+  G("Honda", "Hornet 250", NK, [["HON_MC31E", "1996–2007"]]);
+  G("Honda", "Jade 250", NK, [["HON_MC31E", "1991–1996"]]);
+  G("Honda", "NSR250R", SP, [["HON_MC21E", "1988–1989 (MC18)"], ["HON_MC21E", "1990–1993 (MC21)"], ["HON_MC21E", "1994–1999 (MC28)", { hp: 40 }]]);
+  G("Honda", "CBR600F", SP, [["HON_PC19E", "1987–1990 (F1)"], ["HON_PC25E", "1991–1994 (F2)"], ["HON_PC25E", "1995–1998 (F3)", { hp: 105 }], ["HON_PC35E", "1999–2000 (F4)"],
+    ["HON_PC35F", "2001–2006 (F4i)"], ["HON_PC41E", "2011–2013"]]);
+  G("Honda", "CBR600F4i", SP, [["HON_PC35F", "2001–2006"]]);
+  G("Honda", "CBR900RR Fireblade", SP, [["HON_SC28E", "1992–1995"], ["HON_SC33E", "1996–1999"]]);
+  G("Honda", "CBR929RR Fireblade", SP, [["HON_SC44E", "2000–2001"]]);
+  G("Honda", "CBR954RR Fireblade", SP, [["HON_SC50E", "2002–2003"]]);
+  G("Honda", "CBR1000F", SP, [["HON_SC24E", "1987–1999"]]);
+  G("Honda", "CBR1100XX Super Blackbird", SP, [["HON_SC35C", "1996–1998"], ["HON_SC35E", "1999–2007"]]);
+  G("Honda", "X-11 (CB1100SF)", NK, [["HON_SC35E", "1999–2003", { hp: 136 }]]);
+  G("Honda", "CB1000 Big One", NK, [["HON_SC30E", "1993–1997"]]);
+  G("Honda", "X4", NK, [["HON_SC38E", "1997–2003"]]);
+  G("Honda", "CB1300 Super Bol d'Or", NK, [["HON_SC54E", "2005–2013"], ["HON_SC54E", "2014+ (6 ст.)", { hp: 113 }]]);
+  G("Honda", "CB1300 Super Touring", TR, [["HON_SC54E", "2005–2013"]]);
+  G("Honda", "CB1000R", NK, [["HON_SC60E", "2008–2016"], ["HON_SC80E", "2018+"]]);
+  G("Honda", "CB1000 Hornet", NK, [["HON_SC77E", "2025+", { hp: 152 }]]);
+  G("Honda", "CB900F Hornet (919)", NK, [["HON_SC48E", "2002–2007"]]);
+  G("Honda", "CBF1000", NK, [["HON_SC58E", "2006–2010"], ["HON_SC64E", "2010–2013 (CBF1000F)"]]);
+  G("Honda", "CB1100 / EX / RS", KL, [["HON_SC65E", "2010–2013"], ["HON_SC65E", "2014–2021", { hp: 90 }]]);
+  G("Honda", "VFR750F", SP, [["HON_RC24E", "1986–1989 (RC24)"], ["HON_RC36E", "1990–1997 (RC36)"]]);
+  G("Honda", "VFR800", SP, [["HON_RC46E", "1998–2001 (FI)"], ["HON_RC46V", "2002–2013 (VTEC)"], ["HON_RC79E", "2014+ (VFR800F)"]]);
+  G("Honda", "VFR800X Crossrunner", AD, [["HON_RC46V", "2011–2014", { hp: 102 }], ["HON_RC79E", "2015+"]]);
+  G("Honda", "VFR1200F", TR, [["HON_SC63E", "2010–2017"]]);
+  G("Honda", "VFR1200X Crosstourer", AD, [["HON_SC63E", "2012–2020", { hp: 129 }]]);
+  G("Honda", "ST1100 Pan-European", TR, [["HON_SC26E", "1990–2002"]]);
+  G("Honda", "ST1300 Pan-European", TR, [["HON_SC51E", "2002–2016"]]);
+  G("Honda", "Magna 750", CH, [["HON_RC43E", "1994–2003"]]);
+  G("Honda", "VTR1000F Firestorm", SP, [["HON_SC36E", "1997–2005"]]);
+  G("Honda", "VTR1000 SP-1 / SP-2 (RC51)", SP, [["HON_SC45E", "2000–2006"]]);
+  /* ================= МОТОРЫ: V-twin, оппозиты, двойки ================= */
+  var VSCR = { valveIn: "0.13–0.17 мм", valveEx: "0.18–0.22 мм" }; /* винтовые регуляторы, норма 0.15 / 0.20 ± 0.02 */
+  var WP = { t: "Сальник помпы: подтёк антифриза из контрольного отверстия под помпой", sev: "med", fix: "Ремкомплект помпы (сальник + механическое уплотнение), свежий антифриз." };
+  var STC = { t: "Обгонная муфта стартера проскальзывает — стартер «визжит», мотор не крутится", sev: "med", fix: "Замена обгонной муфты (sprag) и шестерни стартера." };
+  RE("HON_MC51E", x(EFI, x(H, { code: "MC51E", name: "Honda CBR250RR 2017+ (рядная двойка 180°, 249)", layout: "twin", crankPhase: 180,
+    cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 249, hp: 41, torque: "≈ 23 Н·м", compression: "≈ 13 бар (степень 11.5:1)", redline: 14000,
+    carb: "Инжектор PGM-FI, ride-by-wire", idle: "1500–1700", valveIn: "0.13–0.19 мм", valveEx: "0.24–0.30 мм", spark: "NGK CPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 2.4 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 1.1 л", fuel: "АИ-95", topRatio: 2.6,
+    issues: [{ t: "Высокооборотистый мотор: масло нужной вязкости и вовремя", sev: "low", fix: "10W-30/10W-40 JASO MA, замена каждые 6 тыс. км." },
+      { t: "Ошибки датчиков после мойки под давлением", sev: "low", fix: "Не лить напором на разъёмы и дроссель." }] })), 1.9);
+  RE("HON_RC83E", x(EFI, x(I4, { code: "Honda 649 (2014–2018)", name: "Honda CB650F / CBR650F 2014–2018 (рядная четвёрка 649)",
+    cc: 649, hp: 87, torque: "≈ 63 Н·м", compression: "≈ 13 бар (степень 11.4:1)", redline: 11500,
+    carb: "Инжектор PGM-FI", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.24–0.30 мм", spark: "NGK IMR9E-9HES", gap: "0.8–0.9 мм", sparkTorque: "16 Н·м",
+    oilVol: "≈ 3.6 л с фильтром", oilInt: 12000, valveInt: 24000, coolant: "≈ 2.6 л", fuel: "АИ-92/95",
+    issues: [{ t: "Ржавеет коллектор выпуска и крепёж от реагентов", sev: "low", fix: "Мойка после зимы, керамическая краска/защита." }, REG, { t: "Рывки на малом газе — синхронизация дросселей", sev: "low", fix: "Синхронизация, чистка дроссельного узла." }] })), 2.1);
+  CL("HON_RH01E", "HON_RC83E", { code: "Honda 649 (2019+)", name: "Honda CB650R / CBR650R 2019+ (рядная четвёрка 649)", hp: 95, torque: "≈ 63 Н·м", redline: 12000,
+    compression: "≈ 13 бар (степень 11.6:1)" }, 2.2);
+  RE("HON_PC26E", x(CARB, x(H, { code: "PC26E", name: "Honda CB500 / CBF500 (рядная двойка 180°, 499, балансир)", layout: "twin", crankPhase: 180,
+    groups: ["dohc", "liquid", "carb", "4t", "big", "balancer"], cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 499, hp: 57, torque: "≈ 47 Н·м", compression: "≈ 12 бар (степень 10.5:1)", redline: 10500,
+    carb: "Keihin CV ×2 (34 мм)", idle: "1100–1300", valveIn: "0.10–0.16 мм", valveEx: "0.21–0.27 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 3.2 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 1.8 л", fuel: "АИ-92/95", topRatio: 2.0,
+    issues: [{ t: "Очень живучий мотор (курьеры, мотошколы) — главное масло и клапаны по регламенту", sev: "low", fix: "Регулировка шайбами при сильно зажатых выпускных клапанах." }, REG,
+      { t: "Учебная/курьерская эксплуатация: изношенное сцепление и цепь ГРМ после 80–100 тыс. км", sev: "med", fix: "Проверка сцепления под нагрузкой, лязг ГРМ на холодную." }] })), 1.8);
+  var V52 = x(H, { layout: "vtwin", vAngle: 52, crankPhase: 360, groups: ["liquid", "carb", "4t", "big"], ignition: "CDI / транзисторное", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу" });
+  RE("HON_PD06E", x(V52, x(VSCR, { code: "PD06E", name: "Honda XL600V Transalp (V-twin 52°, 583)", cam: "SOHC, 6 клапанов (3 на цилиндр), V-twin 52°",
+    cc: 583, hp: 50, torque: "≈ 53 Н·м", compression: "≈ 12 бар (степень 9.2:1)", redline: 8500, gearbox: "5 ст.", carb: "Keihin CV ×2", idle: "1100–1300",
+    spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 3 л с фильтром", oilInt: 6000, valveInt: 12000, coolant: "≈ 1.9 л", fuel: "АИ-92",
+    issues: [REG, WP, { t: "Обмерзание карбюраторов в сырую прохладную погоду (провалы, глохнет)", sev: "low", fix: "Подогрев карбюраторов исправен, чистые мембраны и дренажи." }] })), 1.8);
+  CL("HON_V647", "HON_PD06E", { code: "RD03E/RD10E/RC47E (647)", name: "Honda V-twin 52° 647 (Africa Twin 650 / Transalp 650 / Bros 650 / NTV650 / Deauville 650)",
+    cc: 647, hp: 53, torque: "≈ 56 Н·м", compression: "≈ 12 бар (степень 9.2:1)", gearbox: "5 ст. (NTV / Deauville — кардан)", oilVol: "≈ 3.2 л с фильтром" }, 1.9);
+  CL("HON_V680", "HON_PD06E", { code: "RD13E (680)", name: "Honda XL700V Transalp / NT700V Deauville (V-twin 52°, 680, инжектор)", cc: 680, hp: 60, torque: "≈ 60 Н·м",
+    compression: "≈ 12.5 бар (степень 10:1)", redline: 8000, groups: ["liquid", "efi", "4t", "big", "jp"], ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", jetMain: "—", jetPilot: "—", needle: "—",
+    spark: "NGK CPR8EA-9", oilVol: "≈ 3.4 л с фильтром", gearbox: "5 ст. (Deauville — кардан)",
+    issues: [REG, WP, { t: "Ошибки PGM-FI от окисленных разъёмов и датчика наклона", sev: "low", fix: "Чистка разъёмов, считать код по миганию FI." }] }, 1.9);
+  CL("HON_RD07E", "HON_PD06E", { code: "RD07E", name: "Honda XRV750 Africa Twin (V-twin 52°, 742)", cc: 742, hp: 59, torque: "≈ 63 Н·м", compression: "≈ 12 бар (степень 9:1)",
+    redline: 8000, oilVol: "≈ 3.6 л с фильтром",
+    issues: [REG, { t: "Блок CDI и статор у RD04/RD07 — отказы с возрастом", sev: "med", fix: "Проверка зарядки и искры, запасной CDI." }, WP] }, 2.0);
+  RE("HON_SD01E", x(CARB, x(H, { code: "SD01E", name: "Honda XL1000V Varadero 1999–2002 (V-twin 90°, 996, карбюраторы)", layout: "vtwin", vAngle: 90, crankPhase: 360,
+    cam: "DOHC, 8 клапанов, V-twin 90°", cc: 996, hp: 94, torque: "≈ 98 Н·м", compression: "≈ 12 бар (степень 9.8:1)", redline: 9000, gearbox: "5 ст.",
+    carb: "Keihin CV ×2 (42 мм)", idle: "1100–1300", valveIn: "0.13–0.19 мм", valveEx: "0.20–0.26 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "14 Н·м",
+    oilVol: "≈ 4 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.8 л", fuel: "АИ-92/95", topRatio: 1.6,
+    issues: [REG, { t: "Расход топлива 7–9 л/100 км на карбюраторах", sev: "low", fix: "Особенность; синхронизация и чистые фильтры." }, WP] })), 2.0);
+  CL("HON_SD02E", "HON_SD01E", { code: "SD02E", name: "Honda XL1000V Varadero 2003–2011 (V-twin 90°, 996, инжектор)", groups: ["dohc", "liquid", "efi", "4t", "big", "jp"],
+    ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", jetMain: "—", jetPilot: "—", needle: "—", gearbox: "5 ст. (2003+ — 6 ст.)", spark: "NGK IMR9C-9HES",
+    issues: [REG, { t: "Связанные тормоза Dual-CBS и ABS — прокачка по схеме", sev: "low", fix: "Свежая жидкость, прокачка по мануалу." }, WP] }, 2.0);
+  RE("HON_SD04E", x(EFI, x(H, { code: "SD04E", name: "Honda CRF1000L Africa Twin (рядная двойка 270°, 998)", layout: "twin", crankPhase: 270,
+    groups: ["liquid", "efi", "4t", "big", "balancer"], cam: "Unicam SOHC, 8 клапанов", cc: 998, hp: 95, torque: "≈ 99 Н·м", compression: "≈ 12.5 бар (степень 10:1)", redline: 8000,
+    carb: "Инжектор PGM-FI", idle: "1150–1350", valveIn: "0.15–0.21 мм", valveEx: "0.24–0.30 мм", spark: "NGK IFR8H11", gap: "1.0–1.1 мм", sparkTorque: "16 Н·м",
+    oil: "10W-30 (JASO MA)", oilVol: "≈ 4.4 л с фильтром (DCT ≈ 4.6 л)", oilInt: 12000, valveInt: 24000, coolant: "≈ 2.4 л", fuel: "АИ-92/95",
+    issues: [{ t: "DCT: масло, два фильтра DCT, адаптация сцеплений", sev: "med", fix: "Регламент DCT, адаптация у дилера после замены масла." },
+      { t: "АКБ садится при долгой стоянке (иммобилайзер, электроника)", sev: "low", fix: "Зарядное устройство с режимом хранения." }, WP] })), 2.2);
+  var VCR = x(H, { layout: "vtwin", groups: ["liquid", "carb", "4t", "big"], ignition: "CDI / транзисторное", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    spark: "NGK DPR7EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oil: "10W-40 (JASO MA)", oilInt: 6000, valveInt: 12000, fuel: "АИ-92", valveIn: "0.13–0.17 мм", valveEx: "0.18–0.22 мм" });
+  RE("HON_NC26E", x(VCR, { code: "NC26E", name: "Honda Steed 400 / Shadow 400 / Bros 400 (V-twin 52°, 398)", vAngle: 52, crankPhase: 360,
+    cam: "SOHC, 6 клапанов (3 на цилиндр), V-twin 52°", cc: 398, hp: 30, torque: "≈ 33 Н·м", compression: "≈ 12 бар (степень 10:1)", redline: 8500, gearbox: "5 ст.",
+    carb: "Keihin CV ×2", idle: "1100–1300", oilVol: "≈ 2.6 л с фильтром", coolant: "≈ 1.4 л", topRatio: 2.0,
+    issues: [REG, WP, { t: "Мембраны карбюраторов и обогатитель — нестабильный холостой", sev: "low", fix: "Чистка, ремкомплект, синхронизация." }] }), 1.6);
+  RE("HON_PC21E", x(VCR, { code: "PC21E", name: "Honda Shadow 600 VLX / Steed 600 (V-twin 52°, 583)", vAngle: 52, crankPhase: 360,
+    cam: "SOHC, 6 клапанов (3 на цилиндр), 2 свечи на цилиндр", cc: 583, hp: 39, torque: "≈ 48 Н·м", compression: "≈ 12 бар (степень 9.2:1)", redline: 7500, gearbox: "4 ст. (Steed — 5 ст.)",
+    carb: "Keihin CV", idle: "1100–1300", spark: "NGK DPR7EA-9 (2 на цилиндр)", oilVol: "≈ 3 л с фильтром", coolant: "≈ 1.7 л", topRatio: 1.7,
+    issues: [REG, WP, { t: "Обмерзание карбюратора в сырую погоду", sev: "low", fix: "Проверить подогрев карбюратора." }] }), 1.6);
+  RE("HON_RC44E", x(VCR, { code: "RC44E", name: "Honda Shadow ACE 750 / Spirit 750 1997–2003 (V-twin 52°, 745, одноштырьевой вал)", vAngle: 52, crankPhase: 360,
+    cam: "SOHC, 6 клапанов (3 на цилиндр), 2 свечи на цилиндр", cc: 745, hp: 45, torque: "≈ 64 Н·м", compression: "≈ 12 бар (степень 9:1)", redline: 6500, gearbox: "5 ст., кардан",
+    carb: "Keihin CV ×2", idle: "900–1100", spark: "NGK DPR7EA-9 (2 на цилиндр)", oilVol: "≈ 3.2 л с фильтром", coolant: "≈ 1.9 л", topRatio: 1.45,
+    issues: [REG, STC, { t: "Кардан: масло главной передачи и смазка шлицов", sev: "low", fix: "Менять масло редуктора, смазывать шлицы при замене шины." }] }), 1.8);
+  CL("HON_RC50E", "HON_RC44E", { code: "RC50E", name: "Honda Shadow 750 Aero / Spirit (VT750C/C2) 2004–2009 (V-twin 52°, 745, карбюратор)", carb: "Keihin CV (34 мм)" }, 1.8);
+  CL("HON_RC53E", "HON_RC44E", { code: "RC53E", name: "Honda Shadow 750 / Phantom / Black Spirit 2010+ (V-twin 52°, 745, инжектор)", groups: ["liquid", "efi", "4t", "big", "jp"],
+    ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", jetMain: "—", jetPilot: "—", needle: "—",
+    issues: [REG, { t: "Ошибки PGM-FI после мойки", sev: "low", fix: "Сушка и смазка разъёмов." }, { t: "Кардан: масло главной передачи", sev: "low", fix: "По регламенту." }] }, 1.8);
+  RE("HON_SC18E", x(VCR, { code: "SC18E/SC32E", name: "Honda Shadow 1100 VT1100C (V-twin 45°, 1099)", vAngle: 45, crankPhase: 360,
+    cam: "SOHC, 6 клапанов (3 на цилиндр), 2 свечи на цилиндр", cc: 1099, hp: 50, torque: "≈ 88 Н·м", compression: "≈ 11 бар (степень 8:1)", redline: 5500, gearbox: "5 ст., кардан (ранние — 4 ст.)",
+    carb: "Keihin CV ×2 (36 мм)", idle: "900–1000", spark: "NGK DPR7EA-9 (2 на цилиндр)", oilVol: "≈ 3.3 л с фильтром", coolant: "≈ 2.5 л", topRatio: 1.3,
+    issues: [{ t: "Обгонная муфта стартера — известная болячка VT1100", sev: "high", fix: "Замена муфты; не крутить стартер при подсевшей АКБ." }, REG, { t: "Кардан: масло редуктора и шлицы", sev: "low", fix: "По регламенту." }] }), 2.0);
+  RE("HON_SC52E", x(VCR, { code: "SC52E", name: "Honda VTX1300 (V-twin 52°, 1312)", vAngle: 52, crankPhase: 360,
+    cam: "SOHC, 6 клапанов (3 на цилиндр), 2 свечи на цилиндр", cc: 1312, hp: 74, torque: "≈ 108 Н·м", compression: "≈ 11 бар (степень 9.2:1)", redline: 5500, gearbox: "5 ст., кардан",
+    carb: "Keihin CV (38 мм)", idle: "800–1000", spark: "NGK DPR7EA-9 (2 на цилиндр)", oilVol: "≈ 3.8 л с фильтром", coolant: "≈ 2.7 л", topRatio: 1.15,
+    issues: [REG, STC, { t: "Кардан: масло главной передачи", sev: "low", fix: "По регламенту." }] }), 2.2);
+  CL("HON_SC61E", "HON_SC52E", { code: "SC61E", name: "Honda VT1300CX Fury / Sabre / Stateline / Interstate (V-twin 52°, 1312, инжектор)", hp: 58, torque: "≈ 107 Н·м",
+    groups: ["liquid", "efi", "4t", "big", "jp"], ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", jetMain: "—", jetPilot: "—", needle: "—",
+    issues: [REG, { t: "Задушен по выпуску и смеси под экологию — «ленивый» низ", sev: "low", fix: "Выпуск + коррекция топливной карты." }, { t: "Кардан: масло главной передачи", sev: "low", fix: "По регламенту." }] }, 2.2);
+  RE("HON_SC46E", x(VCR, { code: "SC46E", name: "Honda VTX1800 (V-twin 52°, 1795)", vAngle: 52, crankPhase: 360, groups: ["liquid", "efi", "4t", "big"],
+    cam: "SOHC, 6 клапанов (3 на цилиндр), 2 свечи на цилиндр", cc: 1795, hp: 106, torque: "≈ 163 Н·м", compression: "≈ 11 бар (степень 9:1)", redline: 5000, gearbox: "5 ст., кардан",
+    ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", jetMain: "—", jetPilot: "—", needle: "—", idle: "800–1000", spark: "NGK DPR7EA-9 (2 на цилиндр)", oilVol: "≈ 4.5 л с фильтром", coolant: "≈ 3.2 л", topRatio: 1.05,
+    issues: [STC, REG, { t: "Огромный момент — износ шлицов кардана и задней шины", sev: "low", fix: "Смазка шлицов, масло редуктора, давление в шине." }] }), 2.5);
+  var FLAT6 = x(H, { layout: "boxer", groups: ["liquid", "carb", "4t", "big"], ignition: "Транзисторное", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    valveIn: "гидрокомпенсаторы", valveEx: "гидрокомпенсаторы", valveInt: 0, gap: "1.0–1.1 мм", sparkTorque: "12 Н·м", oil: "10W-40 (JASO MA)", oilInt: 8000, fuel: "АИ-92/95" });
+  RE("HON_SC22E", x(FLAT6, { code: "SC22E", name: "Honda Gold Wing GL1500 (оппозитная шестёрка, 1520)", cam: "SOHC, 12 клапанов, оппозитная шестёрка, ремни ГРМ, гидрокомпенсаторы",
+    cc: 1520, hp: 100, torque: "≈ 150 Н·м", compression: "≈ 11 бар (степень 9.8:1)", redline: 6000, gearbox: "5 ст. + электрический задний ход, кардан",
+    carb: "Keihin CV ×2", idle: "800–900", spark: "NGK BKR6E-11", oilVol: "≈ 3.8 л с фильтром", coolant: "≈ 3.5 л", topRatio: 1.15,
+    issues: [{ t: "Ремни ГРМ — замена по возрасту и пробегу (≈ 100 тыс. км / 10 лет)", sev: "high", fix: "Ремни и натяжители комплектом." }, { t: "Статор генератора греется и пробивает", sev: "med", fix: "Замер фаз, замена статора, не перегружать сеть аксессуарами." },
+      { t: "Гидрокомпенсаторы стучат после долгой стоянки", sev: "low", fix: "Свежее масло; стук должен уйти через минуту." }] }), 2.4);
+  CL("HON_SC34E", "HON_SC22E", { code: "SC34E", name: "Honda Valkyrie GL1500C (оппозитная шестёрка, 1520, 6 карбюраторов)", carb: "Keihin CV ×6 (28 мм)", hp: 100, torque: "≈ 133 Н·м", redline: 6500,
+    issues: [{ t: "Шесть карбюраторов — синхронизация и чистка", sev: "med", fix: "Синхронизация вакуумметром, ремкомплекты." }, { t: "Ремни ГРМ — замена по возрасту", sev: "high", fix: "Ремни и натяжители комплектом." }, { t: "Статор генератора", sev: "med", fix: "Замер фаз, замена." }] }, 2.4);
+  RE("HON_SC47E", x(FLAT6, { code: "SC47E", name: "Honda Gold Wing GL1800 2001–2017 / Valkyrie 2014 / F6B (оппозитная шестёрка, 1832)", groups: ["liquid", "efi", "4t", "big"],
+    cam: "SOHC, 12 клапанов, оппозитная шестёрка, ремни ГРМ", cc: 1832, hp: 118, torque: "≈ 167 Н·м", compression: "≈ 12 бар (степень 9.8:1)", redline: 6000, gearbox: "5 ст. + электрический задний ход, кардан",
+    ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI", jetMain: "—", jetPilot: "—", needle: "—", idle: "650–750",
+    valveIn: "0.13–0.19 мм", valveEx: "0.19–0.25 мм", valveInt: 51000, spark: "NGK IFR6J11", oilVol: "≈ 4 л с фильтром", coolant: "≈ 3.7 л", topRatio: 1.05,
+    issues: [{ t: "Клапаны на шайбах — проверка раз в ~50 тыс. км, работа долгая (снимается часть пластика)", sev: "low", fix: "Делать у мастера с опытом GL1800, с приспособлением для натяжителей." },
+      { t: "Ремни ГРМ: регламента замены нет, но после 10+ лет — осмотр", sev: "med", fix: "Осмотр на трещины, замена при старении." }, { t: "Связанные тормоза и ABS — прокачка по сложной схеме", sev: "low", fix: "Прокачка по мануалу, свежая жидкость." }] }), 2.6);
+  RE("HON_SC79E", x(EFI, x(H, { code: "SC79E", name: "Honda Gold Wing GL1800 2018+ (оппозитная шестёрка, 1833, Unicam)", layout: "boxer",
+    groups: ["liquid", "efi", "4t", "big"], cam: "Unicam SOHC, 24 клапана, оппозитная шестёрка", cc: 1833, hp: 126, torque: "≈ 170 Н·м", compression: "≈ 12.5 бар (степень 10.5:1)", redline: 6000,
+    gearbox: "6 ст. / 7 ст. DCT, кардан", carb: "Инжектор PGM-FI, ride-by-wire", idle: "650–750", valveIn: "0.15–0.21 мм", valveEx: "0.24–0.30 мм", spark: "NGK SILMAR8A9S", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oil: "10W-30 (JASO MA)", oilVol: "≈ 4.5 л с фильтром", oilInt: 12000, valveInt: 48000, coolant: "≈ 3.8 л", fuel: "АИ-92/95", topRatio: 1.05,
+    issues: [{ t: "DCT: масло и фильтры DCT, адаптация", sev: "med", fix: "Регламент DCT у дилера." }, { t: "Сложная электроника (Apple CarPlay, подвеска, ABS)", sev: "low", fix: "Диагностика сканером Honda." }] })), 2.8);
+  RE("HON_MC15E", x(VCR, { code: "MC15E", name: "Honda VT250 / VTR250 / Magna 250 (V-twin 90°, 249)", vAngle: 90, crankPhase: 360, groups: ["dohc", "liquid", "carb", "4t", "big"],
+    cam: "DOHC, 8 клапанов, V-twin 90°", cc: 249, hp: 35, torque: "≈ 22 Н·м", compression: "≈ 13 бар (степень 11:1)", redline: 12500, gearbox: "5 ст. (VTR — 5 ст., Magna — 6 ст.)",
+    carb: "Keihin CV ×2 (VTR250 2009+ — инжектор)", idle: "1200–1400", valveIn: "0.13–0.19 мм", valveEx: "0.19–0.25 мм", spark: "NGK CR8EH-9", oilVol: "≈ 2.2 л с фильтром", coolant: "≈ 1.3 л",
+    valveInt: 24000, fuel: "АИ-92/95", topRatio: 2.4,
+    issues: [REG, WP, { t: "Возрастной мотор: компрессия, расход масла", sev: "med", fix: "Замер компрессии при покупке." }] }), 1.6);
+  RE("HON_V125", x(VCR, { code: "JC32E", name: "Honda XL125V Varadero / VT125C Shadow (V-twin 90°, 125)", vAngle: 90, crankPhase: 360, groups: ["liquid", "carb", "4t", "small"],
+    cam: "SOHC, 4 клапана (2 на цилиндр), V-twin", cc: 125, hp: 15, torque: "≈ 11 Н·м", compression: "≈ 12 бар (степень 11.8:1)", redline: 11000, gearbox: "5 ст.",
+    carb: "Keihin ×2", idle: "1300–1500", valveIn: "0.08–0.12 мм", valveEx: "0.10–0.14 мм", spark: "NGK CR8EH-9", oilVol: "≈ 1.6 л с фильтром", coolant: "≈ 1 л", oilInt: 4000, topRatio: 2.8,
+    issues: [{ t: "Два карбюратора на 125 — синхронизация и чистка", sev: "low", fix: "Синхронизация, чистка после хранения." }, WP, { t: "Перегрузка на трассе — мотор всё время у отсечки", sev: "low", fix: "Масло чаще, 90–100 км/ч — комфортный предел." }] }), 1.4);
+  RE("HON_MC13E", x(H, { code: "MC13E", name: "Honda Rebel 250 / CB250 Nighthawk (рядная двойка 234, воздушная)", layout: "twin", crankPhase: 360,
+    groups: ["air", "carb", "4t", "big"], cooling: "Воздушное", cam: "SOHC, 4 клапана (2 на цилиндр)", cc: 234, hp: 17, torque: "≈ 17 Н·м", compression: "≈ 12 бар (степень 9.2:1)", redline: 10000,
+    ignition: "CDI", gearbox: "5 ст.", carb: "Keihin CV (1 на оба цилиндра)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1300–1500",
+    valveIn: "0.08–0.12 мм", valveEx: "0.10–0.14 мм", spark: "NGK DPR7EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.8 л с фильтром", oilInt: 4000, valveInt: 12000, fuel: "АИ-92", topRatio: 2.3,
+    issues: [{ t: "Учебная эксплуатация: сцепление, звёзды, цепь", sev: "low", fix: "Проверка при покупке." }, { t: "Карбюратор после хранения — тяжёлый пуск", sev: "low", fix: "Чистка, сливать поплавковую камеру на зиму." }] }), 1.4);
+
+  /* ================= МОДЕЛИ: исправления (V-twin и двойки) ================= */
+  gens("CBF500", [["HON_PC26E", "2004–2008"]]);
+  gens("CBR250RR", [["HON_MC51E", "2017+"], ["HON_MC22E", "1990–1999 (MC22)"]]);
+  gens("XL600V Transalp", [["HON_PD06E", "1987–2000"]]);
+  gens("XL650V Transalp", [["HON_V647", "2000–2007"]]);
+  gens("XL700V Transalp", [["HON_V680", "2008–2012"]]);
+  gens("XRV650 Africa Twin", [["HON_V647", "1988–1989", { hp: 50 }]]);
+  gens("XRV750 Africa Twin", [["HON_RD07E", "1990–2003"]]);
+  gens("XL1000V Varadero", [["HON_SD02E", "2003–2011"], ["HON_SD01E", "1999–2002"]]);
+  gens("CRF1000L Africa Twin", [["HON_SD04E", "2016–2019"]]);
+  gens("Steed 400", [["HON_NC26E", "1988–2001"]]);
+  gens("Shadow 400", [["HON_NC26E", "1997–2008"]]);
+  gens("Steed 600", [["HON_PC21E", "1988–1998", { hp: 40 }]]);
+  gens("Shadow 750", [["HON_RC50E", "2004–2009"], ["HON_RC44E", "1997–2003"], ["HON_RC53E", "2010+"]]);
+  gens("Magna 250 (V4)", [["HON_MC15E", "1994–2007", { hp: 35 }]]);
+  gens("VTR250", [["HON_MC15E", "1998–2017", { hp: 32 }]]);
+  gens("CB500 Hornet", [["NX500", "2024+"]]);
+  gens("CB650F", [["HON_RC83E", "2014–2018"]]); gens("CBR650F", [["HON_RC83E", "2014–2018"]]);
+  gens("CB650R", [["HON_RH01E", "2019+"]]); gens("CBR650R", [["HON_RH01E", "2019+"]]);
+
+  /* ================= МОДЕЛИ: новые (V-twin, круизеры, туреры) ================= */
+  G("Honda", "CB500 / CB500S", NK, [["HON_PC26E", "1993–1996 (PC26)"], ["HON_PC26E", "1997–2003 (PC32)"]]);
+  G("Honda", "Bros 400", NK, [["HON_NC26E", "1988–1992", { hp: 37 }]]);
+  G("Honda", "Bros 650", NK, [["HON_V647", "1988–1992", { hp: 55 }]]);
+  G("Honda", "VRX400 Roadster", NK, [["HON_NC26E", "1995–1997", { hp: 33 }]]);
+  G("Honda", "Shadow Slasher 400", CH, [["HON_NC26E", "2000–2005", { hp: 31 }]]);
+  G("Honda", "NTV650 Revere", NK, [["HON_V647", "1988–1997", { hp: 57 }]]);
+  G("Honda", "NT650V Deauville", TR, [["HON_V647", "1998–2005", { hp: 56 }]]);
+  G("Honda", "NT700V Deauville", TR, [["HON_V680", "2006–2013", { hp: 65 }]]);
+  G("Honda", "Shadow 600 VLX", CH, [["HON_PC21E", "1988–2007"]]);
+  G("Honda", "Shadow 750 Aero", CH, [["HON_RC50E", "2004–2009"], ["HON_RC53E", "2010+"]]);
+  G("Honda", "Shadow 750 Spirit", CH, [["HON_RC44E", "2001–2003"], ["HON_RC50E", "2007–2009"], ["HON_RC53E", "2010+"]]);
+  G("Honda", "Shadow 750 Phantom", CH, [["HON_RC53E", "2010+"]]);
+  G("Honda", "Shadow ACE 750", CH, [["HON_RC44E", "1997–2003"]]);
+  G("Honda", "VT750DC Black Widow", CH, [["HON_RC44E", "2000–2003"]]);
+  G("Honda", "Shadow 1100 (VT1100C)", CH, [["HON_SC18E", "1985–1996"]]);
+  G("Honda", "Shadow Spirit 1100 (VT1100C2)", CH, [["HON_SC18E", "1997–2007"]]);
+  G("Honda", "Shadow ACE 1100", CH, [["HON_SC18E", "1995–1999", { hp: 54 }]]);
+  G("Honda", "Shadow Aero 1100 (VT1100C3)", CH, [["HON_SC18E", "1998–2002"]]);
+  G("Honda", "Shadow Sabre 1100 (VT1100C2S)", CH, [["HON_SC18E", "2000–2007"]]);
+  G("Honda", "VTX1300", CH, [["HON_SC52E", "2003–2009"]]);
+  G("Honda", "VTX1800", CH, [["HON_SC46E", "2002–2008"]]);
+  G("Honda", "VT1300CX Fury", CH, [["HON_SC61E", "2010+"]]);
+  G("Honda", "VT1300CS Sabre", CH, [["HON_SC61E", "2010–2014"]]);
+  G("Honda", "VT1300CR Stateline", CH, [["HON_SC61E", "2010–2013"]]);
+  G("Honda", "VT1300CT Interstate", CH, [["HON_SC61E", "2010–2017"]]);
+  G("Honda", "Valkyrie", CH, [["HON_SC34E", "1996–2003 (GL1500C)"], ["HON_SC47E", "2014–2016 (GL1800C)"]]);
+  G("Honda", "Valkyrie Rune", CH, [["HON_SC47E", "2004–2005"]]);
+  G("Honda", "Gold Wing GL1500", TR, [["HON_SC22E", "1988–2000"]]);
+  G("Honda", "Gold Wing GL1800", TR, [["HON_SC47E", "2001–2017"], ["HON_SC79E", "2018+"]]);
+  G("Honda", "Gold Wing F6B", TR, [["HON_SC47E", "2013–2017"]]);
+  G("Honda", "VT250 Spada", NK, [["HON_MC15E", "1988–1990", { hp: 40 }]]);
+  G("Honda", "Xelvis 250", NK, [["HON_MC15E", "1991–1994", { hp: 40 }]]);
+  G("Honda", "XL125V Varadero", AD, [["HON_V125", "2001–2016"]]);
+  G("Honda", "VT125C Shadow", CH, [["HON_V125", "1999–2007"]]);
+  G("Honda", "CB250 Nighthawk / Two Fifty", NK, [["HON_MC13E", "1991–2008"]]);
+  G("Honda", "NC700S", NK, [["HNC700", "2012–2014"]]);
+  G("Honda", "CTX700", CH, [["HNC700", "2014–2018"]]);
+  G("Honda", "CRF1000L Africa Twin Adventure Sports", AD, [["HON_SD04E", "2018–2019"]]);
+  G("Honda", "Africa Twin CRF1100L Adventure Sports", AD, [["AT1100", "2020+"]]);
+  G("Honda", "NT1100", TR, [["AT1100", "2022+"]]);
+  /* ================= МОТОРЫ: синглы 50–400, кросс 2T ================= */
+  var S1 = x(H, { layout: "single" });
+  RE("HON_JC34E", x(S1, { code: "JC34E", name: "Honda CBR125R JC34 / JC50 (жидкостный сингл 125)", groups: ["liquid", "efi", "4t", "small"], cam: "SOHC, 2 клапана",
+    cc: 125, hp: 13, torque: "≈ 10.4 Н·м", compression: "≈ 12 бар (степень 11:1)", redline: 10500, carb: "Инжектор PGM-FI (2004–2006 — Keihin)", idle: "1300–1500",
+    valveIn: "0.10–0.14 мм", valveEx: "0.13–0.17 мм", spark: "NGK CPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.1 л с фильтром (1.3 л при сборке)",
+    oilInt: 4000, valveInt: 8000, coolant: "≈ 0.8 л", fuel: "АИ-92/95", topRatio: 2.9,
+    issues: [{ t: "Натяжитель и цепь ГРМ шумят после 20–30 тыс. км", sev: "med", fix: "Натяжитель и цепь комплектом." }, { t: "Учебная эксплуатация: перекрутка, сцепление", sev: "low", fix: "Проверка сцепления, компрессии." },
+      { t: "Сальник помпы", sev: "low", fix: "Подтёк из контрольного отверстия — ремкомплект помпы." }] }), 1.6);
+  RE("HON_JC79E", x(S1, { code: "JC79E", name: "Honda CB125R 2018–2020 (жидкостный сингл 125, 4 клапана)", groups: ["liquid", "efi", "4t", "small"], cam: "SOHC, 4 клапана",
+    cc: 125, hp: 13.3, torque: "≈ 10 Н·м", compression: "≈ 12.5 бар (степень 11.3:1)", redline: 10500, carb: "Инжектор PGM-FI", idle: "1300–1500",
+    valveIn: "0.10–0.14 мм", valveEx: "0.21–0.25 мм", spark: "NGK CPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.4 л с фильтром",
+    oilInt: 6000, valveInt: 12000, coolant: "≈ 0.8 л", fuel: "АИ-92/95", topRatio: 2.8,
+    issues: [{ t: "Ошибки датчиков после мойки", sev: "low", fix: "Сушка разъёмов." }, { t: "Учебная эксплуатация: сцепление, падения", sev: "low", fix: "Осмотр при покупке." }] }), 1.6);
+  CL("HON_JC91E", "HON_JC79E", { code: "JC91E", name: "Honda CB125R 2021+ (жидкостный сингл 125, DOHC)", cam: "DOHC, 4 клапана", groups: ["dohc", "liquid", "efi", "4t", "small", "jp"], hp: 15, torque: "≈ 11.6 Н·м",
+    redline: 11000, compression: "≈ 13 бар (степень 11.5:1)" }, 1.7);
+  RE("HON_CBR150", x(S1, { code: "CBR150R (K45)", name: "Honda CBR150R (жидкостный сингл 149, DOHC)", groups: ["dohc", "liquid", "efi", "4t", "small"], cam: "DOHC, 4 клапана",
+    cc: 149, hp: 17, torque: "≈ 14 Н·м", compression: "≈ 13 бар (степень 11.3:1)", redline: 11000, carb: "Инжектор PGM-FI", idle: "1300–1500",
+    valveIn: "0.10–0.14 мм", valveEx: "0.21–0.25 мм", spark: "NGK CPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.3 л с фильтром",
+    oilInt: 5000, valveInt: 12000, coolant: "≈ 0.8 л", fuel: "АИ-92/95", topRatio: 2.8,
+    issues: [{ t: "Серый импорт из Азии: запчасти под заказ", sev: "low", fix: "Расходники заранее." }, { t: "Высокие обороты — масло чаще", sev: "low", fix: "Замена каждые 4–5 тыс. км." }] }), 1.4);
+  RE("HON_JC40E", x(S1, { code: "JC40E/JC64E", name: "Honda CBF125 / CB125F 2015–2020 (воздушный сингл 125)", groups: ["air", "efi", "4t", "small"], cooling: "Воздушное", cam: "SOHC, 2 клапана",
+    cc: 125, hp: 11, torque: "≈ 10 Н·м", compression: "≈ 11 бар (степень 9.2:1)", redline: 9000, gearbox: "5 ст.", carb: "Инжектор PGM-FI", idle: "1300–1500",
+    valveIn: "0.06–0.10 мм", valveEx: "0.06–0.10 мм", spark: "NGK CPR7EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.0 л (0.9 л при замене)",
+    oilInt: 4000, valveInt: 8000, fuel: "АИ-92", topRatio: 2.8,
+    issues: [{ t: "Очень живучий мотор — курьерская и учебная эксплуатация", sev: "low", fix: "Масло каждые 3–4 тыс. км, клапаны по регламенту." }, { t: "Цепь и звёзды изнашиваются быстро при плохой смазке", sev: "low", fix: "Смазка и натяжение цепи." }] }), 1.4);
+  CL("HON_JC74E", "HON_JC40E", { code: "JC74E (eSP)", name: "Honda CB125F 2021+ (воздушный сингл 124, eSP)", hp: 11, torque: "≈ 11.2 Н·м", compression: "≈ 11.5 бар (степень 10:1)" }, 1.4);
+  RE("HON_MC41E", x(S1, { code: "MC41E", name: "Honda CBR250R / CB250R / Rebel 250 (жидкостный сингл 249, DOHC)", groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 4 клапана",
+    cc: 249, hp: 26, torque: "≈ 23 Н·м", compression: "≈ 12.5 бар (степень 10.7:1)", redline: 10500, carb: "Инжектор PGM-FI", idle: "1300–1500",
+    valveIn: "0.13–0.19 мм", valveEx: "0.24–0.30 мм", spark: "NGK SIMR8A9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.8 л с фильтром",
+    oil: "10W-30 (JASO MA)", oilInt: 6000, valveInt: 24000, coolant: "≈ 1 л", fuel: "АИ-92/95", topRatio: 2.6,
+    issues: [{ t: "Ошибки датчиков после мойки под давлением", sev: "low", fix: "Не лить напором на разъёмы и дроссель." }, { t: "Вибрации на 8–9 тыс. об/мин — норма для сингла с балансиром", sev: "low", fix: "Проверить затяжку крепежа." }] }), 1.6);
+  CL("HON_NC51E", "HON_MC41E", { code: "NC51E", name: "Honda CBR300R / CB300F / CB300R / Rebel 300 (жидкостный сингл 286, DOHC)", cc: 286, hp: 30, torque: "≈ 27 Н·м", redline: 10000,
+    compression: "≈ 12.5 бар (степень 10.7:1)" }, 1.6);
+  RE("HON_MD21E", x(S1, { code: "MD21E", name: "Honda AX-1 / NX250 (жидкостный сингл 249, DOHC, карбюратор)", groups: ["dohc", "liquid", "carb", "4t", "big"], cam: "DOHC, 4 клапана",
+    cc: 249, hp: 26, torque: "≈ 23 Н·м", compression: "≈ 12 бар (степень 10.5:1)", redline: 10000, ignition: "CDI", carb: "Keihin CV", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    idle: "1300–1500", valveIn: "0.10–0.14 мм", valveEx: "0.15–0.19 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1.8 л с фильтром",
+    oilInt: 4000, valveInt: 12000, coolant: "≈ 1.1 л", fuel: "АИ-92", topRatio: 2.6,
+    issues: [OLD, { t: "Карбюратор после хранения и задубевшие патрубки", sev: "low", fix: "Чистка, новые патрубки." }] }), 1.5);
+  RE("HON_NC41E", x(S1, { code: "NC41E", name: "Honda CB400SS / CL400 (воздушный сингл 397, RFVC)", groups: ["air", "carb", "4t", "big"], cooling: "Воздушно-масляное (сухой картер)",
+    cam: "SOHC, 4 клапана RFVC", cc: 397, hp: 29, torque: "≈ 31 Н·м", compression: "≈ 11 бар (степень 9:1)", redline: 7500, gearbox: "5 ст.", start: "Кик (с 2003 — электро + кик)", ignition: "CDI",
+    carb: "Keihin CV", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1100–1300",
+    valveIn: "0.08–0.12 мм", valveEx: "0.10–0.14 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 2 л (сухой картер)", oilInt: 5000, valveInt: 12000, fuel: "АИ-92", topRatio: 2.2,
+    issues: [{ t: "Сухой картер: уровень масла мерить на прогретом моторе по мануалу", sev: "med", fix: "Прогреть, заглушить, мерить в вертикальном положении." }, { t: "Кикстартер и декомпрессор — тугой запуск при зажатых клапанах", sev: "low", fix: "Клапаны по регламенту." }] }), 1.5);
+  RE("HON_MC10E", x(S1, { code: "MC10E", name: "Honda GB250 Clubman (воздушный сингл 249, 4 клапана)", groups: ["dohc", "air", "carb", "4t", "big"], cooling: "Воздушное",
+    cam: "DOHC, 4 клапана", cc: 249, hp: 20, torque: "≈ 21 Н·м", compression: "≈ 11 бар (степень 9.3:1)", redline: 9500, gearbox: "5 ст.", ignition: "CDI",
+    carb: "Keihin", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1200–1400",
+    valveIn: "0.10–0.14 мм", valveEx: "0.12–0.16 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м", oilVol: "≈ 2 л с фильтром", oilInt: 4000, valveInt: 12000, fuel: "АИ-92", topRatio: 2.5,
+    issues: [OLD, { t: "Карбюратор и электрика — возраст", sev: "low", fix: "Чистка, ревизия разъёмов." }] }), 1.4);
+  RE("HON_CRF150R", x(S1, { code: "KE03E", name: "Honda CRF150R / RB (кроссовый сингл 149, Unicam)", groups: ["liquid", "carb", "4t", "small"], cam: "Unicam SOHC, 4 клапана",
+    cc: 149, hp: 19, torque: "≈ 13 Н·м", compression: "≈ 13 бар (степень 11.7:1)", redline: 13000, gearbox: "5 ст.", start: "Кик", ignition: "CDI",
+    carb: "Keihin FCR (2022+ — инжектор)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1800–2000",
+    valveIn: "0.09–0.15 мм", valveEx: "0.25–0.31 мм", spark: "NGK IMR9C-9H", gap: "0.7–0.8 мм", sparkTorque: "12 Н·м", oil: "10W-40 (JASO MA2)", oilVol: "≈ 0.9 л (общее для мотора и КПП)",
+    oilInt: 1000, valveInt: 3000, coolant: "≈ 0.6 л", fuel: "АИ-95/98", hours: true,
+    issues: [{ t: "Титановый впускной клапан — садится, мотор плохо заводится", sev: "high", fix: "Проверка зазоров по моточасам, замена клапанов и сёдел при износе." }, { t: "Поршень по моточасам", sev: "med", fix: "Журнал моточасов." }] }), 1.6);
+  CL("HON_ME12E", "CRF250C", { code: "ME10E FI", name: "Honda CRF250R 2010–2017 (Unicam, инжектор)", groups: ["liquid", "efi", "4t", "big", "jp"], ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI",
+    jetMain: "—", jetPilot: "—", needle: "—", hp: 39, spark: "NGK IMR8C-9HES",
+    issues: [{ t: "Титановые клапаны садятся — тугой запуск", sev: "high", fix: "Зазоры по моточасам, замена клапанов и сёдел." }, { t: "Кроссовый мотор — ТО по моточасам", sev: "med", fix: "Масло каждые 5–10 м/ч." }] }, 1.9);
+  CL("HON_PE05F", "CRF450C", { code: "PE05E FI", name: "Honda CRF450R 2009–2016 (Unicam, инжектор)", groups: ["liquid", "efi", "4t", "big", "jp"], ignition: "ЭБУ (PGM-FI)", carb: "Инжектор PGM-FI",
+    jetMain: "—", jetPilot: "—", needle: "—", hp: 54, spark: "NGK IMR8C-9HES" }, 2.0);
+  var CR = x(P2T, { region: "jp", maker: "Honda", start: "Кик", groups: ["2t", "liquid", "carb", "small"], jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", sparkTorque: "18–20 Н·м" });
+  W("HON_CR85", x(CR, { code: "HE02E/HE04E", name: "Honda CR80R / CR85R (2T 83, кросс подростковый)", cc: 83, hp: 22, torque: "≈ 13 Н·м", compression: "≈ 9 бар", redline: 13000,
+    carb: "Keihin PE / PWK28", spark: "NGK BR9EVX", oilVol: "КПП ≈ 0.7 л",
+    issues: [{ t: "Поршень и кольцо по моточасам", sev: "high", fix: "Журнал моточасов, замер зазора." }, { t: "Клапан выпуска (HPP) закоксовывается", sev: "med", fix: "Чистка по моточасам." }] }), 1.4);
+  W("HON_CR125A", x(CR, { code: "JE01E (1990–1999)", name: "Honda CR125R 1990–1999 (2T 124)", cc: 124, hp: 36, torque: "≈ 23 Н·м", compression: "≈ 9 бар", redline: 12000,
+    carb: "Keihin PWK / PJ (по году)", spark: "NGK BR9EVX", oilVol: "КПП ≈ 0.7 л",
+    issues: [{ t: "Поршень по моточасам", sev: "high", fix: "Журнал моточасов." }, { t: "Клапан выпуска ATAC/HPP закоксовывается", sev: "med", fix: "Чистка каждые 20–30 м/ч." }, OLD] }), 1.6);
+  CL("HON_CR125B", "HON_CR125A", { code: "JE01E (2000–2007)", name: "Honda CR125R 2000–2007 (2T 124, алюминиевая рама)", hp: 38, torque: "≈ 24 Н·м",
+    issues: [{ t: "Поршень по моточасам", sev: "high", fix: "Журнал моточасов." }, { t: "Клапан выпуска HPP и его привод", sev: "med", fix: "Чистка каждые 20–30 м/ч." }] }, 1.6);
+  W("HON_CR250A", x(CR, { code: "ME03E (1992–2001)", name: "Honda CR250R 1992–2001 (2T 249)", groups: ["2t", "liquid", "carb", "big"], cc: 249, hp: 45, torque: "≈ 37 Н·м", compression: "≈ 9 бар", redline: 9500,
+    gearbox: "5 ст.", carb: "Keihin PJ38 / PWK38 (по году)", spark: "NGK BR8EVX", oilVol: "КПП ≈ 0.75 л",
+    issues: [{ t: "Поршень по моточасам", sev: "high", fix: "Журнал моточасов." }, { t: "Клапан выпуска HPP", sev: "med", fix: "Чистка по моточасам." }, OLD] }), 1.8);
+  CL("HON_CR250B", "HON_CR250A", { code: "ME03E (2002–2007)", name: "Honda CR250R 2002–2007 (2T 249, алюминиевая рама 3-го поколения)", hp: 47, torque: "≈ 38 Н·м",
+    issues: [{ t: "Поршень по моточасам", sev: "high", fix: "Журнал моточасов." }, { t: "Клапан выпуска HPP", sev: "med", fix: "Чистка по моточасам." }] }, 1.8);
+  W("HON_CR500", x(CR, { code: "PE02E", name: "Honda CR500R (2T 491)", groups: ["2t", "liquid", "carb", "big"], cc: 491, hp: 60, torque: "≈ 60 Н·м", compression: "≈ 8.5 бар", redline: 7500,
+    gearbox: "5 ст.", topRatio: 1.6, carb: "Keihin PJ38 / PWK40", spark: "NGK BR8EVX", oilVol: "КПП ≈ 0.75 л",
+    issues: [{ t: "Огромная отдача кикстартера — запуск с декомпрессором", sev: "low", fix: "Декомпрессор исправен, правильная техника запуска." }, { t: "Поршень и коленвал — возраст", sev: "high", fix: "Компрессия, люфт шатуна." }] }), 1.8);
+  W("HON_CRM250", x(CR, { code: "MD24E", name: "Honda CRM250R / CRM250AR (2T эндуро 249)", groups: ["2t", "liquid", "carb", "big"], cc: 249, hp: 40, torque: "≈ 35 Н·м", compression: "≈ 9 бар", redline: 9500,
+    start: "Кик", fuel: "АИ-92/95, масло 2T — в отдельный бачок", oil: "2T масло (раздельная смазка)", carb: "Keihin PJ / PWK (по году)", spark: "NGK BR8ECM", oilVol: "КПП ≈ 0.9 л, бачок 2T ≈ 1 л",
+    issues: [{ t: "Масляный насос раздельной смазки: трос и уровень в бачке", sev: "high", fix: "Без масла мотор заклинит — уровень перед поездкой." }, { t: "Клапан выпуска (у AR — система AR) закоксовывается", sev: "med", fix: "Чистка, проверка привода." }, OLD] }), 1.6);
+  RE("HON_APE100", x(S1, { code: "HC07E", name: "Honda Ape 100 (горизонтальный 99, ручное сцепление)", groups: ["air", "carb", "4t", "small"], cooling: "Воздушное", cam: "SOHC, 2 клапана",
+    cc: 99, hp: 7.5, torque: "≈ 8 Н·м", compression: "≈ 11 бар (степень 9.4:1)", redline: 9000, gearbox: "4 ст., ручное сцепление", start: "Кик", ignition: "CDI",
+    carb: "Keihin PB", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1400–1600",
+    valveIn: "0.03–0.07 мм", valveEx: "0.03–0.07 мм", spark: "NGK CR6HSA", gap: "0.6–0.7 мм", sparkTorque: "12 Н·м", oilVol: "≈ 1 л", oilInt: 3000, valveInt: 6000, fuel: "АИ-92", topRatio: 3.1,
+    issues: [{ t: "Популярная база для тюнинга (цилиндры 115–140, кулачки)", sev: "low", fix: "Большой цилиндр — только с охлаждением и смесью." }, { t: "Только кикстартер — тугой запуск при зажатых клапанах", sev: "low", fix: "Клапаны по регламенту." }] }), 1.3);
+  CL("HON_APE50", "HON_APE100", { code: "AC16E", name: "Honda Ape 50 (горизонтальный 49, ручное сцепление)", cc: 49, hp: 4, torque: "≈ 4 Н·м", redline: 9000 }, 1.2);
+
+  /* ================= МОДЕЛИ: исправления (синглы, кросс) ================= */
+  gens("CBR125R", [["HON_JC34E", "2004–2010 (JC34)"], ["HON_JC34E", "2011–2017 (JC50)"]]);
+  gens("CB125R", [["HON_JC79E", "2018–2020"], ["HON_JC91E", "2021+"]]);
+  gens("CB125F", [["HON_JC40E", "2015–2020", { hp: 10.6 }], ["HON_JC74E", "2021+"]]);
+  gens("CBR250R", [["HON_MC41E", "2011–2013"]]);
+  gens("CBR300R", [["HON_NC51E", "2014–2019"]]);
+  gens("CB300R", [["HON_NC51E", "2018+", { hp: 31 }]]);
+  gens("Rebel 300", [["HON_NC51E", "2017+", { hp: 27 }]]);
+  gens("AX-1", [["HON_MD21E", "1987–1999"]]);
+  gens("CRF150R", [["HON_CRF150R", "2007+"]]);
+  setEngine("Honda", "CRF250R", 1, "HON_ME12E");
+  setEngine("Honda", "CRF450R", 1, "HON_PE05F");
+  setEngine("Honda", "XR150L", 1, "XR150L");
+  gens("CR125R", [["HON_CR125B", "2000–2007"], ["HON_CR125A", "1990–1999"]]);
+  gens("CR250R", [["HON_CR250B", "2002–2007"], ["HON_CR250A", "1992–2001"]]);
+
+  /* ================= МОДЕЛИ: новые (синглы, мопеды, кросс) ================= */
+  G("Honda", "CBR150R", SP, [["HON_CBR150", "2011+"]]);
+  G("Honda", "CBF125", NK, [["HON_JC40E", "2009–2014"]]);
+  G("Honda", "CB190R", NK, [["XR190", "2015+"]]);
+  G("Honda", "CB223S", KL, [["CRF230F", "2008–2017", { hp: 16 }]]);
+  G("Honda", "CB250R", NK, [["HON_MC41E", "2018+", { hp: 27 }]]);
+  G("Honda", "CL250", KL, [["HON_MC41E", "2023+", { hp: 24 }]]);
+  G("Honda", "Rebel 250", CH, [["HON_MC13E", "1985–2016"], ["HON_MC41E", "2017+", { hp: 26 }]]);
+  G("Honda", "CB300F", NK, [["HON_NC51E", "2015–2018"]]);
+  G("Honda", "CB400SS", KL, [["HON_NC41E", "2001–2009"]]);
+  G("Honda", "CL400", KL, [["HON_NC41E", "1998–2001"]]);
+  G("Honda", "GB250 Clubman", KL, [["HON_MC10E", "1983–2008"]]);
+  G("Honda", "CRF150RB", KR, [["HON_CRF150R", "2007+"]]);
+  G("Honda", "CRF250M", MO, [["CRF250L", "2013–2016"]]);
+  G("Honda", "CR80R / CR85R", KR, [["HON_CR85", "1986–2002 (CR80R)", { hp: 20 }], ["HON_CR85", "2003–2007 (CR85R)"]]);
+  G("Honda", "CR500R", KR, [["HON_CR500", "1985–2001"]]);
+  G("Honda", "CRM250R / CRM250AR", EN, [["HON_CRM250", "1989–1996 (CRM250R)"], ["HON_CRM250", "1997–1999 (CRM250AR)"]]);
+  G("Honda", "XL600R", EN, [["XR600R", "1983–1987", { hp: 42, approx: true }]]);
+  G("Honda", "Vigor 650", AD, [["XR650L", "1999–2003", { hp: 38, approx: true }]]);
+  G("Honda", "Ape 100", MP, [["HON_APE100", "2002–2007"]]);
+  G("Honda", "Ape 50", MP, [["HON_APE50", "2001–2017"]]);
+  G("Honda", "Monkey 50 (Z50J)", MP, [["CRF50F", "1967–2017", { hp: 3.4, approx: true }]]);
+  G("Honda", "Gorilla 50", MP, [["CRF50F", "1978–2007", { hp: 3.4, approx: true }]]);
+  G("Honda", "Z50R", PB, [["CRF50F", "1979–1999"]]);
+  G("Honda", "Dax 125 (ST125)", MP, [["CUB125", "2022+"]]);
+  G("Honda", "Cross Cub 110", MP, [["CUB110", "2013+"]]);
+  /* ================= ещё: GB350 / CB350 и модели на уже заведённых моторах ================= */
+  RE("HON_NC59E", x(S1, { code: "NC59E", name: "Honda GB350 / CB350 H'ness (воздушный сингл 348, балансир)", groups: ["air", "efi", "4t", "big", "balancer"], cooling: "Воздушное",
+    cam: "SOHC, 2 клапана", cc: 348, hp: 20, torque: "≈ 29 Н·м", compression: "≈ 10.5 бар (степень 9.5:1)", redline: 6500, gearbox: "5 ст.",
+    carb: "Инжектор PGM-FI", idle: "1100–1300", valveIn: "0.08–0.12 мм", valveEx: "0.10–0.14 мм", spark: "NGK CPR7EA-9", gap: "0.8–0.9 мм", sparkTorque: "12 Н·м",
+    oilVol: "≈ 1.7 л с фильтром", oilInt: 6000, valveInt: 12000, fuel: "АИ-92/95", topRatio: 2.0,
+    issues: [{ t: "Неспешный длинноходный мотор — не держать долго 110+ км/ч", sev: "low", fix: "Особенность; масло по регламенту." }, { t: "Новая модель — мало статистики, ошибки датчиков после мойки", sev: "low", fix: "Сушка разъёмов." }] }), 1.4);
+  G("Honda", "GB350 / GB350S", KL, [["HON_NC59E", "2021+"]]);
+  G("Honda", "CB350 H'ness", KL, [["HON_NC59E", "2020+"]]);
+  G("Honda", "CB350RS", KL, [["HON_NC59E", "2021+"]]);
+  G("Honda", "VFR750R (RC30)", SP, [["HON_RC24E", "1988–1990", { hp: 112, approx: true }]]);
+  G("Honda", "CB600S Hornet S", NK, [["HON_PC34E", "2000–2002"]]);
+  G("Honda", "CTX1300", CH, [["HON_SC51E", "2014–2017", { hp: 84 }]]);
+  G("Honda", "Hawk 11", NK, [["AT1100", "2022+"]]);
+  G("Honda", "CB400X", AD, [["NX400", "2013–2021"]]);
+  G("Honda", "Valkyrie Interstate", TR, [["HON_SC34E", "1999–2001"]]);
+  G("Honda", "Dax 50 (ST50)", MP, [["CRF50F", "1995–1999", { hp: 3.4, approx: true }]]);
+  G("Honda", "Chaly 50 (CF50)", MP, [["CRF50F", "1972–1999", { hp: 3.4, approx: true }]]);
+})();
+
 /* @@DB-FRAGMENTS@@ */
 sortBikes();
 /* ===================== v26: детали 174 и 182 больше не путаются ===================== */
