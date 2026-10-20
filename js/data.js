@@ -4718,6 +4718,460 @@ function tiresFor(bike, e) {
   G(K, "KX500", KX, [["KAW_KX500", "1988–2004"]]);
 })();
 
+/* ===================== v29: Yamaha — свои моторы вместо сборных, новые модели ===================== */
+(function () {
+  var NK = "Нейкед", SP = "Спорт", CH = "Чоппер", TR = "Турер", AD = "Тур-эндуро", EN = "Эндуро", LE = "Лёгкий эндуро",
+    MO = "Мотард", KR = "Кросс-эндуро", PB = "Питбайк", KL = "Классика", A = { approx: true };
+  function x(base, o) { var r = {}, k; for (k in base) r[k] = base[k]; for (k in o) r[k] = o[k]; return r; }
+  /* версия 0 существующей модели: тот же смысл, что был (мотор уточнён, годы проставлены) */
+  function sv(name, id, years, extra) {
+    var e = ENGINES[id];
+    setEngine("Yamaha", name, 0, id, x(years ? { years: years, label: years + " · " + e.code + ", " + e.cc + " см³" } : {}, extra || {}));
+  }
+  function av(name, id, years, extra) { addVersion("Yamaha", name, id, years, extra); }
+  function g(name, type, gens) { G("Yamaha", name, type, gens); }
+  /* groups копируем: RE дописывает регион в массив, а базы общие */
+  function re(id, o, k) { o.groups = o.groups.slice(); RE(id, o, k); }
+
+  /* ================= МОТОРЫ ================= */
+  var Y = { region: "jp", maker: "Yamaha" };
+  /* рядные четвёрки: жидкостные, DOHC, шайбы над/под толкателем */
+  var I4 = x(Y, { layout: "i4", groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 16 клапанов, 4 цилиндра", cooling: "Жидкостное",
+    gap: "0.7–0.8 мм", sparkTorque: "13 Н·м", oil: "10W-40 (JASO MA)", oilInt: 10000, valveInt: 40000, fuel: "АИ-95/98", idle: "1250–1450", coolant: "≈ 2.2 л" });
+  var I4C = x(I4, { groups: ["dohc", "liquid", "carb", "4t", "big"], ignition: "Транзисторное (TCI)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    oilInt: 6000, valveInt: 24000, fuel: "АИ-95" });
+  /* воздушные (воздушно-масляные) четвёрки XJ / FJ / XJR */
+  var I4A = x(I4C, { groups: ["dohc", "air", "carb", "4t", "big"], cooling: "Воздушно-масляное", coolant: "", gearbox: "5 ст.", idle: "1000–1100",
+    valveIn: "0.11–0.15 мм", valveEx: "0.16–0.20 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "17.5 Н·м", fuel: "АИ-92/95" });
+  /* V-twin круизеры с воздушным охлаждением, SOHC, регулировка винтами */
+  var VA = x(Y, { layout: "vtwin", groups: ["air", "carb", "4t", "big"], cooling: "Воздушное", coolant: "", ignition: "Транзисторное (TCI)",
+    jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "950–1050", gearbox: "5 ст., кардан",
+    valveIn: "0.07–0.12 мм", valveEx: "0.12–0.17 мм", gap: "0.7–0.8 мм", sparkTorque: "17.5 Н·м", fuel: "АИ-92/95", oilInt: 6000, valveInt: 12000 });
+  /* OHV-гиганты Road Star / Warrior / Roadliner: штанги, гидрокомпенсаторы, ремень */
+  var VOHV = x(VA, { vAngle: 48, cooling: "Воздушное", cam: "OHV (штанги), 4 клапана на цилиндр, V-twin 48°", valveIn: "гидрокомпенсаторы", valveEx: "гидрокомпенсаторы",
+    valveInt: 0, gearbox: "5 ст., ремень", idle: "850–950", topRatio: 1.15, oil: "20W-40 / 20W-50 (JASO MA)", oilInt: 8000 });
+  /* 2T дорожные / эндуро с раздельной смазкой */
+  var T2 = x(Y, { stroke: "2T", groups: ["2t", "liquid", "carb", "small"], cooling: "Жидкостное", cam: "Лепестковый клапан, YPVS", ignition: "CDI",
+    fuel: "АИ-95, масло 2T — в бачок (Autolube)", oil: "2T масло в бачок; КПП — 10W-30/10W-40", valveIn: "—", valveEx: "—", valveInt: 0, oilInt: 10000,
+    gap: "0.6–0.7 мм", sparkTorque: "20 Н·м", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1300–1500", gearbox: "6 ст.", coolant: "≈ 1 л" });
+  var REG = { t: "Реле-регулятор и статор перегреваются — разряд АКБ", sev: "med", fix: "Проверка зарядки 13.5–14.5 В, регулятор MOSFET, чистые разъёмы." };
+
+  /* --- 250 / 400 / 600: FZR, Thundercat, Fazer 600 --- */
+  re("YAM_FZR250", x(I4C, { code: "FZR250 (2KR / 3LN)", name: "Yamaha FZR250 / FZR250R / Zeal (рядная четвёрка 249)", cc: 249, hp: 45, torque: "≈ 25 Н·м",
+    compression: "≈ 12.5 бар", redline: 17000, carb: "Mikuni ×4", idle: "1300–1500", valveIn: "0.11–0.20 мм", valveEx: "0.21–0.30 мм", spark: "NGK CR9E",
+    oilVol: "≈ 2.6 л с фильтром", coolant: "≈ 1.5 л",
+    issues: [{ t: "Возраст 30+ лет: карбюраторы, проводка, сальники вилки", sev: "med", fix: "Чистка и синхронизация карбюраторов, ревизия электрики." },
+      { t: "Мотор живёт на 12–17 тыс. об/мин — износ ЦПГ и цепи ГРМ", sev: "med", fix: "Компрессия при покупке, натяжитель цепи ГРМ." }, REG] }), 1.6);
+  CL("YAM_FZR400", "YAM_FZR250", { code: "FZR400 (1WG / 3EN)", name: "Yamaha FZR400 / FZR400RR (рядная четвёрка 399)", cc: 399, hp: 59, torque: "≈ 39 Н·м",
+    redline: 14000, oilVol: "≈ 3 л с фильтром", coolant: "≈ 1.8 л" }, 1.7);
+  re("YAM_FZR600", x(I4C, { code: "FZR600 (3HE)", name: "Yamaha FZR600 (рядная четвёрка 599, карбюраторы)", cc: 599, hp: 91, torque: "≈ 66 Н·м",
+    compression: "≈ 12 бар", redline: 12500, carb: "Mikuni BDST ×4", valveIn: "0.11–0.20 мм", valveEx: "0.21–0.30 мм", spark: "NGK CR9E",
+    oilVol: "≈ 3.2 л с фильтром",
+    issues: [REG, { t: "Синхронизация и чистка 4 карбюраторов — рывки на малом газе", sev: "low", fix: "Вакуумметр-синхронизатор, ремкомплекты." },
+      { t: "Натяжитель цепи ГРМ — лязг на холодную", sev: "med", fix: "Замена натяжителя, цепь — по вытяжке." }] }), 2.0);
+  CL("YAM_YZF600R", "YAM_FZR600", { code: "YZF600R / FZR600R (4JH / 4TV)", name: "Yamaha YZF600R Thundercat / FZR600R / FZS600 Fazer (рядная четвёрка 599)",
+    hp: 100, torque: "≈ 68 Н·м", redline: 13000, carb: "Mikuni BDSR36 ×4 (Thundercat), BSR33 ×4 (FZS600)", oilVol: "≈ 3.4 л с фильтром",
+    issues: [REG, { t: "Износ 2-й передачи у ездивших «на заднем»", sev: "med", fix: "Проверять КПП при покупке, переключать до упора." },
+      { t: "Карбюраторы после хранения — засор холостой системы", sev: "low", fix: "Чистка, сливать поплавковые камеры на зиму." }] }, 2.0);
+  /* --- YZF-R6 --- */
+  re("YAM_R6_5EB", x(I4C, { code: "YZF-R6 (5EB)", name: "Yamaha YZF-R6 1999–2002 (рядная четвёрка 599, карбюраторы)", cc: 599, hp: 120, torque: "≈ 68 Н·м",
+    compression: "≈ 12.4 бар", redline: 15500, carb: "Mikuni BDSR37 ×4", valveIn: "0.11–0.20 мм", valveEx: "0.21–0.30 мм", spark: "NGK CR10EK", gap: "0.6–0.7 мм",
+    oilVol: "≈ 2.9 л с фильтром (всего ≈ 3.4 л)", valveInt: 40000, fuel: "АИ-98",
+    issues: [REG, { t: "Натяжитель цепи ГРМ и шум ГРМ после трека", sev: "med", fix: "Замена натяжителя, проверка меток и вытяжки цепи." },
+      { t: "Трековое прошлое: рама, КПП, перекрученный мотор", sev: "high", fix: "Компрессия, проверка КПП и геометрии при покупке." }] }), 2.2);
+  re("YAM_R6_5SL", x(I4, { code: "YZF-R6 (5SL)", name: "Yamaha YZF-R6 2003–2005 / R6S (рядная четвёрка 599, инжектор)", cc: 599, hp: 123, torque: "≈ 68 Н·м",
+    compression: "≈ 12.4 бар", redline: 15500, ignition: "ЭБУ (EFI)", carb: "Инжектор", valveIn: "0.11–0.20 мм", valveEx: "0.21–0.25 мм", spark: "NGK CR10EK", gap: "0.6–0.7 мм",
+    oilVol: "≈ 2.9 л с фильтром",
+    issues: [REG, { t: "Натяжитель цепи ГРМ — лязг на холодную", sev: "med", fix: "Замена натяжителя." },
+      { t: "Датчик положения дросселя (TPS) — провалы и рывки", sev: "low", fix: "Проверка и выставление TPS по мануалу." }] }), 2.2);
+  CL("YAM_FZ6", "YAM_R6_5SL", { code: "FZ6 (5VX)", name: "Yamaha FZ6 / FZ6 Fazer (рядная четвёрка 600 от R6 5SL)", cc: 600, hp: 98, torque: "≈ 63 Н·м",
+    compression: "≈ 12.2 бар", redline: 14000, spark: "NGK CR9EK", gap: "0.6–0.7 мм", fuel: "АИ-95", oilVol: "≈ 3.4 л с фильтром",
+    issues: [REG, { t: "Мало тяги внизу — мотор от спортбайка", sev: "low", fix: "Ехать на оборотах выше 7000 или −1 зуб на передней звезде." },
+      { t: "Выпуск под сиденьем греет райдера в пробках", sev: "low", fix: "Теплоизоляция, проверка работы вентилятора." }] }, 2.1);
+  CL("YAM_XJ6", "YAM_FZ6", { code: "XJ6 (20S)", name: "Yamaha XJ6 / Diversion / Diversion F (рядная четвёрка 600)", hp: 78, torque: "≈ 60 Н·м", redline: 11500,
+    spark: "NGK CR9E", gap: "0.7–0.8 мм",
+    issues: [{ t: "Течь по прокладке крышки клапанов и датчику на ГБЦ", sev: "low", fix: "Новая прокладка, ровная затяжка." },
+      { t: "Ранние партии: рывки на малом газе", sev: "low", fix: "Обновление прошивки ЭБУ у дилера, синхронизация дросселей." }, REG] }, 2.0);
+  re("YAM_R6_2C0", x(I4, { code: "YZF-R6 (2C0 / 13S)", name: "Yamaha YZF-R6 2006–2020 (рядная четвёрка 599, YCC-T, YCC-I)", cc: 599, hp: 127, torque: "≈ 66 Н·м",
+    compression: "≈ 13.1 бар", redline: 16500, ignition: "ЭБУ (EFI), YCC-T", carb: "Инжектор", valveIn: "0.12–0.19 мм", valveEx: "0.23–0.30 мм", spark: "NGK CR10EK", gap: "0.6–0.7 мм",
+    oilVol: "≈ 2.8 л с фильтром", coolant: "≈ 2.4 л",
+    issues: [REG, { t: "Титановые впускные клапаны: зазор «садится» после перекрутки", sev: "med", fix: "Проверка зазоров по регламенту, раньше — после трека." },
+      { t: "Привод YCC-I (переменные впускные трубы) — ошибки", sev: "low", fix: "Проверка сервопривода и тросика по мануалу." },
+      { t: "Трековое прошлое у большинства б/у", sev: "high", fix: "Компрессия, КПП, рама и подшипники при покупке." }] }), 2.3);
+  /* --- FZR1000 / Thunderace --- */
+  re("YAM_FZR1000", x(I4C, { code: "FZR1000 EXUP (3LE / 3GM)", name: "Yamaha FZR1000 EXUP / YZF1000R Thunderace (рядная четвёрка 1002, 20 клапанов)", cc: 1002,
+    hp: 145, torque: "≈ 107 Н·м", compression: "≈ 12 бар", redline: 11500, cam: "DOHC, 20 клапанов (5 на цилиндр), 4 цилиндра", carb: "Mikuni BDST38 ×4",
+    valveIn: "0.11–0.20 мм", valveEx: "0.21–0.30 мм", spark: "NGK CR9E", oilVol: "≈ 3.8 л с фильтром", coolant: "≈ 2.6 л",
+    issues: [{ t: "Клапан выпуска EXUP закисает — провал тяги внизу", sev: "med", fix: "Снять, почистить и смазать заслонку EXUP, проверить тросы." }, REG,
+      { t: "Возраст: карбюраторы, сальники вилки, проводка", sev: "med", fix: "Ревизия при покупке, синхронизация." }] }), 2.4);
+  CL("YAM_FZR1000G", "YAM_FZR1000", { code: "FZR1000 Genesis (2LA)", name: "Yamaha FZR1000 Genesis 1987–1988 (рядная четвёрка 989, 20 клапанов)", cc: 989, hp: 135,
+    torque: "≈ 99 Н·м", carb: "Mikuni BDST36 ×4",
+    issues: [REG, { t: "Возраст 35+ лет: карбюраторы, проводка, резина", sev: "med", fix: "Ревизия при покупке." }] }, 2.3);
+  /* --- YZF-R1 и производные --- */
+  re("YAM_R1_4XV", x(I4C, { code: "YZF-R1 (4XV / 5JJ)", name: "Yamaha YZF-R1 1998–2001 / FZS1000 Fazer (рядная четвёрка 998, 20 клапанов, карбюраторы)", cc: 998,
+    hp: 150, torque: "≈ 108 Н·м", compression: "≈ 11.8 бар", redline: 11750, cam: "DOHC, 20 клапанов (5 на цилиндр), 4 цилиндра",
+    carb: "Mikuni BDSR40 ×4 (R1), BSR37 ×4 (FZS1000)", valveIn: "0.11–0.20 мм", valveEx: "0.21–0.25 мм", spark: "NGK CR9E", oilVol: "≈ 3.4 л с фильтром",
+    valveInt: 40000, coolant: "≈ 2.5 л",
+    issues: [{ t: "R1 1998: слабая 2-я передача — выбивает под нагрузкой", sev: "med", fix: "Проверять КПП при покупке, у FZS1000 — заметно реже." },
+      { t: "Клапан EXUP закисает", sev: "low", fix: "Чистка и смазка заслонки, проверка тросов." }, REG] }), 2.4);
+  CL("YAM_R1_5PW", "YAM_R1_4XV", { code: "YZF-R1 (5PW)", name: "Yamaha YZF-R1 2002–2003 (рядная четвёрка 998, 20 клапанов, инжектор)", hp: 152,
+    groups: ["dohc", "liquid", "efi", "4t", "big", "jp"], ignition: "ЭБУ (EFI)", carb: "Инжектор (с вакуумными заслонками)", jetMain: "—", jetPilot: "—", needle: "—",
+    redline: 12500, spark: "NGK CR9EIA-9", oilInt: 10000, fuel: "АИ-98",
+    issues: [REG, { t: "Клапан EXUP закисает", sev: "low", fix: "Чистка и смазка заслонки." },
+      { t: "Натяжитель цепи ГРМ", sev: "med", fix: "Замена при лязге на холодную." }] }, 2.4);
+  re("YAM_R1_5VY", x(I4, { code: "YZF-R1 (5VY)", name: "Yamaha YZF-R1 2004–2006 (рядная четвёрка 998, 20 клапанов)", cc: 998, hp: 172, torque: "≈ 107 Н·м",
+    compression: "≈ 12.4 бар", redline: 13750, cam: "DOHC, 20 клапанов (5 на цилиндр), 4 цилиндра", carb: "Инжектор", valveIn: "0.11–0.20 мм", valveEx: "0.21–0.25 мм",
+    spark: "NGK CR9EK", oilVol: "≈ 3.4 л с фильтром", coolant: "≈ 2.6 л",
+    issues: [REG, { t: "Выпуск под сиденьем — сильный нагрев", sev: "low", fix: "Теплоизоляция, не стоять долго в пробках." },
+      { t: "Трековое прошлое у многих б/у", sev: "high", fix: "Компрессия, КПП, рама при покупке." }] }), 2.5);
+  CL("YAM_FZ1", "YAM_R1_5VY", { code: "FZ1 (3C3)", name: "Yamaha FZ1 / FZ1 Fazer 2006–2015 (рядная четвёрка 998 от R1 5VY)", hp: 150, torque: "≈ 106 Н·м", redline: 12000,
+    fuel: "АИ-95",
+    issues: [{ t: "Резкий отклик газа на малых оборотах (рывки)", sev: "low", fix: "Синхронизация дросселей, прошивка / тюнинг-модуль." }, REG,
+      { t: "Сильный нагрев в пробках", sev: "low", fix: "Проверка вентилятора и антифриза." }] }, 2.4);
+  CL("YAM_FZ8", "YAM_FZ1", { code: "FZ8 (39P)", name: "Yamaha FZ8 / Fazer 8 (рядная четвёрка 779)", cc: 779, hp: 106, torque: "≈ 82 Н·м", redline: 11500,
+    issues: [{ t: "Рывки на малом газе на стоке", sev: "low", fix: "Синхронизация дросселей, обновление прошивки." }, REG] }, 2.2);
+  re("YAM_R1_4C8", x(I4, { code: "YZF-R1 (4C8)", name: "Yamaha YZF-R1 2007–2008 (рядная четвёрка 998, 16 клапанов, YCC-I)", cc: 998, hp: 180, torque: "≈ 113 Н·м",
+    compression: "≈ 12.7 бар", redline: 13750, carb: "Инжектор, YCC-T / YCC-I", valveIn: "0.12–0.19 мм", valveEx: "0.21–0.26 мм", spark: "NGK CR9EIA-9",
+    oilVol: "≈ 3.4 л с фильтром", coolant: "≈ 2.6 л",
+    issues: [REG, { t: "Сервопривод YCC-I и датчики — ошибки после падений", sev: "low", fix: "Диагностика по коду ошибки, проверка проводки." },
+      { t: "Трековое прошлое у многих б/у", sev: "high", fix: "Компрессия, КПП, рама при покупке." }] }), 2.5);
+  CL("YAM_R1_14B", "YAM_R1_4C8", { code: "YZF-R1 Crossplane (14B / 1KB)", name: "Yamaha YZF-R1 2009–2014 (рядная четвёрка 998, коленвал crossplane)", hp: 182,
+    torque: "≈ 115 Н·м", issues: [{ t: "Большой расход топлива и нагрев", sev: "low", fix: "Норма для мотора, следи за вентилятором и антифризом." }, REG,
+      { t: "Трековое прошлое у многих б/у", sev: "high", fix: "Компрессия, КПП, рама при покупке." }] }, 2.6);
+  re("YAM_R1_2CR", x(I4, { code: "YZF-R1 (2CR / B3L)", name: "Yamaha YZF-R1 2015+ / MT-10 (рядная четвёрка 998 crossplane, рокеры)", cc: 998, hp: 200, torque: "≈ 112 Н·м",
+    compression: "≈ 13 бар", redline: 14000, cam: "DOHC, 16 клапанов, рокеры (finger follower), 4 цилиндра", ignition: "ЭБУ, ride-by-wire (YCC-T)", carb: "Инжектор",
+    valveIn: "0.10–0.17 мм", valveEx: "0.20–0.25 мм", spark: "NGK LMAR9E-J", oilVol: "≈ 4.0 л с фильтром", coolant: "≈ 2.6 л",
+    issues: [{ t: "R1 2015–2016: отзыв по шестерням 2-й/3-й передач", sev: "high", fix: "Проверить по VIN, что КПП заменена по отзыву." },
+      { t: "Сложная электроника — диагностика сканером", sev: "med", fix: "Yamaha-совместимый адаптер и ПО." }, REG] }), 2.7);
+  /* --- воздушные четвёрки --- */
+  re("YAM_XJ600", x(I4A, { code: "XJ600 (51J / 4BR)", name: "Yamaha XJ600 / XJ600S Diversion (рядная четвёрка 598, воздушная, 8 клапанов)", cc: 598, hp: 61,
+    torque: "≈ 53 Н·м", compression: "≈ 10.5 бар", redline: 10500, cam: "DOHC, 8 клапанов, 4 цилиндра", cooling: "Воздушное", carb: "Mikuni BS28 ×4", gearbox: "6 ст.",
+    spark: "NGK DR8ES-L", oilVol: "≈ 3 л с фильтром",
+    issues: [{ t: "Течь масла по крышке клапанов и прокладке цилиндров", sev: "low", fix: "Новые прокладки, ровная затяжка." },
+      { t: "Карбюраторы и синхронизация после хранения", sev: "low", fix: "Чистка, синхронизация вакуумметром." }, REG] }), 1.8);
+  CL("YAM_XJ900", "YAM_XJ600", { code: "XJ900 (31A / 4KM)", name: "Yamaha XJ900F / XJ900S Diversion (рядная четвёрка 891, воздушная, кардан)", cc: 891, hp: 89,
+    torque: "≈ 82 Н·м", compression: "≈ 10 бар", redline: 9500, carb: "Mikuni BS36 ×4", gearbox: "5 ст., кардан", spark: "NGK DPR8EA-9", oilVol: "≈ 3.6 л с фильтром",
+    issues: [{ t: "Кардан: масло в главной передаче, шлицы", sev: "med", fix: "Масло редуктора по регламенту, смазка шлицов." },
+      { t: "Течи масла с возрастом", sev: "low", fix: "Прокладки крышек." }, REG] }, 2.0);
+  re("YAM_FJ1200", x(I4A, { code: "FJ1200 (3CW / 3XW)", name: "Yamaha FJ1200 / XJR1200 (рядная четвёрка 1188, воздушно-масляная)", cc: 1188, hp: 125, torque: "≈ 106 Н·м",
+    compression: "≈ 9.7 бар", redline: 9500, carb: "Mikuni BS36 ×4", oilVol: "≈ 3.8 л с фильтром",
+    issues: [{ t: "Перегрев и пригорание масла в пробках", sev: "med", fix: "Масло по уровню, не стоять подолгу на месте." },
+      { t: "Шум цепи ГРМ (ручной натяжитель у ранних)", sev: "med", fix: "Регулировка/замена натяжителя." }, REG] }), 2.3);
+  CL("YAM_FJ1100", "YAM_FJ1200", { code: "FJ1100 (36Y)", name: "Yamaha FJ1100 (рядная четвёрка 1097, воздушно-масляная)", cc: 1097, hp: 123, torque: "≈ 96 Н·м" }, 2.2);
+  re("YAM_XJR1300", x(I4A, { code: "XJR1300 (5EA / 5UX)", name: "Yamaha XJR1300 1999–2006 (рядная четвёрка 1251, карбюраторы)", cc: 1251, hp: 100, torque: "≈ 108 Н·м",
+    compression: "≈ 9.7 бар", redline: 9500, carb: "Mikuni BSR36 ×4", oilVol: "≈ 3.9 л с фильтром (всего ≈ 4.2 л)",
+    issues: [{ t: "Шум цепи ГРМ и натяжителя", sev: "med", fix: "Замена натяжителя, цепь при вытяжке." },
+      { t: "Карбюраторы: засор и рассинхрон после зимы", sev: "low", fix: "Чистка, синхронизация, слив камер на зиму." },
+      { t: "Перегрев масла в пробках летом", sev: "low", fix: "Масло по уровню, маслорадиатор чистый." }] }), 2.4);
+  CL("YAM_XJR1300FI", "YAM_XJR1300", { code: "XJR1300 (инжектор)", name: "Yamaha XJR1300 2007–2016 (рядная четвёрка 1251, инжектор)", hp: 98,
+    groups: ["dohc", "air", "efi", "4t", "big", "jp"], ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—", oilInt: 10000,
+    issues: [{ t: "Шум цепи ГРМ и натяжителя", sev: "med", fix: "Замена натяжителя." },
+      { t: "Датчик кислорода и катализатор — рывки на малом газе", sev: "low", fix: "Синхронизация дросселей, проверка датчиков." }] }, 2.4);
+  /* --- FJR1300 --- */
+  re("YAM_FJR1300", x(I4, { code: "FJR1300 (5JW / 3P6)", name: "Yamaha FJR1300 2001–2012 (рядная четвёрка 1298, кардан)", cc: 1298, hp: 145, torque: "≈ 134 Н·м",
+    compression: "≈ 10.8 бар", redline: 9000, gearbox: "5 ст., кардан", carb: "Инжектор", valveIn: "0.11–0.20 мм", valveEx: "0.21–0.25 мм", spark: "NGK CR8E",
+    oil: "10W-40 / 20W-40 (JASO MA)", oilVol: "≈ 4.2 л с фильтром", coolant: "≈ 2.9 л", fuel: "АИ-95", valveInt: 42000,
+    issues: [{ t: "Нагрев ног от мотора (ранние 2001–2005)", sev: "low", fix: "Дефлекторы, с 2006 доработано." },
+      { t: "Кардан: шлицы и масло редуктора", sev: "med", fix: "Смазка шлицов, масло редуктора по регламенту." },
+      { t: "Версия AS (YCC-S): гидравлика автосцепления", sev: "med", fix: "Жидкость по регламенту, прокачка у знающего мастера." }] }), 2.5);
+  CL("YAM_FJR1300B", "YAM_FJR1300", { code: "FJR1300 (1MC / B95)", name: "Yamaha FJR1300 2013+ (рядная четвёрка 1298, ride-by-wire)", hp: 146, torque: "≈ 138 Н·м",
+    ignition: "ЭБУ, ride-by-wire (YCC-T)", spark: "NGK CPR8EA-9", gearbox: "5 ст. (2016+ — 6 ст.), кардан", oil: "10W-40 / 10W-50 (JASO MA)",
+    issues: [{ t: "Кардан: шлицы и масло редуктора", sev: "med", fix: "Смазка шлицов, масло редуктора по регламенту." },
+      { t: "Электронная подвеска (AE/AS) — дорогие датчики", sev: "low", fix: "Диагностика сканером." }] }, 2.5);
+  /* --- двойки: TDM850 / TRX850 / XTZ750, синглы XTZ660 --- */
+  re("YAM_TDM850", x(Y, { code: "TDM850 (3VD)", name: "Yamaha TDM850 1991–1995 (рядная двойка 849, 10 клапанов, 360°)", layout: "twin", crankPhase: 360,
+    groups: ["dohc", "liquid", "carb", "4t", "big", "balancer"], cam: "DOHC, 10 клапанов (5 на цилиндр), 2 цилиндра", cc: 849, hp: 77, torque: "≈ 78 Н·м",
+    compression: "≈ 10 бар", redline: 8500, gearbox: "5 ст.", ignition: "Транзисторное (TCI)", carb: "Mikuni BDST38 ×2", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    idle: "1150–1250", valveIn: "0.11–0.20 мм", valveEx: "0.21–0.30 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "17.5 Н·м",
+    oilVol: "≈ 3.4 л с фильтром (полусухой картер)", oilInt: 6000, valveInt: 24000, coolant: "≈ 2 л", fuel: "АИ-92/95",
+    issues: [{ t: "Расход масла и натяжитель цепи ГРМ на больших пробегах", sev: "med", fix: "Контроль уровня по щупу, замена натяжителя." },
+      { t: "Шлицы вторичного вала и звезда (TDM — известная слабость)", sev: "med", fix: "Проверять люфт звезды, менять звезду с цепью." }, REG] }), 2.0);
+  CL("YAM_TDM850B", "YAM_TDM850", { code: "TDM850 (4TX) / TRX850", name: "Yamaha TDM850 1996–2001 / TRX850 (рядная двойка 849, 270°)", crankPhase: 270, hp: 80,
+    torque: "≈ 84 Н·м" }, 2.0);
+  CL("YAM_XTZ750", "YAM_TDM850", { code: "XTZ750 (3LD)", name: "Yamaha XTZ750 Super Ténéré (рядная двойка 749, 10 клапанов, сухой картер)", cc: 749, hp: 69,
+    torque: "≈ 67 Н·м", compression: "≈ 9.5 бар", redline: 8500, oilVol: "≈ 3.5 л (сухой картер)",
+    issues: [{ t: "Шлицы вторичного вала и звезда", sev: "med", fix: "Проверка люфта звезды, смазка шлицов при замене." },
+      { t: "Возраст: проводка, реле-регулятор, карбюраторы", sev: "med", fix: "Ревизия при покупке." },
+      { t: "Вентилятор и термовыключатель — перегрев в медленной езде", sev: "med", fix: "Проверка вентилятора перед сезоном." }] }, 2.0);
+  re("YAM_XTZ660", x(Y, { code: "XTZ660 (3YF)", name: "Yamaha XTZ660 Ténéré / SZR660 (одноцилиндровый 659, 5 клапанов)", groups: ["liquid", "carb", "4t", "big"],
+    cam: "SOHC, 5 клапанов", cc: 659, hp: 48, torque: "≈ 54 Н·м", compression: "≈ 9.2 бар", redline: 7500, gearbox: "5 ст.", ignition: "CDI",
+    carb: "Mikuni двухкамерный", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1200–1300",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "17.5 Н·м",
+    oilVol: "≈ 2.8 л (сухой картер)", oilInt: 6000, valveInt: 12000, coolant: "≈ 1.4 л", fuel: "АИ-92/95",
+    issues: [{ t: "Расход масла у мотора с большим пробегом", sev: "med", fix: "Уровень по щупу на горячую, колпачки/кольца." },
+      { t: "Натяжитель цепи ГРМ", sev: "med", fix: "Замена при шуме." }, REG] }), 1.8);
+  /* --- CP3 847 --- */
+  re("YAM_CP3_847", x(Y, { code: "CP3 847", name: "Yamaha CP3 847 (рядная тройка: MT-09 / Tracer 900 / XSR900 / Niken 2014–2020)", layout: "i3",
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 12 клапанов, 3 цилиндра", cc: 847, hp: 115, torque: "≈ 87.5 Н·м", compression: "≈ 11.5 бар",
+    redline: 11250, ignition: "ЭБУ, ride-by-wire (YCC-T)", valveIn: "0.09–0.17 мм", valveEx: "0.24–0.30 мм", spark: "NGK CPR9EA-9", oilVol: "≈ 3.4 л с фильтром",
+    oilInt: 10000, valveInt: 40000, coolant: "≈ 2.3 л", fuel: "АИ-95",
+    issues: [{ t: "Ранние 2014–2016: резкий газ в режиме A, рывки", sev: "low", fix: "Режим STD/B, обновление прошивки." },
+      { t: "Мягкая сток-подвеска", sev: "low", fix: "Пружины и картриджи под вес." }, REG] }), 2.2);
+  /* --- круизеры: Virago / Drag Star / Bulldog --- */
+  re("YAM_XV250", x(VA, { code: "XV250 (3DM / 3LS)", name: "Yamaha XV250 Virago / V-Star 250 / XVS250 Drag Star (V-twin 60°, 249)", vAngle: 60,
+    cam: "SOHC, 4 клапана, V-twin 60°", cc: 249, hp: 21, torque: "≈ 20 Н·м", compression: "≈ 10 бар", redline: 9000, gearbox: "5 ст., цепь", carb: "Mikuni BDS26",
+    spark: "NGK D8EA", gap: "0.6–0.7 мм", oilVol: "≈ 1.6 л", sparkTorque: "17.5 Н·м",
+    issues: [{ t: "Перегрев заднего цилиндра в пробках", sev: "low", fix: "Масло по уровню, не стоять долго на холостых." },
+      { t: "Карбюратор после хранения", sev: "low", fix: "Чистка, слив камеры на зиму." }] }), 1.5);
+  re("YAM_XV535", x(VA, { code: "XV535 (2GV / 3BR)", name: "Yamaha XV535 Virago (V-twin 70°, 535)", vAngle: 70, cam: "SOHC, 4 клапана, V-twin 70°", cc: 535, hp: 45,
+    torque: "≈ 46 Н·м", compression: "≈ 9 бар", redline: 8000, carb: "Mikuni BDS34 ×2", spark: "NGK DPR7EA-9", gap: "0.8–0.9 мм", oilVol: "≈ 2.6 л с фильтром",
+    issues: [{ t: "Слабая обгонная муфта стартера — щелчки и проскальзывание", sev: "med", fix: "Ремонт/замена обгонной муфты, исправный АКБ." },
+      { t: "Карбюраторы и мембраны после хранения", sev: "low", fix: "Чистка, проверка мембран, синхронизация." },
+      { t: "Реле-регулятор и масса", sev: "low", fix: "Проверка зарядки и разъёмов." }] }), 1.6);
+  re("YAM_XV750", x(VA, { code: "XV750 (4FY / 3JK)", name: "Yamaha XV750 Virago (V-twin 75°, 748)", vAngle: 75, cam: "SOHC, 4 клапана, V-twin 75°", cc: 748, hp: 55,
+    torque: "≈ 64 Н·м", compression: "≈ 8.7 бар", redline: 7500, carb: "Mikuni BDS40 ×2", spark: "NGK BPR7ES", oilVol: "≈ 3.2 л с фильтром",
+    issues: [{ t: "Обгонная муфта и шестерня стартера (известная слабость больших Virago)", sev: "high", fix: "Свежий АКБ, ремонт муфты стартера, не крутить стартер долго." },
+      { t: "Перегрев заднего цилиндра", sev: "low", fix: "Масло по уровню, не стоять в пробках." }] }), 1.8);
+  CL("YAM_XV1100", "YAM_XV750", { code: "XV1100 (2NA / 4PP)", name: "Yamaha XV1100 Virago / XVS1100 Drag Star / BT1100 Bulldog (V-twin 75°, 1063)", cc: 1063, hp: 62, topRatio: 1.5,
+    torque: "≈ 87 Н·м", compression: "≈ 8.3 бар", redline: 6500, oilVol: "≈ 3.4 л с фильтром",
+    issues: [{ t: "Обгонная муфта и шестерня стартера", sev: "high", fix: "Свежий АКБ, ремонт муфты, не крутить стартер долго." },
+      { t: "Кардан: масло редуктора и шлицы колеса", sev: "med", fix: "Масло по регламенту, смазка шлицов при снятии колеса." },
+      { t: "Перегрев заднего цилиндра в пробках", sev: "low", fix: "Масло по уровню." }] }, 2.0);
+  CL("YAM_XV1000", "YAM_XV1100", { code: "XV1000 (42X)", name: "Yamaha XV1000 Virago (V-twin 75°, 981)", cc: 981, hp: 64, torque: "≈ 80 Н·м" }, 1.9);
+  re("YAM_XVS1300", x(Y, { code: "XVS1300 (5C7)", name: "Yamaha XVS1300 V-Star / Midnight Star / Stryker (V-twin 60°, 1304, жидкостный)", layout: "vtwin", vAngle: 60,
+    groups: ["liquid", "efi", "4t", "big"], cam: "SOHC, 8 клапанов, V-twin 60°", cc: 1304, hp: 73, torque: "≈ 106 Н·м", compression: "≈ 9.5 бар", redline: 6500, topRatio: 1.45,
+    gearbox: "5 ст., ремень", valveIn: "0.09–0.13 мм", valveEx: "0.13–0.17 мм", spark: "NGK LMAR7A-9", gap: "0.8–0.9 мм", oilVol: "≈ 4.1 л с фильтром",
+    oilInt: 10000, valveInt: 40000, coolant: "≈ 2.2 л", fuel: "АИ-92/95", idle: "950–1050",
+    issues: [{ t: "Ремень: камни и трещины зубьев", sev: "med", fix: "Осмотр ремня и шкивов каждое ТО." },
+      { t: "Нагрев правой ноги от выпуска/заднего цилиндра", sev: "low", fix: "Теплоизоляция, вентилятор." }] }), 2.0);
+  /* --- OHV: Road Star / Warrior / MT-01 / Roadliner --- */
+  re("YAM_XV1600", x(VOHV, { code: "XV1600 (5JA)", name: "Yamaha XV1600 Road Star / Wild Star (V-twin 48°, 1602, OHV)", cc: 1602, hp: 63, torque: "≈ 135 Н·м",
+    compression: "≈ 8.3 бар", redline: 4750, carb: "Mikuni BSR40", spark: "NGK DPR7EA-9", gap: "0.8–0.9 мм", oilVol: "≈ 4.6 л (масляный бак)",
+    issues: [{ t: "Течь масла по трубкам штанг и крышкам", sev: "low", fix: "Уплотнения трубок штанг, затяжка по моменту." },
+      { t: "Стартерная муфта и тяжёлый холодный пуск", sev: "med", fix: "Сильный АКБ, проверка муфты стартера." },
+      { t: "Обеднение после тюнинг-выпуска — перегрев", sev: "med", fix: "Перенастройка карбюратора/прошивки." }] }), 2.4);
+  CL("YAM_XV1700C", "YAM_XV1600", { code: "XV1700 (карбюратор)", name: "Yamaha XV1700 Road Star 2004–2007 (V-twin 48°, 1670, OHV, карбюратор)", cc: 1670, hp: 67,
+    torque: "≈ 146 Н·м", compression: "≈ 8.4 бар" }, 2.4);
+  CL("YAM_XV1700", "YAM_XV1700C", { code: "XV1700 (инжектор)", name: "Yamaha XV1700 Road Star Warrior / Road Star 2008+ / MT-01 (V-twin 48°, 1670, OHV, инжектор)",
+    hp: 84, torque: "≈ 146 Н·м", redline: 5500, topRatio: 1.2, groups: ["air", "efi", "4t", "big", "jp"], ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—",
+    issues: [{ t: "Течь масла по трубкам штанг", sev: "low", fix: "Уплотнения трубок штанг." },
+      { t: "Сильный нагрев заднего цилиндра (MT-01 — под сиденьем)", sev: "low", fix: "Теплоизоляция, не стоять в пробках." },
+      { t: "Дроссель и датчики после тюнинга выпуска", sev: "low", fix: "Прошивка / тюнинг-модуль." }] }, 2.4);
+  CL("YAM_XV1900", "YAM_XV1700", { code: "XV1900 (1D7 / 2D1)", name: "Yamaha XV1900 Roadliner / Stratoliner / Raider / Star Venture (V-twin 48°, 1854, OHV)", cc: 1854,
+    hp: 90, torque: "≈ 167 Н·м", compression: "≈ 9.5 бар", redline: 5000, topRatio: 1.15, spark: "NGK DPR8EA-9", oilVol: "≈ 4.9 л с фильтром" }, 2.5);
+  /* --- V4: Royal Star, V-Max --- */
+  re("YAM_VMAX1200", x(Y, { code: "V-Max 1200 (1FK / 3UF)", name: "Yamaha V-Max 1200 (V4 70°, 1198, V-Boost)", layout: "vtwin", vAngle: 70, groups: ["dohc", "liquid", "carb", "4t", "big"],
+    cam: "DOHC, 16 клапанов, V4 70°", cc: 1198, hp: 145, torque: "≈ 121 Н·м", compression: "≈ 10.5 бар", redline: 9500, gearbox: "5 ст., кардан",
+    ignition: "Транзисторное (TCI)", carb: "Mikuni BDS35 ×4 (V-Boost)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "950–1050",
+    valveIn: "0.11–0.15 мм", valveEx: "0.26–0.30 мм", spark: "NGK DPR8EA-9", gap: "0.8–0.9 мм", sparkTorque: "17.5 Н·м", oilVol: "≈ 3.5 л с фильтром",
+    oilInt: 6000, valveInt: 24000, coolant: "≈ 3 л", fuel: "АИ-95",
+    issues: [{ t: "Привод V-Boost (сервомотор и тросы) — не открываются заслонки", sev: "med", fix: "Проверка сервомотора и тросов, чистка заслонок." },
+      { t: "Кардан и шлицы колеса — износ от мощности", sev: "med", fix: "Смазка шлицов, масло редуктора." }, REG] }), 2.4);
+  CL("YAM_XVZ1300", "YAM_VMAX1200", { code: "XVZ1300 (4NK)", name: "Yamaha XVZ1300 Royal Star / Royal Star Venture (V4 70°, 1294)", cc: 1294, hp: 74, torque: "≈ 106 Н·м", topRatio: 1.5,
+    compression: "≈ 10 бар", redline: 7000, carb: "Mikuni BSR32 ×4", spark: "NGK DPR7EA-9", oilVol: "≈ 4.2 л с фильтром",
+    issues: [{ t: "Синхронизация 4 карбюраторов — неровный холостой", sev: "low", fix: "Синхронизация вакуумметром." },
+      { t: "Кардан: масло редуктора", sev: "low", fix: "По регламенту." }, REG] }, 2.3);
+  re("YAM_VMAX1700", x(Y, { code: "VMAX 1700 (2S3)", name: "Yamaha VMAX 1700 (V4 65°, 1679)", layout: "vtwin", vAngle: 65, groups: ["dohc", "liquid", "efi", "4t", "big"],
+    cam: "DOHC, 16 клапанов, V4 65°", cc: 1679, hp: 200, torque: "≈ 167 Н·м", compression: "≈ 11.3 бар", redline: 9500, gearbox: "5 ст., кардан",
+    ignition: "ЭБУ, YCC-T / YCC-I", valveIn: "0.11–0.20 мм", valveEx: "0.21–0.26 мм", spark: "NGK CPR8EB-9", oilVol: "≈ 4.9 л с фильтром", oilInt: 10000, valveInt: 42000,
+    coolant: "≈ 3.6 л", fuel: "АИ-95",
+    issues: [{ t: "Кардан и задняя шина — быстрый износ от момента", sev: "med", fix: "Масло редуктора, шина по износу." },
+      { t: "Сильный нагрев в пробках", sev: "low", fix: "Вентиляторы и антифриз по регламенту." }] }), 2.7);
+  /* --- классика --- */
+  re("YAM_SR400", x(Y, { code: "SR400 (2H6 / 1JR / 3HT)", name: "Yamaha SR400 1978–2008 (одноцилиндровый 399, карбюратор, только кик)", groups: ["air", "carb", "4t", "big"],
+    cooling: "Воздушное", coolant: "", cam: "SOHC, 2 клапана", cc: 399, hp: 26, torque: "≈ 29 Н·м", compression: "≈ 8.5 бар", redline: 7000, topRatio: 2.0, start: "Кик (с декомпрессором)",
+    gearbox: "5 ст.", ignition: "CDI", carb: "Mikuni VM34 (до 2000) / BST34 (2001–2008)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1100–1300",
+    valveIn: "0.07–0.12 мм", valveEx: "0.12–0.17 мм", spark: "NGK BPR6ES", gap: "0.7–0.8 мм", sparkTorque: "20 Н·м", oilVol: "≈ 2.4 л (масло в раме, сухой картер)",
+    oilInt: 5000, valveInt: 6000, fuel: "АИ-92",
+    issues: [{ t: "Запуск киком: без ВМТ по окошку декомпрессора — отдача", sev: "low", fix: "Ставить поршень по метке в окне, затем уверенно кикать." },
+      { t: "Течь масла по маслопроводам рамы и крышкам", sev: "low", fix: "Уплотнения, затяжка штуцеров." },
+      { t: "Слабый 6-вольтовый/старый свет у ранних", sev: "low", fix: "Ревизия проводки, LED-лампы." }] }), 1.5);
+  CL("YAM_SR400FI", "YAM_SR400", { code: "SR400 (RH03J / RH16J)", name: "Yamaha SR400 2010–2021 (одноцилиндровый 399, инжектор)", hp: 24,
+    groups: ["air", "efi", "4t", "big", "jp"], ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—" }, 1.5);
+  CL("YAM_SRX600", "XT600", { code: "SRX600 (1JK / 3SX)", name: "Yamaha SRX600 (одноцилиндровый 595, 4 клапана, от XT600)", hp: 42, start: "Кик (с декомпрессором)",
+    carb: "Двухкамерный (по году)", redline: 7500,
+    issues: [{ t: "Запуск киком на горячую", sev: "low", fix: "Декомпрессор, ВМТ сжатия, исправное зажигание." },
+      { t: "Возраст: проводка, карбюратор, ЦПГ", sev: "med", fix: "Ревизия при покупке." }] }, 1.6);
+  re("YAM_XS650", x(Y, { code: "XS650 (S1 / 447)", name: "Yamaha XS650 (рядная двойка 653, 360°, воздушная)", layout: "twin", crankPhase: 360, groups: ["air", "carb", "4t", "big"],
+    cooling: "Воздушное", coolant: "", cam: "SOHC, 4 клапана, 2 цилиндра", cc: 653, hp: 50, torque: "≈ 53 Н·м", compression: "≈ 8.7 бар", redline: 7500, gearbox: "5 ст.",
+    start: "Электро + кик", ignition: "Контактное (у поздних — TCI)", carb: "Mikuni BS38 ×2", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1000–1200",
+    valveIn: "0.10 мм", valveEx: "0.15 мм", spark: "NGK BP7ES", gap: "0.7–0.8 мм", sparkTorque: "20 Н·м", oilVol: "≈ 2.5 л (сетчатый фильтр)", oilInt: 3000, valveInt: 5000, fuel: "АИ-92",
+    issues: [{ t: "Течи масла (крышки, сальник переключения)", sev: "low", fix: "Прокладки, сальники, затяжка." },
+      { t: "Контактное зажигание и генератор у старых", sev: "med", fix: "Электронное зажигание — популярная доработка." },
+      { t: "Сетчатые фильтры масла — промывать при каждой замене", sev: "med", fix: "Снять и промыть сетки, иначе износ ГРМ." }] }), 1.6);
+  /* --- малокубатурные --- */
+  re("YAM_YBR125", x(Y, { code: "YBR125 (5VL)", name: "Yamaha YBR125 / XTZ125 (одноцилиндровый 124, воздушный, карбюратор)", groups: ["air", "carb", "4t", "small"],
+    cooling: "Воздушное", coolant: "", cam: "SOHC, 2 клапана", cc: 124, hp: 10, torque: "≈ 10 Н·м", compression: "≈ 10 бар", redline: 9000, gearbox: "5 ст.",
+    start: "Электро + кик", ignition: "CDI", carb: "Mikuni (BS25 / VM22, по году)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1300–1500",
+    valveIn: "0.05–0.09 мм", valveEx: "0.08–0.12 мм", spark: "NGK CR6HSA", gap: "0.6–0.7 мм", sparkTorque: "12.5 Н·м", oilVol: "≈ 1.0 л", oilInt: 3000, valveInt: 6000, fuel: "АИ-92",
+    issues: [{ t: "Натяжитель цепи ГРМ шумит после 20 тыс. км", sev: "low", fix: "Замена натяжителя и цепи." },
+      { t: "Сетка масляного фильтра — промывать", sev: "low", fix: "Чистить сетку при замене масла." }] }), 1.1);
+  CL("YAM_YBR125FI", "YAM_YBR125", { code: "YBR125 Fi / YS125", name: "Yamaha YBR125 2010+ / YS125 (одноцилиндровый 124, инжектор)", hp: 10.6,
+    groups: ["air", "efi", "4t", "small", "jp"], ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—" }, 1.1);
+  re("YAM_FZ16", x(Y, { region: "in", code: "FZ16 (153)", name: "Yamaha FZ16 / FZ-S / Fazer 150 (одноцилиндровый 153, Индия)", groups: ["air", "carb", "4t", "small"],
+    cooling: "Воздушное", coolant: "", cam: "SOHC, 2 клапана", cc: 153, hp: 14, torque: "≈ 13.6 Н·м", compression: "≈ 9.5 бар", redline: 9500, gearbox: "5 ст.", start: "Электро",
+    ignition: "CDI", carb: "Mikuni BS26", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1300–1500",
+    valveIn: "0.08–0.12 мм", valveEx: "0.10–0.14 мм", spark: "NGK CR6HSA", gap: "0.6–0.7 мм", sparkTorque: "12.5 Н·м", oilVol: "≈ 1.2 л", oilInt: 3000, valveInt: 6000, fuel: "АИ-92",
+    issues: [{ t: "Запчасти в РФ — под заказ из Индии", sev: "low", fix: "Расходники держать в запасе." },
+      { t: "Натяжитель цепи ГРМ", sev: "low", fix: "Замена при шуме." }] }), 1.0);
+  CL("YAM_FZ15FI", "YAM_FZ16", { code: "FZ-S FI (149, Blue Core)", name: "Yamaha FZ-S FI V2/V3 / Fazer FI (одноцилиндровый 149, инжектор)", cc: 149, hp: 12.4, torque: "≈ 12.8 Н·м",
+    groups: ["air", "efi", "4t", "small", "in"], ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—" }, 1.0);
+  CL("YAM_FZ25", "YAM_FZ15FI", { code: "FZ25 (249)", name: "Yamaha FZ25 / Fazer 25 (одноцилиндровый 249, маслоохлаждаемый)", cc: 249, hp: 20.8, torque: "≈ 20 Н·м",
+    groups: ["air", "efi", "4t", "big", "in"], cooling: "Воздушно-масляное", compression: "≈ 9.8 бар", redline: 9500, spark: "NGK CPR8EA-9", gap: "0.7–0.8 мм",
+    oilVol: "≈ 1.55 л с фильтром", oilInt: 5000, valveInt: 10000 }, 1.1);
+  re("YAM_R125", x(Y, { code: "YZF-R125 (5D7)", name: "Yamaha 125 жидкостный (YZF-R125 2008–2018 / MT-125 2014–2019 / WR125R/X)", groups: ["liquid", "efi", "4t", "small"],
+    cam: "SOHC, 4 клапана", cc: 125, hp: 15, torque: "≈ 12.2 Н·м", compression: "≈ 11.2 бар", redline: 10500, ignition: "ЭБУ (EFI)",
+    valveIn: "0.10–0.14 мм", valveEx: "0.20–0.24 мм", spark: "NGK CR8E", gap: "0.7–0.8 мм", oilVol: "≈ 1.15 л с фильтром", oilInt: 6000, valveInt: 12000, coolant: "≈ 1 л",
+    idle: "1300–1500",
+    issues: [{ t: "Вкладыш шатуна/коленвал у перекрученных (частая беда R125)", sev: "high", fix: "Масло каждые 3–5 тыс. км, не держать на отсечке на холодную." },
+      { t: "Натяжитель цепи ГРМ — шум", sev: "med", fix: "Замена натяжителя." }] }), 1.6);
+  CL("YAM_R125VVA", "YAM_R125", { code: "YZF-R125 VVA (BR6 / B9D)", name: "Yamaha 125 VVA (YZF-R125 2019+ / MT-125 2020+ / XSR125)", hp: 15, torque: "≈ 11.5 Н·м",
+    cam: "SOHC, 4 клапана, VVA", spark: "NGK LMAR8A-9", gap: "0.8–0.9 мм",
+    issues: [{ t: "Датчики и разъёмы VVA после мойки", sev: "low", fix: "Не мыть напором, диэлектрическая смазка." },
+      { t: "Цепь ГРМ при редкой замене масла", sev: "med", fix: "Масло каждые 5 тыс. км." }] }, 1.6);
+  CL("YAM_R15V2", "YAM_R125", { region: "in", code: "YZF-R15 V1/V2 (150)", groups: ["liquid", "efi", "4t", "small", "in"], name: "Yamaha YZF-R15 V1/V2 (одноцилиндровый 149.8, без VVA)", cc: 150, hp: 17, torque: "≈ 15 Н·м",
+    compression: "≈ 10.4 бар", spark: "NGK CPR8EA-9", gap: "0.7–0.8 мм", oilVol: "≈ 1.05 л с фильтром",
+    issues: [{ t: "Запчасти в РФ — под заказ", sev: "low", fix: "Расходники держать в запасе." }, { t: "Натяжитель цепи ГРМ", sev: "low", fix: "Замена при шуме." }] }, 1.0);
+  /* --- детские и эндуро --- */
+  re("YAM_TTR50", x(Y, { code: "TT-R50E", name: "Yamaha TT-R50E (горизонтальный 49, автосцепление)", groups: ["air", "carb", "4t", "small"], cooling: "Воздушное", coolant: "",
+    cam: "SOHC, 2 клапана", cc: 49, hp: 3.5, torque: "≈ 3.5 Н·м", compression: "≈ 9 бар", gearbox: "3 ст., автоматическое сцепление", start: "Электро + кик", ignition: "CDI",
+    carb: "Mikuni VM12", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1700–1900", valveIn: "0.05–0.09 мм", valveEx: "0.08–0.12 мм",
+    spark: "NGK CR6HSA", gap: "0.6–0.7 мм", sparkTorque: "12.5 Н·м", oilVol: "≈ 0.8 л", oilInt: 1000, valveInt: 3000, fuel: "АИ-92",
+    issues: [{ t: "Ограничитель газа — винт на ручке газа", sev: "low", fix: "Открывать постепенно по мере опыта ребёнка." },
+      { t: "Засор карбюратора после хранения", sev: "low", fix: "Сливать бензин из камеры на зиму." }] }), 1.1);
+  CL("YAM_TTR110", "YAM_TTR50", { code: "TT-R110E", name: "Yamaha TT-R110E (горизонтальный 110, автосцепление)", cc: 110, hp: 7, torque: "≈ 8 Н·м",
+    gearbox: "4 ст., автоматическое сцепление", carb: "Mikuni VM16", spark: "NGK CR7HSA", oilVol: "≈ 1.0 л", idle: "1500–1700" }, 1.2);
+  re("YAM_TTR250", x(Y, { code: "TT-R250 / TT250R (4GY)", name: "Yamaha TT-R250 / TT250R Raid (воздушный 249, DOHC 4 клапана)", groups: ["dohc", "air", "carb", "4t", "big"],
+    cooling: "Воздушно-масляное", coolant: "", cam: "DOHC, 4 клапана", cc: 249, hp: 30, torque: "≈ 27 Н·м", compression: "≈ 10.5 бар", gearbox: "6 ст.", start: "Электро",
+    ignition: "CDI", carb: "Mikuni (по году)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1300–1500",
+    valveIn: "0.10–0.15 мм", valveEx: "0.17–0.22 мм", spark: "NGK DR8EA", gap: "0.6–0.7 мм", sparkTorque: "17.5 Н·м", oilVol: "≈ 1.8 л", oilInt: 3000, valveInt: 6000, fuel: "АИ-92/95",
+    issues: [{ t: "Возраст: проводка, карбюратор, сальники вилки", sev: "med", fix: "Ревизия при покупке." },
+      { t: "Цепь ГРМ и натяжитель", sev: "med", fix: "Замена при шуме." }] }), 1.6);
+  re("YAM_YZ400F", x(Y, { code: "YZ400F (5BE)", name: "Yamaha YZ400F / WR400F (DOHC 5 клапанов, 399, карбюратор)", groups: ["dohc", "liquid", "carb", "4t", "big"],
+    cam: "DOHC, 5 клапанов", cc: 399, hp: 47, torque: "≈ 40 Н·м", compression: "≈ 12.5 бар", gearbox: "5 ст.", start: "Кик (с декомпрессором)", ignition: "CDI",
+    carb: "Keihin FCR39", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", idle: "1600–1800", valveIn: "0.10–0.15 мм", valveEx: "0.20–0.25 мм",
+    spark: "NGK CR8E", oilVol: "≈ 1.2 л (сухой картер)", oilInt: 1500, valveInt: 6000, coolant: "≈ 1.1 л", fuel: "АИ-95",
+    issues: [{ t: "Тяжёлый запуск на горячую", sev: "low", fix: "Кнопка горячего старта, декомпрессор, без газа." },
+      { t: "Клапаны «садятся» — плохой запуск", sev: "med", fix: "Проверка зазоров по моточасам." },
+      { t: "Масло в раме: проверять уровень после прогрева", sev: "med", fix: "Уровень по мануалу, сетка в раме." }] }), 1.9);
+  CL("YAM_YZ426F", "YAM_YZ400F", { code: "YZ426F (5JG)", name: "Yamaha YZ426F / WR426F (DOHC 5 клапанов, 426, карбюратор)", cc: 426, hp: 49, torque: "≈ 44 Н·м" }, 1.9);
+  re("YAM_PW80", x(T2, { code: "PW80", name: "Yamaha PW80 (2T 79, воздушный, автосцепление)", groups: ["2t", "air", "carb", "small"], cooling: "Воздушное", coolant: "", cam: "Лепестковый клапан",
+    cc: 79, hp: 5, torque: "≈ 6 Н·м", compression: "≈ 8 бар", gearbox: "3 ст., автоматическое сцепление", start: "Кик", carb: "Mikuni VM16", idle: "1600–1800",
+    spark: "NGK BP4HS", oilVol: "КПП ≈ 0.6 л, бачок 2T ≈ 0.8 л", oilInt: 3000,
+    issues: [{ t: "Следить за маслом в бачке Autolube!", sev: "high", fix: "Без масла мотор заклинит." },
+      { t: "Сцепление после долгой езды «на газу»", sev: "low", fix: "Свежее масло КПП, регулировка." }] }), 1.1);
+  re("YAM_DT125R", x(T2, { code: "DT125R (3MB / 3RM / 4BL)", name: "Yamaha DT125R / RE / X (2T 124, YPVS, раздельная смазка)", cc: 124, hp: 22, torque: "≈ 17 Н·м",
+    compression: "≈ 8.5 бар", start: "Кик", carb: "Mikuni TM28SS (RE/X — VM26 с катализатором)", spark: "NGK BR8ES", oilVol: "КПП ≈ 0.75 л", redline: 9500,
+    issues: [{ t: "Клапан YPVS закоксовывается — нет тяги вверху", sev: "med", fix: "Чистка YPVS, качественное 2T масло." },
+      { t: "Насос Autolube и трос насоса", sev: "high", fix: "Проверять подачу и регулировку троса, уровень масла в бачке." },
+      { t: "RE/X: дроссельные ограничители и катализатор", sev: "low", fix: "Стоковые ограничения мощности до 15 л.с." }] }), 1.3);
+  CL("YAM_DT230", "YAM_DT125R", { code: "DT230 Lanza (4TP)", name: "Yamaha DT230 Lanza (2T 224, YPVS, раздельная смазка)", cc: 224, hp: 40, torque: "≈ 30 Н·м",
+    groups: ["2t", "liquid", "carb", "big", "jp"], carb: "Mikuni TM (по мануалу)", start: "Электро + кик", issues: [{ t: "Клапан YPVS — чистка", sev: "med", fix: "Снять и почистить по регламенту." },
+      { t: "Насос Autolube", sev: "high", fix: "Уровень масла в бачке, подача насоса." }, { t: "Редкие запчасти ЦПГ", sev: "med", fix: "Заказывать заранее, поршни Wiseco/Vertex." }] }, 1.4);
+  re("YAM_RD350", x(T2, { code: "RD350 YPVS (31K / 1WT)", name: "Yamaha RD350 YPVS (2T рядная двойка 347, жидкостная)", layout: "twin", crankPhase: 180,
+    groups: ["2t", "liquid", "carb", "big"], cc: 347, hp: 59, torque: "≈ 43 Н·м", compression: "≈ 8 бар", start: "Кик", carb: "Mikuni VM26SS ×2", spark: "NGK BR8ES",
+    oilVol: "КПП ≈ 1.6 л", redline: 9500,
+    issues: [{ t: "Клапаны YPVS и сервопривод — нет «подхвата» на 6–7 тыс.", sev: "med", fix: "Чистка клапанов, проверка тросов и сервопривода." },
+      { t: "Средние сальники коленвала — подсос", sev: "high", fix: "Сальники и проверка на подсос." }, { t: "Насос Autolube", sev: "high", fix: "Подача и уровень масла." }] }), 1.6);
+  CL("YAM_TZR250", "YAM_RD350", { code: "TZR250 (1KT / 3MA)", name: "Yamaha TZR250 / R1-Z (2T рядная двойка 249)", cc: 249, hp: 45, torque: "≈ 36 Н·м", redline: 10500,
+    carb: "Mikuni TM ×2", spark: "NGK BR9ES" }, 1.7);
+  CL("YAM_TZR250V", "YAM_TZR250", { code: "TZR250 (3XV)", name: "Yamaha TZR250 V-twin (2T V-twin 90°, 249)", layout: "vtwin", vAngle: 90, crankPhase: undefined }, 1.8);
+
+  /* ================= ИСПРАВЛЕНИЯ СУЩЕСТВУЮЩИХ МОДЕЛЕЙ ================= */
+  sv("YZF-R6", "YAM_R6_2C0", "2017–2020", { hp: 118 });
+  av("YZF-R6", "YAM_R6_5EB", "1999–2002"); av("YZF-R6", "YAM_R6_5SL", "2003–2005"); av("YZF-R6", "YAM_R6_2C0", "2006–2016");
+  sv("YZF-R1", "YAM_R1_2CR", "2015+");
+  av("YZF-R1", "YAM_R1_4XV", "1998–2001"); av("YZF-R1", "YAM_R1_5PW", "2002–2003"); av("YZF-R1", "YAM_R1_5VY", "2004–2006");
+  av("YZF-R1", "YAM_R1_4C8", "2007–2008"); av("YZF-R1", "YAM_R1_14B", "2009–2014");
+  sv("MT-10", "YAM_R1_2CR", "2016+", { hp: 166 });
+  sv("FZ6 Fazer", "YAM_FZ6", "2004–2010");
+  sv("FZ1", "YAM_FZ1", "2006–2015");
+  sv("FZ8", "YAM_FZ8", "2010–2016");
+  sv("XJ6", "YAM_XJ6", "2009–2016");
+  sv("XJR1300", "YAM_XJR1300", "1999–2006"); av("XJR1300", "YAM_XJR1300FI", "2007–2016");
+  sv("XV535 Virago", "YAM_XV535", "1987–2003");
+  sv("XTZ750 Super Ténéré", "YAM_XTZ750", "1989–1997");
+  sv("TDM850", "YAM_TDM850B", "1996–2001"); av("TDM850", "YAM_TDM850", "1991–1995");
+  sv("XTZ660 Ténéré", "YAM_XTZ660", "1991–1999");
+  sv("YZF-R125", "YAM_R125VVA", "2019+"); av("YZF-R125", "YAM_R125", "2008–2018");
+  sv("MT-125", "YAM_R125VVA", "2020+"); av("MT-125", "YAM_R125", "2014–2019");
+  sv("XSR125", "YAM_R125VVA", "2021+");
+  sv("WR125R", "YAM_R125", "2009–2016"); sv("WR125X", "YAM_R125", "2009–2016");
+  sv("XTZ125", "YAM_YBR125", "2003+", { hp: 10 });
+  sv("DT125R", "YAM_DT125R", "1988–2004"); sv("DT125RE", "YAM_DT125R", "2004–2007", { hp: 15 }); sv("DT125X", "YAM_DT125R", "2005–2007", { hp: 15 });
+  sv("DT230 Lanza", "YAM_DT230", "1997–2000");
+  sv("TT-R110E", "YAM_TTR110", "2008+"); sv("TT-R50E", "YAM_TTR50", "2006+");
+  sv("TT-R250", "YAM_TTR250", "1999–2006"); sv("TT250R Raid", "YAM_TTR250", "1993–2004");
+  sv("TT600", "XT600", "1983–2003", { hp: 40 });
+  sv("XG250 Tricker", "XT250", "2004–2017", { hp: 19 }); sv("XT250X", "XT250", "2006–2016");
+  av("YZF-R15", "YAM_R15V2", "2008–2016 (V1/V2)");
+  sv("MT-03", "T321Y", "2016+"); av("MT-03", "XT660", "2006–2014", { hp: 45 });
+  av("MT-09", "YAM_CP3_847", "2014–2020"); av("XSR900", "YAM_CP3_847", "2016–2021"); av("Tracer 9", "YAM_CP3_847", "2015–2020 (Tracer 900 / 900 GT)");
+  av("Tracer 7", "T700", "2016–2019 (Tracer 700)");
+
+  /* ================= НОВЫЕ МОДЕЛИ ================= */
+  /* спорт */
+  g("FZR250 / FZR250R", SP, [["YAM_FZR250", "1986–1994"]]);
+  g("FZX250 Zeal", NK, [["YAM_FZR250", "1991–1993", { hp: 40 }]]);
+  g("FZR400 / FZR400RR", SP, [["YAM_FZR400", "1986–1995"]]);
+  g("FZR600", SP, [["YAM_FZR600", "1989–1993"]]);
+  g("FZR600R", SP, [["YAM_YZF600R", "1994–1999"]]);
+  g("YZF600R Thundercat", SP, [["YAM_YZF600R", "1996–2007"]]);
+  g("FZR1000", SP, [["YAM_FZR1000G", "1987–1988"], ["YAM_FZR1000", "1989–1995"]]);
+  g("YZF1000R Thunderace", SP, [["YAM_FZR1000", "1996–2003"]]);
+  g("YZF-R9", SP, [["I3_890Y", "2025+"]]);
+  g("XSR900 GP", SP, [["I3_890Y", "2024+"]]);
+  g("TZR250", SP, [["YAM_TZR250", "1986–1990"], ["YAM_TZR250V", "1991–1995"]]);
+  g("R1-Z", NK, [["YAM_TZR250", "1990–1999", { hp: 40 }]]);
+  g("RD350 YPVS", SP, [["YAM_RD350", "1983–1995"]]);
+  /* нейкеды и туреры */
+  g("FZS600 Fazer", NK, [["YAM_YZF600R", "1998–2003", { hp: 95 }]]);
+  g("FZS1000 Fazer", NK, [["YAM_R1_4XV", "2001–2005", { hp: 143 }]]);
+  g("XJ600 / XJ600S Diversion", NK, [["YAM_XJ600", "1984–1991", { hp: 72 }], ["YAM_XJ600", "1992–2003"]]);
+  g("XJ900F", TR, [["YAM_XJ900", "1983–1994", { hp: 97 }]]);
+  g("XJ900S Diversion", TR, [["YAM_XJ900", "1995–2003"]]);
+  g("XJR1200", NK, [["YAM_FJ1200", "1995–1998", { hp: 97 }]]);
+  g("FJ1100", TR, [["YAM_FJ1100", "1984–1985"]]);
+  g("FJ1200", TR, [["YAM_FJ1200", "1986–1996"]]);
+  g("FJR1300", TR, [["YAM_FJR1300", "2001–2005"], ["YAM_FJR1300", "2006–2012"], ["YAM_FJR1300B", "2013+"]]);
+  g("TRX850", SP, [["YAM_TDM850B", "1995–2000"]]);
+  g("SZR660", NK, [["YAM_XTZ660", "1995–1997"]]);
+  g("MT-01", NK, [["YAM_XV1700", "2005–2012", { hp: 90 }]]);
+  g("BT1100 Bulldog", NK, [["YAM_XV1100", "2002–2006", { hp: 65 }]]);
+  g("Niken / Niken GT", NK, [["YAM_CP3_847", "2018–2020"], ["I3_890Y", "2021+"]]);
+  g("SCR950", KL, [["V950Y", "2017–2020"]]);
+  /* круизеры */
+  g("XV250 Virago / V-Star 250", CH, [["YAM_XV250", "1988–2020"]]);
+  g("XVS250 Drag Star", CH, [["YAM_XV250", "2000–2017"]]);
+  g("XV400 Virago", CH, [["V400Y", "1987–1998"]]);
+  g("XV750 Virago", CH, [["YAM_XV750", "1988–1998"]]);
+  g("XV1000 Virago", CH, [["YAM_XV1000", "1984–1986"]]);
+  g("XV1100 Virago", CH, [["YAM_XV1100", "1986–1999"]]);
+  g("XVS1100 Drag Star", CH, [["YAM_XV1100", "1999–2007"]]);
+  g("XVS950 Midnight Star / V-Star 950", CH, [["V950Y", "2009–2017"]]);
+  g("XVS1300 V-Star / Midnight Star", CH, [["YAM_XVS1300", "2007–2017"]]);
+  g("XVS1300 Stryker", CH, [["YAM_XVS1300", "2011–2017"]]);
+  g("XV1600 Wild Star / Road Star", CH, [["YAM_XV1600", "1999–2003"]]);
+  g("XV1700 Road Star", CH, [["YAM_XV1700C", "2004–2007"], ["YAM_XV1700", "2008–2014", { hp: 75 }]]);
+  g("XV1700 Road Star Warrior", CH, [["YAM_XV1700", "2002–2010"]]);
+  g("XV1900 Raider", CH, [["YAM_XV1900", "2008–2017"]]);
+  g("XV1900 Roadliner / Stratoliner / Midnight Star", CH, [["YAM_XV1900", "2006–2014"]]);
+  g("Star Venture", TR, [["YAM_XV1900", "2018–2021"]]);
+  g("XVZ1300 Royal Star", CH, [["YAM_XVZ1300", "1996–2013"]]);
+  g("Royal Star Venture", TR, [["YAM_XVZ1300", "1999–2013", { hp: 98 }]]);
+  g("V-Max 1200", CH, [["YAM_VMAX1200", "1985–2007"]]);
+  g("V-Max 1700", CH, [["YAM_VMAX1700", "2009–2020"]]);
+  /* классика */
+  g("SR400", KL, [["YAM_SR400", "1978–2008"], ["YAM_SR400FI", "2010–2021"]]);
+  g("SR500", KL, [["XT500", "1978–1999", { hp: 32 }]]);
+  g("SRX600", KL, [["YAM_SRX600", "1985–1997"]]);
+  g("XS650", KL, [["YAM_XS650", "1970–1985"]]);
+  /* малокубатурные */
+  g("YBR125", NK, [["YAM_YBR125", "2005–2009"], ["YAM_YBR125FI", "2010+"]]);
+  g("YS125", NK, [["YAM_YBR125FI", "2017+", { hp: 11 }]]);
+  g("YBR250 / YS250 Fazer", NK, [["XT250", "2006–2012", { hp: 21 }]]);
+  g("FZ16 / FZ-S / Fazer 150", NK, [["YAM_FZ16", "2008–2014"]]);
+  g("FZ-S FI / Fazer FI", NK, [["YAM_FZ15FI", "2014+"]]);
+  g("FZ25 / Fazer 25", NK, [["YAM_FZ25", "2017+"]]);
+  g("SZ-R", NK, [["YAM_FZ16", "2010–2014", { hp: 12, approx: true }]]);
+  /* эндуро и детские */
+  g("YZ400F", KR, [["YAM_YZ400F", "1998–1999"]]);
+  g("WR400F", EN, [["YAM_YZ400F", "1998–2000", { hp: 44 }]]);
+  g("YZ426F", KR, [["YAM_YZ426F", "2000–2002"]]);
+  g("WR426F", EN, [["YAM_YZ426F", "2001–2002", { hp: 46 }]]);
+  g("PW80", PB, [["YAM_PW80", "1983–2006"]]);
+})();
+
 /* @@DB-FRAGMENTS@@ */
 sortBikes();
 /* ===================== v26: детали 174 и 182 больше не путаются ===================== */
