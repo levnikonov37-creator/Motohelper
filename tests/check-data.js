@@ -26,7 +26,7 @@ const TYPES = typesSrc ? JSON.parse(typesSrc[1]) : null;
 if (!TYPES) fail("Не найден BF_TYPES в js/app.js");
 
 // Двигатели
-const GROUPS = new Set(["horiz", "cg", "cb", "zs4v", "dohc", "air", "liquid", "carb", "efi", "2t", "4t", "small", "big", "balancer", "jp", "eu", "in", "cn", "ru"]);
+const GROUPS = new Set(["horiz", "cg", "cb", "zs4v", "dohc", "air", "liquid", "carb", "efi", "2t", "4t", "small", "big", "balancer", "jp", "eu", "in", "cn", "ru", "cvt"]);
 for (const [id, e] of Object.entries(ENGINES)) {
   for (const f of ["code", "name", "stroke", "cooling", "spark"]) if (!e[f]) fail(`Двигатель ${id}: пустое поле ${f}`);
   if (!(e.cc > 0)) fail(`Двигатель ${id}: объём cc = ${e.cc}`);
