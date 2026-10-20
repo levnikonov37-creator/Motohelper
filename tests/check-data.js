@@ -111,6 +111,26 @@ PARTS.forEach((p) => {
   });
 });
 
+// Объём в названии модели должен совпадать с мотором: «Sportster 1200» не может стоять на моторе 883.
+// Не считаем: числа меньше 200 при моторе больше 600 (кубические дюймы «114», индексы «T120», «M-72», «AF35»)
+// и модели, где число — индекс, а не объём (список ниже).
+const CC_OK = new Set(["Урал М-67 / ИМЗ-8.103", "ИЖ 49", "ИЖ 56", "Ковровец К-55 / К-58", "Минск М-103", "Минск М-104", "Минск М-105", "Минск М-106",
+  "Тула ТМЗ-5.951", "Тула ТМЗ-5.952", "BMW F 650 GS (двухцилиндровый)", "Honda Dio AF62", "Honda Dio AF68", "Honda Tact AF75"]);
+const ccBad = [];
+BIKES.forEach((b) => {
+  if (b.brand === "Любая модель" || CC_OK.has(b.brand + " " + b.name)) return;
+  const name = b.name.replace(/\([^)]*\)/g, " ").replace(/\b\d{2}\/\d{2}\b/g, " ").replace(/\b(19|20)\d\d\b/g, " ");
+  const nums = (name.match(/\d{2,4}/g) || []).map(Number).filter((n) => n >= 49 && n <= 2100);
+  if (!nums.length) return;
+  b.versions.forEach((v) => {
+    const e = ENGINES[v.engine];
+    const best = nums.reduce((m, n) => (Math.abs(n - e.cc) < Math.abs(m - e.cc) ? n : m), nums[0]);
+    if (best < 200 && e.cc > 600) return;
+    if (Math.abs(best - e.cc) / best > 0.15) ccBad.push(`${b.brand} ${b.name}${v.years ? " [" + v.years + "]" : ""}: в названии ${best}, мотор ${v.engine} — ${e.cc} см³`);
+  });
+});
+ccBad.forEach((m) => fail("Объём не совпадает: " + m));
+
 // Инструкции и тюнинг
 const guideIds = new Set();
 GUIDES.forEach((g) => {
