@@ -7199,7 +7199,399 @@ function sparkCross(str) {
   addBike("Любая модель", "скутер с мотором 157QMJ (GY6 150)", SC, "CN_157QMJ");
 })();
 
+/* ===================== v34: СССР/Россия, Индия, MZ/Simson ===================== */
+(function () {
+  var NK = "Нейкед", SP = "Спорт", CH = "Чоппер", AD = "Тур-эндуро", CLS = "Классика", MOP = "Мопед", LE = "Лёгкий эндуро";
+  var A = { approx: true };
+  function x(a, b) { return Object.assign({}, a, b || {}); }
+  /* сменить мотор версии и проставить годы (порядок версий не меняется) */
+  function gen(brand, name, vi, eng, years, extra) {
+    var e = ENGINES[eng];
+    setEngine(brand, name, vi, eng, x({ years: years, label: years + " · " + e.code + ", " + e.cc + " см³" }, extra));
+  }
+
+  /* =====================================================================
+     СССР / Россия / Беларусь — двухтактные моторы (база RU из data.js)
+     ===================================================================== */
+  var I_CRSEAL = { t: "Сальники коленвала — подсос воздуха, плавают обороты, перегрев", sev: "high", fix: "Проверка на подсос, замена сальников при каждой переборке." };
+  var I_CONTACT = { t: "Контактное зажигание: подгорают контакты, сбивается угол опережения", sev: "med", fix: "Зачистка и зазор контактов 0.4–0.6 мм, выставить опережение; популярная доработка — электронное зажигание." };
+  var I_6V = { t: "6-вольтовая электрика: слабый свет, садится АКБ", sev: "low", fix: "Ревизия генератора и реле-регулятора; часто переводят на 12 В." };
+  var I_MIX = { t: "Бедная смесь / плохое масло — задиры поршня", sev: "high", fix: "Смесь не беднее 1:25…1:40 на масле для 2T, не перетягивать жиклёр." };
+  var I_CHAIN = { t: "Цепь моторной передачи и сцепление (износ, рывки)", sev: "med", fix: "Натяжение моторной цепи, замена дисков, регулировка троса." };
+  var I_AGE = { t: "Возраст: изношенные подшипники коленвала и КПП, люфты", sev: "med", fix: "При покупке — слушать мотор, проверять люфт коленвала и шатуна." };
+
+  /* --- ИЖ (Ижмаш) --- */
+  W("RU_IZH49", o(RU, { code: "ИЖ-49", name: "ИЖ-49 / ИЖ-56 (2T 350)", maker: "Ижмаш", groups: ["2t", "air", "carb", "big"], cc: 346, hp: 11.5,
+    torque: "≈ 21 Н·м", compression: "≈ 6–7 бар (ε 5.8)", fuel: "АИ-80/92 + масло 1:25", ignition: "Батарейная, контактный прерыватель (6 В)", carb: "К-37 / К-28 (по году)",
+    jetMain: "по мануалу", spark: "А11У (≈ Brisk N17C)", redline: 4500,
+    issues: [I_AGE, I_CONTACT, I_6V, I_CRSEAL] }), 0.45);
+  CL("RU_IZH56", "RU_IZH49", { code: "ИЖ-56", name: "ИЖ-56 (2T 350)", hp: 13, compression: "≈ 7 бар (ε 6.0)" }, 0.45);
+  W("RU_IZHP2", o(RU, { code: "ИЖ П-2", name: "ИЖ Планета / Планета-2 (2T 350)", maker: "Ижмаш", groups: ["2t", "air", "carb", "big"], cc: 346, hp: 15,
+    torque: "≈ 25 Н·м", compression: "≈ 7 бар (ε 6.7)", fuel: "АИ-80/92 + масло 1:25", ignition: "Батарейная, контактный прерыватель (6 В)", carb: "К-36И",
+    jetMain: "по мануалу", spark: "А11У (≈ Brisk N17C)", issues: [I_CONTACT, I_6V, I_CRSEAL, I_AGE] }), 0.45);
+  CL("RU_IZHP3", "RU_IZHP2", { code: "ИЖ П-3/П-4", name: "ИЖ Планета-3 / Планета-4 (2T 350)", hp: 18, torque: "≈ 27 Н·м", compression: "≈ 8 бар (ε 7.0)", carb: "К-62",
+    ignition: "Батарейная, контактная (П-3 — 6 В, П-4 — 12 В)", spark: "А17В (≈ Brisk N15C)", fuel: "АИ-92 + масло 1:25",
+    issues: [I_CONTACT, I_CRSEAL, { t: "Перегрев и прогар поршня на бедной смеси", sev: "med", fix: "Настройка К-62, уровень в поплавковой камере." }] }, 0.45);
+  W("RU_IZHJ2", o(RU, { code: "ИЖ Ю/Ю-2", name: "ИЖ Юпитер / Юпитер-2 (2T, двухцилиндровый 350)", maker: "Ижмаш", layout: "twin", crankPhase: 180,
+    groups: ["2t", "air", "carb", "big"], cc: 347, hp: 19.5, torque: "≈ 26 Н·м", compression: "≈ 7 бар (ε 6.5)", fuel: "АИ-80/92 + масло 1:25",
+    ignition: "Батарейная, два контактных прерывателя (6 В)", carb: "К-36И", jetMain: "по мануалу", spark: "А11У ×2 (≈ Brisk N17C)",
+    issues: [{ t: "Средний сальник коленвала — один цилиндр «не работает»", sev: "high", fix: "Проверка опрессовкой, замена сальника." }, I_CONTACT, I_6V] }), 0.45);
+  CL("RU_IZHJ4", "RU_IZHJ2", { code: "ИЖ Ю-3/Ю-4", name: "ИЖ Юпитер-3 / Юпитер-4 (2T, двухцилиндровый 350)", hp: 25, torque: "≈ 30 Н·м", compression: "≈ 8 бар (ε 7.5)",
+    carb: "К-62 (Ю-4 — два К-62)", ignition: "Батарейная, контактная (Ю-3 — 6 В, Ю-4 — 12 В)", spark: "А17В ×2 (≈ Brisk N15C)", fuel: "АИ-92 + масло 1:25",
+    issues: [{ t: "Средний сальник коленвала — один цилиндр «не работает»", sev: "high", fix: "Проверка опрессовкой, замена сальника." },
+      { t: "Синхронизация цилиндров: опережение и карбюраторы", sev: "med", fix: "Выставлять зажигание по каждому цилиндру отдельно." }, I_CONTACT] }, 0.45);
+
+  /* --- Минск (ММВЗ) и Ковровец К-125 — копия DKW RT125 --- */
+  W("RU_MINSK_M1", o(RU, { code: "М1А (DKW RT125)", name: "Минск М1А / М1М · Ковровец К-125 (2T 125, копия DKW RT125)", maker: "ММВЗ / ЗиД",
+    groups: ["2t", "air", "carb", "small"], cc: 123, hp: 4.25, torque: "≈ 7 Н·м", compression: "≈ 6 бар (ε 5.8)", fuel: "АИ-80/92 + масло 1:20…1:25",
+    ignition: "Маховичное магнето (магдино)", gearbox: "3 ст.", carb: "К-55 (по году)", jetMain: "по мануалу", spark: "А11У (≈ Brisk N17C)", redline: 5000,
+    oilVol: "КПП ≈ 0.5 л (трансмиссионное)", issues: [I_AGE, { t: "Магдино: слабая искра, износ кулачка прерывателя", sev: "med", fix: "Чистка контактов, зазор 0.3–0.4 мм, проверка конденсатора." }, I_MIX] }), 0.4);
+  W("RU_MINSK_M10", o(RU, { code: "М-105", name: "Минск М-103 / М-104 / М-105 / М-106 (2T 125)", maker: "ММВЗ", groups: ["2t", "air", "carb", "small"], cc: 125, hp: 7,
+    torque: "≈ 9 Н·м", compression: "≈ 7 бар", fuel: "АИ-80/92 + масло 1:25", ignition: "Магдино (махов. магнето), 6 В", gearbox: "3–4 ст. (по модели)",
+    carb: "К-36Е / К-36Л (по году)", jetMain: "по мануалу", spark: "А11У (≈ Brisk N17C)", oilVol: "КПП ≈ 0.6 л (трансмиссионное)",
+    issues: [I_CRSEAL, I_6V, { t: "Сцепление в масляной ванне КПП «ведёт» на густом масле", sev: "low", fix: "Масло по сезону, регулировка троса." }] }), 0.4);
+
+  /* --- Ковровец / Восход (ЗиД) --- */
+  W("RU_K175", o(RU, { code: "К-175", name: "Ковровец К-175 / Восход (2T 175)", maker: "ЗиД", groups: ["2t", "air", "carb", "small"], cc: 174, hp: 8,
+    torque: "≈ 12 Н·м", compression: "≈ 6–7 бар", fuel: "АИ-80/92 + масло 1:25", ignition: "Магдино (Восход — генератор с прерывателем), 6 В", gearbox: "3 ст.",
+    carb: "К-36 (по году)", jetMain: "по мануалу", spark: "А11У (≈ Brisk N17C)", oilVol: "КПП ≈ 0.6 л (трансмиссионное)", issues: [I_AGE, I_CRSEAL, I_6V] }), 0.4);
+  CL("RU_VOSHOD2", "RU_K175", { code: "Восход-2/2М", name: "Восход-2 / Восход-2М (2T 175)", hp: 11, torque: "≈ 14 Н·м", compression: "≈ 7–8 бар", carb: "К-36Р / К-62С (по году)",
+    ignition: "Генератор Г-401, контактный прерыватель (6 В)", spark: "А17В (≈ Brisk N15C)", fuel: "АИ-92 + масло 1:25",
+    issues: [I_CRSEAL, I_CONTACT, { t: "Перегрев на бедной смеси и затяжных подъёмах", sev: "med", fix: "Настройка жиклёра, проверка подсоса." }] }, 0.4);
+
+  /* --- Тула ТМЗ-5.951 (мотороллерный мотор с вентилятором) --- */
+  W("RU_TMZ200", o(RU, { code: "ТМЗ-5.951", name: "Тула ТМЗ-5.951 / 5.952 (2T 200, принудительное воздушное)", maker: "Туламашзавод", groups: ["2t", "air", "carb", "small"],
+    cc: 199, hp: 12.5, torque: "≈ 16 Н·м", compression: "≈ 7–8 бар", cooling: "Воздушное принудительное (вентилятор)", fuel: "АИ-92 + масло 1:25",
+    ignition: "Батарейная, 12 В (стартер-генератор)", start: "Электро (стартер-генератор) + кик", gearbox: "4 ст.", carb: "К-62 (по году)", jetMain: "по мануалу",
+    spark: "А17В (≈ Brisk N15C)", issues: [{ t: "Стартер-генератор и реле — проблемы с запуском и зарядкой", sev: "med", fix: "Щётки, коллектор, реле-регулятор." },
+      { t: "Кожух вентилятора забивается — перегрев", sev: "med", fix: "Чистить кожух и рёбра цилиндра." }, I_CRSEAL] }), 0.4);
+
+  /* --- мопедные 50 см³ --- */
+  var MOPED = { groups: ["2t", "air", "carb", "small"], fuel: "АИ-92 + масло 1:25", ignition: "Маховичное магнето", carb: "К-60 (по году)", jetMain: "по мануалу",
+    spark: "А11У (≈ Brisk N17C)", oilVol: "КПП ≈ 0.4–0.5 л (трансмиссионное)", redline: 5500 };
+  W("RU_D8", o(RU, x(MOPED, { code: "Д-6/Д-8", name: "Д-6 / Д-8 (веломотор 2T 50, одна передача)", maker: "ХВЗ / ПМЗ", cc: 49.9, hp: 1.2, torque: "≈ 2 Н·м", compression: "≈ 6 бар",
+    gearbox: "1 ст. (цепь, педали)", carb: "К-34", oilVol: "Редуктор ≈ 0.2 л (трансмиссионное)",
+    issues: [{ t: "Сцепление (фрикцион) пробуксовывает", sev: "med", fix: "Регулировка, замена дисков." }, I_MIX] })), 0.35);
+  W("RU_SH58", o(RU, x(MOPED, { code: "Ш-57/Ш-58", name: "Ш-57 / Ш-58 / Ш-62 (Шяуляй, 2T 50, 2 ст.)", maker: "Шяуляйский велозавод «Вайрас»", cc: 49.9, hp: 2, torque: "≈ 3 Н·м",
+    compression: "≈ 7 бар", gearbox: "2 ст.", issues: [I_CRSEAL, { t: "Износ шестерён и вилки переключения 2-ст. КПП", sev: "med", fix: "Масло в картере, регулировка переключения." }, I_MIX] })), 0.35);
+  W("RU_V50", o(RU, x(MOPED, { code: "В-50", name: "В-50 / В-501 (Шяуляй, 2T 50, 2 ст., автоматическое сцепление)", maker: "Шяуляйский велозавод «Вайрас»", cc: 49.9, hp: 1.7,
+    torque: "≈ 3 Н·м", compression: "≈ 7 бар", gearbox: "2 ст. (автоматическое центробежное сцепление)",
+    issues: [{ t: "Центробежное сцепление: износ колодок, «тащит» на холостых", sev: "med", fix: "Замена колодок/пружин, правильное масло в картере." }, I_CRSEAL, I_MIX] })), 0.35);
+
+  /* =====================================================================
+     4T оппозиты ИМЗ (Урал) / КМЗ (Днепр)
+     ===================================================================== */
+  var BOX = { region: "ru", maker: "ИМЗ", layout: "boxer", stroke: "4T", cooling: "Воздушное", fuel: "АИ-92", gearbox: "4 ст., кардан", needle: "3 канавка",
+    oil: "20W-50 / 15W-40 (минеральное)", oilInt: 3000, valveInt: 3000, gap: "0.6–0.7 мм", idle: "700–900" };
+  var I_SYNC = { t: "Синхронизация двух карбюраторов — неровная работа, перегрев одного цилиндра", sev: "med", fix: "Синхронизация тросов и холостого хода по каждому цилиндру." };
+  var I_LEAK = { t: "Течи масла: клапанные крышки, сальник коленвала (масло в сцеплении)", sev: "med", fix: "Прокладки, задний сальник коленвала, сапун." };
+  var I_GBX = { t: "КПП и кардан: выбивание передач, износ шлицов кардана", sev: "med", fix: "Регулировка механизма переключения, смазка шлицов, масло в КПП и редукторе." };
+  W("RU_M72", o(BOX, { code: "М-72 (нижнеклапанный)", name: "М-72 / К-750 (оппозит SV 750)", maker: "ИМЗ / КМЗ", groups: ["air", "carb", "4t", "big"],
+    cam: "SV (нижнеклапанный), 4 клапана, оппозит", cc: 746, hp: 22, torque: "≈ 40 Н·м", compression: "≈ 6 бар (ε 5.5)", redline: 4800,
+    fuel: "АИ-80/92", ignition: "Батарейная, контактный прерыватель (6 В)", start: "Кик", carb: "К-37 ×2 (поздние — К-301)", jetMain: "по мануалу", jetPilot: "по мануалу",
+    valveIn: "0.10 мм", valveEx: "0.10 мм", spark: "А11У ×2 (≈ NGK B4HS)", gap: "0.5–0.6 мм", oilVol: "≈ 2 л (картер)", oil: "М-8/М-10 (летом) / 20W-50",
+    issues: [I_AGE, I_SYNC, I_LEAK, I_6V] }), 0.7);
+  W("RU_URAL650", o(BOX, { code: "ИМЗ/КМЗ 650 OHV", name: "Урал / Днепр 650 OHV (М-61…М-67, ИМЗ-8.103, К-650, МТ-9/10)", maker: "ИМЗ / КМЗ", groups: ["air", "carb", "4t", "big"],
+    cam: "OHV (штанги), 4 клапана, оппозит", cc: 649, hp: 32, torque: "≈ 47 Н·м", compression: "≈ 8 бар (ε 6.2–7.0)", redline: 5500,
+    ignition: "Батарейная, контактная (6 В; ИМЗ-8.103 и поздние — 12 В)", start: "Кик", gearbox: "4 ст., кардан (с М-67 и МТ — задний ход)",
+    carb: "К-38 / К-301 / К-68 ×2 (по году)", jetMain: "по мануалу", jetPilot: "по мануалу", valveIn: "0.07–0.10 мм", valveEx: "0.07–0.10 мм",
+    spark: "А14В ×2 (≈ NGK BP6HS)", oilVol: "≈ 2 л (картер)",
+    issues: [I_SYNC, I_LEAK, I_GBX, { t: "Зазоры клапанов уходят быстро — стук, потеря мощности", sev: "med", fix: "Проверять каждые 2–3 тыс. км на холодном моторе." }] }), 0.7);
+  W("RU_URAL750I", o(BOX, { code: "Урал 750 EFI", name: "Урал 750 EFI (оппозит OHV, впрыск, 2014+)", maker: "ИМЗ (Ural Motorcycles)", groups: ["air", "efi", "4t", "big"],
+    cam: "OHV (штанги), 4 клапана, оппозит", cc: 749, hp: 41, torque: "57 Н·м", compression: "≈ 9 бар (ε 8.6)", redline: 5500, fuel: "АИ-92/95",
+    ignition: "Электронное (ЭБУ)", start: "Электро + кик", gearbox: "4 ст. + задний ход, кардан (привод коляски — по модели)", carb: "Инжектор (Keihin)",
+    jetMain: "—", jetPilot: "—", needle: "—", idle: "≈ 950", valveIn: "0.10 мм", valveEx: "0.10 мм", spark: "NGK BPR6ES ×2", gap: "0.7–0.8 мм",
+    oil: "20W-50 (минеральное / полусинтетика)", oilVol: "≈ 2.5 л", oilInt: 5000, valveInt: 5000,
+    issues: [I_LEAK, I_GBX, { t: "Датчики и разъёмы впрыска — грязь и влага", sev: "low", fix: "Диагностика, обработка разъёмов." }] }), 0.9);
+
+  /* =====================================================================
+     Чехословакия / ГДР (то, что массово ездило в СССР)
+     ===================================================================== */
+  var I_JIKOV = { t: "Карбюратор Jikov: износ иглы и распылителя, бедная/богатая смесь", sev: "med", fix: "Ремкомплект, уровень топлива, жиклёр по свече." };
+  CL("EU_JAWA354", "JAWA350", { code: "Jawa 354/360", name: "Jawa 350 354 / 360 (2T, двухцилиндровый, 6 В)", hp: 16, torque: "≈ 25 Н·м", compression: "≈ 7 бар (ε 6.7)",
+    fuel: "АИ-80/92 + масло 1:25", ignition: "Батарейная, контактная (6 В)", carb: "Jikov 2924 / 2926 (по году)", jetMain: "по мануалу", spark: "PAL N14-8 (≈ NGK B7HS) ×2",
+    issues: [I_AGE, I_6V, I_JIKOV, { t: "Автоматическое выжимание сцепления при переключении — износ механизма", sev: "low", fix: "Регулировка автомата сцепления по мануалу." }] }, 0.9);
+  W("EU_JAWA250", o(RU, { region: "eu", code: "Jawa 250", name: "Jawa 250 353 / 559 (2T, одноцилиндровый)", maker: "Jawa", groups: ["2t", "air", "carb", "big"], cc: 248, hp: 12,
+    torque: "≈ 19 Н·м", compression: "≈ 7 бар (ε 7.0)", fuel: "АИ-80/92 + масло 1:25…1:33", ignition: "Батарейная, контактная (6 В)", carb: "Jikov 2926 (по году)",
+    jetMain: "по мануалу", spark: "PAL N14-8 (≈ NGK B7HS)", issues: [I_AGE, I_6V, I_JIKOV] }), 0.9);
+  W("EU_MZ250", o(RU, { region: "eu", code: "MZ 250 (TS/ETZ)", name: "MZ ES/TS/ETZ 250 (2T 243)", maker: "MZ (Zschopau)", groups: ["2t", "air", "carb", "big"], cc: 243, hp: 21,
+    torque: "≈ 27 Н·м", compression: "≈ 8 бар (ε 9.5)", fuel: "АИ-92 + масло 1:33…1:50", ignition: "Батарейная, контактная (TS — 6 В, ETZ — 12 В)",
+    gearbox: "5 ст. (ES/ранние TS — 4 ст.)", carb: "BVF 30N2", jetMain: "по мануалу (≈ 135)", spark: "Isolator M14-260 (≈ NGK B8HS)",
+    issues: [{ t: "Закрытая цепь в кожухах — следить за натяжением и смазкой", sev: "low", fix: "Смазка цепи, проверка резиновых кожухов." }, I_CRSEAL, I_CONTACT] }), 0.9);
+  CL("EU_MZ150", "EU_MZ250", { code: "MZ 150 (TS/ETZ)", name: "MZ TS/ETZ 150 (2T 143)", cc: 143, hp: 13, torque: "≈ 15 Н·м", carb: "BVF 22N1", gearbox: "5 ст. (TS — 4 ст.)" }, 0.8);
+  CL("EU_MZ125", "EU_MZ250", { code: "MZ 125 (TS/ETZ)", name: "MZ TS/ETZ 125 (2T 123)", cc: 123, hp: 10, torque: "≈ 12 Н·м", carb: "BVF 22N1", gearbox: "5 ст. (TS — 4 ст.)" }, 0.8);
+  W("EU_SIMSON50", o(RU, { region: "eu", code: "Simson M531/M541", name: "Simson S50/S51 (2T 50)", maker: "Simson (Suhl)", groups: ["2t", "air", "carb", "small"], cc: 49.8, hp: 3.7,
+    torque: "≈ 5 Н·м", compression: "≈ 8 бар", fuel: "АИ-92 + масло 1:50", ignition: "Магдино (контактное, у S51 B — электронное)", gearbox: "3–4 ст. (по версии)",
+    carb: "BVF 16N1", jetMain: "по мануалу (≈ 70)", spark: "Isolator M14-260 (≈ NGK B8HS)", oilVol: "КПП ≈ 0.6 л (трансмиссионное)",
+    issues: [{ t: "Сальник коленвала со стороны генератора — подсос", sev: "med", fix: "Замена сальника." }, I_MIX] }), 0.8);
+  CL("EU_SIMSON70", "EU_SIMSON50", { code: "Simson M741", name: "Simson S70 (2T 70)", cc: 69.8, hp: 5.6, torque: "≈ 7 Н·м", carb: "BVF 19N1" }, 0.8);
+
+  /* =====================================================================
+     Индия — дорожные моторы (RE() из data.js)
+     ===================================================================== */
+  var I_IN_CHAIN = { t: "Натяжитель цепи ГРМ — стук на холодную, шум мотора", sev: "med", fix: "Проверка/замена натяжителя и цепи." };
+  var I_IN_ELEC = { t: "Электрика: реле-регулятор, разъёмы, выключатели", sev: "low", fix: "Проверка зарядки 13.8–14.5 В, обработка разъёмов." };
+  var I_IN_CLUTCH = { t: "Сцепление и цепь привода изнашиваются быстро", sev: "low", fix: "Регулировка, качественная цепь и смазка." };
+  var BAJ = { region: "in", maker: "Bajaj", layout: "single", cooling: "Воздушное", groups: ["air", "carb", "4t", "small"], gearbox: "5 ст.",
+    ignition: "Цифровое CDI (DTS-i, две свечи)", start: "Электро + кик", carb: "Ucal UCD (по мануалу)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    fuel: "АИ-92/95", oil: "20W-50 (JASO MA)", oilVol: "≈ 1.2 л", oilInt: 5000, valveInt: 10000, valveIn: "0.05 мм (типовой)", valveEx: "0.10 мм (типовой)",
+    spark: "Champion RG8YC / Bosch UR4AC ×2 (типовая)", gap: "0.8–0.9 мм", idle: "1300–1500",
+    issues: [I_IN_CHAIN, I_IN_ELEC, { t: "Две свечи DTS-i: одна выходит из строя — потеря тяги", sev: "low", fix: "Менять обе свечи вместе." }] };
+  RE("IN_BAJ150", x(BAJ, { code: "Bajaj DTS-i 150", name: "Bajaj Pulsar 150 / Avenger 150 (DTS-i 149)", cam: "SOHC, 2 клапана, 2 свечи", cc: 149, hp: 14, torque: "≈ 13 Н·м",
+    compression: "≈ 10 бар (ε 9.8)", carb: "Ucal UCD29", redline: 9500 }), 0.8);
+  RE("IN_BAJ125", x(BAJ, { code: "Bajaj DTS-i 125", name: "Bajaj Pulsar 125 / NS125 (DTS-i 124)", cam: "SOHC, 2 клапана, 2 свечи", cc: 124.4, hp: 12, torque: "≈ 11 Н·м",
+    compression: "≈ 10 бар", redline: 9500 }), 0.75);
+  RE("IN_BAJ220", x(BAJ, { code: "Bajaj DTS-i 220", name: "Bajaj Pulsar 220F / Avenger 220 (маслоохлаждаемый 220)", cam: "SOHC, 2 клапана, 2 свечи", cooling: "Воздушно-масляное",
+    groups: ["air", "carb", "4t", "big"], cc: 220, hp: 21, torque: "≈ 19 Н·м", compression: "≈ 10 бар (ε 9.5)", carb: "Ucal UCD32 (ранние 2007–2009 — впрыск DTS-Fi)",
+    oilVol: "≈ 1.3 л", redline: 9500 }), 0.85);
+  RE("IN_BAJ200OC", x(BAJ, { code: "Bajaj DTS-i 200", name: "Bajaj Pulsar 200 / Avenger 200 (маслоохлаждаемый 199, 2007–2010)", cam: "SOHC, 2 клапана, 2 свечи", cooling: "Воздушно-масляное",
+    cc: 198.8, hp: 18, torque: "≈ 17 Н·м", compression: "≈ 10 бар", oilVol: "≈ 1.3 л" }), 0.85);
+  RE("IN_BAJ160N", x(BAJ, { code: "Bajaj N160", name: "Bajaj Pulsar N160 (сингл 165)", cam: "SOHC, 2 клапана", cooling: "Воздушно-масляное", groups: ["air", "efi", "4t", "small"],
+    cc: 164.8, hp: 16, torque: "≈ 14.7 Н·м", compression: "≈ 10 бар", ignition: "ЭБУ", carb: "Инжектор", spark: "NGK CR8E (типовая, одна свеча)", oilVol: "≈ 1.2 л" }), 0.8);
+  RE("IN_BAJBOX", x(BAJ, { code: "Bajaj Boxer 150", name: "Bajaj Boxer BM150 (сингл 145)", cam: "SOHC, 2 клапана, 2 свечи", cc: 144.8, hp: 12, torque: "≈ 12 Н·м", compression: "≈ 9.5 бар",
+    issues: [I_IN_CHAIN, I_IN_CLUTCH] }), 0.7);
+  CL("IN_BAJAS150", "S160BJ", { code: "Bajaj AS150", name: "Bajaj Pulsar AS150 (4 клапана, 150)", cc: 149.5, hp: 17, cooling: "Воздушное", carb: "Карбюратор", groups: ["air", "carb", "4t", "small", "in"], valveIn: "0.05–0.08 мм (типовой)", valveEx: "0.10–0.12 мм (типовой)", spark: "Champion RG8YC ×3 (типовая)" }, 0.8);
+
+  var TVS = { region: "in", maker: "TVS", layout: "single", cooling: "Воздушное", groups: ["air", "carb", "4t", "small"], gearbox: "5 ст.", ignition: "Цифровое CDI",
+    start: "Электро + кик", carb: "Mikuni / Ucal (по мануалу)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", fuel: "АИ-92/95",
+    oil: "10W-30 / 20W-40 (JASO MA)", oilVol: "≈ 1 л", oilInt: 5000, valveInt: 10000, valveIn: "0.08 мм (типовой)", valveEx: "0.12 мм (типовой)",
+    spark: "NGK CR7HSA / Bosch UR5DC (типовая)", gap: "0.6–0.7 мм", idle: "1300–1500", redline: 9500, issues: [I_IN_CHAIN, I_IN_ELEC, I_IN_CLUTCH] };
+  RE("IN_TVS160", x(TVS, { code: "TVS 160 2V", name: "TVS Apache RTR 160 (2 клапана, 2007–2018)", cam: "SOHC, 2 клапана", cc: 159.7, hp: 15, torque: "≈ 13 Н·м", compression: "≈ 9.5 бар" }), 0.75);
+  RE("IN_TVS160_4V", x(TVS, { code: "TVS 160 4V", name: "TVS Apache RTR 160 4V (маслоохлаждаемый, 4 клапана)", cam: "SOHC, 4 клапана", cooling: "Воздушно-масляное",
+    groups: ["air", "efi", "4t", "small"], cc: 159.7, hp: 17.5, torque: "≈ 14.7 Н·м", compression: "≈ 10 бар", ignition: "ЭБУ", carb: "Инжектор (до 2020 — карбюратор)",
+    jetMain: "—", jetPilot: "—", needle: "—", spark: "NGK CPR8EA-9 (типовая)", gap: "0.8–0.9 мм" }), 0.8);
+  RE("IN_TVS180", x(TVS, { code: "TVS 180 2V", name: "TVS Apache RTR 180 (маслоохлаждаемый 177)", cam: "SOHC, 2 клапана", cooling: "Воздушно-масляное", cc: 177.4, hp: 17,
+    torque: "≈ 15.5 Н·м", compression: "≈ 9.5 бар" }), 0.8);
+
+  var HERO = { region: "in", maker: "Hero MotoCorp", layout: "single", cooling: "Воздушное", groups: ["air", "carb", "4t", "small"], gearbox: "5 ст.", ignition: "CDI",
+    start: "Электро + кик", carb: "Mikuni / Ucal (по мануалу)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", fuel: "АИ-92",
+    oil: "10W-30 (JASO MA)", oilVol: "≈ 1.1 л", oilInt: 5000, valveInt: 10000, valveIn: "0.05–0.08 мм (типовой)", valveEx: "0.05–0.08 мм (типовой)",
+    spark: "NGK CPR6EA-9 (типовая)", gap: "0.8–0.9 мм", idle: "1300–1500", redline: 9000, issues: [I_IN_CHAIN, I_IN_ELEC, I_IN_CLUTCH] };
+  RE("IN_HERO150", x(HERO, { code: "Hero 150", name: "Hero Hunk / Achiever (сингл 149, на базе Honda)", cam: "OHC, 2 клапана", cc: 149.2, hp: 14.4, torque: "≈ 12.8 Н·м", compression: "≈ 9.5 бар" }), 0.75);
+  RE("IN_HERO160", x(HERO, { code: "Hero 160", name: "Hero Xtreme 160R (сингл 163)", cam: "OHC, 2 клапана", cc: 163, hp: 15, torque: "≈ 14 Н·м", compression: "≈ 10 бар",
+    groups: ["air", "efi", "4t", "small"], ignition: "ЭБУ", carb: "Инжектор (у части — карбюратор)" }), 0.75);
+  RE("IN_HERO223", x(HERO, { code: "Hero 223", name: "Hero Karizma / Karizma R / ZMR (сингл 223)", cam: "OHC, 2 клапана", cc: 223, hp: 17, torque: "≈ 19 Н·м", compression: "≈ 9.5 бар",
+    groups: ["air", "carb", "4t", "big"], carb: "Карбюратор (ZMR — инжектор)", spark: "NGK CPR8EA-9 (типовая)", oilVol: "≈ 1.3 л" }), 0.8);
+
+  /* Royal Enfield: чугунный Bullet, UCE, 535 */
+  var REI = { region: "in", maker: "Royal Enfield", layout: "single", cooling: "Воздушное", groups: ["air", "carb", "4t", "big"], cam: "OHV (штанги), 2 клапана",
+    gearbox: "4 ст. (переключение справа; поздние — 5 ст. слева)", ignition: "Контактное / CDI (по году)", start: "Кик (поздние — электро)", carb: "Mikuni VM24 / Amal (по году)",
+    jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу", fuel: "АИ-92", oil: "15W-50 / 20W-50 (минеральное)", oilVol: "≈ 2.25 л", oilInt: 3000, valveInt: 3000,
+    valveIn: "≈ 0 (штанга вращается от руки, без продольного люфта)", valveEx: "≈ 0 (штанга вращается от руки, без продольного люфта)", spark: "NGK BP6ES (типовая)",
+    gap: "0.6–0.7 мм", idle: "≈ 900", redline: 5500, sparkTorque: "20 Н·м",
+    issues: [{ t: "Течи масла и «потение» по стыкам картера", sev: "med", fix: "Герметик, прокладки, не переливать масло." },
+      { t: "Сильная вибрация — откручивается крепёж", sev: "med", fix: "Фиксатор резьбы, протяжка после поездок." }, I_IN_ELEC] };
+  RE("IN_RE350CI", x(REI, { code: "RE 350 Iron", name: "Royal Enfield Bullet 350 (чугунный цилиндр / AVL 346)", cc: 346, hp: 18, torque: "≈ 25 Н·м", compression: "≈ 7 бар (ε 6.5)" }), 1.0);
+  CL("IN_RE500CI", "IN_RE350CI", { code: "RE 500 Iron", name: "Royal Enfield Bullet 500 (чугунный цилиндр / AVL 499)", cc: 499, hp: 22, torque: "≈ 34 Н·м" }, 1.0);
+  var REU = { region: "in", maker: "Royal Enfield", layout: "single", cooling: "Воздушное", cam: "OHV (штанги), 2 клапана, гидрокомпенсаторы", gearbox: "5 ст.",
+    ignition: "Цифровое TCI", start: "Электро + кик", fuel: "АИ-92/95", oil: "15W-50 (JASO MA2)", oilVol: "≈ 2.75 л", oilInt: 5000, valveInt: 0,
+    valveIn: "гидрокомпенсаторы", valveEx: "гидрокомпенсаторы", spark: "NGK BPR6ES / Bosch UR5DC (типовая)", gap: "0.7–0.8 мм", idle: "≈ 1000", redline: 5500,
+    issues: [{ t: "Течи масла (крышки, датчик давления, сальник КПП)", sev: "med", fix: "Прокладки, правильный уровень масла." },
+      { t: "Гидрокомпенсаторы стучат на грязном/жидком масле", sev: "med", fix: "Масло 15W-50 по регламенту, промывка." },
+      { t: "Вибрация — откручивается крепёж, трескаются кронштейны", sev: "low", fix: "Фиксатор резьбы, осмотр рамы и кронштейнов." }] };
+  RE("IN_RE350UCE", x(REU, { code: "RE UCE 350", name: "Royal Enfield UCE 346 (Classic / Bullet / Thunderbird 350, 2009–2020)", groups: ["air", "carb", "4t", "big"], cc: 346, hp: 19.8,
+    torque: "≈ 28 Н·м", compression: "≈ 8.5 бар (ε 8.5)", carb: "Ucal BSR29 (по мануалу)", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу" }), 1.0);
+  RE("IN_RE500UCE", x(REU, { code: "RE UCE 500", name: "Royal Enfield UCE 499 EFI (Classic / Bullet / Thunderbird 500)", groups: ["air", "efi", "4t", "big"], cc: 499, hp: 27.2,
+    torque: "≈ 41 Н·м", compression: "≈ 8.5 бар (ε 8.5)", ignition: "ЭБУ (Keihin EFI)", carb: "Инжектор" }), 1.1);
+  CL("IN_RE535", "IN_RE500UCE", { code: "RE UCE 535", name: "Royal Enfield UCE 535 EFI (Continental GT 535)", cc: 535, hp: 29.1, torque: "≈ 44 Н·м", start: "Электро" }, 1.1);
+
+  /* Jawa / Yezdi (Classic Legends, Индия) — моторы на базе Mahindra Mojo */
+  var CLL = { region: "in", maker: "Classic Legends (Jawa / Yezdi)", layout: "single", groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 4 клапана", gearbox: "6 ст.",
+    fuel: "АИ-95", oil: "10W-40 / 15W-50 (JASO MA2)", oilVol: "≈ 1.8 л", oilInt: 5000, valveInt: 10000, coolant: "≈ 1 л", spark: "NGK CPR8EA-9 (типовая)", gap: "0.7–0.8 мм",
+    issues: [{ t: "Рывки на малом газу, неровный холостой у ранних партий", sev: "med", fix: "Прошивка ЭБУ у дилера, чистка дросселя." }, I_IN_CHAIN, I_IN_ELEC] };
+  RE("IN_JAWA293", x(CLL, { code: "Jawa 293", name: "Jawa 42 / Jawa (2018+, жидкостный 293)", cc: 293, hp: 27, torque: "≈ 27 Н·м", compression: "≈ 11 бар (ε 11)" }), 1.0);
+  RE("IN_JAWA334", x(CLL, { code: "Jawa/Yezdi 334", name: "Jawa Perak / 42 Bobber · Yezdi (жидкостный 334)", cc: 334, hp: 29.5, torque: "≈ 30 Н·м", compression: "≈ 11 бар" }), 1.0);
+
+  /* =====================================================================
+     ИСПРАВЛЕНИЯ существующих моделей
+     ===================================================================== */
+  setEngine("Bajaj", "Pulsar 150", 0, "IN_BAJ150");
+  setEngine("Bajaj", "Avenger 220 Cruise", 0, "IN_BAJ220", { hp: 19 });
+  setEngine("Bajaj", "Pulsar NS125", 0, "IN_BAJ125");
+  setEngine("TVS", "Apache RTR 160 4V", 0, "IN_TVS160_4V");
+  setEngine("ИЖ", "Планета-4", 0, "RU_IZHP3");
+  setEngine("ИЖ", "Юпитер-4", 0, "RU_IZHJ4", { hp: 28 });
+  setEngine("Днепр", "МТ-10", 0, "RU_URAL650");
+  setEngine("Урал", "М-67 / ИМЗ-8.103", 0, "RU_URAL650");
+  gen("Урал", "Gear Up", 0, "URAL", "2003–2013");
+  addVersion("Урал", "Gear Up", "RU_URAL750I", "2014+");
+  gen("Royal Enfield", "Classic 350", 0, "S350RE", "2021+");
+  addVersion("Royal Enfield", "Classic 350", "IN_RE350UCE", "2009–2020");
+  gen("Royal Enfield", "Bullet 350", 0, "S350RE", "2023+");
+  addVersion("Royal Enfield", "Bullet 350", "IN_RE350UCE", "2010–2022");
+  addVersion("Royal Enfield", "Bullet 350", "IN_RE350CI", "до 2010 (чугун / AVL)", A);
+
+  /* =====================================================================
+     НОВЫЕ МОДЕЛИ
+     ===================================================================== */
+  /* --- ИЖ --- */
+  G("ИЖ", "49", CLS, [["RU_IZH49", "1951–1958"]]);
+  G("ИЖ", "56", CLS, [["RU_IZH56", "1956–1962"]]);
+  G("ИЖ", "Планета", CLS, [["RU_IZHP2", "1962–1965", { hp: 13 }]]);
+  G("ИЖ", "Планета-2", CLS, [["RU_IZHP2", "1965–1971"]]);
+  G("ИЖ", "Планета-3", CLS, [["RU_IZHP3", "1970–1977"]]);
+  G("ИЖ", "Юпитер", CLS, [["RU_IZHJ2", "1961–1965", { hp: 18 }]]);
+  G("ИЖ", "Юпитер-2", CLS, [["RU_IZHJ2", "1965–1971"]]);
+  G("ИЖ", "Юпитер-3", CLS, [["RU_IZHJ4", "1971–1980"]]);
+  G("ИЖ", "Юпитер-6", CLS, [["IZHJ5", "2000-е", A]]);
+  G("ИЖ", "Юнкер", CH, [["IZHJ5", "2000-е", A]]);
+
+  /* --- Минск --- */
+  G("Минск", "М1А", CLS, [["RU_MINSK_M1", "1951–1956"]]);
+  G("Минск", "М1М", CLS, [["RU_MINSK_M1", "1956–1962", { hp: 5, approx: true }]]);
+  G("Минск", "М-103", CLS, [["RU_MINSK_M10", "1962–1964", { hp: 5.5, approx: true }]]);
+  G("Минск", "М-104", CLS, [["RU_MINSK_M10", "1964–1967", { hp: 5.5 }]]);
+  G("Минск", "М-105", CLS, [["RU_MINSK_M10", "1967–1971"]]);
+  G("Минск", "М-106", CLS, [["RU_MINSK_M10", "1971–1973", A]]);
+  G("Минск", "ММВЗ 3.111", CLS, [["MINSK125", "1973–1982", A]]);
+  G("Минск", "ММВЗ 3.115", CLS, [["MINSK125", "1990-е", A]]);
+  G("Минск", "C4 250", CLS, [["165FMM", "2010-е", A]]);
+
+  /* --- Ковровец / Восход / ЗиД --- */
+  G("Ковровец", "К-125", CLS, [["RU_MINSK_M1", "1946–1951"]]);
+  G("Ковровец", "К-55 / К-58", CLS, [["RU_MINSK_M1", "1957–1965", { hp: 5, approx: true }]]);
+  G("Ковровец", "К-175 / К-175А / К-175Б / К-175В", CLS, [["RU_K175", "1957–1965"]]);
+  G("Восход", "175 (1965–1970)", CLS, [["RU_K175", "1965–1970", { hp: 10 }]]);
+  G("Восход", "2", CLS, [["RU_VOSHOD2", "1970–1976", { hp: 10.5 }]]);
+  G("Восход", "2М", CLS, [["RU_VOSHOD2", "1976–1979"]]);
+  G("Восход", "3", CLS, [["VOSHOD", "1979–1982", { hp: 13 }]]);
+  G("Восход", "3М-01", CLS, [["VOSHOD", "1988–1990-е"]]);
+  G("ЗиД", "Сова 175", CLS, [["VOSHOD", "1990-е–2000-е", A]]);
+  G("ЗиД", "200 Курьер", CLS, [["CG200", "2000-е"]]);
+
+  /* --- Урал (ИМЗ) --- */
+  G("Урал", "М-72", CLS, [["RU_M72", "1941–1960"]]);
+  G("Урал", "М-61", CLS, [["RU_URAL650", "1957–1960", { hp: 28 }]]);
+  G("Урал", "М-62", CLS, [["RU_URAL650", "1961–1965", { hp: 28 }]]);
+  G("Урал", "М-63", CLS, [["RU_URAL650", "1965–1971", { hp: 28 }]]);
+  G("Урал", "М-66", CLS, [["RU_URAL650", "1971–1976"]]);
+  G("Урал", "ИМЗ-8.107", CLS, [["RU_URAL650", "1990-е", { hp: 36, approx: true }]]);
+  G("Урал", "Соло", CLS, [["RU_URAL650", "1980-е–1990-е", { hp: 36, approx: true }]]);
+  G("Урал", "Турист", CLS, [["RU_URAL650", "1990-е", { hp: 36, approx: true }]]);
+  G("Урал", "Wolf", CH, [["URAL", "1999–2000-е", A]]);
+  G("Урал", "Patrol", CLS, [["URAL", "2001–2013"], ["RU_URAL750I", "2014+"]]);
+  G("Урал", "Tourist", CLS, [["URAL", "2001–2013"], ["RU_URAL750I", "2014+"]]);
+  G("Урал", "Retro", CLS, [["URAL", "2003–2013"], ["RU_URAL750I", "2014+"]]);
+  G("Урал", "cT", CLS, [["URAL", "2011–2013"], ["RU_URAL750I", "2014+"]]);
+  G("Урал", "Solo sT", CLS, [["URAL", "2009–2013"], ["RU_URAL750I", "2014+", A]]);
+  G("Урал", "M70", CLS, [["RU_URAL750I", "2017+"]]);
+
+  /* --- Днепр (КМЗ) --- */
+  G("Днепр", "К-750", CLS, [["RU_M72", "1959–1977", { hp: 26 }]]);
+  G("Днепр", "МВ-750", CLS, [["RU_M72", "1965–1970-е", { hp: 26 }]]);
+  G("Днепр", "МТ-12", CLS, [["RU_M72", "1977–1980-е", { hp: 26 }]]);
+  G("Днепр", "К-650", CLS, [["RU_URAL650", "1967–1971", { hp: 28 }]]);
+  G("Днепр", "МТ-9", CLS, [["RU_URAL650", "1971–1977"]]);
+  G("Днепр", "МТ-16", CLS, [["DNEPR", "1985–1990-е"]]);
+
+  /* --- Тула --- */
+  G("Тула", "ТМЗ-5.951", CLS, [["RU_TMZ200", "1984–1996"]]);
+  G("Тула", "ТМЗ-5.952", CLS, [["RU_TMZ200", "1990-е", { hp: 13 }]]);
+
+  /* --- мопеды --- */
+  G("Рига", "7", MOP, [["RU_SH58", "1970-е", A]]);
+  G("Рига", "11", MOP, [["RU_SH58", "1977–1980-е", A]]);
+  G("Рига", "13", MOP, [["RU_D8", "1980-е–1990-е"]]);
+  G("Рига", "16", MOP, [["RU_SH58", "1977–1980-е", A]]);
+  G("Рига", "22", MOP, [["RU_V50", "1980-е", A]]);
+  G("Рига", "Дельта", MOP, [["RU_V50", "1986–1990-е", A]]);
+  G("ЛМЗ", "Карпаты", MOP, [["RU_V50", "1981–1990-е"]]);
+  G("ЛМЗ", "Карпаты-2", MOP, [["RU_V50", "1990-е", A]]);
+  G("ЛМЗ", "Верховина-5", MOP, [["RU_SH58", "1970-е", A]]);
+  G("ЛМЗ", "Верховина-6", MOP, [["RU_SH58", "1970-е–1980-е", A]]);
+  G("ЛМЗ", "Верховина-7", MOP, [["RU_V50", "1980-е", A]]);
+
+  /* --- Ява (Чехословакия) --- */
+  G("Jawa", "350 354", CLS, [["EU_JAWA354", "1954–1962"]]);
+  G("Jawa", "350 360", CLS, [["EU_JAWA354", "1962–1964", { hp: 18 }]]);
+  G("Jawa", "350 639", CLS, [["JAWA350", "1990-е"]]);
+  G("Jawa", "350 640", CLS, [["JAWA350", "1991–2000-е"]]);
+  G("Jawa", "250 353", CLS, [["EU_JAWA250", "1954–1962"]]);
+  G("Jawa", "250 559", CLS, [["EU_JAWA250", "1962–1973", { hp: 14 }]]);
+
+  /* --- MZ / Simson (ГДР) --- */
+  G("MZ", "ETZ 250", CLS, [["EU_MZ250", "1981–1989"]]);
+  G("MZ", "ETZ 251", CLS, [["EU_MZ250", "1989–1991"]]);
+  G("MZ", "TS 250", CLS, [["EU_MZ250", "1973–1981", { hp: 19 }]]);
+  G("MZ", "ES 250/2 Trophy", CLS, [["EU_MZ250", "1967–1973", { hp: 19 }]]);
+  G("MZ", "ETZ 150", CLS, [["EU_MZ150", "1985–1991"]]);
+  G("MZ", "TS 150", CLS, [["EU_MZ150", "1973–1985", { hp: 12.5 }]]);
+  G("MZ", "ETZ 125", CLS, [["EU_MZ125", "1985–1991"]]);
+  G("Simson", "S51", MOP, [["EU_SIMSON50", "1980–1990"]]);
+  G("Simson", "S51 Enduro", MOP, [["EU_SIMSON50", "1980–1990"]]);
+  G("Simson", "S50", MOP, [["EU_SIMSON50", "1975–1980", { hp: 3.6 }]]);
+  G("Simson", "S70", MOP, [["EU_SIMSON70", "1983–1990"]]);
+
+  /* --- Bajaj --- */
+  G("Bajaj", "Pulsar 125", NK, [["IN_BAJ125", "2019+"]]);
+  G("Bajaj", "Pulsar 200", NK, [["IN_BAJ200OC", "2007–2010"]]);
+  G("Bajaj", "Pulsar 220F", SP, [["IN_BAJ220", "2007+"]]);
+  G("Bajaj", "Pulsar AS150", NK, [["IN_BAJAS150", "2015–2017"]]);
+  G("Bajaj", "Pulsar AS200", NK, [["S200BJ", "2015–2017"]]);
+  G("Bajaj", "Pulsar N160", NK, [["IN_BAJ160N", "2022+"]]);
+  G("Bajaj", "Pulsar NS400Z", NK, [["S400BJ", "2024+"]]);
+  G("Bajaj", "Avenger 150 Street", CH, [["IN_BAJ150", "2015–2018"]]);
+  G("Bajaj", "Avenger 160 Street", CH, [["IN_BAJ160N", "2019+", { hp: 15, approx: true }]]);
+  G("Bajaj", "Avenger 180 Street", CH, [["S180BJ", "2018–2020", { hp: 15.5 }]]);
+  G("Bajaj", "Avenger 200", CH, [["IN_BAJ200OC", "2007–2010", { hp: 17.5 }]]);
+  G("Bajaj", "Avenger 220 Street", CH, [["IN_BAJ220", "2015+", { hp: 19 }]]);
+  G("Bajaj", "Boxer BM150", NK, [["IN_BAJBOX", "2010+"]]);
+
+  /* --- TVS --- */
+  G("TVS", "Apache RTR 160", NK, [["IN_TVS160", "2007–2018"]]);
+  G("TVS", "Apache RTR 180", NK, [["IN_TVS180", "2009+"]]);
+
+  /* --- Hero --- */
+  G("Hero", "Hunk", NK, [["IN_HERO150", "2007–2018"]]);
+  G("Hero", "Achiever 150", NK, [["IN_HERO150", "2006–2019", { hp: 13.4 }]]);
+  G("Hero", "Xtreme 160R", NK, [["IN_HERO160", "2020+"]]);
+  G("Hero", "Karizma / Karizma R", SP, [["IN_HERO223", "2003–2019"]]);
+  G("Hero", "Karizma ZMR", SP, [["IN_HERO223", "2009–2019", { hp: 20 }]]);
+  G("Hero", "Karizma XMR 210", SP, [["XP210", "2023+"]]);
+
+  /* --- Royal Enfield --- */
+  G("Royal Enfield", "Bullet 500", NK, [["IN_RE500CI", "до 2010 (чугун / AVL)", A], ["IN_RE500UCE", "2013–2020"]]);
+  G("Royal Enfield", "Classic 500", CH, [["IN_RE500UCE", "2009–2020"]]);
+  G("Royal Enfield", "Thunderbird 350 / 350X", CH, [["IN_RE350UCE", "2012–2020"]]);
+  G("Royal Enfield", "Thunderbird 500 / 500X", CH, [["IN_RE500UCE", "2012–2020"]]);
+  G("Royal Enfield", "Continental GT 535", SP, [["IN_RE535", "2013–2018"]]);
+  G("Royal Enfield", "Electra 350", NK, [["IN_RE350CI", "2000–2010", A], ["IN_RE350UCE", "2010–2016"]]);
+
+  /* --- Jawa / Yezdi (Индия) --- */
+  G("Jawa", "42", NK, [["IN_JAWA293", "2018+"]]);
+  G("Jawa", "Classic (2018+)", CLS, [["IN_JAWA293", "2018+"]]);
+  G("Jawa", "Perak", CH, [["IN_JAWA334", "2020+"]]);
+  G("Jawa", "42 Bobber", CH, [["IN_JAWA334", "2022+"]]);
+  G("Yezdi", "Roadster", CLS, [["IN_JAWA334", "2022+"]]);
+  G("Yezdi", "Scrambler", LE, [["IN_JAWA334", "2022+"]]);
+  G("Yezdi", "Adventure", AD, [["IN_JAWA334", "2022+"]]);
+})();
+
 /* @@DB-FRAGMENTS@@ */
+/* ===================== v35: Keeway K-Light 202 и Kayo TS90 — свой объём ===================== */
+CL("V223KW", "V250LF", { code: "Keeway V223", name: "Keeway V-twin 223 воздушный (K-Light 202, Superlight 200)", cc: 223, hp: 17, torque: "16 Н·м" }, 1.1);
+setEngine("Keeway", "K-Light 202", 0, "V223KW");
+CL("1P50FMG", "147FMD", { code: "1P50FMG", name: "1P50FMG · горизонтальный 88 см³ (детские питбайки 90)", cc: 88, hp: 6, torque: "5.5 Н·м" }, 1);
+setEngine("Kayo", "TS90", 0, "1P50FMG", { approx: true });
+/* ===================== v35: уборка — моторы без моделей и дубль ===================== */
+(function () {
+  /* дубль Progasi: «Super Max 300 Pro» — та же модель, что «Super Max 300 PRO» (по дилерам — PR300) */
+  var i = BIKES.findIndex(function (b) { return b.brand === "Progasi" && b.name === "Super Max 300 Pro"; });
+  if (i >= 0) { BIKES.splice(i, 1); delete BIKE_KEYS["Progasi|Super Max 300 Pro"]; BIKE_ALIASES["Progasi Super Max 300 Pro"] = ["Progasi Super Max 300 PRO", 0]; }
+  /* «сборные» и старые моторы, с которых все модели переведены на свои, — убираем вместе с их деталями */
+  var used = {};
+  BIKES.forEach(function (b) { b.versions.forEach(function (v) { used[v.engine] = 1; }); });
+  var gone = Object.keys(ENGINES).filter(function (id) { return !used[id] && !Object.keys(SHARE).some(function (k) { return SHARE[k] === id; }); });
+  gone.forEach(function (id) { delete ENGINES[id]; delete ENGINE_AKA[id]; });
+  var dead = {};
+  gone.forEach(function (id) { dead[id] = 1; });
+  for (var j = PARTS.length - 1; j >= 0; j--) {
+    var p = PARTS[j];
+    if (!p.fit) continue;
+    var keep = p.fit.filter(function (f) { return !dead[f]; });
+    if (!keep.length) PARTS.splice(j, 1);else p.fit = keep;
+  }
+})();
 /* ===================== v31: после всех моторов — вариатор, цепи по размеру, фильтр китайских DOHC только им ===================== */
 (function () {
   var ids = Object.keys(ENGINES);
