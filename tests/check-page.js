@@ -72,6 +72,15 @@ const server = http.createServer((req, res) => {
     await input.fill("лфнщ");
     const kayo = await page.locator(".bf-item .bf-brand-s", { hasText: "Kayo" }).first().waitFor({ timeout: 5000 }).then(() => true, () => false);
     if (!kayo) errors.push("Поиск «лфнщ» (kayo в русской раскладке) ничего не нашёл");
+    // Как пишут люди: по-русски, кириллицей вместо латиницы, народные названия — нужная модель в первых трёх
+    for (const [q, re] of [["сузуки бандит 400", /Suzuki.*Bandit 400/], ["харлей 883", /Harley.*883/], ["кавасаки зх6р", /Kawasaki.*ZX-6R/],
+      ["клх 300", /KLX ?300/], ["хонда св 400", /Honda.*CB ?400/], ["мт 09", /Yamaha.*MT-09/], ["джиксер 600", /GSX-R ?600/],
+      ["вистром 650", /V-Strom 650/], ["k1 300", /Kayo.*K1/], ["тенере", /T[ée]n[ée]r[ée]/], ["ява 638", /Jawa.*638/], ["гсх 600", /Suzuki.*GSX/]]) {
+      await input.fill(q);
+      await page.waitForTimeout(150);
+      const top = (await page.locator(".bf-item").allInnerTexts()).slice(0, 3).map((t) => t.replace(/\s+/g, " "));
+      if (!top.some((t) => re.test(t))) errors.push("Поиск «" + q + "»: в первых трёх нет нужной модели — " + (top.join(" / ") || "ничего"));
+    }
     await input.fill("DR-Z400S");
     await page.getByText("DR-Z400S").first().waitFor({ timeout: 5000 });
 
@@ -93,6 +102,8 @@ const server = http.createServer((req, res) => {
     else await page.keyboard.press("Escape");
     // Вид «Мотоцикл»: фото модели из поиска картинок, «Другое фото» листает снимки
     await page.getByRole("button", { name: "Главная" }).last().click();
+    // мотор и вид мотоцикла — во вкладке «Мотоцикл», на главную ведёт кнопка «Мотор в 3D»
+    await page.locator(".hero button", { hasText: "Мотор в 3D" }).click();
     await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
     const photoOk = await page.locator(".model-photo.ok").waitFor({ timeout: 8000 }).then(() => true, () => false);
     if (!photoOk) errors.push("Вид «Мотоцикл»: фото модели не показалось");
@@ -131,12 +142,12 @@ const server = http.createServer((req, res) => {
 
     // Весь ремонт в одном разделе; кнопка «Назад» браузера возвращает на прошлый экран, а не уходит с сайта
     await page.getByRole("button", { name: "Ремонт" }).last().click();
-    await page.locator(".rhub").waitFor({ timeout: 5000 });
+    await page.locator(".rhub").first().waitFor({ timeout: 5000 });
     await page.locator(".rhub .act", { hasText: "ТО по пробегу" }).click();
     const toOk = await page.locator(".plan-go").first().waitFor({ timeout: 5000 }).then(() => true, () => false);
     if (!toOk) errors.push("Ремонт → ТО по пробегу: нет кнопок «Как сделать»");
     await page.goBack();
-    const hubBack = await page.locator(".rhub").waitFor({ timeout: 5000 }).then(() => true, () => false);
+    const hubBack = await page.locator(".rhub").first().waitFor({ timeout: 5000 }).then(() => true, () => false);
     if (!hubBack) errors.push("«Назад» из «ТО по пробегу» не вернул в раздел «Ремонт»");
     await page.locator(".rhub .act", { hasText: "Узлы" }).click();
     await page.locator(".unit-tile").first().click();
@@ -226,6 +237,7 @@ const server = http.createServer((req, res) => {
     const offOk = await off.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 15000 }).then(() => true, () => false);
     if (!offOk) errors.push("Без интернета сайт не открылся");
     else {
+      await off.getByRole("button", { name: "Мотоцикл" }).last().click();
       await off.locator(".view-toggle button", { hasText: "3D" }).first().click();
       const has3d = await off.waitForFunction(() => !!window.THREE, null, { timeout: 10000 }).then(() => true, () => false);
       if (!has3d) errors.push("Без интернета не загрузилась 3D-модель мотора");
