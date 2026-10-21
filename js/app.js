@@ -2003,7 +2003,9 @@ function Onboarding({
     s: 22
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, t[1]), /*#__PURE__*/React.createElement("p", null, t[2]))))), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, "\u042D\u0442\u0438 \u0440\u0430\u0437\u0434\u0435\u043B\u044B \u2014 \u0432 \u043C\u0435\u043D\u044E \u0432\u043D\u0438\u0437\u0443 \u044D\u043A\u0440\u0430\u043D\u0430. \u041F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u0443 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u043D\u043E\u0432\u0430 \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \xAB?\xBB \u0432\u0432\u0435\u0440\u0445\u0443."), /*#__PURE__*/React.createElement("div", {
+  }, "\u042D\u0442\u0438 \u0440\u0430\u0437\u0434\u0435\u043B\u044B \u2014 \u0432 \u043C\u0435\u043D\u044E \u0432\u043D\u0438\u0437\u0443 \u044D\u043A\u0440\u0430\u043D\u0430. \u041F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u0443 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u043D\u043E\u0432\u0430 \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \xAB?\xBB \u0432\u0432\u0435\u0440\u0445\u0443."), window.mhEggs && /*#__PURE__*/React.createElement("p", {
+    className: "muted small onb-eggs"
+  }, "🥚 На сайте спрятаны пасхалки. Найдено: ", window.mhEggs().found, " из ", window.mhEggs().total, "."), /*#__PURE__*/React.createElement("div", {
     className: "onb-actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary big",
