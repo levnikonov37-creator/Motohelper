@@ -1777,58 +1777,53 @@ body.gm-open { overflow: hidden; }
 .sprockets h3 { font-size: 14px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 6px 0 8px; }
 
 /* ===================== v45: фирменный цвет и живость =====================
-   Акцент — мото-оранжевый: главные кнопки, активная вкладка, прогресс, название мотоцикла.
-   У плиток — цветные значки, у каждого раздела свой цвет. */
-:root { --acc: #FF7A1A; --acc2: #FFB547; --acc-ink: #1C1206; --acc-soft: rgba(255,122,26,.16); --acc-line: rgba(255,140,50,.45); }
+   Вся палитра — в переменных ниже: сменить цвет сайта = поменять --acc-rgb / --acc2-rgb / --acc-ink.
+   --tile-mode: значки плиток окрашены в цвет акцента. */
+:root { --acc-rgb: 255, 122, 26; --acc2-rgb: 255, 181, 71; --acc-ink: #1C1206; --warm-rgb: 36, 30, 24; }
+:root { --acc: rgb(var(--acc-rgb)); --acc2: rgb(var(--acc2-rgb)); --acc-soft: rgba(var(--acc-rgb), .16); --acc-line: rgba(var(--acc-rgb), .45); }
 
 /* название мотоцикла и акцентные слова */
-.grad, .main .grad { background: linear-gradient(90deg, #FFC46B, #FF7A1A 45%, #FFB547 75%, #FFC46B) !important; background-size: 200% auto !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
+.grad, .main .grad { background: linear-gradient(90deg, var(--acc2), var(--acc) 45%, var(--acc2) 80%) !important; background-size: 200% auto !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
 
 /* главные кнопки */
-.btn.primary, .hero .btn.primary { background: linear-gradient(180deg, #FF9440, #FF7A1A) !important; color: var(--acc-ink) !important; border-color: transparent !important; box-shadow: 0 12px 28px -14px rgba(255,122,26,.85), inset 0 1px 0 rgba(255,255,255,.35) !important; font-weight: 700; }
+.btn.primary, .hero .btn.primary { background: linear-gradient(180deg, var(--acc2), var(--acc)) !important; color: var(--acc-ink) !important; border-color: transparent !important; box-shadow: 0 12px 28px -14px rgba(var(--acc-rgb), .85), inset 0 1px 0 rgba(255,255,255,.35) !important; font-weight: 700; }
 .btn.primary:hover { filter: brightness(1.06); }
 .btn.primary .ico { color: var(--acc-ink); }
 
 /* нижнее меню */
 .tab.on, .tab.on .tab-ico svg { color: var(--acc) !important; }
 .tab.on:not(.tab-ai) .tab-ico { background: var(--acc-soft) !important; }
-.tab-ai .tab-ico { background: linear-gradient(160deg, #FFB547, #FF7A1A) !important; color: var(--acc-ink) !important; box-shadow: 0 8px 22px -6px rgba(255,122,26,.75), 0 0 0 4px #0E1013 !important; }
+.tab-ai .tab-ico { background: linear-gradient(160deg, var(--acc2), var(--acc)) !important; color: var(--acc-ink) !important; box-shadow: 0 8px 22px -6px rgba(var(--acc-rgb), .75), 0 0 0 4px #0E1013 !important; }
 
 /* полоски прогресса, точки, маркеры заголовков */
-.g-progress span, .gm-dots button.cur { background: linear-gradient(90deg, #FFB547, #FF7A1A) !important; }
-.hero-dot { background: var(--acc) !important; box-shadow: 0 0 0 0 rgba(255,122,26,.7); }
-.page h2::before { background: linear-gradient(180deg, #FFB547, #FF7A1A) !important; }
+.g-progress span, .gm-dots button.cur { background: linear-gradient(90deg, var(--acc2), var(--acc)) !important; }
+.hero-dot { background: var(--acc) !important; }
+.page h2::before { background: linear-gradient(180deg, var(--acc2), var(--acc)) !important; }
 .ring-fg { stroke: var(--acc) !important; }
 .tabs button.on, .seg button.on, .jw-chip.on, .chip.on { box-shadow: inset 0 -3px 0 var(--acc) !important; }
 
-/* плитки: цветной значок в «таблетке» */
-.act > .ico { width: 46px !important; height: 46px !important; padding: 11px; border-radius: 14px; background: rgba(255,255,255,.07); color: #E5E7EB; flex: none; }
-.actions4 .act:nth-child(7n+1) > .ico { background: rgba(255,122,26,.16); color: #FF9A4D; }
-.actions4 .act:nth-child(7n+2) > .ico { background: rgba(96,165,250,.16); color: #7DB6FF; }
-.actions4 .act:nth-child(7n+3) > .ico { background: rgba(74,222,128,.15); color: #6EE39A; }
-.actions4 .act:nth-child(7n+4) > .ico { background: rgba(192,132,252,.16); color: #C9A0FF; }
-.actions4 .act:nth-child(7n+5) > .ico { background: rgba(250,204,21,.15); color: #F5CF4A; }
-.actions4 .act:nth-child(7n+6) > .ico { background: rgba(45,212,191,.15); color: #4FD9C4; }
-.actions4 .act:nth-child(7n+7) > .ico { background: rgba(244,114,182,.15); color: #F28CC4; }
-.act-main { background: linear-gradient(135deg, rgba(255,122,26,.22), rgba(20,22,26,.9) 60%) !important; border-color: var(--acc-line) !important; }
-.act-main > .ico { background: linear-gradient(160deg, #FFB547, #FF7A1A) !important; color: var(--acc-ink) !important; box-shadow: 0 8px 20px -8px rgba(255,122,26,.8); }
+/* плитки: значок в «таблетке» цвета акцента */
+.act > .ico { width: 46px !important; height: 46px !important; padding: 11px; border-radius: 14px; background: var(--acc-soft); color: var(--acc2); flex: none; }
+.act-main { background: linear-gradient(135deg, rgba(var(--acc-rgb), .22), rgba(20,22,26,.9) 60%) !important; border-color: var(--acc-line) !important; }
+.act-main > .ico { background: linear-gradient(160deg, var(--acc2), var(--acc)) !important; color: var(--acc-ink) !important; box-shadow: 0 8px 20px -8px rgba(var(--acc-rgb), .8); }
 .act { position: relative; overflow: hidden; }
 .act::after { content: ""; position: absolute; inset: auto -30% -60% auto; width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.06), transparent 70%); pointer-events: none; }
 .act:active { transform: scale(.98) !important; }
+
+/* сезонная карточка — в тон сайта */
+.season-home, .season-home.spring { border-color: var(--acc-line) !important; background: linear-gradient(135deg, rgba(var(--acc-rgb), .18), rgba(20,22,26,.85) 65%) !important; }
+.season-home .sh-ico { background: var(--acc-soft) !important; color: var(--acc2); }
 
 /* шапка главной: мотоцикл в цветах марки */
 .hero-bike { display: block; position: relative; width: 100%; max-width: 520px; margin: 4px auto 10px; padding: 0; border: 0; background: none; cursor: pointer; }
 .hero-bike svg { position: relative; display: block; width: 100%; height: auto; max-height: 210px; filter: drop-shadow(0 14px 18px rgba(0,0,0,.55)); transition: transform .35s cubic-bezier(.2,.8,.2,1); }
 .hero-bike:hover svg { transform: translateX(6px) rotate(-1deg); }
-.hero-bike .hb-floor { position: absolute; left: 8%; right: 8%; bottom: 4%; height: 26%; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(255,122,26,.42), rgba(255,122,26,.08) 55%, transparent 72%); filter: blur(6px); }
-.hero-bike::before { content: ""; position: absolute; left: -6%; top: 30%; width: 34%; height: 40%; background: repeating-linear-gradient(180deg, transparent 0 9px, rgba(255,181,71,.35) 9px 11px); -webkit-mask: linear-gradient(90deg, transparent, #000 60%, transparent); mask: linear-gradient(90deg, transparent, #000 60%, transparent); opacity: .55; }
+.hero-bike .hb-floor { position: absolute; left: 8%; right: 8%; bottom: 4%; height: 26%; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(var(--acc-rgb), .42), rgba(var(--acc-rgb), .08) 55%, transparent 72%); filter: blur(6px); }
+.hero-bike::before { content: ""; position: absolute; left: -6%; top: 30%; width: 34%; height: 40%; background: repeating-linear-gradient(180deg, transparent 0 9px, rgba(var(--acc2-rgb), .35) 9px 11px); -webkit-mask: linear-gradient(90deg, transparent, #000 60%, transparent); mask: linear-gradient(90deg, transparent, #000 60%, transparent); opacity: .55; }
 @media (max-width: 640px) { .hero-bike { margin: 0 auto 8px; } .hero-bike svg { max-height: 170px; } }
-.hero { background: radial-gradient(120% 80% at 85% 0%, rgba(255,122,26,.20), transparent 55%), linear-gradient(150deg, #15181D 0%, #1C2026 60%, #241E18 100%) !important; border-color: rgba(255,140,50,.22) !important; }
-.phero { background: radial-gradient(120% 90% at 100% 0%, rgba(255,122,26,.16), transparent 55%), linear-gradient(150deg, #15181D 0%, #1C2026 60%, #241E18 100%) !important; border-color: rgba(255,140,50,.18) !important; }
-
-/* цифры в шапках — крупно и с акцентом на единицах */
+.hero { background: radial-gradient(120% 80% at 85% 0%, rgba(var(--acc-rgb), .20), transparent 55%), linear-gradient(150deg, #15181D 0%, #1C2026 60%, rgb(var(--warm-rgb)) 100%) !important; border-color: rgba(var(--acc-rgb), .22) !important; }
+.phero { background: radial-gradient(120% 90% at 100% 0%, rgba(var(--acc-rgb), .16), transparent 55%), linear-gradient(150deg, #15181D 0%, #1C2026 60%, rgb(var(--warm-rgb)) 100%) !important; border-color: rgba(var(--acc-rgb), .18) !important; }
 .hs b { letter-spacing: -.01em; }
-.hs span, .hs small { color: #B9A48E !important; }
 
 /* мягкое появление страниц */
 .page > * { animation: v45in .35s ease-out both; }
