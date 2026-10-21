@@ -90,12 +90,21 @@
     var el = e.target;
     if (!el || el.tagName !== "INPUT" && el.tagName !== "TEXTAREA") return;
     var v = String(el.value || "").toLowerCase().replace(/ё/g, "е").trim();
-    var hit = /^(врум+|бр+р+|вжух+|дррр+)\b/.test(v) ? "vroom" : v === "42" ? "answer" : /кто (тут )?лучший механик/.test(v) ? "mechanic" : null;
-    if (!hit || said[hit] === v) return;
-    said[hit] = v;
-    if (hit === "vroom") play(bikeEl(), "egg-ride", 1900);
+    var hit = /^(вр+у+м+|бр+р+|вжу+х+|др+р+)(\s|!|$)/.test(v) ? "vroom" : v === "42" ? "answer" : /кто (тут )?лучший механик/.test(v) ? "mechanic" : null;
+    if (!hit || Date.now() - (said[hit] || 0) < 3000) return;
+    said[hit] = Date.now();
+    if (hit === "vroom") { play(bikeEl(), "egg-ride", 1900); race(); }
     mark(hit);
   }, true);
+
+  /* неоновые полосы через весь экран — видно, даже если открыт поиск */
+  function race() {
+    var r = document.createElement("div");
+    r.className = "egg-race";
+    for (var i = 0; i < 6; i++) { var l = document.createElement("i"); l.style.top = (12 + i * 14) + "%"; l.style.animationDelay = (i * 0.07) + "s"; r.appendChild(l); }
+    document.body.appendChild(r);
+    setTimeout(function () { r.remove(); }, 1600);
+  }
 
   /* 7. Код Konami на клавиатуре */
   var KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"], kp = 0;
@@ -105,11 +114,7 @@
     kp = k === KONAMI[kp] ? kp + 1 : k === KONAMI[0] ? 1 : 0;
     if (kp === KONAMI.length) {
       kp = 0;
-      var r = document.createElement("div");
-      r.className = "egg-race";
-      for (var i = 0; i < 6; i++) { var l = document.createElement("i"); l.style.top = (12 + i * 14) + "%"; l.style.animationDelay = (i * 0.07) + "s"; r.appendChild(l); }
-      document.body.appendChild(r);
-      setTimeout(function () { r.remove(); }, 1600);
+      race();
       mark("konami");
     }
   });
