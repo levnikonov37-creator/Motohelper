@@ -10571,7 +10571,7 @@ function sprocketPath(cx, cy, r, t) {
   return d + "Z";
 }
 /* ===== Мотоцикл: рисунок по реальной геометрии (js/bike-art.js) и настоящее фото модели ===== */
-function bikeArtFor(bike, eng, cu) {
+function bikeArtFor(bike, eng, cu, uid) {
   const L = bikeLook(bike, eng, cu);
   const cls = bike.type === "Классика" ? "classic" : L.cls;
   const g = eng.groups || [],
@@ -10580,7 +10580,7 @@ function bikeArtFor(bike, eng, cu) {
   const col = window.bikeLivery(bike.brand, bike.name, cu && cu.color, cu && cu.accent);
   const road = ["naked", "sport", "cruiser", "classic", "tour", "moped", "light", "motard"].indexOf(cls) >= 0;
   return window.bikeArt({
-    uid: "bk",
+    uid: uid || "bk",
     cls: cls,
     brand: bike.brand === "Любая модель" ? "" : bike.brand.length <= 12 ? bike.brand : bike.brand.split(/[\s-]/)[0],
     model: bike.brand === "Любая модель" ? "" : bike.name,
@@ -12896,6 +12896,37 @@ function goStage(go) {
     });
   }, 100);
 }
+/* рисунок своего мотоцикла в шапке главной — в цветах марки; нажал — открылся «Мотоцикл» */
+function HeroBike({
+  eng,
+  bike,
+  cu,
+  go
+}) {
+  const art = useMemo(() => {
+    try {
+      return window.bikeArt && bike.brand !== "Любая модель" ? bikeArtFor(bike, eng, cu, "hb") : null;
+    } catch (e) {
+      return null;
+    }
+  }, [bike, eng, cu]);
+  if (!art) return null;
+  return /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "hero-bike",
+    "aria-label": "Открыть " + bike.brand + " " + bike.name,
+    onClick: () => go("bike", "overview")
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "hb-floor",
+    "aria-hidden": "true"
+  }), /*#__PURE__*/React.createElement("svg", {
+    viewBox: art.vb.join(" "),
+    "aria-hidden": "true",
+    dangerouslySetInnerHTML: {
+      __html: art.svg
+    }
+  }));
+}
 /* карточка сезона на главной: октябрь–февраль — консервация, март–май — подготовка */
 function SeasonCard({
   eng,
@@ -12948,7 +12979,12 @@ function Home(props) {
     className: "home-title"
   }, "\u0427\u0442\u043E \u0441\u0434\u0435\u043B\u0430\u0435\u043C \u0441 ", /*#__PURE__*/React.createElement("span", {
     className: "grad"
-  }, cu.nick ? "«" + cu.nick + "»" : bike.name), "?"), /*#__PURE__*/React.createElement("p", {
+  }, cu.nick ? "«" + cu.nick + "»" : bike.name), "?"), /*#__PURE__*/React.createElement(HeroBike, {
+    eng: eng,
+    bike: bike,
+    cu: cu,
+    go: go
+  }), /*#__PURE__*/React.createElement("p", {
     className: "hero-sub"
   }, "Найди причину поломки, инструкцию или запчасть — всё подобрано под твой мотор."), /*#__PURE__*/React.createElement("div", {
     className: "hero-cta"
