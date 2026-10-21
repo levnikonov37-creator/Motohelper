@@ -8490,6 +8490,274 @@ var SEASON = {
     ["ride", "Первый выезд спокойно: прогрей тормоза и резину", null, null]
   ] }
 };
+/* ---- v42: новые модели 2023–2026 ---- */
+(function () {
+  /* Новые модели 2023–2026: китайские/российские эндуро, питбайки, мотарды, лёгкие мотоциклы;
+     Voge / CFMOTO / KTM-Bajaj (индийская сборка) / Минск. */
+  var NK = "Нейкед", SP = "Спорт", CH = "Чоппер", AD = "Тур-эндуро", CLS = "Классика";
+  var E = "Эндуро", P = "Питбайк", M = "Мотард", L = "Лёгкий эндуро";
+
+  /* ===================== МОТОРЫ ===================== */
+
+  /* Zongshen ZS170MM — жидкостная версия CB250 (Motoland XR250 PRO, XT250 ST-W) */
+  CL("ZS_170MM", "CBS300", { code: "ZS170MM", name: "Zongshen ZS170MM · CB250 жидкостное (250)", maker: "Zongshen",
+    groups: ["cb", "liquid", "carb", "4t", "big"], cam: "SOHC (версии 2V и 4V)", cooling: "Жидкостное",
+    cc: 249, hp: 23, torque: "≈ 19 Н·м", compression: "11–13 бар", gearbox: "5 ст.", start: "Электро + кик",
+    carb: "NIBBI PE28 / PZ30", jetMain: "112–120", jetPilot: "38–40", needle: "3 канавка", idle: "1400–1600",
+    valveIn: "0.05–0.08 мм", valveEx: "0.08–0.10 мм", spark: "D8EA (DR8EA)", gap: "0.6–0.7 мм", sparkTorque: "15–18 Н·м",
+    oil: "10W-40 (JASO MA)", oilVol: "≈ 1.2 л", oilInt: 1500, valveInt: 3000, coolant: "≈ 0.9 л",
+    issues: [{ t: "Течёт сальник помпы", sev: "med", fix: "Следить за дренажным отверстием помпы, менять сальник вовремя." },
+      { t: "Воздух в системе охлаждения после замены антифриза", sev: "med", fix: "Прокачать, долить после первого прогрева." },
+      { t: "Путают с 172FMM — ГБЦ и цилиндр другие", sev: "low", fix: "Запчасти ЦПГ подбирать по коду на картере (170MM)." }] }, 1.0);
+
+  /* Zongshen PR300 с инжектором (маркировка 175FMN / PR5) — Moto Apollo M5/M6 300 EFI */
+  CL("PR300E", "PR300", { code: "ZS175FMN PR5 EFI", name: "Zongshen PR300 EFI (175FMN / PR5, инжектор)",
+    groups: ["cb", "zs4v", "air", "efi", "4t", "big", "balancer"], hp: 25, ignition: "ЭБУ (EFI)", carb: "Инжектор (Bosch)",
+    jetMain: "—", jetPilot: "—", needle: "—", idle: "1500–1700",
+    issues: [{ t: "Перегрев в медленной грязи", sev: "high", fix: "Маслорадиатор с вентилятором, не стоять долго на месте." },
+      { t: "Ошибки датчиков и форсунки после мойки", sev: "med", fix: "Сушить разъёмы, диэлектрическая смазка." },
+      { t: "Топливный насос не любит грязный бак", sev: "med", fix: "Чистый бензин, фильтр насоса раз в сезон." }] }, 1.05);
+
+  /* Zongshen NX250 (ZS178MM-2) — новый короткоходный DOHC 250 с балансиром (Hasky A10 Pro NX, GR8 F250L, BRZ MX8) */
+  CL("ZS_NX250", "NC250E", { code: "ZS178MM-2 (NX250)", name: "Zongshen NX250 (ZS178MM-2) DOHC, балансир",
+    groups: ["dohc", "liquid", "efi", "4t", "big", "balancer"], cam: "DOHC, 4 клапана + балансир", hp: 38, torque: "≈ 28 Н·м",
+    compression: "12–14 бар", redline: 11500, carb: "Инжектор (у части моделей — карбюратор FCR)",
+    valveIn: "0.10–0.15 мм", valveEx: "0.15–0.20 мм", oilVol: "≈ 1.4 л", oilInt: 1500, valveInt: 5000, coolant: "≈ 1.0 л",
+    issues: [{ t: "Высокооборотистый — чувствителен к качеству масла", sev: "high", fix: "Масло 10W-50 JASO MA2 каждые 10–15 моточасов." },
+      { t: "Клапаны шайбами, нужны щупы", sev: "med", fix: "Замер зазоров каждые 30–50 моточасов." },
+      { t: "Помпа и вентилятор — перегрев на месте", sev: "high", fix: "Проверять включение вентилятора и уровень антифриза." },
+      { t: "Мало статистики по ресурсу (мотор 2024–2025 г.)", sev: "low", fix: "Вести журнал моточасов, не экономить на ТО." }] }, 1.15);
+
+  /* Loncin YB300H (LX176FMN) — воздушный 4V с балансиром (Kayo T2 2026, Progasi Endurance 300X, XGZ, JHL) */
+  CL("LON_YB300H", "PR300", { code: "LX176FMN (YB300H)", name: "Loncin YB300H (176FMN) · воздушный 4V, балансир", maker: "Loncin",
+    groups: ["air", "carb", "4t", "big", "balancer"], cam: "SOHC, 4 клапана + балансир", cooling: "Воздушно-масляное",
+    cc: 286, hp: 24, torque: "23.5 Н·м", compression: "10–12 бар", gearbox: "5–6 ст.",
+    carb: "NIBBI PE30 / PWK32", jetMain: "120–130", jetPilot: "40–42", needle: "3 канавка", idle: "1400–1600",
+    valveIn: "0.05–0.08 мм", valveEx: "0.08–0.12 мм", spark: "DR8EA / CR8E", gap: "0.6–0.7 мм", sparkTorque: "15–18 Н·м",
+    oilVol: "≈ 1.5 л", oilInt: 1500, valveInt: 3000,
+    issues: [{ t: "Перегрев в медленном техничном эндуро", sev: "high", fix: "Маслорадиатор, смесь не беднить, отдыхать на подъёмах." },
+      { t: "Метки балансира при сборке", sev: "high", fix: "Выставлять метки балансира по мануалу — иначе сильная вибрация." },
+      { t: "Запчасти ЦПГ не взаимозаменяемы с Zongshen PR300", sev: "med", fix: "Покупать по коду мотора Loncin 176FMN." }] }, 1.05);
+  CL("LON_YB300HE", "LON_YB300H", { code: "LX176FMN (YB300H) EFI", name: "Loncin YB300H EFI (176FMN, инжектор)",
+    groups: ["air", "efi", "4t", "big", "balancer"], hp: 27, ignition: "ЭБУ (EFI)", carb: "Инжектор", jetMain: "—", jetPilot: "—", needle: "—", idle: "1500–1700",
+    issues: [{ t: "Перегрев в медленном эндуро", sev: "high", fix: "Маслорадиатор, вентилятор." },
+      { t: "Разъёмы впрыска боятся воды", sev: "med", fix: "Диэлектрическая смазка, не мыть напором." },
+      { t: "Метки балансира при сборке", sev: "high", fix: "Строго по мануалу." }] }, 1.1);
+
+  /* Loncin FE250 (LX171YMM) — воздушно-масляный 4V (Fuego Rambolor 250 Air, Tekken 3.0) */
+  CL("LON_FE250", "172FMM-3A", { code: "LX171YMM (FE250)", name: "Loncin FE250 (LX171YMM) · 4V воздушно-масляный", maker: "Loncin",
+    groups: ["air", "carb", "4t", "big"], cam: "SOHC, 4 клапана", cooling: "Воздушно-масляное (маслорадиатор)",
+    cc: 249, hp: 24.5, torque: "≈ 21 Н·м", compression: "11–13 бар", gearbox: "6 ст.", carb: "PZ30",
+    valveIn: "0.05–0.08 мм", valveEx: "0.08–0.12 мм", spark: "DR8EA", gap: "0.6–0.7 мм", oilVol: "≈ 1.3 л", oilInt: 2000, valveInt: 4000,
+    issues: [{ t: "Перегрев в пробках", sev: "med", fix: "Чистый маслорадиатор, масло по уровню." },
+      { t: "ЦПГ не от Zongshen 172FMM", sev: "med", fix: "Запчасти по коду LX171YMM." },
+      { t: "Шумит цепь ГРМ при редкой замене масла", sev: "low", fix: "Масло каждые 2000 км, натяжитель при шуме." }] }, 1.05);
+  CL("LON_FE250E", "LON_FE250", { code: "LX171YMM EFI", name: "Loncin FE250 EFI (LX171YMM, впрыск Bosch)",
+    groups: ["air", "efi", "4t", "big"], hp: 25, ignition: "ЭБУ (EFI)", carb: "Инжектор (Bosch)", jetMain: "—", jetPilot: "—", needle: "—",
+    issues: [{ t: "Перегрев в пробках", sev: "med", fix: "Маслорадиатор, масло по уровню." },
+      { t: "Ошибки датчиков после мойки", sev: "med", fix: "Сушить разъёмы, диэлектрическая смазка." }] }, 1.1);
+
+  /* Voge DS625X — рядная двойка 581, 270° */
+  RE("VOG_581", { region: "cn", code: "LX 581", name: "Voge 581 (рядная двойка 270°: DS625X)", maker: "Loncin (Voge)", layout: "twin", crankPhase: 270,
+    groups: ["dohc", "liquid", "efi", "4t", "big", "balancer"], cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 581, hp: 63, torque: "57 Н·м",
+    compression: "≈ 11.5:1", redline: 10000, valveIn: "0.10–0.15 мм", valveEx: "0.17–0.22 мм", spark: "NGK CR8EIX", gap: "0.7–0.8 мм", sparkTorque: "12 Н·м",
+    oil: "10W-40 (JASO MA2)", oilVol: "≈ 3.2 л", oilInt: 6000, valveInt: 12000, coolant: "≈ 1.8 л",
+    issues: [{ t: "Ранние партии — обновления ПО ЭБУ и приборки", sev: "low", fix: "Прошивка у дилера." },
+      { t: "Тяжёлый для серьёзного бездорожья", sev: "low", fix: "Дуги, защита картера и радиатора." }] }, 1.5);
+  /* Voge DS800X Rally — рядная двойка 798 */
+  RE("VOG_798", { region: "cn", code: "LX 798", name: "Voge 798 (рядная двойка 270°: DS800X Rally)", maker: "Loncin (Voge)", layout: "twin", crankPhase: 270,
+    groups: ["dohc", "liquid", "efi", "4t", "big", "balancer"], cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 798, hp: 94, torque: "81 Н·м",
+    compression: "≈ 12:1", redline: 9500, valveIn: "0.10–0.15 мм", valveEx: "0.20–0.25 мм", spark: "NGK LMAR8AI-8", gap: "0.7–0.8 мм", sparkTorque: "12 Н·м",
+    oil: "10W-50 (JASO MA2)", oilVol: "≈ 3.6 л", oilInt: 6000, valveInt: 18000, coolant: "≈ 2 л",
+    issues: [{ t: "Электроника и датчики — диагностика только сканером", sev: "med", fix: "Диагностика у дилера Voge/Loncin." },
+      { t: "Слипер-сцепление чувствительно к маслу", sev: "low", fix: "Только масло JASO MA2 нужной вязкости." }] }, 1.8);
+  /* Voge RR660S — рядная четвёрка 663 */
+  RE("VOG_I4_663", { region: "cn", code: "LX 663 I4", name: "Voge 663 (рядная четвёрка: RR660S)", maker: "Loncin (Voge)", layout: "i4",
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 16 клапанов, 4 цилиндра", cc: 663, hp: 99, torque: "64 Н·м",
+    compression: "≈ 12.5:1", redline: 13000, valveIn: "0.10–0.20 мм", valveEx: "0.20–0.30 мм", spark: "NGK CR9EIA-9", gap: "0.8–0.9 мм", sparkTorque: "11 Н·м",
+    oil: "10W-40 (JASO MA2)", oilVol: "≈ 3.4 л", oilInt: 6000, valveInt: 24000, coolant: "≈ 2.2 л",
+    issues: [{ t: "Сильный нагрев в пробках", sev: "med", fix: "Следить за вентилятором и антифризом." },
+      { t: "Новая модель — мало запчастей вне дилеров", sev: "low", fix: "Расходники заранее, ТО у дилера." }] }, 1.8);
+  /* CFMOTO 1000MT-X — рядная двойка 946 */
+  RE("CFM_946", { region: "cn", code: "CF 946", name: "CFMOTO 946 (рядная двойка 285°: 1000MT-X)", maker: "CFMOTO", layout: "twin", crankPhase: 285,
+    groups: ["dohc", "liquid", "efi", "4t", "big", "balancer"], cam: "DOHC, 8 клапанов, 2 цилиндра", cc: 946, hp: 113, torque: "105 Н·м",
+    compression: "≈ 13:1", redline: 9500, valveIn: "0.10–0.15 мм", valveEx: "0.25–0.30 мм", spark: "NGK LMAR8AI-10", gap: "0.7–0.8 мм", sparkTorque: "12 Н·м",
+    oil: "10W-50 (JASO MA2)", oilVol: "≈ 3.6 л", oilInt: 7500, valveInt: 30000, coolant: "≈ 2 л",
+    issues: [{ t: "Сложная электроника — режимы, круиз, квикшифтер", sev: "low", fix: "Обновления ПО у дилера." },
+      { t: "Нагрев в пробках", sev: "low", fix: "Проверять вентиляторы и антифриз." }] }, 2.2);
+  /* KTM 249 нового поколения (2024+) */
+  CL("KTM_249G3", "S250KT", { code: "LC4c 250 (2024)", name: "KTM 249 2024+ (250 Duke / 250 Adventure / Svartpilen / Vitpilen 250)",
+    cam: "4 клапана (новая ГБЦ 2024)", hp: 31, torque: "25 Н·м", compression: "≈ 12.5:1",
+    issues: [{ t: "Перегрев в пробках", sev: "low", fix: "Вентилятор, антифриз по регламенту." },
+      { t: "Датчики и проводка индийской сборки", sev: "low", fix: "Разъёмы — диэлектрическая смазка." }] }, 1.6);
+
+  /* ===================== МОДЕЛИ ===================== */
+
+  /* Motoland */
+  G("Motoland", "XR250 PRO", E, [["ZS_170MM", "2023+"]]);
+  G("Motoland", "XT250 ST-W", E, [["ZS_170MM", "2023+", { hp: 24 }]]);
+  G("Motoland", "R1 300", SP, [["175FMM", "2023+"]]);
+  addBike("Motoland", "R1 250", SP, "165FMM", { hp: 18 });
+  addBike("Motoland", "Fighter 250", NK, "167FMM", { approx: true });
+  G("Motoland", "300 Enduro Garet", AD, [["PR300", "2024+", { approx: true, hp: 25 }]]);
+  G("Motoland", "300 Enduro ST Neon", E, [["PR300", "2024+", { approx: true, hp: 25 }]]);
+  addBike("Motoland", "250 Enduro GL250", E, "172FMM-5");
+  G("Motoland", "500 Enduro Norton", AD, [["VOGE525", "2023+", { approx: true }]]);
+  addBike("Motoland", "FX 300", E, "CBS300", { hp: 26 });
+  addBike("Motoland", "FX 300 NC", E, "NC300", { hp: 31 });
+  addBike("Motoland", "XT300 ST", E, "CBS300", { hp: 26 });
+  addBike("Motoland", "XT300 ST-FA-NC", E, "NC300", { hp: 34 });
+  addBike("Motoland", "X3 300W PRO", E, "CBS300");
+  addBike("Motoland", "WRX250 NC", E, "NC250", { hp: 27 });
+  addBike("Motoland", "MX125", P, "154FMI", { hp: 8 });
+  addBike("Motoland", "APEX140", P, "YX140", { hp: 11 });
+
+  /* PWR (Motoland) */
+  addBike("PWR", "FS300 NC", E, "NC300", { hp: 34 });
+  addBike("PWR", "FM300 NC", E, "NC300", { hp: 28 });
+  addBike("PWR", "FR300 PRO", E, "CBS300", { approx: true });
+
+  /* Moto Apollo */
+  addBike("Apollo", "M5 300 EFI", E, "PR300E");
+  addBike("Apollo", "M6 300 EFI", E, "PR300E", { hp: 24 });
+  addBike("Apollo", "M3 300", E, "PR300", { approx: true });
+  addBike("Apollo", "RX 250", E, "172FMM-3A", { hp: 21 });
+
+  /* Kayo */
+  G("Kayo", "K7 300 EFI", E, [["NB300E", "2024+", { hp: 31 }]]);
+  G("Kayo", "K6-A 300 MX", E, [["PR300", "2024+", { approx: true, hp: 27 }]]);
+  G("Kayo", "T1-L 250 Enduro", E, [["165FMM", "2024+"]]);
+  G("Kayo", "T1-L 300 Enduro", E, [["PR300", "2026+", { approx: true, hp: 24 }]]);
+  G("Kayo", "T3 300 Enduro", E, [["PR300", "2025+", { hp: 24 }]]);
+  G("Kayo", "T2-L 300 Enduro", E, [["175FMM", "2026+", { hp: 24 }]]);
+  G("Kayo", "K4 300 MX", E, [["175FMM", "2024+", { hp: 24 }]]);
+  G("Kayo", "K1-J 150 MX", L, [["CB150", "2025+"]]);
+  G("Kayo", "KT250-L", E, [["2T250", "2023+", { approx: true }]]);
+  G("Kayo", "Basic K125EA", P, [["154FMI", "2024+"]]);
+  G("Kayo", "Basic K125EM", P, [["154FMI", "2024+"]]);
+  addBike("Kayo", "Mini K125EM", P, "154FMI");
+  addBike("Kayo", "Big-Mini K140EM", P, "YX140", { hp: 11 });
+  addBike("Kayo", "Mini TD125", P, "154FMI", { approx: true });
+  addVersion("Kayo", "T2 300 Enduro", "LON_YB300H", "2026+", { hp: 25 });
+  setEngine("Kayo", "K1-L 250 MX", 0, "165FMM");   // у K1-L YX166FMM / CB250G 223 см³, а не 172FMM-3A
+
+  /* Regulmoto */
+  G("Regulmoto", "Fargo 300", CLS, [["CBS300", "2024+"]]);
+  G("Regulmoto", "Legend 300", E, [["NB300", "2023+"]]);
+  G("Regulmoto", "Legend 300 PRO", E, [["YBS300", "2024+"]]);
+  G("Regulmoto", "ADV 300 NB", AD, [["NB300", "2024+"]]);
+  G("Regulmoto", "ADV 300 S", AD, [["NB300", "2024+"]]);
+  G("Regulmoto", "Discovery", AD, [["LIF_T400", "2024+", { approx: true, hp: 36.8 }]]);
+  addBike("Regulmoto", "ZR 250 Enduro", E, "172FMM-3A", { hp: 21 });
+  addBike("Regulmoto", "TE PRO NB300", AD, "NB300", { hp: 26 });
+  addBike("Regulmoto", "TE 300", AD, "175FMM");
+  addBike("Regulmoto", "Seven Medalist Pro", P, "YX140");
+  addBike("Regulmoto", "Seven Medalist Pro 150EM", P, "1P56FMJ");
+
+  /* Avantis */
+  G("Avantis", "FX New", E, [["PR300", "2025+", { approx: true, hp: 26 }]]);
+  G("Avantis", "City New 250", NK, [["CBS300", "2024+"]]);
+  G("Avantis", "A6 300 Lux Motard", M, [["CBS300", "2024+", { hp: 26 }]]);
+  G("Avantis", "Enduro 300 PRO Carb FCR Exclusive", E, [["NC300", "2024+", { hp: 35 }]]);
+  addBike("Avantis", "Just CB300F", E, "175FMM");
+  G("Avantis", "K23 PRO", E, [["NB300E", "2024+"]]);
+
+  /* BSE */
+  G("BSE", "T9", E, [["NC300", "2025+", { approx: true, hp: 33 }]]);
+  addBike("BSE", "TS 300R", E, "2T300", { approx: true, hp: 44 });
+  addBike("BSE", "MXH 150 RAPT", P, "1P60FMK", { hp: 12 });
+  addVersion("BSE", "Z8", "NC300", "2024+ (Rapid)", { hp: 36 });
+
+  /* GR7 / GR8 */
+  addBike("GR7", "F300L (4T NB300) Motard", M, "NB300");
+  addBike("GR7", "F300L (4T 182MN EFI) Enduro Pro", E, "NB300E", { hp: 31 });
+  addBike("GR7", "F300L (4T 182MN FCR) Enduro Optimum", E, "NC300");
+  addBike("GR7", "T250L (2T) Enduro Optimum", E, "2T250", { approx: true });
+  G("GR8", "F250L (4T NX250) Enduro RR", E, [["ZS_NX250", "2025+"]]);
+  addBike("GR8", "F300A Enduro RR", E, "PR300", { approx: true, hp: 27 });
+  addBike("GR8", "F300L (4T NC300S) Enduro RR", E, "NC300");
+  addBike("GR8", "F300A (4T PR300) Enduro Optimum", E, "PR300");
+  G("GR8", "T250L (2T MT-250) Enduro Pro", E, [["2T250", "2025+", { approx: true }]]);
+
+  /* Fuego */
+  G("Fuego", "Tekken 3.0", AD, [["LON_FE250E", "2024+"]]);
+  G("Fuego", "Rambolor 250", CLS, [["165FMM", "2024+", { approx: true, hp: 16.3 }]]);
+  G("Fuego", "Rambolor 250 Air", CLS, [["LON_FE250", "2025+"]]);
+  G("Fuego", "Discovery 300", AD, [["NB300", "2025+", { hp: 26 }]]);
+  G("Fuego", "Evo 450", AD, [["NC450", "2025+"]]);
+
+  /* Hasky */
+  addBike("Hasky", "F6 Racing", E, "PR300", { hp: 25 });
+  addBike("Hasky", "F6 Lite Racing", E, "172FMM");
+  addBike("Hasky", "F7 Racing", E, "NC300", { hp: 36 });
+  addBike("Hasky", "F7 Pro", E, "NC250");
+  addBike("Hasky", "V4 Racing", E, "PR300", { approx: true });
+  G("Hasky", "A10 Pro NX", E, [["ZS_NX250", "2025+"]]);
+  addBike("Hasky", "A10 Pro NB300", E, "NB300");
+
+  /* Zuumav / Kews / Fxmoto / BRZ */
+  addBike("Zuumav", "K8R YBS300", E, "YBS300");
+  addBike("Zuumav", "K8 NC300", E, "NC300");
+  addBike("Zuumav", "K8 MT250", E, "2T250", { approx: true });
+  addBike("Kews", "K23 MT250", E, "2T250", { approx: true });
+  addBike("Fxmoto", "X7 NC300", E, "NC300", { hp: 33 });
+  addBike("BRZ", "X8 NB300", E, "NB300", { hp: 27 });
+  addBike("BRZ", "H6 PR250", E, "172FMM-5", { hp: 21 });
+  addBike("BRZ", "H6 PR300", E, "PR300");
+  addBike("BRZ", "Z6 PR300", E, "PR300");
+  G("BRZ", "MX8 NX250", E, [["ZS_NX250", "2024+"]]);
+  G("BRZ", "MX8 NC450", E, [["NC450", "2024+"]]);
+
+  /* Racer / Ataki / Wels / Progasi */
+  addBike("Racer", "Ranger RC300-GY8", AD, "175FMM", { approx: true, hp: 20 });
+  G("Ataki", "Carrera 300", M, [["PR300", "2025+"]]);
+  addBike("Wels", "MX6 250", E, "172FMM");
+  G("Progasi", "Endurance 300X EFI", E, [["LON_YB300HE", "2025+"]]);
+  G("Progasi", "Hardcore 450 EFI", E, [["NC450", "2025+", { hp: 45 }]]);
+  G("Progasi", "Super Max 300 NG", E, [["PR300", "2026+", { hp: 27 }]]);
+
+  /* Voge */
+  G("Voge", "DS625X", AD, [["VOG_581", "2025+"]]);
+  G("Voge", "DS800X Rally", AD, [["VOG_798", "2025+"]]);
+  G("Voge", "CU525", CH, [["VOGE525", "2024+"]]);
+  G("Voge", "RR660S", SP, [["VOG_I4_663", "2025+"]]);
+
+  /* CFMOTO */
+  G("CFMOTO", "1000MT-X", AD, [["CFM_946", "2025+"]]);
+
+  /* KTM / Husqvarna (индийская сборка Bajaj) */
+  addVersion("KTM", "250 Duke", "KTM_249G3", "2024+");
+  addVersion("KTM", "250 Adventure", "KTM_249G3", "2025+");
+  G("KTM", "390 Adventure X", AD, [["KTM399", "2025+"]]);
+  G("Husqvarna", "Svartpilen 250", NK, [["KTM_249G3", "2024+"]]);
+  G("Husqvarna", "Vitpilen 250", NK, [["KTM_249G3", "2024+"]]);
+
+  /* Bajaj */
+  G("Bajaj", "Pulsar N125", NK, [["IN_BAJ125", "2024+", { approx: true, hp: 12 }]]);
+  addBike("Bajaj", "Boxer BM125", NK, "IN_BAJ125", { approx: true, hp: 11 });
+  addBike("Bajaj", "Boxer BM150X", NK, "IN_BAJBOX", { approx: true });
+
+  /* Минск (M1NSK) */
+  addBike("Минск", "SCR 250", CLS, "165FMM", { approx: true, hp: 17 });
+  addBike("Минск", "D4 125", L, "CN_157FMI", { approx: true, hp: 10.5 });
+  addBike("Минск", "C4 300", CLS, "PR300", { approx: true, hp: 28.5 });
+
+  /* добор: Motoland / Kayo / Ataki / Zuumav / Racer / Sharmax */
+  addBike("Motoland", "WRX300 NC", E, "NC300", { approx: true, hp: 34 });          // ZS177MM big bore 300 (NC300)
+  addVersion("Motoland", "XT300 HS", "PR300", "вариант PR5 4V (воздушный)", { approx: true });
+  G("Kayo", "T6 250 Enduro", E, [["NC250", "2019+", { hp: 27 }]]);
+  G("Ataki", "Crosser 300", E, [["PR300", "2025+", { hp: 24 }]]);
+  G("Ataki", "Yami", P, [["152FMH", "2025+", { approx: true, hp: 6.8 }]]);
+  G("Ataki", "Yomi", P, [["154FMI", "2025+", { approx: true, hp: 8.9 }]]);
+  addBike("Zuumav", "K5 Lite", E, "172FMM");
+  addBike("Zuumav", "K7 CR300NC", E, "NC300", { approx: true, hp: 34 });         // Zongshen 177MM 300 (NC300)
+  G("Racer", "Panther ZWC2-300X", E, [["PR300", "2025+", { approx: true, hp: 23 }]]);
+  setEngine("Sharmax", "Sport 280", 0, "172FMM-5");   // у Sport 280 / 280 PR — 172FMM-5 (PR250), 21 л.с., а не NB300
+
+  /* Loncin (мотор RE250 223 см³) */
+  addBike("Loncin", "MS250", NK, "165FMM", { approx: true, hp: 17.7 });
+  addBike("Loncin", "CR4 LX250-15", CLS, "165FMM", { approx: true, hp: 18 });
+})();
 /* @@DB-FRAGMENTS@@ */
 /* ===================== v35: Keeway K-Light 202 и Kayo TS90 — свой объём ===================== */
 CL("V223KW", "V250LF", { code: "Keeway V223", name: "Keeway V-twin 223 воздушный (K-Light 202, Superlight 200)", cc: 223, hp: 17, torque: "16 Н·м" }, 1.1);

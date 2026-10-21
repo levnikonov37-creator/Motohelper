@@ -1708,3 +1708,28 @@ body.gm-open { overflow: hidden; }
 .wr-zoom { margin: 0 0 10px; gap: 6px; }
 .wr-wrap.big { overflow: auto; max-width: none; max-height: 78vh; -webkit-overflow-scrolling: touch; }
 .wr-wrap.big .wr-svg { width: 620px; max-width: none; }
+
+/* v43: отдельная кнопка-галочка справа — отмечает только она */
+.tick-btn { flex: none; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border-radius: 12px; border: 2px solid var(--line); background: var(--surface2); color: var(--ink); opacity: 1; cursor: pointer; transition: background .15s, border-color .15s, transform .1s; }
+.tick-btn .ico { opacity: .22; transition: opacity .15s; }
+.tick-btn:hover { border-color: var(--ink); }
+.tick-btn:hover .ico { opacity: .5; }
+.tick-btn:active { transform: scale(.94); }
+.tick-btn.on { background: #2F9E5B; border-color: #2F9E5B; color: #fff; }
+.tick-btn.on .ico { opacity: 1; }
+.g-steps li.has-tick { grid-template-columns: 36px 1fr 44px; align-items: center; }
+.g-steps li.has-tick .g-check { width: 32px; height: 32px; border-width: 1.5px; font-size: 14px; }
+.g-steps li.has-tick p { margin: 0; }
+.g-steps li.has-tick.done { opacity: 1; }
+.g-steps li.has-tick.done p { color: var(--muted); }
+.g-steps li.has-tick.done .g-check { background: var(--surface); border-color: var(--line); color: var(--muted); }
+.checklist li.tick-li { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.checklist li.tick-li:last-child { border-bottom: 0; }
+.checklist .tick-t { flex: 1; min-width: 0; font-size: 15px; }
+.checklist li.tick-li.on .tick-t { color: var(--muted); text-decoration: line-through; }
+.checklist .tick-btn { width: 40px; height: 40px; }
+.season-list li.tick-li { padding: 8px 0; }
+.checklist button.tick-btn { width: 40px; height: 40px; padding: 0; justify-content: center; border: 2px solid var(--line); background: var(--surface2); color: var(--ink); text-decoration: none; border-radius: 12px; }
+.checklist button.tick-btn:hover { border-color: var(--ink); background: var(--surface2); }
+.checklist button.tick-btn.on { background: #2F9E5B; border-color: #2F9E5B; color: #fff; }
+.checklist button.season-how { width: auto; text-decoration: none; color: var(--ink); }

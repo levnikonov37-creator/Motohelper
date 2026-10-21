@@ -13049,17 +13049,15 @@ function PreRide({
   }, n, "/", items.length))), /*#__PURE__*/React.createElement("ul", {
     className: "checklist"
   }, items.map(i => /*#__PURE__*/React.createElement("li", {
-    key: i[0]
-  }, /*#__PURE__*/React.createElement("button", {
-    className: st.done[i[0]] ? "on" : "",
-    "aria-pressed": !!st.done[i[0]],
-    onClick: () => tog(i[0])
+    key: i[0],
+    className: "tick-li" + (st.done[i[0]] ? " on" : "")
   }, /*#__PURE__*/React.createElement("span", {
-    className: "cb"
-  }, st.done[i[0]] && /*#__PURE__*/React.createElement(Icon, {
-    n: "check",
-    s: 14
-  })), i[1])))), n === items.length && /*#__PURE__*/React.createElement("p", {
+    className: "tick-t"
+  }, i[1]), /*#__PURE__*/React.createElement(TickBtn, {
+    on: !!st.done[i[0]],
+    label: i[1],
+    onClick: () => tog(i[0])
+  })))), n === items.length && /*#__PURE__*/React.createElement("p", {
     className: "ok-msg"
   }, "\u0412\u0441\u0451 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E \u2014 \u0445\u043E\u0440\u043E\u0448\u0435\u0439 \u043F\u043E\u0435\u0437\u0434\u043A\u0438!"));
 }
@@ -13648,23 +13646,21 @@ function SeasonView(props) {
   })), /*#__PURE__*/React.createElement("ul", {
     className: "checklist season-list"
   }, items.map(it => /*#__PURE__*/React.createElement("li", {
-    key: it[0]
-  }, /*#__PURE__*/React.createElement("button", {
-    className: done[it[0]] ? "on" : "",
-    "aria-pressed": !!done[it[0]],
-    onClick: () => tog(it[0])
+    key: it[0],
+    className: "tick-li" + (done[it[0]] ? " on" : "")
   }, /*#__PURE__*/React.createElement("span", {
-    className: "cb"
-  }, done[it[0]] && /*#__PURE__*/React.createElement(Icon, {
-    n: "check",
-    s: 14
-  })), it[1]), it[3] && gids.indexOf(it[3]) >= 0 && /*#__PURE__*/React.createElement("button", {
+    className: "tick-t"
+  }, it[1]), it[3] && gids.indexOf(it[3]) >= 0 && /*#__PURE__*/React.createElement("button", {
     className: "season-how",
     onClick: () => setRv("guide:" + it[3])
   }, "Как", /*#__PURE__*/React.createElement(Icon, {
     n: "next",
     s: 14
-  }))))), n === items.length && /*#__PURE__*/React.createElement("p", {
+  })), /*#__PURE__*/React.createElement(TickBtn, {
+    on: !!done[it[0]],
+    label: it[1],
+    onClick: () => tog(it[0])
+  })))), n === items.length && /*#__PURE__*/React.createElement("p", {
     className: "ok-msg"
   }, w === "winter" ? "Мотоцикл готов к зиме. Раз в месяц подзаряжай аккумулятор." : "Готов к сезону — хорошей езды!")), gids.indexOf(mainGuide) >= 0 && /*#__PURE__*/React.createElement("button", {
     className: "btn season-guide",
@@ -14103,6 +14099,24 @@ function GuidesList({
     className: "g-fig"
   }, "\u0441\u0445\u0435\u043C\u0430"))))));
 }
+/* отдельная кнопка-галочка справа от пункта: отмечает только она, текст не нажимается */
+function TickBtn({
+  on,
+  label,
+  onClick
+}) {
+  return /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "tick-btn" + (on ? " on" : ""),
+    "aria-pressed": on,
+    "aria-label": label,
+    title: on ? "Снять отметку" : "Отметить",
+    onClick: onClick
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "check",
+    s: 20
+  }));
+}
 /* пошаговый режим: один шаг на экран, крупно, экран не гаснет */
 function GarageMode({
   guide,
@@ -14281,16 +14295,14 @@ function GuideView({
     className: "g-steps"
   }, guide.steps.map((st, i) => /*#__PURE__*/React.createElement("li", {
     key: i,
-    className: done[i] ? "done" : ""
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "g-check",
-    "aria-pressed": !!done[i],
-    "aria-label": "Шаг " + (i + 1) + " выполнен",
+    className: "has-tick" + (done[i] ? " done" : "")
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "g-check"
+  }, i + 1), /*#__PURE__*/React.createElement("p", null, sub(st, eng)), /*#__PURE__*/React.createElement(TickBtn, {
+    on: !!done[i],
+    label: "Шаг " + (i + 1) + " сделан",
     onClick: () => mark(i, !done[i])
-  }, done[i] ? /*#__PURE__*/React.createElement(Icon, {
-    n: "check",
-    s: 16
-  }) : i + 1), /*#__PURE__*/React.createElement("p", null, sub(st, eng))))), doneN === guide.steps.length && /*#__PURE__*/React.createElement("p", {
+  })))), doneN === guide.steps.length && /*#__PURE__*/React.createElement("p", {
     className: "ok-msg"
   }, "Готово! Все шаги выполнены. Через 20–50 км проверь затяжку и нет ли подтёков."), parts.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0414\u0435\u0442\u0430\u043B\u0438 \u0438 \u0440\u0430\u0441\u0445\u043E\u0434\u043D\u0438\u043A\u0438"), /*#__PURE__*/React.createElement("ul", {
     className: "plist"
@@ -14561,7 +14573,7 @@ function BuyCheckView({
     got = Object.keys(done).filter(k => done[k]).length;
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "Чек-лист для ", bike.brand === "Любая модель" ? "мотоцикла с мотором " + eng.code : bike.brand + " " + bike.name, ". Отмечай по ходу осмотра: ", got, " из ", total, "."), /*#__PURE__*/React.createElement("div", {
+  }, "Чек-лист для ", bike.brand === "Любая модель" ? "мотоцикла с мотором " + eng.code : bike.brand + " " + bike.name, ". Проверил пункт — нажми галочку справа: ", got, " из ", total, "."), /*#__PURE__*/React.createElement("div", {
     className: "g-progress"
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -14575,18 +14587,16 @@ function BuyCheckView({
     const k = si + ":" + i;
     return /*#__PURE__*/React.createElement("li", {
       key: k,
-      className: done[k] ? "done" : ""
-    }, /*#__PURE__*/React.createElement("button", {
-      className: "g-check",
-      "aria-pressed": !!done[k],
-      "aria-label": "Проверено",
+      className: "has-tick" + (done[k] ? " done" : "")
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "g-check"
+    }, i + 1), /*#__PURE__*/React.createElement("p", null, t), /*#__PURE__*/React.createElement(TickBtn, {
+      on: !!done[k],
+      label: "Проверено",
       onClick: () => setDone(Object.assign({}, done, {
         [k]: !done[k]
       }))
-    }, done[k] ? /*#__PURE__*/React.createElement(Icon, {
-      n: "check",
-      s: 16
-    }) : i + 1), /*#__PURE__*/React.createElement("p", null, t));
+    }));
   })))), /*#__PURE__*/React.createElement("div", {
     className: "g-video"
   }, /*#__PURE__*/React.createElement("b", null, "Видео"), /*#__PURE__*/React.createElement(VideoLinks, {
