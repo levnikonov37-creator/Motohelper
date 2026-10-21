@@ -13089,13 +13089,22 @@ function BikePage(props) {
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn ghost",
     onClick: () => setPicker(true)
-  }, "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0434\u0440\u0443\u0433\u043E\u0439"), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "bike",
+    s: 17
+  }), "Сменить"), /*#__PURE__*/React.createElement("button", {
     className: "btn ghost",
     onClick: () => setCmpPick(true)
-  }, "\u0421\u0440\u0430\u0432\u043D\u0438\u0442\u044C"), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "list",
+    s: 17
+  }), "Сравнить"), /*#__PURE__*/React.createElement("button", {
     className: "btn ghost",
     onClick: () => shareBike(bike, sel.vi, props.flash || (() => {}))
-  }, "Поделиться"), bike.versions.length > 1 && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "send",
+    s: 17
+  }), "Поделиться"), bike.versions.length > 1 && /*#__PURE__*/React.createElement("div", {
     className: "seg dark",
     role: "group",
     "aria-label": "\u0417\u0430\u0432\u043E\u0434\u0441\u043A\u0430\u044F \u0432\u0435\u0440\u0441\u0438\u044F"
@@ -14880,61 +14889,94 @@ function jetNum(s) {
   const n = m.map(Number);
   return n.length > 1 ? (n[0] + n[1]) / 2 : n[0];
 }
+/* местность и погода — кнопками, точные цифры по желанию */
+const JW_ALT = [[150, "Равнина", "до 300 м"], [800, "Холмы", "≈ 800 м"], [1500, "Горы", "≈ 1500 м"], [2500, "Высокогорье", "≈ 2500 м"]];
+const JW_TEMP = [[-10, "Мороз", "−10 °C"], [5, "Прохладно", "+5 °C"], [20, "Тепло", "+20 °C"], [32, "Жара", "+32 °C"]];
 function JetWeather({
   eng
 }) {
-  const [alt, setAlt] = useState(() => load("jw-alt", 200));
-  const [temp, setTemp] = useState(() => load("jw-temp", 20));
+  const [alt, setAlt] = useState(() => Number(load("jw-alt", 150)) || 0);
+  const [temp, setTemp] = useState(() => {
+    const t = Number(load("jw-temp", 20));
+    return isNaN(t) ? 20 : t;
+  });
   if (eng.groups.indexOf("carb") < 0) return null;
   const main = jetNum(eng.jetMain),
     pilot = jetNum(eng.jetPilot);
   if (!main) return null;
-  const r = airDensityRatio(Number(alt) || 0, Number(temp)),
+  const r = airDensityRatio(alt, temp),
     k = Math.sqrt(r);
   const step = main >= 100 ? 2.5 : 1;
   const round = v => Math.round(v / step) * step;
   const nm = round(main * k),
     np = pilot ? Math.round(pilot * k) : 0;
   const d = (r - 1) * 100;
-  const needle = d < -6 ? "клипса на 1 канавку выше (беднее)" : d > 6 ? "клипса на 1 канавку ниже (богаче)" : "без изменений";
-  const set = (f, key) => e => {
-    f(e.target.value);
-    save(key, e.target.value);
+  const needle = d < -6 ? "Клипсу иглы — на 1 канавку выше" : d > 6 ? "Клипсу иглы — на 1 канавку ниже" : "Иглу не трогать";
+  const base = round(main);
+  const diff = nm - base;
+  const setA = v => {
+    setAlt(v);
+    save("jw-alt", v);
   };
+  const setT = v => {
+    setTemp(v);
+    save("jw-temp", v);
+  };
+  const chips = (list, cur, setv) => /*#__PURE__*/React.createElement("div", {
+    className: "jw-chips"
+  }, list.map(x => /*#__PURE__*/React.createElement("button", {
+    key: x[0],
+    type: "button",
+    className: "jw-chip" + (cur === x[0] ? " on" : ""),
+    "aria-pressed": cur === x[0],
+    onClick: () => setv(x[0])
+  }, /*#__PURE__*/React.createElement("b", null, x[1]), /*#__PURE__*/React.createElement("span", null, x[2]))));
   return /*#__PURE__*/React.createElement("div", {
     className: "panel jetw"
-  }, /*#__PURE__*/React.createElement("h2", null, "Жиклёры под погоду и высоту"), /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("h2", null, "Жиклёры под погоду и местность"), /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "Базовые цифры ", eng.code, " — для 20 °C у моря. В горах и в жару воздух реже — смесь богатеет, в мороз — беднеет."), /*#__PURE__*/React.createElement("div", {
+  }, "Заводские жиклёры ", eng.code, " рассчитаны на тёплую погоду на равнине. В горах и в жару воздух разреженный — смесь становится богаче, в мороз — беднее. Выбери, где и в какую погоду катаешься:"), /*#__PURE__*/React.createElement("div", {
+    className: "jw-q"
+  }, "Где катаешься"), chips(JW_ALT, alt, setA), /*#__PURE__*/React.createElement("div", {
+    className: "jw-q"
+  }, "Какая погода"), chips(JW_TEMP, temp, setT), /*#__PURE__*/React.createElement("details", {
+    className: "jw-exact"
+  }, /*#__PURE__*/React.createElement("summary", null, "Указать точно"), /*#__PURE__*/React.createElement("div", {
     className: "jetw-in"
   }, /*#__PURE__*/React.createElement("label", {
     className: "f"
   }, /*#__PURE__*/React.createElement("span", {
     className: "f-label"
-  }, "Высота, м"), /*#__PURE__*/React.createElement("input", {
+  }, "Высота местности над морем, м"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     inputMode: "numeric",
     value: alt,
     min: "0",
     max: "4500",
     step: "100",
-    onChange: set(setAlt, "jw-alt")
+    onChange: e => setA(Math.max(0, Number(e.target.value) || 0))
   })), /*#__PURE__*/React.createElement("label", {
     className: "f"
   }, /*#__PURE__*/React.createElement("span", {
     className: "f-label"
-  }, "Температура, °C"), /*#__PURE__*/React.createElement("input", {
+  }, "Температура воздуха, °C"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     inputMode: "numeric",
     value: temp,
     min: "-30",
     max: "45",
-    onChange: set(setTemp, "jw-temp")
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "jetw-out"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Плотность воздуха"), /*#__PURE__*/React.createElement("b", null, (d >= 0 ? "+" : "") + d.toFixed(0) + "%")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Главный жиклёр"), /*#__PURE__*/React.createElement("b", null, nm, " ", /*#__PURE__*/React.createElement("small", null, "(база ", eng.jetMain, ")"))), np > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Холостой"), /*#__PURE__*/React.createElement("b", null, np, " ", /*#__PURE__*/React.createElement("small", null, "(база ", eng.jetPilot, ")"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Игла"), /*#__PURE__*/React.createElement("b", null, needle))), /*#__PURE__*/React.createElement("p", {
+    onChange: e => setT(Number(e.target.value) || 0)
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "jw-res"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "jw-main"
+  }, /*#__PURE__*/React.createElement("span", null, "Главный жиклёр"), /*#__PURE__*/React.createElement("b", null, nm), /*#__PURE__*/React.createElement("em", {
+    className: diff === 0 ? "same" : diff < 0 ? "down" : "up"
+  }, diff === 0 ? "как с завода" : diff < 0 ? "меньше на " + Math.abs(diff) : "больше на " + diff), /*#__PURE__*/React.createElement("small", null, "с завода ", eng.jetMain)), /*#__PURE__*/React.createElement("div", {
+    className: "jw-side"
+  }, np > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Холостой жиклёр"), /*#__PURE__*/React.createElement("b", null, np, " ", /*#__PURE__*/React.createElement("small", null, "с завода ", eng.jetPilot))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Игла"), /*#__PURE__*/React.createElement("b", null, needle)))), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, "Это стартовая точка. Окончательно — по цвету свечи после проезда на полном газу (светло-коричневая — норма)."));
+  }, Math.abs(d) < 1 ? "Воздух как в расчёте завода. " : "Воздух " + (d < 0 ? "реже" : "плотнее") + " на " + Math.abs(d).toFixed(0) + "%, чем тёплым днём у моря. ", "Это стартовая точка: окончательно подбирай по цвету свечи после проезда на полном газу (светло-коричневая — норма)."));
 }
 function Sprockets({
   eng,
