@@ -12936,6 +12936,58 @@ function HeroBike({
     }
   }));
 }
+/* «Установить на телефон»: иконка на экране, работает без интернета. Android/Chrome — кнопкой, iPhone — подсказкой */
+function InstallCard() {
+  const standalone = typeof matchMedia === "function" && matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  const [ev, setEv] = useState(() => window.mhInstall || null);
+  const [hide, setHide] = useState(() => load("installHide", false));
+  const [how, setHow] = useState(false);
+  useEffect(() => {
+    const h = () => setEv(window.mhInstall || null);
+    window.addEventListener("mh-install", h);
+    return () => window.removeEventListener("mh-install", h);
+  }, []);
+  if (standalone || hide) return null;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const install = () => {
+    if (ev) {
+      ev.prompt();
+      ev.userChoice && ev.userChoice.then(r => {
+        if (r && r.outcome === "accepted") setHide(true);
+      }).catch(() => {});
+      window.mhInstall = null;
+      setEv(null);
+    } else setHow(!how);
+  };
+  const li = (t, i) => /*#__PURE__*/React.createElement("li", {
+    key: i
+  }, t);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "panel install-card"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "ic-close",
+    "aria-label": "Скрыть",
+    onClick: () => {
+      setHide(true);
+      save("installHide", true);
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "close",
+    s: 16
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "ic-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "ic-ico",
+    "aria-hidden": "true"
+  }, "МН"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Установи MotoHelper на телефон"), /*#__PURE__*/React.createElement("p", null, "Иконка на главном экране, открывается как приложение и работает без интернета — в гараже и в лесу."))), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn primary ic-btn",
+    onClick: install
+  }, ev ? "Установить" : "Как установить"), how && /*#__PURE__*/React.createElement("ol", {
+    className: "ic-how"
+  }, (ios ? ["Открой сайт в Safari.", "Нажми «Поделиться» — квадрат со стрелкой вверх.", "Выбери «На экран «Домой»» → «Добавить»."] : ["Открой меню браузера — три точки ⋮ или ≡.", "Выбери «Установить приложение» или «Добавить на главный экран».", "Подтверди — иконка MotoHelper появится рядом с другими приложениями."]).map(li)));
+}
 /* карточка сезона на главной: октябрь–февраль — консервация, март–май — подготовка */
 function SeasonCard({
   eng,
@@ -13034,7 +13086,7 @@ function Home(props) {
     className: "home-grid"
   }, /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(PreRide, {
     eng: eng
-  })));
+  })), /*#__PURE__*/React.createElement(InstallCard, null));
 }
 function PreRide({
   eng
