@@ -3453,7 +3453,7 @@ const FIGS = {
   spark: {
     title: "Свеча: зазор и цвет",
     legend: ["Центральный электрод", "Боковой электрод", "Щуп — проходит с лёгким усилием", "Белая — бедная смесь, перегрев", "Светло-коричневая — норма", "Чёрная сухая — богато; мокрая — залило"],
-    svg: () => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("rect", {
+    svg: eng => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("rect", {
       x: "40",
       y: "30",
       width: "60",
@@ -3511,7 +3511,7 @@ const FIGS = {
     }), /*#__PURE__*/React.createElement(Txt, {
       x: 45,
       y: 185,
-      t: "\u0437\u0430\u0437\u043E\u0440 0.6\u20130.9 \u043C\u043C",
+      t: "зазор " + (eng && eng.gap || "0.6–0.9 мм"),
       s: 11
     }), [["#efe8dc", 4, "белая"], ["#b98a52", 5, "норма"], ["#2b2b2b", 6, "чёрная"]].map((c, i) => /*#__PURE__*/React.createElement("g", {
       key: i
@@ -4393,7 +4393,7 @@ function GuideFig({
     height: "230",
     rx: "10",
     fill: FG.paper
-  }), F.svg()), /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("b", null, F.title), /*#__PURE__*/React.createElement("ol", null, F.legend.map((l, i) => /*#__PURE__*/React.createElement("li", {
+  }), F.svg(eng)), /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("b", null, F.title), /*#__PURE__*/React.createElement("ol", null, F.legend.map((l, i) => /*#__PURE__*/React.createElement("li", {
     key: i
   }, eng ? sub(l, eng) : l)))));
 }
@@ -13881,6 +13881,97 @@ function GuidesList({
     className: "g-fig"
   }, "\u0441\u0445\u0435\u043C\u0430"))))));
 }
+/* пошаговый режим: один шаг на экран, крупно, экран не гаснет */
+function GarageMode({
+  guide,
+  eng,
+  i,
+  setI,
+  done,
+  mark
+}) {
+  const n = guide.steps.length;
+  const close = () => setI(-1);
+  useEffect(() => {
+    let lock = null,
+      alive = true;
+    const req = () => {
+      if (!alive || document.visibilityState !== "visible" || !navigator.wakeLock) return;
+      navigator.wakeLock.request("screen").then(l => {
+        if (alive) lock = l;
+        else l.release();
+      }).catch(() => {});
+    };
+    req();
+    document.addEventListener("visibilitychange", req);
+    const key = e => {
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowRight") setI(Math.min(n - 1, i + 1));
+      else if (e.key === "ArrowLeft") setI(Math.max(0, i - 1));
+    };
+    window.addEventListener("keydown", key);
+    document.body.classList.add("gm-open");
+    return () => {
+      alive = false;
+      document.removeEventListener("visibilitychange", req);
+      window.removeEventListener("keydown", key);
+      document.body.classList.remove("gm-open");
+      if (lock) lock.release().catch(() => {});
+    };
+  }, [i]);
+  const last = i === n - 1;
+  const next = () => {
+    if (!done[i]) mark(i, true);
+    if (last) close();
+    else setI(i + 1);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "gmode",
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-label": guide.title
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "gm-top"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "gm-title"
+  }, guide.title), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    "aria-label": "Закрыть",
+    onClick: close
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "close",
+    s: 22
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "gm-dots"
+  }, guide.steps.map((_, j) => /*#__PURE__*/React.createElement("button", {
+    key: j,
+    className: (j === i ? "cur " : "") + (done[j] ? "ok" : ""),
+    "aria-label": "Шаг " + (j + 1),
+    onClick: () => setI(j)
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "gm-body",
+    key: i
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "gm-num"
+  }, "Шаг ", i + 1, " из ", n, done[i] && /*#__PURE__*/React.createElement("i", null, " · сделано")), /*#__PURE__*/React.createElement("p", null, sub(guide.steps[i], eng))), /*#__PURE__*/React.createElement("div", {
+    className: "gm-nav"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn gm-prev",
+    disabled: i === 0,
+    onClick: () => setI(i - 1)
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "back",
+    s: 20
+  }), "Назад"), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary gm-next",
+    onClick: next
+  }, last ? "Готово" : "Сделано, дальше", /*#__PURE__*/React.createElement(Icon, {
+    n: last ? "check" : "next",
+    s: 20
+  }))), navigator.wakeLock && /*#__PURE__*/React.createElement("p", {
+    className: "gm-hint"
+  }, "Экран не погаснет, пока открыт этот режим."));
+}
 function GuideView({
   eng,
   bike,
@@ -13894,6 +13985,14 @@ function GuideView({
 }) {
   const guide = GUIDES.find(g => g.id === (GUIDE_ALIAS[id] || id));
   const [done, setDone] = useState({});
+  const [focus, setFocus] = useState(-1);
+  const mark = (i, v) => {
+    const nd = Object.assign({}, done, {
+      [i]: v
+    });
+    if (guide.steps.every((_, j) => nd[j]) && !guide.steps.every((_, j) => done[j])) bumpStat("guides");
+    setDone(nd);
+  };
   const cartIds = cart.map(c => c.id);
   const parts = [];
   guide.parts.forEach(k => {
@@ -13929,9 +14028,27 @@ function GuideView({
   }, guide.tools.map(t => /*#__PURE__*/React.createElement("span", {
     key: t,
     className: "chip static"
-  }, t)))), /*#__PURE__*/React.createElement("h2", null, "\u0428\u0430\u0433\u0438 ", /*#__PURE__*/React.createElement("small", {
+  }, t)))), /*#__PURE__*/React.createElement("div", {
+    className: "g-steps-head"
+  }, /*#__PURE__*/React.createElement("h2", null, "\u0428\u0430\u0433\u0438 ", /*#__PURE__*/React.createElement("small", {
     className: "muted"
-  }, doneN, " \u0438\u0437 ", guide.steps.length)), /*#__PURE__*/React.createElement("ol", {
+  }, doneN, " \u0438\u0437 ", guide.steps.length)), /*#__PURE__*/React.createElement("button", {
+    className: "btn g-focus-btn",
+    onClick: () => {
+      const f = guide.steps.findIndex((_, i) => !done[i]);
+      setFocus(f < 0 ? 0 : f);
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "play",
+    s: 16
+  }), "\u041F\u043E\u0448\u0430\u0433\u043E\u0432\u043E \u043A\u0440\u0443\u043F\u043D\u043E")), focus >= 0 && /*#__PURE__*/React.createElement(GarageMode, {
+    guide: guide,
+    eng: eng,
+    i: focus,
+    setI: setFocus,
+    done: done,
+    mark: mark
+  }), /*#__PURE__*/React.createElement("ol", {
     className: "g-steps"
   }, guide.steps.map((st, i) => /*#__PURE__*/React.createElement("li", {
     key: i,
@@ -13940,19 +14057,13 @@ function GuideView({
     className: "g-check",
     "aria-pressed": !!done[i],
     "aria-label": "Шаг " + (i + 1) + " выполнен",
-    onClick: () => {
-      const nd = Object.assign({}, done, {
-        [i]: !done[i]
-      });
-      if (guide.steps.every((_, j) => nd[j]) && !guide.steps.every((_, j) => done[j])) bumpStat("guides");
-      setDone(nd);
-    }
+    onClick: () => mark(i, !done[i])
   }, done[i] ? /*#__PURE__*/React.createElement(Icon, {
     n: "check",
     s: 16
   }) : i + 1), /*#__PURE__*/React.createElement("p", null, sub(st, eng))))), doneN === guide.steps.length && /*#__PURE__*/React.createElement("p", {
     className: "ok-msg"
-  }, "\u0413\u043E\u0442\u043E\u0432\u043E! \u041D\u0435 \u0437\u0430\u0431\u0443\u0434\u044C \u043E\u0442\u043C\u0435\u0442\u0438\u0442\u044C \u0440\u0430\u0431\u043E\u0442\u0443 \u0432 \xAB\u041E\u0431\u0441\u043B\u0443\u0436\u0438\u0432\u0430\u043D\u0438\u0435\xBB, \u0435\u0441\u043B\u0438 \u044D\u0442\u043E \u0422\u041E."), parts.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0414\u0435\u0442\u0430\u043B\u0438 \u0438 \u0440\u0430\u0441\u0445\u043E\u0434\u043D\u0438\u043A\u0438"), /*#__PURE__*/React.createElement("ul", {
+  }, "Готово! Все шаги выполнены. Через 20–50 км проверь затяжку и нет ли подтёков."), parts.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "\u0414\u0435\u0442\u0430\u043B\u0438 \u0438 \u0440\u0430\u0441\u0445\u043E\u0434\u043D\u0438\u043A\u0438"), /*#__PURE__*/React.createElement("ul", {
     className: "plist"
   }, parts.map(p => /*#__PURE__*/React.createElement("li", {
     key: p.id
