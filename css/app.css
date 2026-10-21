@@ -1733,3 +1733,45 @@ body.gm-open { overflow: hidden; }
 .checklist button.tick-btn:hover { border-color: var(--ink); background: var(--surface2); }
 .checklist button.tick-btn.on { background: #2F9E5B; border-color: #2F9E5B; color: #fff; }
 .checklist button.season-how { width: auto; text-decoration: none; color: var(--ink); }
+
+/* v44: жиклёры под погоду — кнопками */
+.jw-q { margin: 14px 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.jw-chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 520px) { .jw-chips { grid-template-columns: 1fr 1fr; } }
+.jw-chip { display: grid; gap: 2px; padding: 10px 12px; text-align: left; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface2); color: var(--ink); transition: border-color .15s, background .15s, transform .1s; }
+.jw-chip b { font-size: 15px; }
+.jw-chip span { font-size: 12px; color: var(--muted); }
+.jw-chip:hover { border-color: var(--ink); }
+.jw-chip:active { transform: scale(.97); }
+.jw-chip.on { background: var(--plate); border-color: var(--plate); color: var(--plate-ink); }
+.jw-chip.on span { color: rgba(27,31,34,.7); }
+.jw-exact { margin: 12px 0 0; }
+.jw-exact summary { cursor: pointer; font-size: 14px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.jw-exact .jetw-in { margin-top: 10px; }
+.jw-res { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 10px; margin: 16px 0 10px; }
+@media (max-width: 520px) { .jw-res { grid-template-columns: 1fr; } }
+.jw-main { display: grid; gap: 2px; padding: 14px 16px; border-radius: 16px; background: linear-gradient(160deg, rgba(229,231,235,.14), rgba(229,231,235,.04)); border: 1px solid rgba(229,231,235,.25); }
+.jw-main span { font-size: 13px; color: var(--muted); }
+.jw-main b { font: 400 40px/1.1 var(--display); }
+.jw-main em { font-style: normal; font-weight: 600; font-size: 14px; }
+.jw-main em.up { color: #E8AA4C; } .jw-main em.down { color: #7FB8F0; } .jw-main em.same { color: #72C793; }
+.jw-main small { font-size: 12px; color: var(--muted); }
+.jw-side { display: grid; gap: 8px; }
+.jw-side > div { padding: 10px 14px; border-radius: 14px; background: var(--surface2); border: 1px solid var(--line); display: grid; gap: 2px; }
+.jw-side span { font-size: 13px; color: var(--muted); }
+.jw-side b { font-size: 16px; }
+.jw-side b small { font-weight: 500; font-size: 12px; color: var(--muted); }
+
+/* v44: красивее на телефоне */
+@media (max-width: 640px) {
+  .fgrid.two { grid-template-columns: 1fr 1fr !important; }
+  /* цифры в шапке «Мой мотоцикл» — сеткой 2×2, ничего не обрезано */
+  .phero-stats { display: grid !important; grid-template-columns: 1fr 1fr; overflow: visible; margin: 0 0 12px !important; padding: 0 !important; }
+  .phero-stats .hs { min-width: 0; }
+  .phero-stats .hs b { font-size: 19px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* три кнопки в шапке — в один ряд */
+  .phero-act:has(> .btn:nth-of-type(3)) { grid-template-columns: repeat(3, 1fr); }
+  .phero-act .btn { justify-content: center; gap: 6px; padding: 9px 6px; font-size: 14px; }
+}
+.phero-act .btn .ico { opacity: .85; }
+.sprockets h3 { font-size: 14px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 6px 0 8px; }
