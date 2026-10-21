@@ -1779,7 +1779,7 @@ body.gm-open { overflow: hidden; }
 /* ===================== v45: фирменный цвет и живость =====================
    Вся палитра — в переменных ниже: сменить цвет сайта = поменять --acc-rgb / --acc2-rgb / --acc-ink.
    --tile-mode: значки плиток окрашены в цвет акцента. */
-:root { --acc-rgb: 255, 122, 26; --acc2-rgb: 255, 181, 71; --acc-ink: #1C1206; --warm-rgb: 36, 30, 24; }
+:root { --acc-rgb: 139, 92, 246; --acc2-rgb: 196, 181, 253; --acc-ink: #0F0820; --warm-rgb: 26, 20, 40; }
 :root { --acc: rgb(var(--acc-rgb)); --acc2: rgb(var(--acc2-rgb)); --acc-soft: rgba(var(--acc-rgb), .16); --acc-line: rgba(var(--acc-rgb), .45); }
 
 /* название мотоцикла и акцентные слова */
