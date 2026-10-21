@@ -2,10 +2,10 @@
    Онлайн: всегда свежая версия с сервера (и она же сохраняется в кэш).
    Без сети: сайт открывается из кэша. ИИ-механику интернет нужен всегда.
    При изменении списка файлов увеличь VERSION. */
-const VERSION = "mh-v2";
+const VERSION = "mh-v3";
 const CORE = [
   "./", "index.html", "manifest.webmanifest",
-  "css/app.css", "js/data.js", "js/bike-art.js", "js/app.js", "js/motion.js",
+  "css/app.css", "js/data.js", "js/bike-art.js", "js/app.js", "js/motion.js", "js/eggs.js",
   "vendor/react.production.min.js", "vendor/react-dom.production.min.js",
   "img/topo.svg", "img/icon-192.png", "img/icon-512.png",
 ];
