@@ -8758,6 +8758,130 @@ var SEASON = {
   addBike("Loncin", "MS250", NK, "165FMM", { approx: true, hp: 17.7 });
   addBike("Loncin", "CR4 LX250-15", CLS, "165FMM", { approx: true, hp: 18 });
 })();
+/* ---- v43: моторы японцев — карбюратор/инжектор по годам, Racer ---- */
+(function () {
+  /* ===================== fixmotors: проверка моторов у популярных 50–300 см³ ===================== */
+  function lbl(years, id) { return years + " · " + ENGINES[id].code + ", " + ENGINES[id].cc + " см³"; }
+  /* разбить единственную версию модели на два поколения: старое (мотор oldId) и новое (newId) */
+  function split(brand, name, oldId, oldYears, newId, newYears, extra) {
+    setEngine(brand, name, 0, oldId, Object.assign({ years: oldYears, label: lbl(oldYears, oldId) }, extra || {}));
+    addVersion(brand, name, newId, newYears, extra);
+  }
+
+  /* --- Yamaha 249 (Serow 250 / XT250X / Tricker / YBR250 / Lander): с 2008 (JDM) — инжектор --- */
+  // Yamaha (официально): Serow 250 и XT250X получили F.I. с модели 2008 (DG17J), Tricker — DG16J 2008.
+  // YBR250 / YS250 Fazer и XTZ250 Lander — тот же 249 (74×58) воздушный SOHC, но с инжектором с самого начала.
+  CL("YAM_XT250FI", "XT250", { code: "DG17J (F.I.)", name: "Yamaha 249 воздушный, инжектор (Serow 250 / XT250X / Tricker 2008+, YBR250, Lander)",
+    groups: ["air", "efi", "4t", "big", "jp"], carb: "Инжектор", ignition: "ЭБУ (TCI)", jetMain: "—", jetPilot: "—", needle: "—", idle: "1300–1500",
+    hp: 20, torque: "≈ 21 Н·м",
+    issues: [
+      { t: "Очень надёжный — главное не перегревать и менять масло вовремя", sev: "low", fix: "Масло 1.2–1.3 л каждые 3 тыс. км, фильтр — через замену." },
+      { t: "Неровный холостой / провалы после долгого простоя", sev: "low", fix: "Свежий бензин, проверка топливного фильтра насоса и датчика дросселя (TPS), чистка корпуса дросселя." },
+      { t: "Мягкая подвеска", sev: "low", fix: "Пружины под вес." }
+    ] }, 1.7);
+  split("Yamaha", "Serow 250 (XT250)", "XT250", "2005–2007", "YAM_XT250FI", "2008–2020");
+  setEngine("Yamaha", "XT250X", 0, "XT250", { years: "2006–2007", label: lbl("2006–2007", "XT250") });
+  addVersion("Yamaha", "XT250X", "YAM_XT250FI", "2008–2016");
+  setEngine("Yamaha", "XG250 Tricker", 0, "XT250", { years: "2004–2007", label: lbl("2004–2007", "XT250") });
+  addVersion("Yamaha", "XG250 Tricker", "YAM_XT250FI", "2008–2017");
+  setEngine("Yamaha", "YBR250 / YS250 Fazer", 0, "YAM_XT250FI", { hp: 21 });
+  setEngine("Yamaha", "XTZ250 Lander", 0, "YAM_XT250FI", { hp: 21 });
+
+  /* --- Suzuki TU250 (ST250 / Volty / Grasstracker): карбюратор до 2008, затем инжектор --- */
+  CL("SUZ_TU250C", "SUZ_TU250", { code: "NJ47A / NJ4AA (карб.)", name: "Suzuki 249 воздушный, карбюратор (Volty, Grasstracker и ST250 до 2008)",
+    groups: ["air", "carb", "4t", "big", "jp"], carb: "Mikuni BS32 (CV)", ignition: "CDI", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    idle: "1300–1500", hp: 20,
+    issues: [
+      { t: "Засор карбюратора после зимы", sev: "low", fix: "Сливать поплавковую камеру на хранение, чистка жиклёров." },
+      { t: "Клапаны — регулировка винтами", sev: "low", fix: "Каждые 6–12 тыс. км на холодную." }
+    ] }, 1.6);
+  setEngine("Suzuki", "Volty", 0, "SUZ_TU250C");
+  setEngine("Suzuki", "ST250", 0, "SUZ_TU250C", { years: "2003–2007", label: lbl("2003–2007", "SUZ_TU250C") });
+  addVersion("Suzuki", "ST250", "SUZ_TU250", "2008+");
+  setEngine("Suzuki", "Grasstracker", 0, "SUZ_TU250C", { years: "2000–2008", label: lbl("2000–2008", "SUZ_TU250C") });
+  addVersion("Suzuki", "Grasstracker", "SUZ_TU250", "2008–2009");
+
+  /* --- Suzuki Van Van 200: с 24.12.2007 (JDM, пресс-релиз Suzuki) — инжектор, катализатор, O2; в Европе FI с Euro 4 --- */
+  CL("SUZ_DR200FI", "DR200", { code: "DR200 (FI)", name: "Suzuki 199 воздушный, инжектор (Van Van 200 2008+)",
+    groups: ["air", "efi", "4t", "big", "jp"], carb: "Инжектор", ignition: "ЭБУ (EFI)", jetMain: "—", jetPilot: "—", needle: "—", idle: "1400–1600",
+    issues: [
+      { t: "Очень живучий — следи за цепью и клапанами", sev: "low", fix: "Регулировка клапанов по регламенту." },
+      { t: "Плохой пуск / провалы после простоя", sev: "low", fix: "Свежий бензин, зарядка АКБ, проверка датчиков (TPS, O2) и разъёмов." }
+    ] }, 1.6);
+  setEngine("Suzuki", "Van Van 200", 0, "DR200", { years: "2002–2007", label: lbl("2002–2007", "DR200"), hp: 16 });
+  addVersion("Suzuki", "Van Van 200", "SUZ_DR200FI", "2008+", { hp: 16 });
+
+  /* --- Kawasaki Estrella 250: с 2007 инжектор (Kawasaki, пресс-релиз 01.2007) --- */
+  CL("KAW_BJ250FI", "KAW_BJ250", { code: "BJ250A FI", name: "Kawasaki 249 воздушный, инжектор (Estrella / 250TR 2007+)",
+    groups: ["air", "efi", "4t", "big", "jp"], carb: "Инжектор", ignition: "ЭБУ (EFI)", jetMain: "—", jetPilot: "—", needle: "—",
+    issues: [
+      { t: "Простой и живучий: главное масло и клапаны вовремя", sev: "low", fix: "Регулировка клапанов винтами." },
+      { t: "Плохой пуск / плавающие обороты после простоя", sev: "low", fix: "Свежий бензин, зарядка АКБ, чистка дроссельного узла." }
+    ] }, 1.6);
+  setEngine("Kawasaki", "Estrella 250", 0, "KAW_BJ250", { years: "1992–2006", label: lbl("1992–2006", "KAW_BJ250") });
+  addVersion("Kawasaki", "Estrella 250", "KAW_BJ250FI", "2007–2017");
+  // 250TR — тот же мотор, инжектор тоже с февраля 2007 (Kawasaki, пресс-релиз 12.01.2007)
+  setEngine("Kawasaki", "250TR", 0, "KAW_BJ250", { years: "2002–2006", label: lbl("2002–2006", "KAW_BJ250"), hp: 19 });
+  addVersion("Kawasaki", "250TR", "KAW_BJ250FI", "2007–2013", { hp: 19 });
+
+  /* --- Honda CRF150L (Индонезия, 2017+): PGM-FI, а не карбюраторный XR150L --- */
+  CL("HON_CRF150LE", "XR150L", { code: "CRF150L (PGM-FI)", name: "Honda 149 воздушный SOHC, инжектор (CRF150L, база Verza/MegaPro)",
+    groups: ["air", "efi", "4t", "small", "jp"], carb: "Инжектор (PGM-FI)", ignition: "ЭБУ (PGM-FI)", jetMain: "—", jetPilot: "—", needle: "—",
+    hp: 12.9, torque: "12.4 Н·м", compression: "9.5:1",
+    issues: [
+      { t: "Простой и живучий мотор — главное масло вовремя", sev: "low", fix: "Масло каждые 2–3 тыс. км." },
+      { t: "Провалы / нестабильный холостой", sev: "low", fix: "Чистка дроссельного узла, проверка воздушного фильтра и разъёмов датчиков." }
+    ] }, 1.5);
+  setEngine("Honda", "CRF150L", 0, "HON_CRF150LE", { years: "2017+", label: lbl("2017+", "HON_CRF150LE") });
+
+  /* --- Honda CBR125R JC34: 2004–2006 карбюратор, с 2007 PGM-FI (Euro 3) --- */
+  CL("HON_JC34C", "HON_JC34E", { code: "JC34E (карб.)", name: "Honda CBR125R JC34 2004–2006 (жидкостный сингл 125, карбюратор)",
+    groups: ["liquid", "carb", "4t", "small", "jp"], carb: "Keihin CV (VE)", ignition: "CDI", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    issues: [
+      { t: "Натяжитель и цепь ГРМ шумят после 20–30 тыс. км", sev: "med", fix: "Натяжитель и цепь комплектом." },
+      { t: "Засор карбюратора после хранения, плохой холостой", sev: "low", fix: "Слив поплавковой камеры на зиму, чистка жиклёров, проверка мембраны." },
+      { t: "Сальник помпы", sev: "low", fix: "Подтёк из контрольного отверстия — ремкомплект помпы." }
+    ] }, 1.6);
+  setEngine("Honda", "CBR125R", 0, "HON_JC34C", { years: "2004–2006 (JC34)", label: lbl("2004–2006 (JC34)", "HON_JC34C") });
+  addVersion("Honda", "CBR125R", "HON_JC34E", "2007–2010 (JC34)");
+
+  /* --- Honda CRF110F / CRF125F: до 2018 карбюратор, с 2019 — инжектор Keihin (Honda, 2019 model year) --- */
+  CL("HON_CRF110C", "CRF110F", { code: "JE02E (карб.)", name: "Honda CRF110F 2013–2018 (горизонтальный 109, карбюратор)",
+    groups: ["horiz", "air", "carb", "4t", "small", "jp"], carb: "Keihin PB", ignition: "CDI", jetMain: "по мануалу", jetPilot: "по мануалу", needle: "по мануалу",
+    issues: [
+      { t: "Засор жиклёров карбюратора после простоя", sev: "low", fix: "Сливать бензин из поплавковой камеры на хранение, чистка карбюратора." },
+      { t: "Детский мотоцикл — главное следить за цепью и маслом", sev: "low", fix: "Смазка цепи и масло по регламенту." }
+    ] }, 1.4);
+  setEngine("Honda", "CRF110F", 0, "HON_CRF110C", { years: "2013–2018", label: lbl("2013–2018", "HON_CRF110C") });
+  addVersion("Honda", "CRF110F", "CRF110F", "2019+");
+  CL("HON_CRF125FI", "CRF125F", { code: "JE01E (FI)", name: "Honda CRF125F / Big Wheel 2019+ (горизонтальный 125, инжектор)",
+    groups: ["horiz", "air", "efi", "4t", "small", "jp"], carb: "Инжектор Keihin", ignition: "ЭБУ", jetMain: "—", jetPilot: "—", needle: "—",
+    issues: [
+      { t: "Детский/подростковый мотоцикл — главное цепь и масло", sev: "low", fix: "Смазка цепи и масло по регламенту." },
+      { t: "Плохой пуск после долгого простоя", sev: "low", fix: "Свежий бензин, зарядка АКБ, проверка топливного фильтра насоса." }
+    ] }, 1.4);
+  ["CRF125F", "CRF125F Big Wheel"].forEach(function (n) {
+    setEngine("Honda", n, 0, "CRF125F", { years: "2014–2018", label: lbl("2014–2018", "CRF125F") });
+    addVersion("Honda", n, "HON_CRF125FI", "2019+");
+  });
+
+  /* --- Honda Ape 50: с модели 12.2007 — PGM-FI + катализатор (Honda, пресс-релиз) --- */
+  CL("HON_APE50FI", "HON_APE50", { code: "AC16E (PGM-FI)", name: "Honda Ape 50 2008–2017 (горизонтальный 49, инжектор PGM-FI)",
+    groups: ENGINES.HON_APE50.groups.map(function (g) { return g === "carb" ? "efi" : g; }),
+    carb: "Инжектор (PGM-FI)", ignition: "ЭБУ (PGM-FI)", jetMain: "—", jetPilot: "—", needle: "—",
+    issues: [
+      { t: "Плохой пуск / глохнет после долгого простоя", sev: "low", fix: "Свежий бензин, зарядка АКБ, проверка топливного насоса и форсунки." },
+      { t: "Цепь и натяжитель ГРМ шумят на большом пробеге", sev: "low", fix: "Натяжитель и цепь, масло каждые 2–3 тыс. км." }
+    ] }, 1.4);
+  setEngine("Honda", "Ape 50", 0, "HON_APE50", { years: "2001–2007", label: lbl("2001–2007", "HON_APE50") });
+  addVersion("Honda", "Ape 50", "HON_APE50FI", "2008–2017");
+
+  /* --- Racer (РФ): у Caiman RC250XZR-X и Ranger RC250-GY8A мотор жидкостный ≈26–27 л.с. (ZS177MM = NC250), а не воздушный CB250 --- */
+  setEngine("Racer", "Caiman RC250XZR-X", 0, "NC250", { approx: true, hp: 26 });
+  setEngine("Racer", "Ranger RC250-GY8A", 0, "NC250", { approx: true, hp: 27 });
+})();
+/* у Honda Ape 50 воздушное охлаждение — антифриза нет */
+["HON_APE50", "HON_APE50FI"].forEach(function (id) { if (ENGINES[id]) ENGINES[id].coolant = "—"; });
 /* @@DB-FRAGMENTS@@ */
 /* ===================== v35: Keeway K-Light 202 и Kayo TS90 — свой объём ===================== */
 CL("V223KW", "V250LF", { code: "Keeway V223", name: "Keeway V-twin 223 воздушный (K-Light 202, Superlight 200)", cc: 223, hp: 17, torque: "16 Н·м" }, 1.1);
