@@ -1529,12 +1529,79 @@ const BF_ALIAS = {
   "зонтес": "zontes",
   "фхмото": "fxmoto",
   "эстиэн": "stn",
-  "стн": "stn"
+  "стн": "stn",
+  "кае": "kayo",
+  "вистром": "v-strom",
+  "ви-стром": "v-strom",
+  "драгстар": "dragstar",
+  "зефир": "zephyr",
+  "ява": "jawa",
+  "джава": "jawa",
+  "хайсан": "hyosung",
+  "хесунг": "hyosung",
+  "хьесунг": "hyosung",
+  "хусунг": "hyosung",
+  "аквила": "aquila",
+  "тенере": "tenere",
+  "войдж": "voge",
+  "вож": "voge",
+  "вогэ": "voge",
+  "лонсин": "loncin",
+  "лончин": "loncin",
+  "фуего": "fuego",
+  "фксмото": "fxmoto",
+  "фикс мото": "fxmoto",
+  "ракер": "racer",
+  "баджадж": "bajaj",
+  "бажадж": "bajaj",
+  "баджай": "bajaj",
+  "боксер": "boxer",
+  "базовый": "basic",
+  "ган ": "gn ",
+  "дегри": "degree",
+  "версис": "versys",
+  "вулкан": "vulcan",
+  "зонгшен": "zongshen",
+  "зонгшэн": "zongshen",
+  "дэлим": "daelim",
+  "даэлим": "daelim",
+  "гуцци": "guzzi",
+  "кавасаки": "kawasaki",
+  "сибиэр": "cbr",
+  "сибиер": "cbr",
+  "джог": "jog",
+  "кросстрек": "crosstrec",
+  "кросстрэк": "crosstrec",
+  "джей": "j",
+  "хардкор": "hardcore",
+  "пантера": "panther",
+  "пантер": "panther",
+  "рейнджер": "ranger",
+  "нитро": "nitro",
+  "магнум": "magnum",
+  "кайман": "caiman",
+  "пальма": "palma",
+  "палма": "palma",
+  "ибица": "ibiza",
+  "гауди": "gaudi",
+  "эндуранс": "endurance",
+  "супермакс": "supermax",
+  "супер макс": "supermax",
+  "атлет": "athlete",
+  "ралли": "rally",
+  "трофи": "trophy",
+  "метеор": "meteor",
+  "скайвэй": "skyway",
+  "дакар": "dakar",
+  "эксклюзив": "exclusive",
+  "лайт": "lite"
 };
+/* народные названия моделей: добавляются к словам поиска у подходящих моделей */
+const BF_WORDS = [[/GSX-R/i, "gixxer джиксер"], [/Hayabusa|GSX1300R/i, "хаябуса"], [/Drag ?Star/i, "dragstar драгстар"], [/V-Strom/i, "вистром"], [/Ninja/i, "ниндзя"], [/Bandit/i, "бандит"], [/Intruder/i, "интрудер"], [/Africa Twin/i, "африка"], [/Transalp/i, "трансальп"], [/Fat ?Boy/i, "фэтбой фетбой"], [/Sportster/i, "спортстер"], [/Shadow/i, "шадоу шедоу"], [/Steed/i, "стид"], [/Virago/i, "вираго"], [/Serow/i, "серов сероу"], [/Ténéré|Tenere/i, "тенере"], [/Duke/i, "дюк"], [/Monster/i, "монстр"]];
 const BF_POPULAR = ["Motoland", "Kayo", "Regulmoto", "BSE", "Avantis", "Progasi", "Racer", "Irbis", "Stels", "Sharmax", "STN", "CFMOTO", "Honda", "Yamaha", "Kawasaki", "Suzuki", "KTM", "Husqvarna"];
 const BF_TYPES = ["Эндуро", "Питбайк", "Кросс-эндуро", "Мотард", "Тур-эндуро", "Лёгкий эндуро", "Мопед", "Скутер", "Спорт", "Нейкед", "Турер", "Чоппер", "Триал", "Классика"];
 function bfNorm(s) {
-  return String(s || "").toLowerCase().replace(/ё/g, "е").replace(/[\s\-_.\/«»"]+/g, "");
+  return String(s || "").toLowerCase().replace(/ё/g, "е").replace(/[éèêë]/g, "e").replace(/[áàâä]/g, "a").replace(/[óòôö]/g, "o").replace(/[úùûü]/g, "u").replace(/[íìîï]/g, "i").replace(/[\s\-_.\/«»"]+/g, "");
 }
 function bfTokens(q) {
   let s = String(q || "").toLowerCase().replace(/ё/g, "е");
@@ -1549,14 +1616,23 @@ const BF_RU = "йцукенгшщзхъфывапролджэячсмитьбю"
 const BF_TR = {
   а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya"
 };
+/* буквы, которые пишут по-русски вместо похожих латинских: «зх6р» = ZX-6R, «сб 400» = CB 400 */
+const BF_LOOK = {
+  х: "x",
+  с: "c",
+  б: "b",
+  в: "b"
+};
 function bfAlts(t) {
   if (!/[а-я]/.test(t)) return [t];
   const lay = bfNorm(t.split("").map(c => {
       const i = BF_RU.indexOf(c);
       return i < 0 ? c : BF_EN[i];
     }).join("")),
-    tr = t.split("").map(c => BF_TR[c] != null ? BF_TR[c] : c).join("");
-  return [t, lay, tr].filter((x, i, a) => x && a.indexOf(x) === i);
+    tr = t.split("").map(c => BF_TR[c] != null ? BF_TR[c] : c).join(""),
+    look = t.split("").map(c => BF_LOOK[c] || (BF_TR[c] != null ? BF_TR[c] : c)).join(""),
+    trx = tr.replace(/h/g, "x");
+  return [t, lay, tr, look, /х/.test(t) ? trx : ""].filter((x, i, a) => x && a.indexOf(x) === i);
 }
 /* слово похоже на название марки: начало совпадает или отличается на 1–2 буквы («kavasaki» → kawasaki) */
 function bfNear(a, b) {
@@ -1618,7 +1694,7 @@ function BikeFinder({
   const aka = id => typeof ENGINE_AKA === "object" && ENGINE_AKA[id] || "";
   const idx = useMemo(() => BIKES.map(b => ({
     b: b,
-    s: bfNorm(b.brand + " " + b.name + " " + b.versions.map(v => bfYears(v.years) + " " + (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name + " " + aka(v.engine)).join(" "))
+    s: bfNorm(b.brand + " " + b.name + " " + b.type + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ") + " " + b.versions.map(v => bfYears(v.years) + " " + (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name + " " + aka(v.engine)).join(" "))
   })), []);
   /* Моторы: сколько моделей на каждом, строка для поиска с синонимами («174», «нб300», «зонгшен») */
   const engIdx = useMemo(() => {
@@ -1680,9 +1756,18 @@ function BikeFinder({
   /* запрос похож на код мотора («174», «NB300», «172») — предложим показать все модели с ним */
   const engHints = toks.length && !engF && toks.join("").length >= 3 ? engMatch(q).filter(x => x.n > 0).slice(0, 3) : [];
   if (toks.length) {
-    const f = toks[0];
-    const sc = b => (bfNorm(b.name).indexOf(f) === 0 ? 3 : 0) + (bfNorm(b.brand).indexOf(f) === 0 ? 2 : 0) + (bfNorm(b.name).indexOf(f) >= 0 ? 1 : 0);
-    list = list.slice().sort((a, b) => sc(b) - sc(a));
+    /* выше — модели, у которых слова запроса есть в самом названии, целыми словами («k1 300» → Kayo K1 300, а не BMW K 1300) */
+    const ta = toks.map(bfAlts);
+    const sc = b => {
+      const words = (b.brand + " " + b.name + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ")).toLowerCase().split(/[\s\/()+,]+/).map(bfNorm).filter(Boolean),
+        nm = bfNorm(b.brand + " " + b.name);
+      let sum = ta.reduce((sum, alts) => sum + Math.max.apply(null, alts.map(a => words.indexOf(a) >= 0 ? 4 : words.some(w => w.indexOf(a) === 0) ? 3 : words.some(w => a.indexOf(w) === 0 && w.length >= 2) ? 2 : nm.indexOf(a) >= 0 ? 1 : 0)), 0);
+      /* два слова подряд вместе — одно слово названия («св 400» → CB400, «мт 09» → MT-09) */
+      for (let i = 0; i + 1 < ta.length; i++) if (ta[i].some(a => ta[i + 1].some(c => words.some(w => w.indexOf(a + c) === 0)))) sum += 4;
+      return sum;
+    };
+    const m = new Map(list.map(b => [b, sc(b)]));
+    list = list.slice().sort((a, b) => m.get(b) - m.get(a));
   }
   const counts = {};
   pool.forEach(x => {
@@ -1878,7 +1963,7 @@ function BikeFinder({
   }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", list.length - limit, ")"))));
 }
 /* ===== Первый заход: приветствие и «С чего начать» ===== */
-const ONB_TILES = [["home", "Главная", "Объёмная модель мотора твоего мотоцикла: крути, заводи, заглядывай внутрь. Совет дня и проверка перед выездом."], ["wrench", "Ремонт и ТО", "Всё про починку в одном месте: «Что сломалось?» по симптомам, ТО по пробегу, узлы мотоцикла и 70+ инструкций со схемами."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и ссылки на магазины."], ["bike", "Мой мотоцикл", "Характеристики и максимальная скорость, свои настройки, тюнинг под цель и бюджет."]];
+const ONB_TILES = [["home", "Главная", "Поиск по всему сайту, быстрые входы, проверка перед выездом и что сделать по сезону — зимой консервация, весной подготовка."], ["wrench", "Ремонт и ТО", "Всё про починку по группам: что сломалось, обслуживание (ТО и сезон), инструкции со схемами — больше 100."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и ссылки на магазины."], ["bike", "Мой мотоцикл", "Объёмная модель мотора: крути, заводи, заглядывай внутрь. Характеристики, свои настройки и тюнинг."]];
 function Onboarding({
   step0,
   sel,
@@ -1955,13 +2040,7 @@ function StartGuide({
 }) {
   const s = useStats();
   const [hide, setHide] = useState(() => load("startHide", false));
-  const items = [[load("picked", false), "Выбери свой мотоцикл", "Выбрать", () => setPicker(true)], [(s.start || 0) > 0 || (s.xray || 0) > 0, "Заведи мотор или загляни внутрь", "К мотору", () => {
-    const st = document.querySelector(".stage");
-    if (st) window.scrollTo({
-      top: st.getBoundingClientRect().top + window.scrollY - 70,
-      behavior: "smooth"
-    });
-  }], [(s.diag || 0) > 0 || (s.ai || 0) > 0, "Опиши поломку в «Что сломалось?» или спроси ИИ", "Открыть", () => go("repair", "find")]];
+  const items = [[load("picked", false), "Выбери свой мотоцикл", "Выбрать", () => setPicker(true)], [(s.start || 0) > 0 || (s.xray || 0) > 0, "Заведи мотор или загляни внутрь", "К мотору", () => goStage(go)], [(s.diag || 0) > 0 || (s.ai || 0) > 0, "Опиши поломку в «Что сломалось?» или спроси ИИ", "Открыть", () => go("repair", "find")]];
   const done = items.filter(i => i[0]).length;
   if (hide || done === items.length) return null;
   return /*#__PURE__*/React.createElement("div", {
@@ -11128,7 +11207,8 @@ const RV_TITLE = {
   ref: "Справочник",
   wiring: "Схема электрики",
   specs: "Шины и моменты затяжки",
-  buy: "Проверка б/у перед покупкой"
+  buy: "Проверка б/у перед покупкой",
+  season: "Зима и весна"
 };
 function diagFor(eng) {
   return DIAG.filter(d => !d.only || d.only.some(g => eng.groups.indexOf(g) >= 0));
@@ -11170,9 +11250,9 @@ function App() {
       return false;
     }
   });
-  const [page, setPage] = useState("home");
+  const [page, setPage] = useState(() => guideFromHash() ? "repair" : "home");
   const [bikeTab, setBikeTab] = useState("overview");
-  const [rv, setRv] = useState("hub");
+  const [rv, setRv] = useState(() => guideFromHash() ? "guide:" + guideFromHash() : "hub");
   const [partsQ, setPartsQ] = useState(null);
   /* направление выезда раздела: перешёл вправо по меню — выезжает справа, влево — слева */
   const pageDir = useRef({
@@ -11196,6 +11276,11 @@ function App() {
     const h = () => {
       const s = bikeFromHash();
       if (s) setSel(s);
+      const g = guideFromHash();
+      if (g) navTo({
+        page: "repair",
+        rv: "guide:" + g
+      });
     };
     window.addEventListener("hashchange", h);
     return () => window.removeEventListener("hashchange", h);
@@ -12798,6 +12883,43 @@ function cartTotal(cart) {
 }
 
 /* ===== Главная ===== */
+/* открыть «Мотоцикл → Обзор» и докрутить до мотора */
+function goStage(go) {
+  go("bike", "overview");
+  let n = 0;
+  const t = setInterval(() => {
+    const st = document.querySelector(".stage");
+    if (st || ++n > 20) clearInterval(t);
+    if (st) window.scrollTo({
+      top: st.getBoundingClientRect().top + window.scrollY - 70,
+      behavior: "smooth"
+    });
+  }, 100);
+}
+/* карточка сезона на главной: октябрь–февраль — консервация, март–май — подготовка */
+function SeasonCard({
+  eng,
+  go
+}) {
+  const w = seasonNow();
+  if (!w) return null;
+  const items = seasonItems(eng, w);
+  const d = load(seasonStoreKey(w), {});
+  const n = items.filter(i => d[i[0]]).length;
+  if (n === items.length) return null;
+  return /*#__PURE__*/React.createElement("button", {
+    className: "season-home " + w,
+    onClick: () => go("repair", "season:" + w)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "sh-ico",
+    "aria-hidden": "true"
+  }, w === "winter" ? "❄" : "☀"), /*#__PURE__*/React.createElement("span", {
+    className: "sh-txt"
+  }, /*#__PURE__*/React.createElement("b", null, w === "winter" ? "Пора готовить мотоцикл к зиме" : "Пора готовить мотоцикл к сезону"), /*#__PURE__*/React.createElement("span", null, n ? "Сделано " + n + " из " + items.length : "Чек-лист: " + items.length + " пунктов под твой мотор")), /*#__PURE__*/React.createElement(Icon, {
+    n: "next",
+    s: 20
+  }));
+}
 function Home(props) {
   const {
     eng,
@@ -12828,27 +12950,21 @@ function Home(props) {
     className: "grad"
   }, cu.nick ? "«" + cu.nick + "»" : bike.name), "?"), /*#__PURE__*/React.createElement("p", {
     className: "hero-sub"
-  }, "Поиск поломок, ремонт, обслуживание и тюнинг — под твой мотоцикл. Объёмная модель мотора, ИИ-механик и инструкции со схемами."), /*#__PURE__*/React.createElement("div", {
+  }, "Найди причину поломки, инструкцию или запчасть — всё подобрано под твой мотор."), /*#__PURE__*/React.createElement("div", {
     className: "hero-cta"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary shine",
-    onClick: () => {
-      const st = document.querySelector(".stage");
-      if (st) window.scrollTo({
-        top: st.getBoundingClientRect().top + window.scrollY - 70,
-        behavior: "smooth"
-      });
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "play",
-    s: 18
-  }), "\u0417\u0430\u0432\u0435\u0441\u0442\u0438 \u043C\u043E\u0442\u043E\u0440"), /*#__PURE__*/React.createElement("button", {
-    className: "btn ghost",
     onClick: () => go("repair", "find")
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "diag",
     s: 18
-  }), "\u0427\u0442\u043E \u0441\u043B\u043E\u043C\u0430\u043B\u043E\u0441\u044C?")), /*#__PURE__*/React.createElement(SiteSearchInline, {
+  }), "\u0427\u0442\u043E \u0441\u043B\u043E\u043C\u0430\u043B\u043E\u0441\u044C?"), /*#__PURE__*/React.createElement("button", {
+    className: "btn ghost",
+    onClick: () => goStage(go)
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "play",
+    s: 18
+  }), "Мотор в 3D")), /*#__PURE__*/React.createElement(SiteSearchInline, {
     ctx: props,
     placeholder: "Поиск: «не заводится», «клапаны», «свеча», «PWK»"
   })), /*#__PURE__*/React.createElement(GarageBar, _extends({}, props, {
@@ -12857,9 +12973,12 @@ function Home(props) {
     mt: mt,
     go: go,
     setPicker: props.setPicker
-  }), /*#__PURE__*/React.createElement(EngineExplorer, props), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement(SeasonCard, {
+    eng: eng,
+    go: go
+  }), /*#__PURE__*/React.createElement("div", {
     className: "actions4 home-acts"
-  }, [["diag", "Что сломалось?", () => go("repair", "find"), " act-main"], ["list", "ТО по пробегу", () => go("repair", "to"), ""], ["ai", "ИИ-механик", () => go("ai"), " act-ai"], ["book", "Инструкции", () => go("repair", "guides"), ""], ["cart", "Запчасти", () => go("parts"), "", cart.length > 0 && "В корзине " + cart.length], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 && "В проекте " + project.length]].map(a => /*#__PURE__*/React.createElement("button", {
+  }, [["list", "ТО по пробегу", () => go("repair", "to"), "", "Что и когда менять"], ["book", "Инструкции", () => go("repair", "guides"), "", "Пошагово, со схемами"], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 ? "В проекте " + project.length : "Что даст прибавку"], ["check", "Проверка б/у", () => go("repair", "buy"), "", "Перед покупкой"]].map(a => /*#__PURE__*/React.createElement("button", {
     key: a[1],
     className: "act" + a[3],
     onClick: a[2]
@@ -13034,7 +13153,7 @@ function BikePage(props) {
 
 /* ===== Поиск по всему сайту: разделы, узлы, инструкции, симптомы, детали, мотоциклы ===== */
 /* [коротко, полностью, слова для поиска, раздел, подраздел] */
-const SEARCH_SECTIONS = [["Что сломалось?", "Что сломалось? Поиск поломки по симптомам", "поломка неисправность диагностика причина симптом", "repair", "find"], ["ТО по пробегу", "ТО по пробегу: что и когда менять", "то обслуживание регламент замена масла пробег", "repair", "to"], ["Узлы", "Узлы мотоцикла", "узлы двигатель ходовая", "repair", "units"], ["Инструкции", "Все инструкции по ремонту", "инструкции ремонт как сделать своими руками", "repair", "guides"], ["Справочник", "Справочник: моменты затяжки, давление в шинах, коды ошибок", "справочник момент затяжки давление шин коды ошибок цвет свечи жидкости", "repair", "ref"], ["Тюнинг", "Тюнинг и доработки", "тюнинг доработки мощность прирост проект", "tuning"], ["Характеристики", "Характеристики мотоцикла", "характеристики мощность объём скорость максималка регулировки жиклёры зазоры", "bike", "overview"], ["Настроить", "Настроить свой мотоцикл", "настроить изменить свап мотор жиклёры звёзды", "bike", "edit"], ["Запчасти", "Запчасти и корзина", "запчасти корзина купить магазин озон авито", "parts"], ["ИИ-механик", "ИИ-механик", "ии ai механик чат спросить", "ai"]];
+const SEARCH_SECTIONS = [["Что сломалось?", "Что сломалось? Поиск поломки по симптомам", "поломка неисправность диагностика причина симптом", "repair", "find"], ["ТО по пробегу", "ТО по пробегу: что и когда менять", "то обслуживание регламент замена масла пробег", "repair", "to"], ["Узлы", "Узлы мотоцикла", "узлы двигатель ходовая", "repair", "units"], ["Инструкции", "Все инструкции по ремонту", "инструкции ремонт как сделать своими руками", "repair", "guides"], ["Справочник", "Справочник: моменты затяжки, давление в шинах, коды ошибок", "справочник момент затяжки давление шин коды ошибок цвет свечи жидкости", "repair", "ref"], ["Зима: консервация", "Зима: консервация мотоцикла — чек-лист", "зима зимнее хранение консервация хранить гараж холод", "repair", "season:winter"], ["Весна: к сезону", "Весна: подготовка мотоцикла к сезону — чек-лист", "весна сезон расконсервация после зимы первый выезд", "repair", "season:spring"], ["Тюнинг", "Тюнинг и доработки", "тюнинг доработки мощность прирост проект", "tuning"], ["Характеристики", "Характеристики мотоцикла", "характеристики мощность объём скорость максималка регулировки жиклёры зазоры", "bike", "overview"], ["Настроить", "Настроить свой мотоцикл", "настроить изменить свап мотор жиклёры звёзды", "bike", "edit"], ["Запчасти", "Запчасти и корзина", "запчасти корзина купить магазин озон авито", "parts"], ["ИИ-механик", "ИИ-механик", "ии ai механик чат спросить", "ai"]];
 /* слова запроса; у каждого — основа без окончания («масло» найдёт «масла»), вариант в другой раскладке и транслитом */
 function srTokens(q) {
   return String(q || "").toLowerCase().replace(/ё/g, "е").split(/[\s,.;:!?«»"()]+/).filter(Boolean).map(t => {
@@ -13400,7 +13519,9 @@ function RepairPage(props) {
     title: RV_TITLE[kind]
   }), kind === "find" && /*#__PURE__*/React.createElement(SmartDiag, props), kind === "to" && /*#__PURE__*/React.createElement(Maint, props), kind === "units" && /*#__PURE__*/React.createElement(UnitsGrid, props), kind === "guides" && /*#__PURE__*/React.createElement(GuidesList, _extends({}, props, {
     setGuideOpen: g => setRv("guide:" + g)
-  })), kind === "ref" && /*#__PURE__*/React.createElement(RefView, props), kind === "wiring" && /*#__PURE__*/React.createElement(WiringView, props), kind === "specs" && /*#__PURE__*/React.createElement(SpecsView, props), kind === "buy" && /*#__PURE__*/React.createElement(BuyCheckView, props));
+  })), kind === "ref" && /*#__PURE__*/React.createElement(RefView, props), kind === "wiring" && /*#__PURE__*/React.createElement(WiringView, props), kind === "specs" && /*#__PURE__*/React.createElement(SpecsView, props), kind === "buy" && /*#__PURE__*/React.createElement(BuyCheckView, props), kind === "season" && /*#__PURE__*/React.createElement(SeasonView, _extends({}, props, {
+    which: id
+  })));
 }
 /* начало раздела: поиск по ремонту и четыре входа */
 function RepairHub(props) {
@@ -13422,16 +13543,21 @@ function RepairHub(props) {
     ctx: props,
     scope: "repair",
     placeholder: "Что случилось или что нужно сделать?"
-  }), /*#__PURE__*/React.createElement("div", {
+  }), RHUB_GROUPS(eng).map(gr => /*#__PURE__*/React.createElement("div", {
+    key: gr[0],
+    className: "rhub-group"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "rhub-h"
+  }, gr[0]), /*#__PURE__*/React.createElement("div", {
     className: "actions4 rhub"
-  }, [["diag", "Что сломалось?", "find", " act-main"], ["list", "ТО по пробегу", "to", ""], ["engine", "Узлы мотоцикла", "units", ""], ["book", "Все инструкции", "guides", ""], ["bolt", "Схема электрики", "wiring", ""], ["tire", "Шины и затяжка", "specs", ""], ["check", "Проверка б/у", "buy", ""]].map(a => /*#__PURE__*/React.createElement("button", {
+  }, gr[1].map(a => /*#__PURE__*/React.createElement("button", {
     key: a[2],
-    className: "act" + a[3],
-    onClick: () => setRv(a[2])
+    className: "act" + (a[4] || ""),
+    onClick: () => a[2] === "ai" ? props.go("ai") : setRv(a[2])
   }, /*#__PURE__*/React.createElement(Icon, {
     n: a[0],
     s: 26
-  }), /*#__PURE__*/React.createElement("b", null, a[1])))), popular.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "Частые работы"), /*#__PURE__*/React.createElement("ul", {
+  }), /*#__PURE__*/React.createElement("b", null, a[1]), /*#__PURE__*/React.createElement("span", null, a[3])))))), popular.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "Частые работы"), /*#__PURE__*/React.createElement("ul", {
     className: "guide-mini panel"
   }, popular.map(g => /*#__PURE__*/React.createElement("li", {
     key: g.id
@@ -13444,13 +13570,109 @@ function RepairHub(props) {
     className: "diff d-" + g.diff
   }, g.diff)))))), eng.issues.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "Слабые места ", eng.code), /*#__PURE__*/React.createElement(Issues, {
     eng: eng
-  })), /*#__PURE__*/React.createElement("button", {
-    className: "btn ref-btn",
-    onClick: () => setRv("ref")
+  })));
+}
+/* плитки раздела «Ремонт» по группам: [заголовок, [[иконка, название, вид, подпись, класс]]] */
+function RHUB_GROUPS(eng) {
+  const se = seasonNow();
+  return [["Что-то не так", [["diag", "Что сломалось?", "find", "Найти причину по симптомам", " act-main"], ["ai", "Спросить ИИ", "ai", "Опиши проблему словами или фото"], ["list", "Коды ошибок", "ref", "Неисправности и справка"]]], ["Обслуживание", [["list", "ТО по пробегу", "to", "Что и когда менять"], ["theme", se === "spring" ? "Весна: к сезону" : "Зима: консервация", "season", se === "spring" ? "Чек-лист после зимы" : "Чек-лист перед хранением"]]], ["Как сделать", [["book", "Все инструкции", "guides", guidesFor(eng).length + " инструкций со схемами"], ["engine", "Узлы мотоцикла", "units", "Всё по узлу на одной странице"], ["bolt", "Схема электрики", "wiring", "Провода и что куда идёт"], ["tire", "Шины и затяжка", "specs", "Давление и моменты"], ["check", "Проверка б/у", "buy", "Перед покупкой"]]]];
+}
+/* какой сезон сейчас: октябрь–февраль — зима, март–май — весна, лето — null */
+function seasonNow(d) {
+  const m = (d || new Date()).getMonth();
+  return m >= 9 || m <= 1 ? "winter" : m <= 4 ? "spring" : null;
+}
+function seasonItems(eng, which) {
+  return SEASON[which].items.filter(it => {
+    const c = it[2];
+    if (!c) return true;
+    if (c[0] === "!") return eng.groups.indexOf(c.slice(1)) < 0 && !(c === "!cvt" && eng.cvt);
+    if (c === "cvt") return !!eng.cvt || eng.groups.indexOf("cvt") >= 0;
+    if (c === "2t") return eng.stroke === "2T" && !eng.cvt;
+    if (c === "4t") return eng.stroke !== "2T";
+    return eng.groups.indexOf(c) >= 0;
+  });
+}
+function seasonStoreKey(which) {
+  const d = new Date();
+  const y = which === "winter" && d.getMonth() <= 5 ? d.getFullYear() - 1 : d.getFullYear();
+  return "season-" + which + "-" + y;
+}
+function SeasonView(props) {
+  const {
+    eng,
+    bike,
+    setRv,
+    which
+  } = props;
+  const w = which === "spring" || which === "winter" ? which : seasonNow() || "spring";
+  const S = SEASON[w];
+  const items = seasonItems(eng, w);
+  const key = seasonStoreKey(w);
+  const [done, setDone] = useState(() => load(key, {}));
+  useEffect(() => setDone(load(key, {})), [key]);
+  const n = items.filter(i => done[i[0]]).length;
+  const gids = guidesFor(eng).map(g => g.id);
+  const mainGuide = eng.cvt && w === "winter" && gids.indexOf("scooter-winter") >= 0 ? "scooter-winter" : S.guide;
+  function tog(id) {
+    const nd = Object.assign({}, done, {
+      [id]: !done[id]
+    });
+    setDone(nd);
+    save(key, nd);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "season"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "seg season-seg",
+    role: "group",
+    "aria-label": "Сезон"
+  }, [["winter", "Зима: консервация"], ["spring", "Весна: к сезону"]].map(x => /*#__PURE__*/React.createElement("button", {
+    key: x[0],
+    className: w === x[0] ? "on" : "",
+    onClick: () => setRv("season:" + x[0])
+  }, x[1]))), /*#__PURE__*/React.createElement("div", {
+    className: "panel season-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, S.t), /*#__PURE__*/React.createElement("p", {
+    className: "muted"
+  }, S.sub, " Под ", bike.brand === "Любая модель" ? eng.code : bike.brand + " " + bike.name, ".")), /*#__PURE__*/React.createElement("span", {
+    className: "season-n"
+  }, n, "/", items.length)), /*#__PURE__*/React.createElement("div", {
+    className: "g-progress"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: n / items.length * 100 + "%"
+    }
+  })), /*#__PURE__*/React.createElement("ul", {
+    className: "checklist season-list"
+  }, items.map(it => /*#__PURE__*/React.createElement("li", {
+    key: it[0]
+  }, /*#__PURE__*/React.createElement("button", {
+    className: done[it[0]] ? "on" : "",
+    "aria-pressed": !!done[it[0]],
+    onClick: () => tog(it[0])
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cb"
+  }, done[it[0]] && /*#__PURE__*/React.createElement(Icon, {
+    n: "check",
+    s: 14
+  })), it[1]), it[3] && gids.indexOf(it[3]) >= 0 && /*#__PURE__*/React.createElement("button", {
+    className: "season-how",
+    onClick: () => setRv("guide:" + it[3])
+  }, "Как", /*#__PURE__*/React.createElement(Icon, {
+    n: "next",
+    s: 14
+  }))))), n === items.length && /*#__PURE__*/React.createElement("p", {
+    className: "ok-msg"
+  }, w === "winter" ? "Мотоцикл готов к зиме. Раз в месяц подзаряжай аккумулятор." : "Готов к сезону — хорошей езды!")), gids.indexOf(mainGuide) >= 0 && /*#__PURE__*/React.createElement("button", {
+    className: "btn season-guide",
+    onClick: () => setRv("guide:" + mainGuide)
   }, /*#__PURE__*/React.createElement(Icon, {
-    n: "list",
+    n: "book",
     s: 18
-  }), "Справочник: неисправности и коды ошибок"));
+  }), "Подробная инструкция со всеми шагами"));
 }
 function UnitsGrid({
   eng,
@@ -13981,7 +14203,8 @@ function GuideView({
   askAi,
   addToCart,
   cart,
-  flash
+  flash,
+  sel
 }) {
   const guide = GUIDES.find(g => g.id === (GUIDE_ALIAS[id] || id));
   const [done, setDone] = useState({});
@@ -14010,7 +14233,13 @@ function GuideView({
     className: "g-meta big"
   }, /*#__PURE__*/React.createElement("span", {
     className: "diff d-" + guide.diff
-  }, guide.diff), /*#__PURE__*/React.createElement("span", null, guide.time), /*#__PURE__*/React.createElement("span", null, "\u043F\u043E\u0434 ", eng.code)), /*#__PURE__*/React.createElement("div", {
+  }, guide.diff), /*#__PURE__*/React.createElement("span", null, guide.time), /*#__PURE__*/React.createElement("span", null, "\u043F\u043E\u0434 ", eng.code), /*#__PURE__*/React.createElement("button", {
+    className: "g-share",
+    onClick: () => shareGuide(guide, bike, sel ? sel.vi : 0, flash || (() => {}))
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "send",
+    s: 14
+  }), "Поделиться")), /*#__PURE__*/React.createElement("div", {
     className: "g-progress"
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -14182,6 +14411,7 @@ function WiringView({
   const type = wiringType(eng);
   const W = WIRING[type];
   const [sel, setSel] = useState(null);
+  const [big, setBig] = useState(false);
   const NW = 104,
     NH = 52,
     X = c => 16 + c * 126,
@@ -14215,8 +14445,14 @@ function WiringView({
   };
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "wr-head"
-  }, /*#__PURE__*/React.createElement("b", null, W.t), /*#__PURE__*/React.createElement("p", null, W.d)), /*#__PURE__*/React.createElement("div", {
-    className: "wr-wrap"
+  }, /*#__PURE__*/React.createElement("b", null, W.t), /*#__PURE__*/React.createElement("p", null, W.d)), /*#__PURE__*/React.createElement("button", {
+    className: "btn sm wr-zoom",
+    onClick: () => setBig(!big)
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: big ? "close" : "search",
+    s: 15
+  }), big ? "Уменьшить схему" : "Увеличить схему"), /*#__PURE__*/React.createElement("div", {
+    className: "wr-wrap" + (big ? " big" : "")
   }, /*#__PURE__*/React.createElement("svg", {
     className: "wr-svg",
     viewBox: "0 0 390 " + (Y(rows - 1) + NH + 34),
@@ -15769,6 +16005,29 @@ function bikeFromHash() {
   } catch (e) {
     return null;
   }
+}
+/* «…/#bike=…&g=spark» — сразу открыть эту инструкцию */
+function guideFromHash() {
+  try {
+    const g = new URLSearchParams(String(location.hash || "").replace(/^#/, "")).get("g");
+    const id = g && (GUIDE_ALIAS[g] || g);
+    return id && GUIDES.find(x => x.id === id) ? id : null;
+  } catch (e) {
+    return null;
+  }
+}
+function shareGuide(guide, bike, vi, flash) {
+  const url = bikeLink(bike, vi) + "&g=" + encodeURIComponent(guide.id),
+    title = guide.title + (bike.brand === "Любая модель" ? "" : " — " + bike.brand + " " + bike.name);
+  if (navigator.share) {
+    navigator.share({
+      title: title,
+      text: title,
+      url: url
+    }).catch(() => {});
+    return;
+  }
+  (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => flash("Ссылка на инструкцию скопирована"), () => window.prompt("Скопируй ссылку:", url));
 }
 function bikeLink(bike, vi) {
   const q = new URLSearchParams();

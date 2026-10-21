@@ -1673,3 +1673,38 @@ body.gm-open { overflow: hidden; }
 .gm-hint { margin: 0; text-align: center; font-size: 13px; color: var(--stage-muted); }
 @keyframes gm-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .gm-body { animation: none; } }
+
+/* v40: «Ремонт» по группам */
+.rhub-group { margin-top: 22px; }
+.rhub-group .rhub-h { margin: 0 0 10px; font-size: 17px; letter-spacing: .02em; color: var(--muted); }
+.rhub-group .actions4 { margin: 0; }
+.rhub .act span, .home-acts .act span { font-size: 13px; line-height: 1.3; }
+.rhub .act b, .home-acts .act b { font-size: 17px; line-height: 1.2; }
+
+/* v40: сезон */
+.season-seg { margin: 4px 0 14px; display: flex; width: 100%; max-width: 520px; }
+.season-seg button { flex: 1; padding: 10px 8px; }
+.season-card { max-width: 760px; }
+.season-card .panel-head { align-items: flex-start; }
+.season-card h2 { margin: 0 0 4px; }
+.season-card .muted { margin: 0; font-size: 14px; }
+.season-n { font: 400 22px var(--display); white-space: nowrap; }
+.season-list { margin-top: 12px; }
+.season-list li { display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); }
+.season-list li:last-child { border-bottom: 0; }
+.season-list li > button:first-child { flex: 1; min-width: 0; padding: 11px 4px; }
+.season-how { flex: none; display: inline-flex; align-items: center; gap: 2px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface2); font-size: 13px; font-weight: 600; }
+.season-guide { margin-top: 14px; gap: 8px; }
+.season-home { display: flex; align-items: center; gap: 14px; width: 100%; margin: 16px 0 0; padding: 14px 16px; text-align: left; border-radius: 16px; border: 1px solid rgba(140,190,255,.35); color: var(--stage-ink);
+  background: linear-gradient(135deg, rgba(70,120,190,.35), rgba(30,40,55,.6)); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+.season-home.spring { border-color: rgba(150,210,120,.35); background: linear-gradient(135deg, rgba(90,150,70,.35), rgba(30,40,35,.6)); }
+.season-home .sh-ico { font-size: 26px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: rgba(255,255,255,.08); flex: none; }
+.season-home .sh-txt { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.season-home b { font-size: 16px; }
+.season-home .sh-txt span { font-size: 13px; color: var(--stage-muted); }
+.season-list li > button.season-how { width: auto; padding: 6px 10px; text-decoration: none; color: var(--ink); }
+.g-share { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface2); font-size: 13px; font-weight: 600; color: var(--ink); }
+.g-meta.big { flex-wrap: wrap; align-items: center; }
+.wr-zoom { margin: 0 0 10px; gap: 6px; }
+.wr-wrap.big { overflow: auto; max-width: none; max-height: 78vh; -webkit-overflow-scrolling: touch; }
+.wr-wrap.big .wr-svg { width: 620px; max-width: none; }

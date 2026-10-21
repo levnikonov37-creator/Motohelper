@@ -139,6 +139,10 @@ GUIDES.forEach((g) => {
   if (!g.steps || !g.steps.length) fail(`Инструкция ${g.id}: нет шагов`);
 });
 Object.entries(TUNE_GUIDE || {}).forEach(([t, g]) => guideIds.has(g) || fail(`TUNE_GUIDE.${t}: нет инструкции "${g}"`));
+Object.entries(ctx.SEASON || {}).forEach(([w, S]) => {
+  if (!guideIds.has(S.guide)) fail(`SEASON.${w}: нет инструкции "${S.guide}"`);
+  S.items.forEach((it) => it[3] && !guideIds.has(it[3]) && fail(`SEASON.${w}.${it[0]}: нет инструкции "${it[3]}"`));
+});
 TUNING.forEach((t) => {
   if (!t.id || !t.title) fail(`Доработка без id или названия: ${JSON.stringify(t).slice(0, 80)}`);
 });
