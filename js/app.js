@@ -11236,11 +11236,18 @@ function App() {
   useEffect(() => {
     const h = e => {
       const b = e.target.closest && e.target.closest(".tabs button, .view-toggle button, .seg button, .tags .chip");
-      if (b && b.scrollIntoView) setTimeout(() => b.scrollIntoView({
-        inline: "center",
-        block: "nearest",
-        behavior: "smooth"
-      }), 30);
+      /* прокручиваем только саму полосу с кнопками, а не страницу и не шапку вокруг неё */
+      if (b) setTimeout(() => {
+        let sc = b.parentElement;
+        while (sc && !(/(auto|scroll)/.test(getComputedStyle(sc).overflowX) && sc.scrollWidth > sc.clientWidth)) sc = sc.parentElement;
+        if (!sc || sc === document.body || sc === document.documentElement) return;
+        const br = b.getBoundingClientRect(),
+          sr = sc.getBoundingClientRect();
+        sc.scrollTo({
+          left: sc.scrollLeft + br.left - sr.left - (sc.clientWidth - br.width) / 2,
+          behavior: "smooth"
+        });
+      }, 30);
     };
     document.addEventListener("click", h);
     return () => document.removeEventListener("click", h);
