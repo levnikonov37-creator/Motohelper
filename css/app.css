@@ -1914,3 +1914,11 @@ html.egg-night .hero-k::after { content: " · 🌙 ночной райдер"; }
 .egg-snow i { position: absolute; top: -10px; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px rgba(255,255,255,.8); animation: eggSnow linear infinite; }
 @keyframes eggSnow { to { top: 105%; margin-left: 30px; } }
 @media (prefers-reduced-motion: reduce) { .egg-wheelie, .egg-ride, .egg-shake, .egg-race i { animation-duration: .01s !important; } }
+
+/* v48: шапки никогда не съезжают вбок (overflow: clip нельзя прокрутить даже скриптом) */
+.hero, .phero, .ai-head { overflow: clip !important; }
+@media (max-width: 640px) {
+  .phero-act .seg { display: grid !important; grid-template-columns: 1fr; overflow: visible !important; }
+  .phero-act .seg button { white-space: normal; text-align: left; border-right: 0 !important; border-bottom: 1px solid rgba(167,139,250,.18); padding: 10px 12px; line-height: 1.3; }
+  .phero-act .seg button:last-child { border-bottom: 0; }
+}
