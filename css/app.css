@@ -2016,3 +2016,15 @@ html.egg-ny .tabbar::before { content: ""; position: absolute; left: 0; right: 0
 .onb-ico { background: rgba(139,92,246,.18) !important; color: #C4B5FD !important; border-radius: 6px !important; }
 .onb-steps li > span { background: linear-gradient(135deg, #8B5CF6, #EC4899) !important; color: #fff !important; }
 .onb-eggs { padding: 8px 12px; border-radius: 6px; border: 1px dashed rgba(196,181,253,.45); color: #C4B5FD !important; }
+
+/* v50: «Поддержать MotoHelper» */
+.support-card { display: grid; grid-template-columns: 54px 1fr; gap: 12px 14px; align-items: center; margin: 16px 0; padding: 16px !important; border-left-color: #EC4899 !important;
+  background: linear-gradient(120deg, rgba(236,72,153,.16), rgba(20,16,32,.85) 55%) !important; }
+.support-card .sc-ico { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 14px; font-size: 26px; color: #fff; background: linear-gradient(135deg, #EC4899, #8B5CF6); box-shadow: 0 0 22px -4px rgba(236,72,153,.75); animation: scBeat 2.4s ease-in-out infinite; }
+@keyframes scBeat { 0%, 70%, 100% { transform: scale(1); } 76% { transform: scale(1.12); } 84% { transform: scale(.97); } 90% { transform: scale(1.08); } }
+.support-card b { font-size: 16px; }
+.support-card p { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+.support-card .sc-btn { grid-column: 1 / -1; justify-content: center; text-decoration: none; }
+.support-card.compact { margin: 0; }
+.support-card.compact p { font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { .support-card .sc-ico { animation: none; } }

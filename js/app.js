@@ -2005,7 +2005,9 @@ function Onboarding({
     className: "muted small"
   }, "\u042D\u0442\u0438 \u0440\u0430\u0437\u0434\u0435\u043B\u044B \u2014 \u0432 \u043C\u0435\u043D\u044E \u0432\u043D\u0438\u0437\u0443 \u044D\u043A\u0440\u0430\u043D\u0430. \u041F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u0443 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u043D\u043E\u0432\u0430 \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \xAB?\xBB \u0432\u0432\u0435\u0440\u0445\u0443."), window.mhEggs && /*#__PURE__*/React.createElement("p", {
     className: "muted small onb-eggs"
-  }, "🥚 На сайте спрятаны пасхалки. Найдено: ", window.mhEggs().found, " из ", window.mhEggs().total, "."), /*#__PURE__*/React.createElement("div", {
+  }, "🥚 На сайте спрятаны пасхалки. Найдено: ", window.mhEggs().found, " из ", window.mhEggs().total, "."), /*#__PURE__*/React.createElement(SupportCard, {
+    compact: true
+  }), /*#__PURE__*/React.createElement("div", {
     className: "onb-actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary big",
@@ -12936,6 +12938,42 @@ function HeroBike({
     }
   }));
 }
+/* «Поддержать проект»: ссылка на страницу доната — поле "support" в ai-config.json. Нет ссылки — кнопки нет */
+let supportCache = null;
+function useSupportUrl() {
+  const [url, setUrl] = useState(supportCache || "");
+  useEffect(() => {
+    if (supportCache !== null) return;
+    supportCache = "";
+    fetch("ai-config.json", {
+      cache: "no-cache"
+    }).then(r => r.ok ? r.json() : {}).then(j => {
+      const u = j && typeof j.support === "string" && /^https:\/\//.test(j.support) ? j.support : "";
+      supportCache = u;
+      setUrl(u);
+    }).catch(() => {});
+  }, []);
+  return url;
+}
+function SupportCard({
+  compact
+}) {
+  const url = useSupportUrl();
+  if (!url) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "panel support-card" + (compact ? " compact" : "")
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "sc-ico",
+    "aria-hidden": "true"
+  }, "♥"), /*#__PURE__*/React.createElement("div", {
+    className: "sc-txt"
+  }, /*#__PURE__*/React.createElement("b", null, "Поддержать MotoHelper"), /*#__PURE__*/React.createElement("p", null, "Сайт бесплатный и без рекламы. Если помог починить мотоцикл — можно отблагодарить рублём: это пойдёт на новые инструкции и базу.")), /*#__PURE__*/React.createElement("a", {
+    className: "btn primary sc-btn",
+    href: url,
+    target: "_blank",
+    rel: "noopener"
+  }, "Поддержать"));
+}
 /* «Установить на телефон»: иконка на экране, работает без интернета. Android/Chrome — кнопкой, iPhone — подсказкой */
 function InstallCard() {
   const standalone = typeof matchMedia === "function" && matchMedia("(display-mode: standalone)").matches || navigator.standalone;
@@ -13086,7 +13124,7 @@ function Home(props) {
     className: "home-grid"
   }, /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(PreRide, {
     eng: eng
-  })), /*#__PURE__*/React.createElement(InstallCard, null));
+  })), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null));
 }
 function PreRide({
   eng
