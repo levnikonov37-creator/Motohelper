@@ -2028,3 +2028,35 @@ html.egg-ny .tabbar::before { content: ""; position: absolute; left: 0; right: 0
 .support-card.compact { margin: 0; }
 .support-card.compact p { font-size: 13px; }
 @media (prefers-reduced-motion: reduce) { .support-card .sc-ico { animation: none; } }
+
+/* v51: проверка перед выездом сворачивается; запуск мотора со стартером */
+.preride .pr-toggle { width: 100%; align-items: center; gap: 12px; padding: 0; margin: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.preride .pr-title { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.preride .pr-title h2 { margin: 0; }
+.preride .pr-title small { font-size: 13px; color: var(--muted); transition: color .3s; }
+.preride.all .pr-title small { color: #86efac; }
+.preride .pr-chev { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; color: #C4B5FD; background: rgba(139,92,246,.14); border: 1px solid rgba(167,139,250,.3); transition: transform .45s cubic-bezier(.2,.9,.25,1.2), background .3s, box-shadow .3s; }
+.preride .pr-toggle:hover .pr-chev, .preride .pr-toggle:focus-visible .pr-chev { background: rgba(139,92,246,.28); box-shadow: 0 0 18px -4px rgba(167,139,250,.8); }
+.preride.open .pr-chev { transform: rotate(180deg); }
+.preride .ring { transition: transform .45s cubic-bezier(.2,.9,.25,1.2); }
+.preride:not(.open) .ring { transform: scale(.88); }
+.preride .pr-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(.3,.8,.2,1); }
+.preride.open .pr-body { grid-template-rows: 1fr; }
+.preride .pr-inner { min-height: 0; overflow: hidden; }
+.preride .pr-inner > * { opacity: 0; transform: translateY(-8px); transition: opacity .25s, transform .35s; }
+.preride.open .pr-inner > * { opacity: 1; transform: none; transition: opacity .35s .12s, transform .45s .1s cubic-bezier(.2,.9,.25,1.1); }
+.preride.open .checklist li { animation: prIn .4s backwards cubic-bezier(.2,.9,.25,1.1); }
+.preride.open .checklist li:nth-child(2) { animation-delay: .04s; } .preride.open .checklist li:nth-child(3) { animation-delay: .08s; }
+.preride.open .checklist li:nth-child(4) { animation-delay: .12s; } .preride.open .checklist li:nth-child(5) { animation-delay: .16s; }
+.preride.open .checklist li:nth-child(6) { animation-delay: .2s; } .preride.open .checklist li:nth-child(7) { animation-delay: .24s; }
+.preride.open .checklist li:nth-child(n+8) { animation-delay: .28s; }
+@keyframes prIn { from { opacity: 0; transform: translateX(-10px); } }
+.preride .checklist { margin-top: 14px; }
+.start-btn.stopping { opacity: .7; cursor: default; }
+@media (prefers-reduced-motion: reduce) { .preride .pr-body, .preride .pr-inner > *, .preride .pr-chev, .preride .ring { transition: none; } .preride.open .checklist li { animation: none; } }
+/* скорость: длинные списки и нижние блоки не рисуются, пока до них не доскроллили */
+.parts > li { content-visibility: auto; contain-intrinsic-size: auto 132px; }
+.page > .panel ~ .panel ~ .panel, .home-grid ~ * { content-visibility: auto; contain-intrinsic-size: auto 260px; }
+/* кнопка вкладки откликается сразу, ещё до того, как страница дорисуется */
+.tab.tap { color: var(--stage-ink); }
+.tab.tap .tab-ico { transform: scale(.92); background-color: rgba(139,92,246,.22); }

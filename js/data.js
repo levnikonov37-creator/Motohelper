@@ -319,7 +319,12 @@ function addVersion(brand, name, eng, years, extra) {
 /* Порядок списка: марки по алфавиту, внутри марки — порядок добавления, «Любая модель» в конце */
 function sortBikes() {
   var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
+  var coll = new Intl.Collator("ru"), key = {};
+  rest.forEach(function (b, i) { if (!(b.brand in key)) key[b.brand] = 0; b.__i = i; });
+  var brands = Object.keys(key).sort(coll.compare);
+  brands.forEach(function (x, i) { key[x] = i; });
+  rest.sort(function (a, b) { return key[a.brand] - key[b.brand] || a.__i - b.__i; });
+  rest.forEach(function (b) { delete b.__i; });
   BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 }
 (function () {
@@ -7989,8 +7994,11 @@ function fixE(id, o) {
     ["hose-clamps", "Хомуты для патрубков (набор)", 350, "Двигатель", "clamps", null, "Червячные или пружинные под диаметр патрубка"],
     ["shift-seal", "Сальник и уплотнения вала переключения", 250, "Трансмиссия", "shift", null, "Меняется при снятой лапке"]
   ];
+  var have = {};
+  PARTS.forEach(function (p) { have[p.id] = 1; });
   NEW_PARTS.forEach(function (x) {
-    if (PARTS.some(function (p) { return p.id === x[0]; })) return;
+    if (have[x[0]]) return;
+    have[x[0]] = 1;
     var p = P(x[0], x[1], x[2], x[3], x[4], x[5]);
     if (x[6]) { PART_INFO[x[0]] = x[6]; p.info = x[6]; }
     PARTS.push(p);
@@ -8882,6 +8890,1455 @@ var SEASON = {
 })();
 /* у Honda Ape 50 воздушное охлаждение — антифриза нет */
 ["HON_APE50", "HON_APE50FI"].forEach(function (id) { if (ENGINES[id]) ENGINES[id].coolant = "—"; });
+/* ===================== v52: аудит китайских моделей (передачи, моторы по дилерам) ===================== */
+/* audit-cn: сверка характеристик китайских/российских эндуро и питбайков с сайтами производителей и дилеров.
+   Новые моторы — исправленные копии существующих (FIXCN_*), модели переведены на них через setEngine/addVersion. */
+(function () {
+  /* ---------- исправленные копии моторов ---------- */
+
+  /* NB300 (ZS174MN-5 / -5A) в исполнении с 5-ступенчатой КПП (часть производителей ставит 5 ст., часть 6 ст.).
+     Объём 279.6 см³ (74×65) — по progasi.ru, regulmoto.by, kayo.ru (280). */
+  CL("FIXCN_NB300_5", "NB300", { code: "ZS174MN-5 (5 ст.)", name: "Zongshen NB300 (ZS174MN-5) · 5 ст.",
+    cc: 279.6, gearbox: "5 ст.", start: "Электро (+кик у части)" }, 1.0);
+
+  /* NB300 с инжектором (ZS174MN-5 EFI) — не путать с NC300 EFI (ZS182MN, DOHC) */
+  CL("FIXCN_NB300E_5", "FIXCN_NB300_5", { code: "ZS174MN-5 EFI (5 ст.)", name: "Zongshen NB300 EFI (ZS174MN-5, инжектор) · 5 ст.",
+    groups: ["liquid", "efi", "4t", "big", "balancer"], hp: 31, ignition: "ЭБУ (EFI)", carb: "Инжектор",
+    jetMain: "—", jetPilot: "—", needle: "—",
+    issues: ENGINES["NB300"].issues.slice(0, 2).concat([
+      { t: "Топливный насос и фильтр насоса", sev: "med", fix: "Чистый бензин, фильтр насоса раз в сезон." },
+      { t: "Ошибки датчиков после мойки", sev: "med", fix: "Сушить разъёмы, диэлектрическая смазка." }]) }, 1.05);
+
+  /* PR300 (ZS175FMN): 271.3 см³, 2 клапана + балансир (progasi.ru, rollingmoto.ru); КПП у Kayo/Progasi — 5 ст., у Ataki — 6 ст. */
+  CL("FIXCN_PR300_5", "PR300", { code: "ZS175FMN (PR300)", name: "Zongshen PR300 (ZS175FMN) · 2V балансир, 5 ст.",
+    groups: ["cb", "air", "carb", "4t", "big", "balancer"], cam: "SOHC, 2 клапана + балансир",
+    cc: 271, hp: 24, gearbox: "5 ст.", start: "Электро (+кик у части)" }, 1.0);
+  CL("FIXCN_PR300_6", "FIXCN_PR300_5", { code: "ZS175FMN (PR300, 6 ст.)", name: "Zongshen PR300 (ZS175FMN) · 2V балансир, 6 ст.",
+    gearbox: "6 ст.", start: "Электро" }, 1.0);
+
+  /* PR300 Pro (ZS177FMN): 298 см³, 24.5 л.с., 24 Н·м, 6 ст. (Ataki 2026, Kayo 2026, Regulmoto Holeshot 300 Pro) */
+  CL("FIXCN_PR300PRO", "FIXCN_PR300_6", { code: "ZS177FMN (PR300 Pro)", name: "Zongshen PR300 Pro (ZS177FMN) · 298, балансир",
+    cam: "SOHC + балансир", cc: 298, hp: 24.5, torque: "24 Н·м", gearbox: "6 ст.", start: "Электро", carb: "NIBBI PE30" }, 1.05);
+
+  /* CB300RL (ZS175FMN-7): 271 см³, 4 клапана, балансир, 27 л.с. (progasi.ru — 6 ст.; kayo.ru K6-A/K7-A — 5 ст.) */
+  CL("FIXCN_CB300RL_6", "PR300", { code: "ZS175FMN-7 (CB300RL)", name: "Zongshen CB300RL (ZS175FMN-7) · 4V балансир, 6 ст.",
+    cam: "SOHC, 4 клапана + балансир", cc: 271, hp: 27, gearbox: "6 ст.", start: "Электро", carb: "NIBBI / STAREZZI PWK34" }, 1.0);
+  CL("FIXCN_CB300RL_5", "FIXCN_CB300RL_6", { code: "ZS175FMN (CB300RL, 5 ст.)", name: "Zongshen CB300RL (ZS175FMN) · 4V балансир, 5 ст.",
+    gearbox: "5 ст." }, 1.0);
+
+  /* PR250 (ZS172FMM-5) с 5-ступенчатой КПП (motoland-shop.ru, pitbikemarket.ru) */
+  CL("FIXCN_PR250_5", "172FMM-5", { code: "ZS172FMM-5 (PR250, 5 ст.)", name: "ZS172FMM-5 · PR250, 5 ст.", gearbox: "5 ст." }, 1.0);
+
+  /* Loncin YB300H — 6 ст. (kayo.ru T2/T4 300 2026, progasi.ru Endurance 300X) */
+  CL("FIXCN_YB300H_6", "LON_YB300H", { code: "LX176FMN (YB300H, 6 ст.)", name: "Loncin YB300H (176FMN) · воздушный 4V, балансир, 6 ст.",
+    gearbox: "6 ст." }, 1.05);
+
+  /* Питбайковый Z190 (ZS1P62YML-2 W190) с 4-ступенчатой КПП (progasi.ru Smart 190) */
+  CL("FIXCN_Z190_4", "Z190", { code: "ZS1P62YML-2 (W190, 4 ст.)", name: "Zongshen W190 (1P62YML-2) · питбайк, 4 ст.",
+    hp: 19, gearbox: "4 ст., ручное сцепление", start: "Электро + кик" }, 1.0);
+
+  /* Горизонтальный 153FMI 119.6 см³ (XY153FMI) — Progasi Smart 125 */
+  CL("FIXCN_153FMI", "154FMI", { code: "1P53FMI (XY153FMI)", name: "1P53FMI · питбайк 120 (119.6 см³)",
+    cc: 119.6, hp: 11, carb: "PZ27", start: "Электро + кик", gearbox: "4 ст., ручное сцепление" }, 1.0);
+
+  /* JYZ250 / JYZM250 (172FMM-S) — 4V воздушно-масляный 250, 25 л.с., 6 ст. (progasi.ru Flex 250, Sunseeker 250) */
+  CL("FIXCN_JYZ250", "172FMM-3A", { code: "JYZ250 (172FMM-S)", name: "JYZ250 (172FMM-S) · 4V воздушно-масляный, 6 ст.",
+    maker: "JYZ", groups: ["air", "carb", "4t", "big"], cam: "SOHC, 4 клапана", cooling: "Воздушно-масляное",
+    cc: 249.4, hp: 25, gearbox: "6 ст.", start: "Электро" }, 1.0);
+
+  /* Loncin MT250 (LX166MM) — 2T 224 см³ (66.8×64), 6 ст., кик (rollingmoto.ru, ypavla.ru, rockot-motors.ru);
+     раньше эти модели стояли на усреднённом «2T 250 KTM-тип» 249 см³ / 40 л.с. */
+  CL("FIXCN_LON_MT250", "2T250", { code: "LX166MM (MT250)", name: "Loncin MT250 (LX166MM) · 2T 224, жидкостный", maker: "Loncin",
+    cc: 224, hp: 35, torque: "≈ 26 Н·м", start: "Кик", gearbox: "6 ст.", carb: "PWK34–36 (SZC PWD 37 у GR7)" }, 1.0);
+
+  /* CBS300 (ZS174MN-3) в исполнении с 5-ступенчатой КПП (bsemoto.pro Z7 «ZS174-3»; есть и 6-ступенчатые) */
+  CL("FIXCN_CBS300_5", "CBS300", { code: "ZS174MN-3 (5 ст.)", name: "Zongshen CBS300 (ZS174MN-3) · жидкостное, 5 ст.",
+    gearbox: "5 ст." }, 1.0);
+
+  /* ZS172FMM-7 — 250 с балансиром, 25 л.с., 6 ст., NIBBI PWK34 (bsemoto.pro Z5 Storm / Z5 Neon 2026).
+     Обслуживание — по данным PR250 (172FMM-5), заводских зазоров в открытом доступе нет */
+  CL("FIXCN_172FMM7", "172FMM-5", { code: "ZS172FMM-7", name: "ZS172FMM-7 · 250 балансир, 6 ст.",
+    hp: 25, gearbox: "6 ст.", carb: "NIBBI PWK34" }, 1.0);
+
+  /* TYAN TYX300 — воздушный 300, 27 л.с., 6 ст. (эксклюзив BSE: T5, Z11). Обслуживание — типовое для воздушного 300 (по PR300) */
+  CL("FIXCN_TYX300", "PR300", { code: "TYX300", name: "TYAN TYX300 · воздушный 300", maker: "TYAN",
+    groups: ["air", "carb", "4t", "big"], cam: "SOHC", cc: 300, hp: 27, gearbox: "6 ст.", start: "Электро", carb: "NIBBI PWK32–34" }, 1.0);
+
+  /* Питбайковые моторы с уточнённой КПП/стартером (kayo.ru) */
+  CL("FIXCN_1P60FMK_4K", "1P60FMK", { code: "1P60FMK (4 ст., кик)", name: "YX 150/160 (1P60FMK) · питбайк, 4 ст., кикстартер",
+    gearbox: "4 ст., ручное сцепление", start: "Кик" }, 1.0);
+  CL("FIXCN_YX140E", "YX140", { code: "YX140 (1P56FMJ) EM", name: "YX 140 (1P56FMJ) · питбайк, электростартер",
+    start: "Электро + кик" }, 1.0);
+
+  /* ---------- Ataki ---------- */
+  setEngine("Ataki", "EF300", 0, "FIXCN_NB300_5", { hp: 26, carb: "NIBBI PWK34" });
+  setEngine("Ataki", "Crosser 300", 0, "FIXCN_PR300_6", { hp: 24 });
+  setEngine("Ataki", "Carrera 300", 0, "FIXCN_PR300_6", { hp: 24, carb: "PZ30" });
+  addVersion("Ataki", "Carrera 300", "FIXCN_PR300PRO", "2026+");
+
+  /* ---------- Kayo (kayo.ru) ---------- */
+  setEngine("Kayo", "K1 250 MX", 0, "172FMM", { carb: "NIBBI PE30" });
+  setEngine("Kayo", "K2 Pro", 0, "175FMM", { hp: 24, carb: "NIBBI PE30", approx: true });
+  setEngine("Kayo", "K6 EFI 250", 0, "NC250E", { hp: 30 });
+  setEngine("Kayo", "K6-R 250 KYB Pro", 0, "NC250", { hp: 36, carb: "Keihin FCR-MX 41", approx: true });
+  setEngine("Kayo", "K6-A 300 MX", 0, "FIXCN_CB300RL_5", { hp: 27 });
+  setEngine("Kayo", "T2 300 Enduro", 1, "FIXCN_YB300H_6", { hp: 25, carb: "NIBBI PWK32" });
+  setEngine("Kayo", "K1 300 MX", 0, "FIXCN_PR300_5", { hp: 24, carb: "NIBBI PE30" });
+  setEngine("Kayo", "K1-L 300 MX", 0, "175FMM", { hp: 24 });
+  setEngine("Kayo", "K1-L 300 Road", 0, "175FMM", { hp: 24 });
+  setEngine("Kayo", "T4 300 Enduro PR", 0, "FIXCN_PR300_5", { hp: 24, carb: "NIBBI PE30" });
+  setEngine("Kayo", "T3 300 Enduro", 0, "FIXCN_PR300_5", { hp: 24, carb: "NIBBI PE30" });
+  addVersion("Kayo", "T1 300 Enduro", "FIXCN_PR300PRO", "2026+", { hp: 25 });
+  addVersion("Kayo", "K2 Pro 300", "FIXCN_PR300PRO", "2026+", { hp: 25 });
+  setEngine("Kayo", "TT160", 0, "FIXCN_1P60FMK_4K");
+  setEngine("Kayo", "Evolution YX140EM", 0, "FIXCN_YX140E", { approx: true });
+
+  /* ---------- Progasi (progasi.ru/compare.html) ---------- */
+  setEngine("Progasi", "Super Max 300 PRO", 0, "FIXCN_PR300_5", { hp: 27, carb: "NIBBI PE30" });
+  setEngine("Progasi", "Super Max 300 PRO NG", 0, "FIXCN_PR300_5", { hp: 27, carb: "NIBBI Racing PE30" });
+  setEngine("Progasi", "Super Max 300 NG", 0, "175FMM", { hp: 25, carb: "NIBBI Racing PE30" });
+  setEngine("Progasi", "Ibiza 300", 0, "FIXCN_PR300_5", { hp: 27, carb: "NIBBI Racing PWK32" });
+  setEngine("Progasi", "Race 300 Air", 0, "FIXCN_CB300RL_6", { hp: 27, carb: "STAREZZI PWK34" });
+  setEngine("Progasi", "Endurance 300", 0, "FIXCN_NB300_5", { hp: 31, carb: "STAREZZI PWK34" });
+  setEngine("Progasi", "Endurance 300 EFI", 0, "FIXCN_NB300E_5");
+  setEngine("Progasi", "Hardcore 450", 0, "NC450C", { hp: 45, carb: "STAREZZI PWN40" });
+  setEngine("Progasi", "Flex 250", 0, "FIXCN_JYZ250");
+  setEngine("Progasi", "Sunseeker 250", 0, "FIXCN_JYZ250");
+  setEngine("Progasi", "Smart 190", 0, "FIXCN_Z190_4", { carb: "PZ27" });
+  setEngine("Progasi", "Smart 150", 0, "YX140", { hp: 13, carb: "PZ27" });
+  setEngine("Progasi", "Smart 160", 0, "1P60FMK", { hp: 17 });
+  setEngine("Progasi", "Smart 125", 0, "FIXCN_153FMI");
+  setEngine("Progasi", "Smart Mini 125", 0, "FIXCN_153FMI");
+
+  /* ---------- Regulmoto ---------- */
+  setEngine("Regulmoto", "Crosstrec 300", 0, "FIXCN_NB300_5", { hp: 28 });
+
+  /* ---------- Motoland (motoland-shop.ru) ---------- */
+  setEngine("Motoland", "XT300 HS", 0, "175FMM", { carb: "NIBBI PE30" });
+  setEngine("Motoland", "XR250", 1, "FIXCN_PR250_5");
+  setEngine("Motoland", "XR300", 0, "175FMM", { hp: 25 });
+
+  /* ---------- Avantis ---------- */
+  setEngine("Avantis", "A6 Lux 300", 0, "CBS300", { hp: 26 });
+
+  /* ---------- BSE (bsemoto.pro) ---------- */
+  addVersion("BSE", "Z7 300", "FIXCN_CBS300_5", "вариант ZS174MN-3", { hp: 25 });
+  setEngine("BSE", "Z5 250", 0, "FIXCN_172FMM7", { approx: true });
+  setEngine("BSE", "Z4 250", 0, "165FMM", { approx: true });
+  setEngine("BSE", "T7", 0, "NB300");
+  setEngine("BSE", "T5", 0, "FIXCN_TYX300", { approx: true });
+  setEngine("BSE", "Z11", 0, "FIXCN_TYX300", { approx: true });
+
+  /* ---------- GR7 / GR8, Kews, Zuumav — двухтактные Loncin MT250 ---------- */
+  setEngine("GR7", "T250L (2T) Enduro Optimum", 0, "FIXCN_LON_MT250", { hp: 36 });
+  setEngine("GR8", "T250L (2T MT-250) Enduro Pro", 0, "FIXCN_LON_MT250");
+  setEngine("Kews", "K23 MT250", 0, "FIXCN_LON_MT250");
+  setEngine("Zuumav", "K8 MT250", 0, "FIXCN_LON_MT250");
+
+  /* ---------- Zuumav: K6 — воздушный Loncin YB300H(R), а не жидкостный NB300 ---------- */
+  setEngine("Zuumav", "K6 300", 0, "FIXCN_YB300H_6", { hp: 30, approx: true });
+
+  /* ---------- Kews K16 300 (PR300) — 5 ст. ---------- */
+  setEngine("Kews", "K16 300", 0, "FIXCN_PR300_5", { hp: 24, carb: "NIBBI PE30" });
+
+  /* ---------- Sharmax PowerMax 300 — 174MN 280 см³, 27 л.с., 5 ст. (sharmax-moto.ru) ---------- */
+  setEngine("Sharmax", "PowerMax 300", 0, "FIXCN_NB300_5", { hp: 27, approx: true });
+
+  /* ---------- Racer Panther RC300-GY8X — 270 см³, 2V + балансир, 19.7 л.с., 5 ст. ---------- */
+  setEngine("Racer", "Panther RC300-GY8X", 0, "FIXCN_PR300_5", { hp: 19.7, carb: "PZ34", approx: true });
+
+  /* ---------- Irbis TTR250R — 223 см³ (165/166FMM), 16 л.с., а не PR250 ---------- */
+  setEngine("Irbis", "TTR250R", 0, "165FMM", { hp: 16 });
+  setEngine("Irbis", "TTR250", 0, "165FMM", { hp: 16, approx: true });
+})();
+/* ===================== v52: правки общих китайских моторов (PR300, NB300, YB300H) ===================== */
+/* audit-cn-engines: правки общих китайских моторов (грузится ПОСЛЕ audit-cn.js).
+   Подписи версий («код, объём см³») пересчитываются для моторов, у которых меняется объём. */
+(function () {
+  function relabel(id, oldCc) {
+    var e = ENGINES[id], from = e.code + ", " + oldCc + " см³", to = e.code + ", " + e.cc + " см³";
+    BIKES.forEach(function (b) {
+      b.versions.forEach(function (v) {
+        if (v.engine === id && v.label && v.label.indexOf(from) >= 0) v.label = v.label.replace(from, to);
+      });
+    });
+  }
+
+  /* 1) PR300 (ZS175FMN): 271 см³, 2 клапана + балансир (progasi.ru, rollingmoto.ru), 5 ст. у большинства марок
+        (Kayo, Progasi, Kews, GR8, Ataki S004) — 6-ступенчатые Ataki уже на FIXCN_PR300_6.
+     groups — НОВЫЙ массив: у копий через CL (FIXCN_CB300RL_*, 4V) массив groups общий с PR300, их не трогаем. */
+  var pr = ENGINES.PR300, prOld = pr.cc;
+  pr.cc = 271;
+  pr.gearbox = "5 ст.";
+  pr.cam = "SOHC, 2 клапана + балансир";
+  pr.name = "Zongshen PR300 (ZS175FMN) · 2V балансир";
+  pr.groups = pr.groups.filter(function (g) { return g !== "zs4v"; });
+  relabel("PR300", prOld);
+
+  /* Без zs4v PR300 и его 2V-копии теряли бы масляный фильтр (of-pr), PWK34/NIBBI 34 и ремкомплект PWK —
+     привязываем их по id. Колпачки 4V (valveseals-4v) не нужны, остаётся обычный комплект valveseals. */
+  var PR_IDS = ["PR300", "FIXCN_PR300_5", "FIXCN_PR300_6", "FIXCN_PR300PRO"];
+  ["of-pr", "pwk34", "nibbi34", "rk-pwk"].forEach(function (pid) {
+    PARTS.filter(function (p) { return p.id === pid && p.fit; }).forEach(function (p) {
+      PR_IDS.forEach(function (id) { if (p.fit.indexOf(id) < 0) p.fit.push(id); });
+    });
+  });
+  TUNING.filter(function (t) { return t.id === "pwk" && t.fit; }).forEach(function (t) {
+    PR_IDS.forEach(function (id) { if (t.fit.indexOf(id) < 0) t.fit.push(id); });
+  });
+
+  /* 2) NB300 (ZS174MN-5): 74×65 = 279.6 см³ (progasi.ru, regulmoto.by, kayo.ru — 280). КПП оставлена 6 ст. —
+        так у большинства проверенных моделей; 5-ступенчатые — на FIXCN_NB300_5 */
+  var nb = ENGINES.NB300, nbOld = nb.cc;
+  nb.cc = 279.6;
+  relabel("NB300", nbOld);
+  /* Sharmax PowerMax 330 — на самом деле 177MM (NC250) 249 см³, 29 л.с., жидкостный
+     (sharmax-moto.ru, globaldrive.ru, activattor.ru, ridersdrive.ru); «330» — маркетинговое название.
+     ВНИМАНИЕ: tests/check-data.js (объём в названии ±15 %) нужно добавить "Sharmax PowerMax 330" в CC_OK. */
+  setEngine("Sharmax", "PowerMax 330", 0, "NC250", { hp: 29 });
+
+  /* 3) Loncin YB300H — 6 ст. (kayo.ru, progasi.ru). Z190 стоит у 6 моделей (Kayo, BSE, Pitster, Sharmax, Xmotos),
+        4 ст. подтверждено только у Progasi Smart 190 — он на копии FIXCN_Z190_4, общий мотор не трогаем. */
+  /* (LON_YB300H после audit-cn.js без моделей и вычищается при сборке — модели на FIXCN_YB300H_6;
+     правим и его, и EFI-версию: Progasi Endurance 300X — 6 ст.) */
+  ENGINES.LON_YB300H.gearbox = "6 ст.";
+  ENGINES.LON_YB300HE.gearbox = "6 ст.";
+
+  /* 4) Ataki EF300: официальный дилер (Rolling Moto) даёт только ZS174MN-5 / NB300 с 5 ст. —
+        лишнюю версию «вариант мотора 174MN-3» (CBS300) убираем. Сохранённый {vi:1} в app.js
+        откатывается на versions[0] (везде `versions[vi] || versions[0]`). */
+  var ef = BIKES.find(function (b) { return b.brand === "Ataki" && b.name === "EF300"; });
+  if (ef) ef.versions = ef.versions.filter(function (v) { return v.engine !== "CBS300"; });
+})();
+/* ===================== v52: аудит японских и европейских моделей ===================== */
+(function () {
+  /* ===== audit-world: исправления КПП/стартера у НЕ китайских моделей =====
+     Только случаи, когда мотор общий, а у конкретной модели поле отличается (CL + setEngine).
+     Ошибки, общие для всех моделей на моторе, — в audit-world.md («правки общих моторов»). */
+
+  /* --- 4T-кросс KTM / Husqvarna / GasGas: 5 ст. (у EXC-F / FE / EC — 6 ст.) --- */
+  // ktm.com tech specs 250/350/450 SX-F, 450 SMR: «Transmission 5-speed»; Husqvarna FC/FS 450 — 5 ст. Pankl; GasGas MC F — 5 ст.
+  // 450 XC-F и Husqvarna FX 450 — 5 ст. (у 250/350 XC-F и FX 350 — 6 ст., их не трогаем)
+  CL("FIXW_KTM250F_MX", "KTM250F", { name: "KTM 250 SX-F / Husqvarna FC 250 / GasGas MC 250F (кроссовая КПП)", gearbox: "5 ст." }, 2.4);
+  CL("FIXW_KTM350F_MX", "KTM350F", { name: "KTM 350 SX-F / Husqvarna FC 350 / GasGas MC 350F (кроссовая КПП)", gearbox: "5 ст." }, 2.4);
+  CL("FIXW_KTM450F_MX", "KTM450F", { name: "KTM 450 SX-F / SMR / XC-F, Husqvarna FC / FS / FX 450, GasGas MC 450F (5 ст.)", gearbox: "5 ст." }, 2.4);
+
+  /* --- Honda CRF450R / RX (PE07E): 5 ст.; у CRF450L / RL / X 2019+ — 6 ст. --- */
+  // hondanews.com 2024 CRF450RX: «Constant-mesh 5-speed»; Honda 2008/2010/2011 CRF450R: «Close-ratio five-speed»
+  CL("FIXW_CRF450_MX", "CRF450", { name: "Honda CRF450R / CRF450RX (PE07E, 5 ст.)", gearbox: "5 ст." }, 2.0);
+
+  /* --- Yamaha YZ-F: 5 ст.; кик до YZ450F 2018 / YZ250F 2019 (у WR — электростартер) --- */
+  // YZ450F 2003–2009 — карбюратор, кик, 5 ст. (WR450F на том же моторе — электро, 5 ст.)
+  CL("FIXW_YZ450FC_MX", "YZ450FC", { name: "Yamaha YZ450F 2003–2009 (5 клапанов, карбюратор, кик)", gearbox: "5 ст.", start: "Кик", ignition: "CDI",
+    issues: [{ t: "Тяжёлый пуск горячего мотора кикстартером", sev: "med", fix: "Пуск по инструкции: декомпрессор, без газа; проверить зазоры (выпуск садится)." },
+      { t: "Зазоры клапанов уменьшаются (садятся клапаны)", sev: "med", fix: "Проверка зазоров по регламенту, замена клапанов/сёдел при выходе за допуск." }] }, 2.0);
+  // YZ450F 2010+: 5 ст.; электростартер — с 2018 модельного года (до этого кик)
+  CL("FIXW_YZ450F_MX", "YZ450F", { name: "Yamaha YZ450F 2010+ (5 ст.)", gearbox: "5 ст.", start: "Кик (с 2018 — электро)" }, 2.0);
+  // YZ250F 2001–2013: карбюратор, кик, 5 ст. (WR250F на том же моторе — 6 ст., электро)
+  CL("FIXW_YZ250FC_MX", "YZ250FC", { name: "Yamaha YZ250F 2001–2013 (5 клапанов, карбюратор, кик)", gearbox: "5 ст.", start: "Кик", ignition: "CDI" }, 2.0);
+  // YZ250F 2014+: 5 ст.; электростартер с 2019 (у WR250F / YZ250FX — 6 ст.)
+  CL("FIXW_YZ250F_MX", "YZ250F", { name: "Yamaha YZ250F 2014+ (5 ст.)", gearbox: "5 ст.", start: "Кик (с 2019 — электро)" }, 2.0);
+
+  /* --- Suzuki RM-Z450 2008+: 5 ст., только кик (у RMX450Z — электростартер) --- */
+  CL("FIXW_RMZ450_MX", "RMZ450", { name: "Suzuki RM-Z450 2008+ (инжектор, кик)", gearbox: "5 ст.", start: "Кик" }, 2.0);
+
+  /* --- Honda: 6 ст. с 2014 у CB1300 и CB1100 --- */
+  // Honda factbook CB1300 201403: 5 ст. → 6 ст.; global.honda CB history / hondanews 2014 CB1100: six-speed
+  CL("FIXW_HON_SC54E6", "HON_SC54E", { name: "Honda CB1300 Super Four / Bol d'Or 2014+ (SC54E, 6 ст.)", gearbox: "6 ст." }, 2.5);
+  CL("FIXW_HON_SC65E6", "HON_SC65E", { name: "Honda CB1100 / EX / RS 2014+ (SC65E, 6 ст.)", gearbox: "6 ст.", coolant: "" }, 2.5);
+  // VT250 Spada (MC20): 6 ст. (Honda factbook VT250 1988, Wikipedia); у VTR250 — 5 ст.
+  CL("FIXW_HON_MC20E", "HON_MC15E", { code: "MC15E (Spada)", name: "Honda VT250 Spada (V-twin 90°, 249, 6 ст.)", gearbox: "6 ст.", carb: "Keihin CV ×2" }, 1.9);
+  // FTR223 / CB223S: 5 ст. (honda.co.jp CB223S spec: 5 ст.; FTR223 — 5 ст.); у CRF230F — 6 ст.
+  CL("FIXW_HON_223_5", "CRF230F", { code: "MC34E / MD33E", name: "Honda FTR223 / CB223S (сингл 223, 5 ст.)", gearbox: "5 ст." }, 1.8);
+
+  /* --- BMW --- */
+  // R 1100 S: первый боксер с 6-ступенчатой КПП (от K1200RS); остальные R1100 — 5 ст.
+  CL("FIXW_BMW_R1100S", "BMW_R1100", { code: "R259 1100 (S)", name: "BMW R 1100 S (оппозит 1085, 6 ст.)", gearbox: "6 ст., кардан", coolant: "" }, 2.5);
+  // K 1200 LT: 5 ст. (овердрайв) + электрический задний ход; у K 1200 RS / GT — 6 ст.
+  CL("FIXW_BMW_K1200LT", "BMW_K1200O", { code: "K 1200 (589) LT", name: "BMW K 1200 LT (рядная четвёрка 1171, 5 ст. + задний ход)", gearbox: "5 ст. + электрический задний ход, кардан" }, 2.6);
+
+  /* --- Kawasaki ZRX1200R / S 2001–2008: 5 ст. (у ZZR1200 и ZRX1200 DAEG — 6 ст.) --- */
+  CL("FIXW_KAW_ZRX1200R", "KAW_ZRT1200", { code: "ZRT20A", name: "Kawasaki ZRX1200R / S (рядная четвёрка 1164, 5 ст.)", gearbox: "5 ст.", carb: "Keihin CVR36 ×4" }, 2.4);
+
+  /* --- Moto Guzzi --- */
+  // V7 II (2015) и V7 III (2017): 6 ст. (у V7 2008–2014, Nevada, Breva 750 — 5 ст.)
+  CL("FIXW_MG_744_6", "MG_744", { name: "Moto Guzzi V7 II / V7 III (поперечный V-twin 744, 6 ст.)", gearbox: "6 ст., кардан", coolant: "" }, 2.3);
+  // Breva 1100 / Griso 1100: 6 ст. (у California 1100 — 5 ст.)
+  CL("FIXW_MG_1064_6", "MG_1064", { name: "Moto Guzzi Breva 1100 / Griso 1100 (поперечный V-twin 1064, 6 ст.)", gearbox: "6 ст., кардан", coolant: "" }, 2.4);
+
+  /* --- Harley-Davidson Dyna 2006: Twin Cam 88 EFI + новая 6-ст. Cruise Drive --- */
+  // 2006 Dyna: «all-new 6-speed Cruise Drive»; Street Bob 2006 = FXDBI (инжектор), карбюраторных Dyna в 2006 нет
+  CL("FIXW_HD_TC88I_DYNA06", "HD_TC88I", { code: "Twin Cam 88 EFI (Dyna 2006)", name: "Harley-Davidson Twin Cam 88 EFI, Dyna 2006 (6 ст. Cruise Drive)", gearbox: "6 ст. Cruise Drive, ремень" }, 2.6);
+
+  // coolant: "" — у воздушно-масляных баз (SC65E, R259, Guzzi 744/1064) в базе лишнее поле «Антифриз ≈ 2 л»
+
+  /* ===== перевод моделей ===== */
+  setEngine("KTM", "250 SX-F", 0, "FIXW_KTM250F_MX", { approx: true }); // было KTM250F (6 ст.)
+  setEngine("Husqvarna", "FC 250", 0, "FIXW_KTM250F_MX", { hp: 47 });
+  setEngine("GasGas", "MC 250F", 0, "FIXW_KTM250F_MX", { hp: 47 });
+  setEngine("KTM", "350 SX-F", 0, "FIXW_KTM350F_MX"); // было KTM350F (6 ст.)
+  setEngine("Husqvarna", "FC 350", 0, "FIXW_KTM350F_MX", { hp: 57 });
+  setEngine("GasGas", "MC 350F", 0, "FIXW_KTM350F_MX", { hp: 57 });
+  setEngine("KTM", "450 SX-F", 0, "FIXW_KTM450F_MX", { approx: true }); // было KTM450F (6 ст.)
+  setEngine("Husqvarna", "FC 450", 0, "FIXW_KTM450F_MX", { hp: 63 });
+  setEngine("GasGas", "MC 450F", 0, "FIXW_KTM450F_MX", { hp: 63 });
+  setEngine("KTM", "450 SMR", 0, "FIXW_KTM450F_MX", { approx: true });
+  setEngine("Husqvarna", "FS 450", 0, "FIXW_KTM450F_MX");
+  setEngine("KTM", "450 XC-F", 0, "FIXW_KTM450F_MX");
+  setEngine("Husqvarna", "FX 450", 0, "FIXW_KTM450F_MX");
+
+  setEngine("Honda", "CRF450R", 2, "FIXW_CRF450_MX"); // 2017–2020, было CRF450 (6 ст.)
+  setEngine("Honda", "CRF450R", 3, "FIXW_CRF450_MX", { hp: 56 }); // 2021–2026
+  setEngine("Honda", "CRF450RX", 0, "FIXW_CRF450_MX");
+
+  setEngine("Yamaha", "YZ450F", 0, "FIXW_YZ450FC_MX"); // 2003–2009, было YZ450FC (6 ст., электро)
+  setEngine("Yamaha", "YZ450F", 1, "FIXW_YZ450F_MX"); // 2010–2026, было YZ450F (6 ст.)
+  setEngine("Yamaha", "YZ250F", 0, "FIXW_YZ250FC_MX"); // 2001–2013, было YZ250FC (6 ст., электро)
+  setEngine("Yamaha", "YZ250F", 1, "FIXW_YZ250F_MX"); // 2014–2026, было YZ250F (6 ст.)
+  setEngine("Suzuki", "RM-Z450", 1, "FIXW_RMZ450_MX"); // 2008–2026, было RMZ450 (6 ст., электро)
+
+  setEngine("Honda", "CB1300 Super Four", 2, "FIXW_HON_SC54E6", { hp: 113 }); // 2014+
+  setEngine("Honda", "CB1300 Super Bol d'Or", 1, "FIXW_HON_SC54E6", { hp: 113 }); // 2014+
+  setEngine("Honda", "CB1100 / EX / RS", 1, "FIXW_HON_SC65E6", { hp: 90 }); // 2014–2021
+  setEngine("Honda", "VT250 Spada", 0, "FIXW_HON_MC20E", { hp: 40 }); // было HON_MC15E (5 ст.)
+  setEngine("Honda", "FTR223", 0, "FIXW_HON_223_5"); // было CRF230F (6 ст.)
+  setEngine("Honda", "CB223S", 0, "FIXW_HON_223_5", { hp: 16 }); // было CRF230F (6 ст.)
+
+  setEngine("BMW", "R 1100 S", 0, "FIXW_BMW_R1100S", { hp: 98 }); // было BMW_R1100 (5 ст.)
+  setEngine("BMW", "K 1200 LT", 0, "FIXW_BMW_K1200LT", { hp: 98 }); // было BMW_K1200O (6 ст.)
+  setEngine("Kawasaki", "ZRX1200", 0, "FIXW_KAW_ZRX1200R"); // 2001–2008, было KAW_ZRT1200 (6 ст.)
+
+  setEngine("Moto Guzzi", "V7 Classic / Stone / Special", 1, "FIXW_MG_744_6", { hp: 48 }); // V7 II
+  setEngine("Moto Guzzi", "V7 Classic / Stone / Special", 2, "FIXW_MG_744_6", { hp: 52 }); // V7 III
+  setEngine("Moto Guzzi", "Breva 1100", 0, "FIXW_MG_1064_6", { hp: 84 });
+  setEngine("Moto Guzzi", "Griso 1100", 0, "FIXW_MG_1064_6", { hp: 88 });
+
+  // Street Bob 2006: было «2006, карб.» на HD_TC88 (карбюратор, 5 ст.) — модель была только FXDBI (инжектор, 6 ст.)
+  setEngine("Harley-Davidson", "Dyna Street Bob", 0, "FIXW_HD_TC88I_DYNA06", { years: "2006", label: "2006 · Twin Cam 88 EFI (Dyna 2006), 1450 см³" });
+})();
+/* ===================== v52: правки общих моторов (кроссовые 5 ст., зажигание карбюраторных, антифриз у воздушников) ===================== */
+(function () {
+  /* ===== audit-world-engines: правки полей существующих моторов (источники — audit-world.md) ===== */
+  var n = 0;
+  function fix(id, o) {
+    var e = ENGINES[id];
+    if (!e) throw new Error("audit-world-engines: нет мотора " + id);
+    Object.keys(o).forEach(function (k) { if (e[k] !== o[k]) { e[k] = o[k]; n++; } });
+  }
+
+  /* --- 4T-кросс: 5 ст.; кик до появления электростартера --- */
+  fix("CRF450C", { gearbox: "5 ст.", start: "Кик", ignition: "CDI" });      // CRF450R 2002–2008
+  fix("HON_PE05F", { gearbox: "5 ст.", start: "Кик" });                     // CRF450R 2009–2016
+  fix("CRF250C", { gearbox: "5 ст.", start: "Кик", ignition: "CDI" });      // CRF250R 2004–2009
+  fix("HON_ME12E", { gearbox: "5 ст.", start: "Кик" });                     // CRF250R 2010–2017
+  fix("CRF250R", { gearbox: "5 ст." });                                     // CRF250R 2018+ / CRF250RX
+  fix("KX250FC", { gearbox: "5 ст.", start: "Кик", ignition: "CDI" });      // KX250F 2004–2010
+  fix("KAW_KX250F_E", { gearbox: "5 ст." });                                // KX250F 2011–2020
+  fix("KX450FC", { gearbox: "5 ст.", start: "Кик", ignition: "CDI" });      // KX450F 2006–2008
+  fix("KAW_KX450F_09", { gearbox: "5 ст." });                               // KX450F 2009–2018
+  fix("KX450", { gearbox: "5 ст." });                                       // KX450 / KX450X 2019+
+  fix("KAW_KX250_21", { gearbox: "5 ст." });                                // KX250 / KX250X 2021+
+  fix("RMZ450C", { gearbox: "5 ст.", start: "Кик", ignition: "CDI" });      // RM-Z450 2005–2007
+  fix("RMZ450", { gearbox: "5 ст.", name: "Suzuki RM-Z450 / RMX450Z (449, инжектор)" }); // остался RMX450Z (электро + кик — верно)
+  fix("RMZ250C", { gearbox: "5 ст.", start: "Кик", ignition: "CDI" });     // RM-Z250 2004–2009
+  fix("SUZ_RMZ250F", { gearbox: "5 ст.", start: "Кик" });                   // RM-Z250 2010+
+  fix("YZ450FC", { gearbox: "5 ст.", ignition: "CDI", name: "Yamaha WR450F 2003–2015 / YZ450F 2003–2009 (5 клапанов, карбюратор)" }); // WR450F — электро, верно
+  fix("YZ450F", { gearbox: "5 ст." });                                      // WR450F 2016+, YZ450FX, Fantic XEF 450
+  fix("YZ250FC", { ignition: "CDI" });                                      // WR250F: 6 ст. и электро — верно
+  // слабое место про реверсивную головку к карбюраторному YZ450F 2003–2009 не относится (реверс — с 2010)
+  ENGINES["YZ450FC"].issues = ENGINES["YZ450FC"].issues.filter(function (x) { return !/Перевёрнутая головка/.test(x.t); });
+  if (!ENGINES["YZ450FC"].issues.length) ENGINES["YZ450FC"].issues = [
+    { t: "Зазоры клапанов уменьшаются (садятся клапаны)", sev: "med", fix: "Проверка зазоров по регламенту, замена клапанов/сёдел при выходе за допуск." },
+    { t: "Тяжёлый пуск горячего мотора", sev: "low", fix: "Пуск без газа, горячий — с приоткрытым дросселем; проверить зазоры и чистоту жиклёров." }];
+
+  /* --- дорожные и прочие --- */
+  fix("HON_SD02E", { gearbox: "6 ст." });                // Varadero 2003–2011
+  fix("HON_SC54E", { gearbox: "5 ст." });                // CB1300 до 2013 (2014+ — FIXW_HON_SC54E6)
+  fix("HON_SC65E", { gearbox: "5 ст." });                // CB1100 2010–2013 (2014+ — FIXW_HON_SC65E6)
+  fix("HON_RC44E", { gearbox: "5 ст., цепь" });          // Shadow 750 / ACE / Spirit 1997–2003 — цепь
+  fix("CRF250F", { gearbox: "5 ст." });                  // CRF250F 2019+
+  fix("KAW_ZEPH750", { gearbox: "5 ст." });              // Zephyr 750, ZR-7
+  fix("KAW_ZEPH1100", { gearbox: "5 ст." });             // Zephyr 1100
+  fix("DT200", { gearbox: "6 ст." });                    // DT200R / WR200R
+  fix("S160BJ", { gearbox: "5 ст." });                   // Pulsar NS160
+  fix("IN_BAJAS150", { gearbox: "5 ст.", ignition: "CDI" }); // Pulsar AS150 (карбюратор)
+  fix("DUC_750", { gearbox: "5 ст." });                  // Monster 750 / SS 750
+  var nFix = n;
+
+  /* --- массово: карбюратор + «ЭБУ (EFI)» → CDI / транзисторное --- */
+  var nIgn = 0, nCool = 0;
+  Object.keys(ENGINES).forEach(function (id) {
+    var e = ENGINES[id], g = e.groups || [];
+    if (g.indexOf("carb") >= 0 && /^ЭБУ \(EFI\)$/.test(e.ignition || "")) {
+      // многоцилиндровые дорожные японцы и 2-цилиндровые круизеры — транзисторное (TCI); остальное — CDI
+      var tci = e.stroke === "4T" && /^(i4|i3|twin|vtwin)$/.test(e.layout || "") && e.cc >= 240;
+      e.ignition = tci ? "Транзисторное (TCI)" : "CDI";
+      nIgn++;
+    }
+    if (g.indexOf("liquid") < 0 && !/жидкост/i.test(e.cooling || "") && "coolant" in e) { delete e.coolant; nCool++; }
+  });
+  if (typeof console !== "undefined") console.log("audit-world-engines: правок полей " + nFix + ", зажигание исправлено у " + nIgn + ", coolant удалён у " + nCool);
+})();
+/* ===================== v52: новые модели (Indian, Victory, Harley, BMW R 18, китайские 2024–2026) ===================== */
+(function () {
+  /* expand2026: расширение базы — китайские/российские эндуро, питбайки, мопеды 2018–2026 (по каталогам дилеров),
+     Indian / Victory, недостающие Harley, японские и европейские модели и поколения. Префикс новых моторов X26_. */
+  var E = "Эндуро", P = "Питбайк", M = "Мотард", L = "Лёгкий эндуро", AD = "Тур-эндуро", MO = "Мопед",
+    NK = "Нейкед", SP = "Спорт", CH = "Чоппер", TR = "Турер", KL = "Классика", K = "Кросс-эндуро";
+
+  /* ===================================================================== */
+  /* ============================ МОТОРЫ ================================= */
+  /* ===================================================================== */
+
+  /* Zongshen PR300 PRO (ZS177FMN) и CB300RL (ZS175FMN-7) — берём из audit-cn.js: FIXCN_PR300PRO, FIXCN_CB300RL_5 / _6 */
+
+  /* --- Indian Thunder Stroke 111 / 116 --- */
+  RE("X26_IND_TS111", { code: "Thunder Stroke 111", name: "Indian Thunder Stroke 111 (V-twin 49°, 1811)", maker: "Indian Motorcycle (Polaris)",
+    layout: "vtwin", vAngle: 49, groups: ["air", "efi", "4t", "big"], cam: "OHV, 2 клапана на цилиндр, 3 нижних распредвала, параллельные штанги",
+    cooling: "Воздушно-масляное", cc: 1811, hp: 85, torque: "161 Н·м", compression: "9.5:1", redline: 5500,
+    gearbox: "6 ст., ремень", carb: "Инжектор (дроссель 54 мм)", idle: "900–1000",
+    valveIn: "гидрокомпенсаторы", valveEx: "гидрокомпенсаторы", valveInt: 0,
+    spark: "по каталогу Indian (зазор 0.9 мм)", gap: "0.9 мм", sparkTorque: "≈ 15–20 Н·м",
+    oil: "20W-40 полусинтетика (одно масло на мотор, праймари и КПП)", oilVol: "≈ 5.2 л с фильтром (с 03.2019 — ≈ 5.7 л)", oilInt: 8000, coolant: "—",
+    issues: [{ t: "Сильный нагрев ног и седла от заднего цилиндра в пробках", sev: "med", fix: "Режим отключения заднего цилиндра на холостых (обновление ПО), тепловые экраны." },
+      { t: "Уровень масла легко перелить — проверка только по процедуре", sev: "med", fix: "Прогреть, мотоцикл ровно, проверять щупом по мануалу; лишнее масло выдавит через сапун." },
+      { t: "Ранние 2014–2015: отзывные кампании (топливный насос, проводка)", sev: "low", fix: "Проверить по VIN у дилера, выполнены ли отзывы." }] }, 2.6);
+  CL("X26_IND_TS116", "X26_IND_TS111", { code: "Thunder Stroke 116", name: "Indian Thunder Stroke 116 (V-twin 49°, 1890)", cc: 1890, hp: 92, torque: "171 Н·м", compression: "10:1" }, 2.6);
+
+  /* --- Indian PowerPlus 108 / 112 (жидкостный V-twin 60°) --- */
+  RE("X26_IND_PP108", { code: "PowerPlus 108", name: "Indian PowerPlus 108 (V-twin 60°, 1768, жидкостный)", maker: "Indian Motorcycle (Polaris)",
+    layout: "vtwin", vAngle: 60, groups: ["liquid", "efi", "4t", "big"], cam: "SOHC, 4 клапана на цилиндр, гидрокомпенсаторы",
+    cc: 1768, hp: 122, torque: "178 Н·м", compression: "11:1", redline: 6500, gearbox: "6 ст., ремень",
+    valveIn: "гидрокомпенсаторы", valveEx: "гидрокомпенсаторы", valveInt: 0,
+    spark: "по каталогу Indian (зазор 1.0 мм)", gap: "1.0 мм", sparkTorque: "10 Н·м",
+    oil: "15W-60 синтетика (Indian)", oilVol: "≈ 4.5–5 л с фильтром", oilInt: 8000, coolant: "≈ 2.5 л",
+    issues: [{ t: "Ранние 2020–2021: неровный холостой и ошибки — лечится прошивкой", sev: "med", fix: "Обновить ПО ЭБУ у дилера." },
+      { t: "Нагрев в пробках", sev: "low", fix: "Режим отключения заднего цилиндра, следить за вентиляторами и антифризом." }] }, 2.6);
+  CL("X26_IND_PP112", "X26_IND_PP108", { code: "PowerPlus 112", name: "Indian PowerPlus 112 (V-twin 60°, 1834, жидкостный)", cc: 1834, hp: 126, torque: "180 Н·м" }, 2.7);
+
+  /* --- Indian Scout (жидкостный V-twin 60°, DOHC) --- */
+  RE("X26_IND_SCOUT", { code: "Scout 1133 (69 ci)", name: "Indian Scout 1133 (V-twin 60°, жидкостный, DOHC)", maker: "Indian Motorcycle (Polaris)",
+    layout: "vtwin", vAngle: 60, groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 8 клапанов", cc: 1133, hp: 100, torque: "97.7 Н·м",
+    compression: "10.7:1", redline: 8300, gearbox: "6 ст., ремень",
+    valveIn: "≈ 0.10–0.20 мм (шайбы)", valveEx: "≈ 0.25–0.35 мм (шайбы)", spark: "по каталогу Indian (зазор 0.8 мм)", gap: "0.8 мм", sparkTorque: "≈ 12 Н·м",
+    oil: "15W-60 синтетика (Indian)", oilVol: "≈ 3.8 л с фильтром", oilInt: 8000, valveInt: 24000, coolant: "≈ 2 л",
+    issues: [{ t: "Нагрев заднего цилиндра и ног в пробках", sev: "low", fix: "Следить за вентилятором и антифризом, не стоять долго на месте." },
+      { t: "Уровень масла — по процедуре (прогретый мотор, мотоцикл ровно)", sev: "low", fix: "Не доливать «на глаз»." },
+      { t: "Короткий ход подвески — удары в подвеске, не мотор", sev: "low", fix: "Амортизаторы с большим ходом/под вес." }] }, 2.4);
+  CL("X26_IND_SCOUT60", "X26_IND_SCOUT", { code: "Scout Sixty 999", name: "Indian Scout Sixty 999 (V-twin 60°, жидкостный)", cc: 999, hp: 78, torque: "88.8 Н·м", gearbox: "5 ст., ремень" }, 2.3);
+  CL("X26_IND_SCOUT1250", "X26_IND_SCOUT", { code: "SpeedPlus 1250", name: "Indian SpeedPlus 1250 (Scout 2025+, V-twin 60°, жидкостный)", cc: 1250, hp: 105, torque: "111 Н·м",
+    compression: "12.5:1", oilVol: "≈ 3.3–3.8 л с фильтром" }, 2.4);
+
+  /* --- Indian FTR 1203 --- */
+  CL("X26_IND_FTR", "X26_IND_SCOUT", { code: "FTR 1203", name: "Indian FTR 1203 (V-twin 60°, жидкостный, DOHC)", cc: 1203, hp: 120, torque: "120 Н·м",
+    compression: "12.5:1", redline: 9000, gearbox: "6 ст., цепь", oilVol: "≈ 4 л с фильтром",
+    issues: [{ t: "Ранние FTR 1200: жёсткий газ и рывки на малом газу", sev: "low", fix: "Обновление ПО, режимы Rain/Standard." },
+      { t: "Нагрев заднего цилиндра в городе", sev: "low", fix: "Вентилятор и антифриз в порядке, тепловые экраны." }] }, 2.4);
+
+  /* --- Victory Freedom 92 / 100 / 106 (V-twin 50°, SOHC 4V) --- */
+  RE("X26_VIC_F106", { code: "Freedom 106/6", name: "Victory Freedom 106 (V-twin 50°, 1731)", maker: "Victory (Polaris)",
+    layout: "vtwin", vAngle: 50, groups: ["air", "efi", "4t", "big"], cam: "SOHC, 4 клапана на цилиндр, гидрокомпенсаторы", cooling: "Воздушно-масляное",
+    cc: 1731, hp: 97, torque: "153 Н·м", compression: "9.4:1", redline: 6000, gearbox: "6 ст. (овердрайв), ремень", idle: "900–1000",
+    valveIn: "гидрокомпенсаторы", valveEx: "гидрокомпенсаторы", valveInt: 0,
+    spark: "по каталогу Victory (зазор 0.8 мм)", gap: "0.8 мм", sparkTorque: "≈ 15–20 Н·м",
+    oil: "20W-40 полусинтетика (Victory)", oilVol: "≈ 5.7 л с фильтром", oilInt: 8000, coolant: "—",
+    issues: [{ t: "Гидрокомпенсаторы стучат на холодную при старом масле", sev: "med", fix: "Масло и фильтр по регламенту, только рекомендованная вязкость." },
+      { t: "Марка закрыта в 2017 — запчасти через Indian/Polaris и б/у", sev: "med", fix: "Расходники заранее, многие детали общие внутри линейки Victory." },
+      { t: "Нагрев заднего цилиндра в пробках", sev: "low", fix: "Тепловые экраны, не стоять долго на месте." }] }, 2.5);
+  CL("X26_VIC_F100", "X26_VIC_F106", { code: "Freedom 100/6", name: "Victory Freedom 100 (V-twin 50°, 1634)", cc: 1634, hp: 92, torque: "148 Н·м" }, 2.4);
+  CL("X26_VIC_F92", "X26_VIC_F106", { code: "Freedom 92", name: "Victory Freedom 92 (V-twin 50°, 1507)", cc: 1507, hp: 76, torque: "≈ 110 Н·м", gearbox: "5 ст., ремень" }, 2.3);
+
+  /* --- Harley-Davidson Milwaukee-Eight VVT 121 (CVO 2023+) --- */
+  CL("X26_HD_M8_121", "HD_M8_117", { code: "Milwaukee-Eight VVT 121", name: "Harley-Davidson Milwaukee-Eight 121 VVT (V-twin 45°, CVO 2023+)",
+    cc: 1977, hp: 115, torque: "189 Н·м", cooling: "Воздушно-масляное, головки — жидкостные", redline: 5600,
+    cam: "OHV, 8 клапанов (4 на цилиндр), нижний распредвал с изменением фаз (VVT), балансир, V-twin 45°",
+    issues: [{ t: "Новый мотор (2023): единичные проблемы с ПО и датчиками VVT", sev: "low", fix: "Обновления ЭБУ у дилера." },
+      { t: "Сильный нагрев в пробках", sev: "med", fix: "Следить за антифризом головок и вентиляторами, режим отключения цилиндра." },
+      { t: "Три отдельных масла (мотор, праймари, КПП)", sev: "low", fix: "Менять все три по регламенту." }] }, 2.8);
+
+  /* --- BMW R 18 (Big Boxer 1802) --- */
+  RE("X26_BMW_R18", { code: "Big Boxer 1802", name: "BMW R 18 Big Boxer 1802 (оппозит, OHV)", maker: "BMW", layout: "boxer",
+    groups: ["air", "efi", "4t", "big"], cam: "OHV, 4 клапана на цилиндр, 2 распредвала (по бокам коленвала)", cooling: "Воздушно-масляное",
+    cc: 1802, hp: 91, torque: "158 Н·м", compression: "9.6:1", redline: 5750, gearbox: "6 ст., кардан (открытый вал)", idle: "≈ 950",
+    valveIn: "≈ 0.20–0.25 мм (винтовая регулировка)", valveEx: "≈ 0.30–0.35 мм (винтовая регулировка)", spark: "NGK (по каталогу BMW, 2 на цилиндр)",
+    gap: "0.8 мм", sparkTorque: "≈ 20 Н·м", oil: "5W-40 (BMW Advantec Ultimate)", oilVol: "≈ 4 л с фильтром", oilInt: 10000, valveInt: 20000, coolant: "—",
+    issues: [{ t: "Большой вес (≈ 345 кг) — падение на стоянке ломает цилиндры/крышки", sev: "med", fix: "Защитные дуги цилиндров." },
+      { t: "Зазоры клапанов — регулировка винтами по регламенту", sev: "low", fix: "Проверка на ТО, иначе шум и потеря мощности." }] }, 2.7);
+
+  /* --- MV Agusta 931 (Enduro Veloce / Lucky Explorer 9.5) --- */
+  CL("X26_MV_931", "MV_800", { code: "MV 931", name: "MV Agusta 931 (рядная тройка, Enduro Veloce)", cc: 931, hp: 124, torque: "102 Н·м", compression: "≈ 13:1",
+    valveIn: "≈ 0.15–0.20 мм", valveEx: "≈ 0.20–0.25 мм",
+    issues: [{ t: "Новый мотор (2023) — мало статистики и дорогие запчасти", sev: "med", fix: "ТО у дилера, расходники заранее." },
+      { t: "Электроника и прошивки (режимы, квикшифтер)", sev: "low", fix: "Обновления ПО у дилера." }] }, 2.7);
+
+  /* --- Kawasaki BX250 (Ninja 250SL / Z250SL) --- */
+  RE("X26_KAW_BX250", { region: "jp", code: "BX250", name: "Kawasaki BX250 (сингл 249, DOHC: Ninja 250SL / Z250SL)", maker: "Kawasaki",
+    groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 4 клапана", cc: 249, hp: 28, torque: "22.6 Н·м", compression: "11.3:1", redline: 10500,
+    valveIn: "0.10–0.19 мм", valveEx: "0.22–0.31 мм", spark: "NGK CR8E", gap: "0.7–0.8 мм", sparkTorque: "11 Н·м",
+    oil: "10W-40 (JASO MA)", oilVol: "≈ 1.7 л с фильтром", oilInt: 6000, valveInt: 24000, coolant: "≈ 0.9 л",
+    issues: [{ t: "Вибрации на высоких оборотах (сингл без балансира)", sev: "low", fix: "Не держать долго у отсечки, проверять крепёж." },
+      { t: "Перегрев в пробках", sev: "low", fix: "Проверить включение вентилятора и антифриз." }] }, 1.7);
+
+  /* --- Yamaha XV125 (Virago 125 / Drag Star 125) --- */
+  CL("X26_YAM_XV125", "YAM_XV250", { code: "XV125 (5AJ)", name: "Yamaha XV125 Virago / XVS125 Drag Star (V-twin 60°, 124)", cc: 124, hp: 11, torque: "≈ 10 Н·м",
+    carb: "Mikuni BDS (1 карбюратор)", gearbox: "5 ст., цепь", spark: "NGK D8EA", oilVol: "≈ 1.5 л",
+    issues: [{ t: "Слабый для трассы — в основном учебный/городской", sev: "low", fix: "Не перегружать, масло вовремя." },
+      { t: "Карбюратор после зимы", sev: "low", fix: "Сливать бензин из поплавковой камеры на хранение." }] }, 1.4);
+
+  /* --- Suzuki GSX-R1100: масловоздушный SACS (1986–1992) и жидкостный (1993–1998) --- */
+  RE("X26_SUZ_GSXR1100O", { region: "jp", code: "GSX-R1100 (SACS)", name: "Suzuki GSX-R1100 / GSX1100F (рядная четвёрка 1127, масловоздушная SACS)", maker: "Suzuki",
+    layout: "i4", groups: ["dohc", "air", "carb", "4t", "big"], cam: "DOHC, 16 клапанов, 4 цилиндра", cooling: "Воздушно-масляное (SACS)",
+    cc: 1127, hp: 143, torque: "≈ 116 Н·м", compression: "≈ 10:1", redline: 11000, gearbox: "5 ст.", carb: "Mikuni BST40 ×4",
+    jetMain: "по году (≈ 110–125)", jetPilot: "≈ 40", needle: "по году", idle: "1000–1200",
+    valveIn: "0.10–0.15 мм", valveEx: "0.18–0.23 мм", spark: "NGK JR9B / JR8C", gap: "0.6–0.7 мм", sparkTorque: "11 Н·м",
+    oil: "10W-40 (JASO MA)", oilVol: "≈ 4.6 л с фильтром", oilInt: 6000, valveInt: 12000, coolant: "—",
+    issues: [{ t: "Возраст: синхронизация и чистка 4 карбюраторов", sev: "med", fix: "Ремкомплекты, синхронизация вакуумметром." },
+      { t: "Масляный радиатор и шланги стареют — течи", sev: "med", fix: "Осмотр, замена шлангов." },
+      { t: "Цепь ГРМ и натяжитель на большом пробеге", sev: "med", fix: "Шум на холодную — менять комплектом." }] }, 2.4);
+  CL("X26_SUZ_GSXR1100W", "X26_SUZ_GSXR1100O", { code: "GSX-R1100W", name: "Suzuki GSX-R1100W (рядная четвёрка 1074, жидкостная)",
+    groups: ["dohc", "liquid", "carb", "4t", "big"], cooling: "Жидкостное", cc: 1074, hp: 155, torque: "≈ 115 Н·м", carb: "Mikuni ×4 (BST40 / BDST)", coolant: "≈ 2.5 л" }, 2.4);
+
+  /* --- Moto Guzzi V11 (1064, 6-ступенчатая КПП) --- */
+  CL("X26_MG_V11", "MG_1064", { code: "V11 (1064 2V)", name: "Moto Guzzi V11 (поперечный V-twin 90°, 1064, 6 ст.)", hp: 91, gearbox: "6 ст., кардан" }, 2.4);
+
+  /* --- Suzuki GSX-R750 первых поколений (SACS 1985–1991, жидкостный 1992–1995), 6 ст. --- */
+  CL("X26_SUZ_GSXR750O", "X26_SUZ_GSXR1100O", { code: "GSX-R750 (SACS)", name: "Suzuki GSX-R750 1985–1991 (рядная четвёрка 749, масловоздушная SACS)",
+    cc: 749, hp: 106, torque: "≈ 70 Н·м", redline: 12500, gearbox: "6 ст.", carb: "Mikuni ×4 (VM29SS / BST36)" }, 2.2);
+  CL("X26_SUZ_GSXR750W", "X26_SUZ_GSXR1100W", { code: "GSX-R750W", name: "Suzuki GSX-R750W 1992–1995 (рядная четвёрка 749, жидкостная)",
+    cc: 749, hp: 118, torque: "≈ 73 Н·м", redline: 13000, gearbox: "6 ст.", carb: "Mikuni BST36 ×4" }, 2.2);
+
+  /* ===================================================================== */
+  /* ============================ МОДЕЛИ ================================= */
+  /* ===================================================================== */
+
+  /* --- Kayo (каталог официального дилера 2025–2026) --- */
+  G("Kayo", "K1 300 Road", E, [["PR300", "2024+", { hp: 24 }]]);
+  G("Kayo", "K3-LM 250 MX", E, [["165FMM", "2025+", { approx: true }]]);
+  G("Kayo", "K7-A 300 Road", E, [["FIXCN_CB300RL_5", "2025+"]]);
+  G("Kayo", "K2 Pro 300 Road", E, [["FIXCN_PR300PRO", "2025+"]]);
+  G("Kayo", "M125EM", P, [["154FMI", "2024+", { approx: true }]]);
+
+  /* --- Ataki --- */
+  G("Ataki", "Batllo", M, [["FIXCN_PR300PRO", "2025+", { hp: 24.5 }]]);
+  G("Ataki", "T1-L 300 MX", E, [["175FMM", "2026+", { hp: 24 }]]);
+  G("Ataki", "RA300", E, [["PR300", "2025+", { hp: 24 }]]);
+  G("Ataki", "Week9", E, [["175FMM", "2025+", { hp: 24 }]]);
+
+  /* --- Regulmoto --- */
+  G("Regulmoto", "Alien Monster 300", NK, [["S300C", "2024+", { hp: 29 }]]);
+  G("Regulmoto", "CR-X 300", E, [["PR300", "", { hp: 24 }]]);
+  G("Regulmoto", "Athlete Pro 300", E, [["FIXCN_CB300RL_6", "", { approx: true }]]);
+  G("Regulmoto", "TE PR 300", AD, [["FIXCN_CB300RL_6", ""]]);
+  G("Regulmoto", "Nibbi N300", E, [["FIXCN_CB300RL_6", "", { approx: true, hp: 26 }]]);
+  G("Regulmoto", "V Bob 250", CH, [["V250LF", "", { approx: true }]]);
+  G("Regulmoto", "SK200-6", KL, [["CG200", "", { approx: true, hp: 11 }]]);
+  setEngine("Regulmoto", "Holeshot Red Edition", 0, "FIXCN_CB300RL_6", { approx: true, hp: 28 });
+  setEngine("Regulmoto", "ZR PR 300 4 valves", 0, "FIXCN_CB300RL_6", { approx: true, hp: 28 });
+  setEngine("Regulmoto", "CR-Z 300", 0, "NB300", { hp: 28.6 });
+
+  /* --- Racer (каталог официального представителя) --- */
+  G("Racer", "Bros RC300-GY8B", E, [["FIXCN_PR300PRO", "", { approx: true }]]);
+  G("Racer", "Booster ZWC2-300B", E, [["PR300", "", { approx: true, hp: 23 }]]);
+  G("Racer", "Storm RC250XZR-A", E, [["PR300", "", { approx: true, hp: 26 }]]);
+  G("Racer", "Z5", E, [["NB300", "", { hp: 29 }]]);
+  G("Racer", "K2 RC300-GY8A", E, [["FIXCN_PR300PRO", "", { approx: true }]]);
+  G("Racer", "Panther PRO RC300B-F", E, [["175FMM", "", { hp: 24 }]]);
+  G("Racer", "Enduro XVR RC300-GY8K", E, [["175FMM", "", { approx: true, hp: 19.7 }]]);
+  G("Racer", "XSR RC300-GY8V", E, [["175FMM", "", { approx: true, hp: 19.7 }]]);
+  G("Racer", "Cross X2 SR-X2", K, [["NB300", "", { approx: true }]]);
+  G("Racer", "Cross X1 SR-X1", E, [["172FMM", "", { approx: true }]]);
+  G("Racer", "K2 RC250GY-C2K", E, [["172FMM", "", { approx: true }]]);
+  G("Racer", "Enduro L150 RC150-23X", L, [["CG150", "", { approx: true, hp: 11.2 }]]);
+  G("Racer", "Z6 PR", E, [["PR300", "", { approx: true, hp: 22 }]]);
+  G("Racer", "Pitbike Z1", P, [["154FMI", "", { approx: true, hp: 10 }]]);
+  G("Racer", "Pitbike Z2", P, [["YX140", "", { approx: true }]]);
+  G("Racer", "Pitbike CRF125E", P, [["154FMI", "", { approx: true }]]);
+  G("Racer", "Pitbike TRX125E", P, [["154FMI", "", { approx: true, hp: 10 }]]);
+  G("Racer", "Pitbike TRX140E", P, [["YX140", "", { approx: true }]]);
+  G("Racer", "Pitbike RX140E", P, [["YX140", "", { approx: true }]]);
+  G("Racer", "Triumph RC250CK-A", KL, [["172FMM", "", { approx: true }]]);
+  G("Racer", "Triumph 300 RC300-GY8H", KL, [["FIXCN_PR300PRO", "", { approx: true }]]);
+  G("Racer", "Skyway RC300CS", SP, [["175FMM", "", { approx: true, hp: 19.7 }]]);
+  G("Racer", "Fighter RC300CK-N", NK, [["175FMM", "", { approx: true, hp: 19.7 }]]);
+  G("Racer", "Magnum RC200-C5B", CH, [["CG200", "", { approx: true, hp: 13.6 }]]);
+  G("Racer", "Tourist RC200GY-C2A", L, [["CG200", "", { approx: true }]]);
+  G("Racer", "Tiger RC150-23", NK, [["CG150", "", { approx: true, hp: 11.2 }]]);
+  G("Racer", "Tourist RC150-23A", L, [["CG150", "", { approx: true, hp: 11.2 }]]);
+  G("Racer", "Scout RC110N-H", MO, [["152FMH", "", { approx: true }]]);
+  G("Racer", "Scout Lux RC50S", MO, [["139FMB", "", { approx: true }]]);
+  G("Racer", "Scout RC50-H", MO, [["139FMB", "", { approx: true }]]);
+  G("Racer", "Beta RC50-V", MO, [["139FMB", "", { approx: true }]]);
+  G("Racer", "RC50-F", MO, [["139FMB", "", { approx: true, hp: 2.7 }]]);
+
+  /* --- Минск / ЗиД --- */
+  G("Минск", "ERX 300A", E, [["PR300", "", { approx: true, hp: 22 }]]);
+  G("Минск", "ERX 300W", E, [["NB300", "", { approx: true, hp: 26 }]]);
+  G("Минск", "Ranger 200", L, [["CG200", "", { approx: true, hp: 14.3 }]]);
+  G("Минск", "D4 50", MO, [["139FMB", "", { approx: true, hp: 2.7 }]]);
+  G("ЗиД", "300-01 Стайер", E, [["CBS300", "", { approx: true, hp: 29 }]]);
+
+  /* --- Motax --- */
+  G("Motax", "XR 250", E, [["172FMM-3A", ""]]);
+  G("Motax", "XR 300", E, [["YBS300", "", { approx: true }]]);
+  G("Motax", "EX 300", E, [["YBS300", "", { approx: true }]]);
+  G("Motax", "MX 250", E, [["167FMM", "", { approx: true, hp: 16 }]]);
+  G("Motax", "MX 140", P, [["YX140", "2024+", { approx: true }]]);
+
+  /* --- Motoland / PWR --- */
+  G("Motoland", "FX 250", E, [["172FMM-3A", ""]]);
+  G("Motoland", "300 Enduro GL300", E, [["YBS300", "", { approx: true }]]);
+  G("Motoland", "250 Enduro CRF LT", E, [["172FMM", "", { approx: true, hp: 20 }]]);
+  G("PWR", "FZ250", E, [["172FMM-3A", ""]]);
+
+  /* --- CFMOTO --- */
+  G("CFMOTO", "250CL-X", NK, [["S250C", "2023+"]]);
+  G("CFMOTO", "450SR-S", SP, [["CF450", "2024+", { hp: 50 }]]);
+
+  /* --- «Любая модель» для моторов без общей записи --- */
+  addBike("Любая модель", "с мотором ZS177FMN (Zongshen 298, 4V)", E, "FIXCN_PR300PRO");
+  addBike("Любая модель", "с мотором ZS175FMN-7 (Zongshen RL 271, 4V)", E, "FIXCN_CB300RL_6");
+  addBike("Любая модель", "с мотором ZS178MM-2 (NX250)", E, "ZS_NX250");
+  addBike("Любая модель", "с мотором ZS170MM (CB250 жидкостный)", E, "ZS_170MM");
+  addBike("Любая модель", "с мотором ZS175FMN PR5 EFI", E, "PR300E");
+  addBike("Любая модель", "с мотором Loncin LX176FMN (YB300H)", E, "LON_YB300H");
+  addBike("Любая модель", "с мотором Loncin LX171YMM (FE250)", E, "LON_FE250");
+
+  /* --- Indian Motorcycle --- */
+  G("Indian", "Chief", CH, [["X26_IND_TS111", "2014–2021"], ["X26_IND_TS116", "2022+"]]);
+  G("Indian", "Chief Vintage", CH, [["X26_IND_TS111", "2014–2019"]]);
+  G("Indian", "Chief Dark Horse", CH, [["X26_IND_TS111", "2016–2021"], ["X26_IND_TS116", "2022+"]]);
+  G("Indian", "Chief Bobber", CH, [["X26_IND_TS116", "2022+"]]);
+  G("Indian", "Super Chief", CH, [["X26_IND_TS116", "2022+"]]);
+  G("Indian", "Sport Chief", CH, [["X26_IND_TS116", "2023+"]]);
+  G("Indian", "Springfield", TR, [["X26_IND_TS111", "2016–2019"], ["X26_IND_TS116", "2020+"]]);
+  G("Indian", "Chieftain", TR, [["X26_IND_TS111", "2014–2019"], ["X26_IND_TS116", "2020+"], ["X26_IND_PP112", "2025+ (PowerPlus)"]]);
+  G("Indian", "Roadmaster", TR, [["X26_IND_TS111", "2015–2019"], ["X26_IND_TS116", "2020+"], ["X26_IND_PP112", "2025+ (PowerPlus)"]]);
+  G("Indian", "Challenger", TR, [["X26_IND_PP108", "2020–2024"], ["X26_IND_PP112", "2025+"]]);
+  G("Indian", "Pursuit", TR, [["X26_IND_PP108", "2022–2024"], ["X26_IND_PP112", "2025+"]]);
+  G("Indian", "Scout", CH, [["X26_IND_SCOUT", "2015–2024"], ["X26_IND_SCOUT1250", "2025+"]]);
+  G("Indian", "Scout Bobber", CH, [["X26_IND_SCOUT", "2018–2024", { hp: 94 }], ["X26_IND_SCOUT1250", "2025+"]]);
+  G("Indian", "Scout Rogue", CH, [["X26_IND_SCOUT", "2022–2024", { hp: 94 }]]);
+  G("Indian", "Scout Sixty", CH, [["X26_IND_SCOUT60", "2016–2021"], ["X26_IND_SCOUT60", "2025+"]]);
+  G("Indian", "Scout Bobber Sixty", CH, [["X26_IND_SCOUT60", "2020–2021"]]);
+  G("Indian", "Sport Scout", CH, [["X26_IND_SCOUT1250", "2025+"]]);
+  G("Indian", "Super Scout", CH, [["X26_IND_SCOUT1250", "2025+"]]);
+  G("Indian", "101 Scout", CH, [["X26_IND_SCOUT1250", "2025+", { hp: 111 }]]);
+  G("Indian", "FTR 1200 / FTR", NK, [["X26_IND_FTR", "2019–2021 (FTR 1200)"], ["X26_IND_FTR", "2022+ (FTR / FTR S / Rally)"]]);
+
+  /* --- Victory --- */
+  G("Victory", "V92C", CH, [["X26_VIC_F92", "1999–2003"]]);
+  G("Victory", "Vegas", CH, [["X26_VIC_F92", "2003–2005"], ["X26_VIC_F100", "2006–2009"], ["X26_VIC_F106", "2010–2017"]]);
+  G("Victory", "Vegas Jackpot", CH, [["X26_VIC_F92", "2004–2005"], ["X26_VIC_F100", "2006–2009"], ["X26_VIC_F106", "2010–2017"]]);
+  G("Victory", "Kingpin", CH, [["X26_VIC_F92", "2004–2005"], ["X26_VIC_F100", "2006–2009"], ["X26_VIC_F106", "2010–2014"]]);
+  G("Victory", "Hammer", CH, [["X26_VIC_F92", "2005"], ["X26_VIC_F100", "2006–2009"], ["X26_VIC_F106", "2010–2017"]]);
+  G("Victory", "Vision", TR, [["X26_VIC_F106", "2008–2017"]]);
+  G("Victory", "Cross Country", TR, [["X26_VIC_F106", "2010–2017"]]);
+  G("Victory", "Cross Roads", TR, [["X26_VIC_F106", "2010–2014"]]);
+  G("Victory", "Cross Country Tour", TR, [["X26_VIC_F106", "2012–2017"]]);
+  G("Victory", "Magnum", TR, [["X26_VIC_F106", "2015–2017"]]);
+  G("Victory", "Judge", CH, [["X26_VIC_F106", "2013–2016"]]);
+  G("Victory", "Boardwalk", CH, [["X26_VIC_F106", "2013–2016"]]);
+  G("Victory", "High-Ball", CH, [["X26_VIC_F106", "2012–2017"]]);
+  G("Victory", "Gunner", CH, [["X26_VIC_F106", "2014–2017"]]);
+  G("Victory", "Octane", CH, [["X26_IND_SCOUT", "2017", { approx: true, hp: 104 }]]);
+
+  /* --- Harley-Davidson: недостающие модели --- */
+  G("Harley-Davidson", "Softail Custom", CH, [["HD_EVO1340", "1986–1999"], ["HD_TC88B", "2000–2006, карб."], ["HD_TC88BI", "2000–2006, EFI"], ["HD_TC96B", "2007–2010"]]);
+  G("Harley-Davidson", "Heritage Springer", CH, [["HD_EVO1340", "1997–1999"], ["HD_TC88B", "2000–2003"]]);
+  G("Harley-Davidson", "Softail Bad Boy", CH, [["HD_EVO1340", "1995–1997"]]);
+  G("Harley-Davidson", "Softail Springer Classic", CH, [["HD_TC88BI", "2005–2006"], ["HD_TC96B", "2007"]]);
+  G("Harley-Davidson", "Dyna Convertible", CH, [["HD_EVO1340", "1994–1998"], ["HD_TC88", "1999–2000"]]);
+  G("Harley-Davidson", "FXR Super Glide", CH, [["HD_EVO1340", "1986–1994"]]);
+  G("Harley-Davidson", "FXRS Low Rider", CH, [["HD_EVO1340", "1984–1994"]]);
+  G("Harley-Davidson", "Tour Glide Classic", TR, [["HD_EVO1340", "1984–1996"]]);
+  G("Harley-Davidson", "Road Glide Custom", TR, [["HD_TC96", "2010"], ["HD_TC103", "2011–2013"]]);
+  G("Harley-Davidson", "Street Glide ST", TR, [["HD_M8_117", "2022–2023"]]);
+  G("Harley-Davidson", "Road Glide ST", TR, [["HD_M8_117", "2022–2023"]]);
+  G("Harley-Davidson", "CVO Road Glide", TR, [["HD_M8_117", "2021–2022"], ["X26_HD_M8_121", "2023+"]]);
+  G("Harley-Davidson", "CVO Road Glide Ultra", TR, [["HD_TC110", "2011–2016"]]);
+  G("Harley-Davidson", "CVO Road Glide ST", TR, [["X26_HD_M8_121", "2024+", { hp: 127 }]]);
+  G("Harley-Davidson", "CVO Road King", TR, [["HD_TC110", "2013–2014"]]);
+  G("Harley-Davidson", "CVO Breakout", CH, [["HD_TC110", "2013–2014"]]);
+  G("Harley-Davidson", "CVO Pro Street Breakout", CH, [["HD_TC110", "2016"]]);
+  G("Harley-Davidson", "CVO Pan America", AD, [["HD_RMAX1250", "2024+"]]);
+  addVersion("Harley-Davidson", "CVO Street Glide", "X26_HD_M8_121", "2023+");
+
+  /* --- Honda --- */
+  G("Honda", "CB1000F", NK, [["HON_SC77E", "2025+", { hp: 124 }]]);
+  G("Honda", "Rebel 1100T", CH, [["AT1100", "2023+", { hp: 87 }]]);
+  G("Honda", "NM4 Vultus", CH, [["HNC750", "2014–2018", { hp: 54 }]]);
+
+  /* --- Yamaha --- */
+  G("Yamaha", "XV125 Virago", CH, [["X26_YAM_XV125", "1997–2001"]]);
+  G("Yamaha", "XVS125 Drag Star", CH, [["X26_YAM_XV125", "2000–2004"]]);
+
+  /* --- Kawasaki --- */
+  G("Kawasaki", "Ninja 250SL", SP, [["X26_KAW_BX250", "2014–2018"]]);
+  G("Kawasaki", "Z250SL", NK, [["X26_KAW_BX250", "2014–2018"]]);
+  G("Kawasaki", "KLX230 Sherpa", L, [["KLX230", "2025+"]]);
+
+  /* --- Suzuki --- */
+  G("Suzuki", "GSX-R1100", SP, [["X26_SUZ_GSXR1100O", "1986–1988", { approx: true, hp: 130 }], ["X26_SUZ_GSXR1100O", "1989–1992"], ["X26_SUZ_GSXR1100W", "1993–1998"]]);
+  G("Suzuki", "GSX1100F Katana", TR, [["X26_SUZ_GSXR1100O", "1988–1994", { hp: 125 }]]);
+  G("Suzuki", "RGV250 Gamma", SP, [["APR_RS250", "1991–1996 (VJ22)", { approx: true, hp: 60 }]]);
+  G("Suzuki", "RF400R / RF400RV", SP, [["SUZ_GSXR400", "1993–1997", { approx: true, hp: 59 }]]);
+
+  /* --- KTM --- */
+  G("KTM", "990 RC R", SP, [["KTM_LC8C_947", "2025+", { hp: 128 }]]);
+  G("KTM", "1390 Super Adventure R", AD, [["KTM_LC8_1350", "2025+", { hp: 173 }]]);
+  G("KTM", "300 SX", K, [["KTM300TPI", "2023+"]]);
+
+  /* --- BMW --- */
+  G("BMW", "R 18", CH, [["X26_BMW_R18", "2020+"]]);
+  G("BMW", "R 18 Classic", CH, [["X26_BMW_R18", "2021+"]]);
+  G("BMW", "R 18 B", TR, [["X26_BMW_R18", "2022+"]]);
+  G("BMW", "R 18 Transcontinental", TR, [["X26_BMW_R18", "2022+"]]);
+  G("BMW", "R 18 Roctane", CH, [["X26_BMW_R18", "2024+"]]);
+  G("BMW", "R 12 S", KL, [["R1170", "2025+", { hp: 109 }]]);
+  G("BMW", "R 12 G/S", AD, [["R1170", "2025+", { hp: 109 }]]);
+  G("BMW", "HP4", SP, [["BMW_S1000K46", "2012–2014", { hp: 193 }]]);
+  G("BMW", "R 100 R", KL, [["BMW_R100", "1991–1996"]]);
+  G("BMW", "R 80 R", KL, [["BMW_R80", "1991–1995"]]);
+
+  /* --- Ducati --- */
+  G("Ducati", "Monster 800", NK, [["V803D", "2003–2004", { approx: true }]]);
+  G("Ducati", "SS 800", SP, [["V803D", "2003–2007", { approx: true, hp: 74 }]]);
+  G("Ducati", "Monster S2R", NK, [["V803D", "2005–2007, S2R 800", { approx: true }], ["DUC_1000DS", "2006–2008, S2R 1000"]]);
+
+  /* --- Triumph (885, первые Хинкли) --- */
+  G("Triumph", "Sprint 900", TR, [["TRI_885", "1993–1998", { hp: 97 }]]);
+  G("Triumph", "Daytona 900", SP, [["TRI_885", "1993–1996", { hp: 98 }]]);
+  G("Triumph", "Adventurer 900", CH, [["TRI_885", "1996–2001", { hp: 70 }]]);
+  G("Triumph", "Legend TT", CH, [["TRI_885", "1998–2001", { hp: 70 }]]);
+  G("Triumph", "Thunderbird Sport", KL, [["TRI_885", "1998–2004", { hp: 82 }]]);
+
+  /* --- Aprilia --- */
+  G("Aprilia", "RST 1000 Futura", TR, [["APR_V60", "2001–2004", { hp: 113 }]]);
+  G("Aprilia", "Moto 6.5", KL, [["BMW_F650C", "1995–1999", { approx: true, hp: 45 }]]);
+
+  /* --- Moto Guzzi --- */
+  G("Moto Guzzi", "V11 Sport / Le Mans", NK, [["X26_MG_V11", "1999–2005"]]);
+  G("Moto Guzzi", "Quota 1100 ES", AD, [["MG_1064", "1998–2001", { approx: true, hp: 70 }]]);
+
+  /* --- MV Agusta --- */
+  G("MV Agusta", "Superveloce 800", SP, [["MV_800", "2020+", { hp: 147 }]]);
+  G("MV Agusta", "Rush 1000", NK, [["MV_1000N", "2021+", { hp: 208 }]]);
+  G("MV Agusta", "Enduro Veloce", AD, [["X26_MV_931", "2023+"]]);
+
+  /* --- Moto Morini (двойка 649 — CFMOTO-тип) --- */
+  G("Moto Morini", "X-Cape 650", AD, [["CFM_650", "2021+", { approx: true, hp: 60 }]]);
+  G("Moto Morini", "Seiemmezzo 650 STR / SCR", NK, [["CFM_650", "2022+", { approx: true, hp: 60 }]]);
+
+  /* --- Royal Enfield / Hyosung --- */
+  G("Royal Enfield", "Bullet 650", KL, [["T650RE", "2026+"]]);
+  G("Hyosung", "GV125S Bobber", CH, [["HYO_V125", "2015+"]]);
+  /* --- доп. партия: Harley, Victory, 50-кубовые 2T Европы, MZ, Cagiva, поколения GSX-R750 --- */
+  G("Harley-Davidson", "CVO Softail Convertible", CH, [["HD_TC110", "2010–2012"]]);
+  G("Harley-Davidson", "CVO Softail Deluxe", CH, [["HD_TC110", "2014"]]);
+  G("Harley-Davidson", "Electra Glide Sport", TR, [["HD_EVO1340", "1987–1993"]]);
+  G("Harley-Davidson", "Heritage Softail Nostalgia", CH, [["HD_EVO1340", "1993–1996"]]);
+  G("Victory", "Hard-Ball", CH, [["X26_VIC_F106", "2012–2013"]]);
+  G("Derbi", "Senda DRD 50 R / SM", E, [["APR_D50", "2006+"]]);
+  G("Derbi", "Senda X-Treme 50", E, [["APR_D50", "2006+"]]);
+  G("Derbi", "GPR 50", SP, [["APR_D50", "2006+"]]);
+  G("Gilera", "RCR 50", E, [["APR_D50", "2006+"]]);
+  G("Gilera", "SMT 50", M, [["APR_D50", "2006+"]]);
+  G("Peugeot", "XP6 50", E, [["AM6", "1998–2004"]]);
+  G("Peugeot", "XPS 50", M, [["AM6", "2005+"]]);
+  G("Yamaha", "TZR50", SP, [["AM6", "2003–2012"]]);
+  G("MZ", "Baghira 660", E, [["YAM_XTZ660", "1997–2005"]]);
+  G("MZ", "Skorpion 660", NK, [["YAM_XTZ660", "1994–2002"]]);
+  G("Cagiva", "Raptor 125", NK, [["CAG_MITO", "2003–2012"]]);
+  addVersion("Suzuki", "GSX-R750", "X26_SUZ_GSXR750O", "1985–1991");
+  addVersion("Suzuki", "GSX-R750", "X26_SUZ_GSXR750W", "1992–1995");
+})();
+/* ===================== v52: 52 новые инструкции, диагностика, проверка перед выездом ===================== */
+(function () {
+  /* ===================== guides2: новые инструкции, причины, симптомы, деревья диагностики ===================== */
+  function hasId(arr, id) { return arr.some(function (x) { return x.id === id; }); }
+  function grp(e, g) { return (e.groups || []).indexOf(g) >= 0; }
+  function multi(e) { return ["twin", "vtwin", "boxer", "i3", "i4"].indexOf(e.layout) >= 0; }
+  function hydro(e) { return /гидро/i.test(e.valveIn || ""); }
+  function desmo(e) { return /desmo/i.test(e.cam || "") && !/не desmo/i.test(e.cam || ""); }
+
+  /* «only» по признакам мотора (схема, производитель, зажигание), а не только по группам.
+     Список id считается при первом обращении в приложении — когда загружены все моторы, — и пересчитывается,
+     если моторов стало больше. */
+  function dyn(item, pred) {
+    var n = -1, ids = null;
+    Object.defineProperty(item, "only", { enumerable: true, configurable: true, get: function () {
+      var keys = Object.keys(ENGINES);
+      if (keys.length !== n) {
+        n = keys.length;
+        ids = keys.filter(function (id) { try { return !!pred(ENGINES[id]); } catch (x) { return false; } });
+        if (!ids.length) ids = ["__none__"];
+      }
+      return ids;
+    } });
+    return item;
+  }
+  var SHIMS = /Unicam|CRF(150R|250R|450R|250X|450X|1000L|1100L)|Transalp XL750|NC700|KTM|Husaberg|Husqvarna|Triumph|Royal Enfield 648|XT660|XTZ660|SZR660|YZF-R125|VVA|W650|W800|W400|Revolution|Harley/i;
+  var P = {
+    screwValves: function (e) {
+      return grp(e, "4t") && e.stroke !== "2T" && !grp(e, "dohc") && !grp(e, "horiz") && !grp(e, "cg") && !grp(e, "cb") &&
+        !hydro(e) && !desmo(e) && e.layout !== "boxer" && /SOHC|OHV|OHC|штанг/i.test(e.cam || "") && !/DOHC|нижнеклап/i.test(e.cam || "") &&
+        /* SOHC с регулировкой шайбами (Unicam, KTM, Triumph и т.п.) — сюда не относятся */
+        !SHIMS.test((e.maker || "") + " " + (e.name || "") + " " + (e.cam || ""));
+    },
+    boxer: function (e) { return e.layout === "boxer" && !hydro(e) && !/DOHC|нижнеклап/i.test(e.cam || "") && !/Honda/i.test(e.maker || ""); },
+    ducBelt: function (e) { return /Ducati/i.test(e.maker || "") && /ремни ГРМ/i.test(e.cam || ""); },
+    harley: function (e) { return /Harley|Buell/i.test(e.maker || "") && grp(e, "air"); },
+    carbMulti: function (e) { return grp(e, "carb") && grp(e, "4t") && multi(e) && !/Harley|Buell/i.test(e.maker || ""); },
+    plugsMulti: function (e) { return e.layout === "i4" || e.layout === "i3" || (multi(e) && grp(e, "dohc") && grp(e, "liquid") && e.layout !== "boxer"); },
+    points: function (e) { return /контакт|прерыват|магдино/i.test(e.ignition || ""); },
+    sepGearbox: function (e) {
+      if (!/кардан/i.test(e.gearbox || "")) return false;
+      if (/Урал|Днепр|ИМЗ|КМЗ|М-72|К-750/i.test((e.maker || "") + " " + (e.name || ""))) return true;
+      if (/BMW/i.test(e.maker || "") && e.layout === "boxer" && !/DOHC/i.test(e.cam || "")) return true;
+      return /Moto Guzzi/i.test(e.maker || "") && /OHV|SOHC/i.test(e.cam || "") && !/мокрое/i.test(e.gearbox || "");
+    },
+        multiEfi: function (e) { return multi(e) && grp(e, "efi") && grp(e, "4t"); }
+  };
+
+  var G2 = [
+    /* ---------- головка и ГРМ ---------- */
+    dyn({ id: "valves-screw", title: "Регулировка клапанов винтами (SOHC/OHV, одноцилиндровые и V-twin)", area: "head", time: "1–2 ч", diff: "средне",
+      tools: ["Набор щупов (0.05–0.30 мм)", "Ключ на контргайку", "Ключ или отвёртка регулировочного винта", "Головка на гайку маховика", "Свечной ключ"], parts: ["vcgasket", "feeler"],
+      steps: ["Только на холодном моторе (комнатная температура, не раньше чем через 4–5 часов после поездки) — зазоры в мануале даны на холодную. Инструкция для моторов с регулировочными винтами на коромыслах; если винтов нет, а под толкателями или в коромыслах стоят шайбы — это регулировка шайбами, как на DOHC.",
+        "Сними бак и всё, что мешает подобраться к крышкам клапанов (у V-twin — крышки обоих цилиндров). Выкрути свечи — коленвал будет крутиться легко.",
+        "Открути заглушки на крышке генератора: большая — смотровая с меткой, маленькая (по центру) — под гайку/болт маховика. Крути коленвал только по ходу вращения, обычно против часовой, если смотреть на генератор.",
+        "Выставь ВМТ такта сжатия: метка «T» (у V-twin — «FT»/«RT» или «F|T»/«R|T» для переднего и заднего цилиндра) напротив риски, при этом оба коромысла цилиндра имеют люфт. Если коромысло впуска зажато — докрути ещё один полный оборот.",
+        "Проверь щупом: впуск {valveIn}, выпуск {valveEx}. Щуп номинальной толщины должен проходить с лёгким закусыванием, на 0.02–0.03 мм толще — не проходить.",
+        "Если нужно регулировать: ослабь контргайку, вращай винт до нужного зазора с вставленным щупом, держа винт, затяни контргайку (обычно 8–12 Н·м у 125–400 и до 15–20 Н·м у больших моторов — точнее по мануалу) и перемерь — при затяжке зазор часто «уходит».",
+        "У V-twin повтори для второго цилиндра в его ВМТ сжатия: от метки первого цилиндра коленвал проворачивается на угол развала плюс 360° (например, у 45° V-twin — 405°, у 90° — 450°). Ориентируйся на метку второго цилиндра на маховике.",
+        "Проверь уплотнения крышек — резиновые прокладки, затвердевшие или с потёками, меняй. Затягивай болты крышек крест-накрест небольшим моментом (около 8–10 Н·м), свечи — {sparkTorque}.",
+        "Заведи и послушай: равномерное лёгкое шуршание — норма; громкое цоканье — зазор великоват, «хлопки» и плохой запуск на горячую — зазор мал."] }, P.screwValves),
+
+    dyn({ id: "boxer-valves", title: "Клапаны на оппозите: BMW airhead/oilhead, Урал, Днепр", area: "head", time: "1–1.5 ч", diff: "средне",
+      tools: ["Набор щупов", "Ключи на контргайки и винты", "Свечной ключ", "Новые прокладки крышек"], parts: ["vcgasket", "feeler"],
+      steps: ["Мотор полностью холодный. Под каждую крышку подставь тряпку — из головок вытечет немного масла.",
+        "Выкрути свечи. Коленвал удобнее всего проворачивать задним колесом на высшей передаче (мотоцикл на подставке) или ключом за болт генератора.",
+        "Найди ВМТ такта сжатия цилиндра: у BMW — метка «OT» на маховике в смотровом окне картера (над стартером или сбоку), у Урала/Днепра — по положению поршня через свечное отверстие стержнем и по люфту обоих коромысел.",
+        "Проверь, что у этого цилиндра оба коромысла свободны (клапаны закрыты). Цилиндры работают через 360°: после проворота на один оборот в ВМТ сжатия будет второй цилиндр.",
+        "Замерь зазоры: впуск {valveIn}, выпуск {valveEx}. У BMW 4-клапанных oilhead/hexhead на каждом коромысле по два винта — регулируй оба клапана одинаково.",
+        "Регулировка: контргайка — винт — щуп внатяг — затяни контргайку, перемерь. Если коромысло имеет осевой люфт — проверь шайбы оси, это частая причина стука на «Уралах».",
+        "Поставь крышки на новые прокладки, затягивай гайки крышек равномерно и без фанатизма — крышки алюминиевые, перетяг даёт течь по углам.",
+        "На BMW после регулировки клапанов синхронизируй дроссели или карбюраторы (инструкции про синхронизацию) — оппозит к ней очень чувствителен."] }, P.boxer),
+
+    dyn({ id: "ducati-belts", title: "Ducati: замена ремней ГРМ", area: "timing", time: "2–3 ч", diff: "сложно",
+      tools: ["Ключи и головки, шестигранники", "Маркер", "Тестер натяжения ремня или частотомер (приложение-тюнер в телефоне)", "Динамометрический ключ"], parts: ["camchain", "tensioner"],
+      steps: ["Ремни меняются по сроку, а не только по пробегу: у старых 2V и Desmoquattro — обычно каждые 2 года / 12 000–24 000 км, у Testastretta поздних — до 5 лет / 30 000 км. Точный интервал — в сервисной книжке. Порванный ремень = встреча клапанов с поршнями.",
+        "Сними боковые обтекатели (если есть) и пластиковые крышки ремней. Выкрути свечи.",
+        "Выставь ВМТ: метка на шкиве коленвала совмещается с меткой на крышке, метки на шкивах распредвалов — с метками на головках. Дополнительно нанеси маркером свои метки на ремни и шкивы.",
+        "Ослабь гайки подвижных роликов натяжителя, сними ремни. Коленвал и распредвалы при этом не проворачивай.",
+        "Покрути ролики рукой: шум, люфт, шероховатость — замени ролики. Осмотри шкивы на износ зубьев.",
+        "Надень новые ремни по стрелкам направления вращения, без провиса на ведущей стороне. Проверь, что все метки совпали.",
+        "Натяни ремни подвижным роликом. Натяжение у разных поколений разное (задаётся прогибом, специальным инструментом или частотой колебания ветви в Гц) — бери значение из мануала своего мотора, на глаз не тяни.",
+        "Затяни гайки роликов по моменту из мануала, проверни коленвал руками 2 полных оборота и перепроверь метки и натяжение.",
+        "Собери крышки. При первой возможности заодно проверь зазоры Desmo — их регламент обычно совпадает с ремнями."] }, P.ducBelt),
+
+    /* ---------- питание ---------- */
+    dyn({ id: "carb-sync-multi", title: "Синхронизация карбюраторов (2–4 цилиндра)", area: "carb", time: "1 ч", diff: "средне",
+      tools: ["Вакуумметры или синхронизатор на 2–4 канала", "Длинная отвёртка", "Вентилятор для охлаждения", "Удлинитель бензошланга (если снимаешь бак)"], parts: ["vacgauge", "carbkit"],
+      steps: ["Если у мотора один карбюратор на оба цилиндра — синхронизация не нужна. Сначала отрегулируй клапаны и убедись, что нет подсоса по патрубкам.",
+        "Прогрей мотор до рабочей температуры, поставь вентилятор напротив мотора — регулировка идёт на работающем двигателе 15–20 минут.",
+        "Сними заглушки со штуцеров разрежения на патрубках или карбюраторах (на штуцере вакуумного крана — через тройник) и подключи синхронизатор. Демпферы на приборе зажми, чтобы стрелки не дёргались.",
+        "Выставь холостые {idle} упорным винтом. На рядной четвёрке базовый карбюратор обычно №3 (по мануалу): к нему подгоняются №4, затем №1 к №2 и пара 1–2 к паре 3–4.",
+        "Крути синхронизирующие винты между карбюраторами маленькими движениями, после каждого газани и дай стабилизироваться. Цель — разница не больше 1–2 см рт. ст. (≈ 1.5–2.5 кПа).",
+        "Проверь при 3000 об/мин: стрелки не должны разбегаться. Снова выставь холостые {idle}.",
+        "Поставь заглушки на штуцеры на место — пропущенная заглушка даёт подсос и «висящие» обороты. Итог: меньше вибрации на малом газе, ровный холостой и плавный старт с места."] }, P.carbMulti),
+
+    { id: "vacuum-petcock", title: "Вакуумный бензокран: проверка и ремонт", area: "carb", time: "40 мин", diff: "средне", only: ["carb"],
+      tools: ["Шприц или ручной вакуумный насос", "Ёмкость для бензина", "Отвёртки"], parts: ["petcock", "petcockkit", "fuelhose"],
+      steps: ["Вакуумный кран открывается разрежением от впуска: на заглушенном моторе бензин в положении ON не течёт — это норма. PRI (prime) открывает подачу без разрежения.",
+        "Проверка: сними с карбюратора топливный шланг в банку, на кран через вакуумную трубку создай разрежение шприцем — бензин должен пойти ровной струёй.",
+        "Не течёт с разрежением, но течёт в PRI — порвана мембрана крана. Течёт без разрежения в положении ON — не держит клапан, карбюратор будет переливать на стоянке.",
+        "Слей бак или сними его, открути кран. Разбери крышку мембраны, осмотри мембрану на трещины, проверь сетку-фильтр на трубках внутри бака.",
+        "Поставь ремкомплект (мембрана, уплотнения), прокладку крана к баку — новую. Болты крана затягивай умеренно, фланец бака тонкий.",
+        "После сборки проверь, что нет течи по фланцу и что вакуумная трубка цела и надета на свой штуцер."] },
+
+    { id: "intake-boot", title: "Впускной патрубок: поиск подсоса и замена", area: "carb", time: "40 мин", diff: "просто",
+      tools: ["Очиститель карбюратора или WD-40 в баллоне", "Отвёртки/ключи хомутов", "Новые прокладки"], parts: ["intake", "intakegasket", "airboot"],
+      steps: ["Признаки подсоса: обороты холостого «висят» или плавают, хлопки при сбросе газа, белая свеча, перегрев.",
+        "На прогретом моторе на холостых брызгай очистителем коротко на стык патрубка с головкой, с карбюратором/дросселем и на трещины. Обороты изменились — подсос найден.",
+        "Сними карбюратор (дроссельный узел) с патрубка, открути патрубок от головки. Старая резина дубеет и трескается изнутри — сгибай её, так трещины видно.",
+        "Поверхность головки очисти от старой прокладки, новую прокладку или кольцо ставь без герметика (если в мануале не сказано иное).",
+        "Болты патрубка затягивай равномерно (М6 — около 8–10 Н·м). Хомут на карбюраторе — так, чтобы карбюратор не проворачивался рукой, но без пережима резины.",
+        "Отрегулируй холостые ({idle}) — после устранения подсоса они обычно падают."] },
+
+    { id: "choke-service", title: "Обогатитель (подсос): шток, трос, плунжер", area: "carb", time: "40 мин", diff: "просто", only: ["carb"],
+      tools: ["Ключ на гайку плунжера", "Очиститель карбюратора", "Смазка для тросов"], parts: ["choke", "carbkit"],
+      steps: ["Признаки: на холодную не заводится без подгазовки, или наоборот — после прогрева обороты завышены и чёрная свеча (подсос не закрывается).",
+        "Проверь ход рычажка/кнопки подсоса: трос должен ходить свободно и иметь небольшой люфт в закрытом положении.",
+        "Открути гайку плунжера обогатителя на корпусе карбюратора, вынь плунжер с пружиной. Резиновый наконечник плунжера должен быть ровным, без канавки.",
+        "Продуй канал обогатителя в корпусе очистителем — он тонкий и засоряется от старого бензина.",
+        "Смажь трос, собери. На многоцилиндровых проверь, что вал обогатителя открывает плунжеры всех карбюраторов одинаково.",
+        "Если у мотора автоматический обогатитель (термоэлемент с подогревом): на холодную его шток выдвинут, через 3–5 минут после включения он должен нагреться. Проверь сопротивление элемента и питание 12 В на разъёме."] },
+
+    { id: "fuel-pressure", title: "Проверка давления топлива (инжектор)", area: "carb", time: "40 мин", diff: "средне", only: ["efi"],
+      tools: ["Манометр топлива 0–6 бар с переходниками", "Тряпки", "Огнетушитель рядом"], parts: ["fuelpump", "fuelfilter"],
+      steps: ["Мотор холодный, рядом нет открытого огня. Сбрось давление: отключи разъём насоса и прокрути мотор стартером 2–3 с или подожди, пока он заглохнет.",
+        "Подключи манометр между насосом и топливной рампой (через тройник или переходник на быстросъём).",
+        "Включи зажигание — насос накачивает 2–3 секунды. Затем заведи мотор и смотри давление на холостых. У большинства мотоциклетных инжекторов норма около 2.5–3.5 бар (у многих японцев ≈ 3 бар), точное — в мануале.",
+        "Давление низкое — забит сетчатый фильтр насоса, слабый насос, падает напряжение на насосе (проверь 12 В на разъёме во время работы) или течёт регулятор давления.",
+        "Заглуши и следи за давлением: за 5 минут оно не должно падать резко. Быстро падает — обратный клапан насоса, течь форсунки или уплотнений.",
+        "Сбрось давление, сними манометр, верни штатное соединение до щелчка и проверь отсутствие течи."] },
+
+    /* ---------- зажигание ---------- */
+    dyn({ id: "plugs-multi", title: "Замена свечей на рядном моторе (катушки-стики)", area: "spark", time: "1–1.5 ч", diff: "средне",
+      tools: ["Свечная головка с магнитом или резинкой (часто 16 или 18 мм, тонкостенная)", "Удлинитель", "Компрессор или баллон воздуха", "Отрезок шланга для заворачивания свечи", "Динамометрический ключ"], parts: ["spark", "coil"],
+      steps: ["Мотор холодный — горячая алюминиевая головка легко срывает резьбу. Сними бак и корпус воздушного фильтра, если они закрывают крышку головки.",
+        "Отсоедини разъёмы катушек (запомни или подпиши, какая катушка какого цилиндра), вытяни катушки строго вверх, не раскачивая — наконечник легко порвать.",
+        "Продуй свечные колодцы воздухом до выкручивания свечи: песок, упавший в цилиндр, — это задир.",
+        "Выкрути свечи. Сравни нагар по цилиндрам: один цилиндр сильно отличается — проверь его катушку, форсунку или синхронизацию.",
+        "Новые свечи {spark}, проверь зазор {gap} (у иридиевых зазор не подгибают). Наживи свечу рукой через отрезок шланга — так не сорвёшь резьбу.",
+        "Затяни {sparkTorque}. Без динамометра: новая свеча с шайбой — после касания примерно на ½–⅔ оборота для резьбы 10–12 мм.",
+        "Наконечники катушек слегка смажь диэлектрической смазкой изнутри, надень до упора, подключи разъёмы. Заведи — мотор должен работать ровно на всех цилиндрах."] }, P.plugsMulti),
+
+    dyn({ id: "points-ignition", title: "Контактное зажигание: зазор прерывателя и момент искры", area: "spark", time: "40 мин", diff: "средне",
+      tools: ["Щуп 0.3–0.6 мм", "Надфиль или бархатный напильник для контактов", "Контрольная лампа 12 В (или 6 В) с проводами", "Отвёртка"], parts: ["spark", "coil"],
+      steps: ["Сними крышку прерывателя. Зачисти подгоревшие контакты надфилем до ровной поверхности, протри спиртом. Сильно изъеденные контакты меняй.",
+        "Проворачивай коленвал, пока кулачок не разведёт контакты на максимум. Щупом проверь зазор: у ИЖ, «Урала», «Днепра», Jawa — обычно 0.4–0.6 мм, у других — по мануалу.",
+        "Регулировка: ослабь винт стойки контакта, отвёрткой в пазу выставь зазор, затяни винт и перемерь.",
+        "Момент искры (опережение): подключи контрольную лампу между клеммой прерывателя и массой, включи зажигание. Медленно крути коленвал по ходу — в момент размыкания контактов лампа загорается (или гаснет, в зависимости от схемы).",
+        "Этот момент должен совпасть с меткой опережения на маховике или ротора (у двухтактных ИЖ/«Восход»/«Минск» опережение задаётся в миллиметрах хода поршня до ВМТ — замер индикатором или штангенциркулем через свечное отверстие). Значение — по мануалу модели.",
+        "Подгоняется поворотом основания прерывателя. После регулировки смажь фетр кулачка каплей моторного масла — сухой фетр быстро съедает текстолитовую пятку контакта.",
+        "Признаки ошибки: позднее зажигание — перегрев, вялость, хлопки в глушитель; раннее — детонационный звон, отдача в кик."] }, P.points),
+
+    /* ---------- масло и смазка ---------- */
+    { id: "oil-level", title: "Как правильно проверить уровень масла", area: "oil", time: "10 мин", diff: "просто", only: ["4t"],
+      tools: ["Тряпка", "Фонарик"], parts: ["oil"],
+      steps: ["Заведи мотор на 2–3 минуты, заглуши и подожди 2–3 минуты, чтобы масло стекло в картер.",
+        "Мотоцикл строго вертикально, не на боковой подножке (на подставке или с помощником). На подножке уровень врёт на 0.2–0.4 л.",
+        "Смотровое окно: уровень между метками MIN и MAX. Масло не видно — либо очень мало, либо окно залито доверху (перелив) — уточни щупом или долей немного.",
+        "Щуп в крышке: у большинства японских и китайских моторов щуп для замера вставляют НЕ закручивая, только до касания резьбы. Проверь, как сказано в мануале твоего мотора.",
+        "Сухой картер (Harley, многие KTM/Husqvarna 4T, XR/XT-подобные с маслом в раме): уровень проверяют на горячем моторе после короткой работы, в бачке или на щупе бака — на холодном моторе он кажется низким.",
+        "Доливай тем же маслом ({oil}) небольшими порциями. Перелив вредит так же, как недолив: масло уходит в сапун и воздушный фильтр, растёт давление в картере.",
+        "Расход больше 0.2–0.3 л на 1000 км на небольшом моторе — повод замерить компрессию и проверить колпачки."] },
+
+    dyn({ id: "oil-centrifuge", title: "Чистка масляной центрифуги и сетки (горизонтальные и CG-моторы)", area: "oil", time: "1–1.5 ч", diff: "средне",
+      tools: ["Ключи и головки", "Ударная отвёртка (винты крышки центрифуги)", "Очиститель/бензин", "Новая прокладка правой крышки"], parts: ["clutchgasket", "oil", "oilfilter"],
+      steps: ["У горизонтальных моторов (Альфа, Дельта, питбайки 110–150) и у части CG-моторов вместо бумажного фильтра — центрифуга на правом конце коленвала и сетка в картере. Чистить вместе с заменой масла каждые 2–3 тысячи км, у новых моторов — на первом ТО.",
+        "Слей масло. Открути педаль тормоза/кик, если мешают, и сними правую крышку картера.",
+        "Открути крышку центрифуги (3 винта, часто закисшие — ударная отвёртка). Внутри — слой плотного серого осадка: это металлическая пыль и продукты износа.",
+        "Вычисти осадок деревянной лопаткой, промой бензином. Канал к коленвалу не повреди.",
+        "Вынь и промой сетчатый фильтр в нижней части картера (под крышкой или за пробкой).",
+        "Собери на новую прокладку правой крышки, винты центрифуги — на средний фиксатор резьбы. Болты крышки — крест-накрест, умеренно (около 10 Н·м).",
+        "Залей масло {oil} — {oilVol}, проверь уровень и отсутствие течи по прокладке."] }, function (e) { return (grp(e, "horiz") || grp(e, "cg")) && e.layout !== "boxer" && !multi(e); }),
+
+    { id: "breather-clean", title: "Сапун картера: чистка и проверка", area: "oil", time: "30 мин", diff: "просто", only: ["4t"],
+      tools: ["Отвёртка", "Очиститель", "Новые хомуты"], parts: ["breather", "clamps"],
+      steps: ["Сапун выводит газы из картера в воздушный фильтр или наружу. Если он забит, масло выдавливает через сальники и прокладки; если в него много масла — перелив или прорыв газов.",
+        "Найди трубку сапуна (обычно от верха картера или крышки головки к корпусу воздушного фильтра) и отстойник с пробкой внизу корпуса фильтра.",
+        "Слей отстойник: немного масла и воды — норма, полный отстойник после каждой поездки — износ колец или перелив масла.",
+        "Сними трубку, продуй её и штуцер. Проверь, что трубка не пережата и нет трещин.",
+        "У маслоотделителя на крышке головки (если есть) открути крышку, промой сетку или лабиринт.",
+        "Поставь трубку на новые хомуты. Масло в воздушном фильтре после этого должно исчезнуть — если нет, замерь компрессию."] },
+
+    { id: "oil-leak-find", title: "Поиск течи масла", area: "oil", time: "1 ч", diff: "просто", only: ["4t"],
+      tools: ["Очиститель тормозов (обезжириватель)", "Тальк или детская присыпка", "Фонарик и зеркальце"], parts: ["engseals", "vcgasket", "sealant"],
+      steps: ["Масло всегда течёт сверху вниз и сдувается назад — подтёк внизу картера часто приходит с головки или из-под цилиндра.",
+        "Обезжирь мотор целиком очистителем и протри насухо.",
+        "Припудри подозрительные места тальком: стык крышки клапанов, цилиндра и головки, сальник передней звезды, вал переключения, сливную пробку, датчики и штуцеры маслопроводов.",
+        "Прокатись 10–15 минут, осмотри с фонариком: первое тёмное пятно на тальке — источник течи.",
+        "Частые виновники и решения: сливная пробка — новая шайба; вал переключения и звезда — копеечные сальники меняются без разборки мотора; клапанная крышка — новая прокладка (инструкция «Замена прокладки клапанной крышки»).",
+        "Если течёт везде понемногу — проверь сапун: при забитом сапуне давление в картере выдавливает масло через все уплотнения."] },
+
+    dyn({ id: "hd-oils", title: "Harley-Davidson: масло мотора, первичной передачи и коробки", area: "oil", time: "1–1.5 ч", diff: "средне",
+      tools: ["Ключ под фильтр (чашка)", "Шестигранники и Torx", "Ёмкость 5 л", "Воронка с длинным носиком", "Новые уплотнения пробок"], parts: ["oil", "oilfilter", "drainplug", "gearoil"],
+      steps: ["У Big Twin (Softail, Dyna, Touring) три отдельных масла: мотор, первичная передача (primary) и КПП. У Sportster и Buell два: мотор и общая ёмкость первички с коробкой. Не путай пробки — они подписаны или видны в мануале.",
+        "Мотор: прогрей до рабочей температуры, слей масло из картера/бака, замени фильтр (резинку нового смажь маслом, затягивай рукой на ½–¾ оборота после касания). Залей {oil} — {oilVol}, уровень проверяй на горячем моторе, мотоцикл вертикально.",
+        "Первичная передача: слей через пробку снизу крышки первички. Залей специальное масло для первички (Primary Chaincase Lubricant или аналог, обычно около 1 л у Big Twin — точный объём в мануале) через крышку сцепления до нижнего края пружины сцепления или до метки.",
+        "Коробка передач (Big Twin): слей через пробку снизу КПП, залей трансмиссионное масло (у Twin Cam/M8 — около 0.9 л), уровень — по щупу в пробке заливной горловины.",
+        "Магнитные пробки очищай от стружки: крупные осколки — повод для разборки.",
+        "Затягивай пробки по мануалу (сливные — обычно 19–28 Н·м), крышки — новые кольца. Заведи, проверь течи и уровни ещё раз."] }, P.harley),
+
+    dyn({ id: "gearbox-oil-separate", title: "Масло в отдельной КПП и главной передаче (Урал, Днепр, BMW, Moto Guzzi)", area: "oil", time: "40 мин", diff: "просто",
+      tools: ["Ключи на пробки", "Шприц для масла 100–200 мл", "Ёмкость", "Новые шайбы"], parts: ["gearoil", "drainplug"],
+      steps: ["На этих мотоциклах коробка передач и главная передача (редуктор кардана) имеют своё масло, отдельно от моторного. Меняют обычно раз в 10–20 тыс. км или раз в 2 года.",
+        "Прокатись 10 минут, чтобы трансмиссионное масло прогрелось и стало жидким.",
+        "КПП: открути сначала заливную, потом сливную пробку, слей масло. Осмотри магнит — пыль норма, осколки — повод вскрыть коробку.",
+        "Залей трансмиссионное масло класса GL-5 или по мануалу (у старых Уралов/Днепров — ТАП-15/ТАД-17, сейчас — 80W-90 GL-5) до нижнего края заливного отверстия или до метки щупа. Объём КПП Урала — около 0.8 л, у BMW и Guzzi — по мануалу.",
+        "Главная передача: так же слей и залей до нижнего края заливного отверстия (у Урала — около 0.15 л, у BMW — около 0.2–0.25 л, точнее — по мануалу).",
+        "Поставь пробки на новые шайбы, не перетягивай резьбу в алюминиевом картере. Протри и через 50 км проверь, нет ли течи."] }, P.sepGearbox),
+
+    /* ---------- 2T ---------- */
+    { id: "muffler-repack", title: "Перенабивка глушителя (2T и 4T)", area: "exhaust", time: "1 ч", diff: "просто",
+      tools: ["Дрель и сверло под заклёпки", "Заклёпочник", "Шестигранники", "Перчатки и респиратор"], parts: ["expack", "sealanthot"],
+      steps: ["Признаки выгоревшей набивки: глушитель стал заметно громче, звук «звонкий», из среза вылетает пух, у 2T — капает масло из шва. Кроссовым 2T меняют набивку каждые 15–30 моточасов, 4T — 30–60.",
+        "Сними глушитель с мотоцикла. Высверли заклёпки или открути винты задней (иногда передней) крышки.",
+        "Стяни корпус с перфорированной трубы (может прикипеть — постучи резиновым молотком, подогрей феном). Удали старую набивку полностью, очисти трубу от нагара.",
+        "Оберни перфорированную трубу новой набивкой: для 2T — стекловолокно или базальтовая вата, для 4T — обычно стекловолокно с наружным слоем «стальной ваты» у самой трубы. Плотно, без пустот, но чтобы корпус надевался с усилием.",
+        "Надень корпус, поставь крышки на высокотемпературный герметик. Новые заклёпки или винты на фиксатор.",
+        "Прогрей мотор — немного дыма от новой набивки в первые минуты нормально."] },
+
+    { id: "pipe-decoke-2t", title: "Очистка резонатора 2T от нагара", area: "exhaust", time: "2 ч + ночь", diff: "средне", only: ["2t"],
+      tools: ["Пробки или заглушки на концы трубы", "Средство для духовок/каустическая сода", "Перчатки и очки", "Мойка/шланг"], parts: ["pipe2t", "exspring", "exgasket"],
+      steps: ["Признаки забитого резонатора: падение мощности на верхах, мотор хуже раскручивается, из стыков течёт густое масло. Чаще всего — от жирной смеси и езды на малых оборотах.",
+        "Сними трубу. Сначала попробуй горячий способ: прогрей трубу газовой горелкой до потемнения нагара — он рассыпается, потом простучи и вытряхни. Хромированные и титановые трубы так не греют.",
+        "Химический способ: заткни один конец, залей раствор щёлочи (средство для духовок или каустик в горячей воде) примерно на треть объёма, заткни второй конец.",
+        "Оставь на ночь, несколько раз переворачивая трубу. Работай в перчатках и очках — щёлочь опасна для глаз и кожи, алюминий она разъедает (на алюминиевые детали не попадай).",
+        "Слей раствор, промой трубу горячей водой много раз до чистой воды, высуши и сразу смажь снаружи, чтобы не ржавела.",
+        "Поставь на новое кольцо/прокладку, пружины — на место. Проверь смесь: пропорция масла 2T (обычно 1:40–1:50 для современных масел) — лишнее масло снова забьёт трубу."] },
+
+    { id: "oilpump-2t", title: "Раздельная смазка 2T: масляный насос и его трос", area: "oil", time: "30 мин", diff: "средне", only: ["2t"],
+      tools: ["Ключи", "Отвёртка", "Масло 2T"], parts: ["oil", "throttle"],
+      steps: ["Только для мотоциклов с отдельным масляным бачком (Yamaha Autolube, Suzuki CCI/SRIS, Honda, Aprilia и т.п.). Если смесь заливаешь в бак — инструкция не нужна.",
+        "Масляный бачок не должен опустошаться полностью: при попадании воздуха в шланги насоса мотор получит «сухой» режим. Заливай масло 2T для раздельной смазки (JASO FC/FD).",
+        "Регулировка троса: полностью открой газ, найди метки на рычаге насоса и корпусе — они должны совпадать (или проверь зазор/угол по мануалу). Подгоняй регулятором троса насоса.",
+        "Прокачка после снятия шлангов: ослабь винт-сапун на насосе, пока не пойдёт масло без пузырей, затяни. Шланг к впуску заполни маслом заранее.",
+        "Для проверки производительности (по мануалу) мотор работает на смеси 1:50, насос отсоединён от впуска, рычаг на полном ходе — измеряешь объём за определённое число оборотов.",
+        "Проверь обратный клапан на выходе насоса и целостность шлангов — трещина = подсос воздуха и задир."] },
+
+    { id: "crankseal-2t", title: "Замена сальников коленвала 2T", area: "cyl", time: "2–3 ч", diff: "сложно", only: ["2t"],
+      tools: ["Съёмник маховика", "Держатель маховика", "Держатель корзины сцепления", "Крюк для сальников", "Оправка"], parts: ["engseals", "clutchgasket", "gengasket", "puller"],
+      steps: ["Признаки: обороты «висят» после сброса газа, нестабильный холостой, мотор греется, белая свеча; правый сальник может засасывать масло КПП (сизый дым, уходит масло коробки).",
+        "Проверка без разборки: на холостых брызни очистителем на сальник со стороны генератора (сняв крышку) — обороты изменились, сальник сосёт. Точнее — опрессовка картера (0.5 бар, падение не больше 0.05 бар за 5 минут).",
+        "Левый сальник: сними крышку генератора, держателем зафиксируй маховик, открути гайку и стяни маховик съёмником. Выньте шпонку, сними статор, если мешает.",
+        "Правый сальник: слей масло КПП, сними правую крышку, первичную шестерню и, если нужно, сцепление (держатель корзины).",
+        "Подцепи старый сальник крюком, не царапая посадочное место и шейку вала. Новый смажь маслом и запрессуй оправкой ровно, пружиной внутрь, на ту же глубину.",
+        "Собери: гайку маховика — по моменту из мануала (на 125–300 обычно 40–60 Н·м), конус коленвала и маховика должны быть сухими и чистыми.",
+        "Залей масло КПП, заведи, проверь холостые."] },
+
+    /* ---------- генератор, стартер, электрика ---------- */
+    { id: "starter-clutch", title: "Обгонная муфта стартера: стартер крутит, а мотор нет", area: "gen", time: "2–3 ч", diff: "сложно",
+      tools: ["Съёмник маховика (ротора)", "Держатель маховика", "Динамометрический ключ", "Фиксатор резьбы высокой прочности"], parts: ["sprag", "puller", "gengasket"],
+      steps: ["Признаки: стартер воет, а коленвал не проворачивается или проворачивается рывками; скрежет при запуске; на холодную муфта не цепляет, на тёплую — работает.",
+        "Сначала исключи АКБ (12.4 В и выше) и плохой контакт — слабый стартер даёт похожий звук.",
+        "Слей масло (если муфта в масляной полости), сними крышку генератора. Держателем зафиксируй ротор, открути болт/гайку и стяни ротор съёмником вместе с муфтой и ведомой шестернёй.",
+        "Проверь: ведомая шестерня должна вращаться в одну сторону свободно и клинить в другую. Ролики или сепаратор (sprag) с выработкой, лыски на ступице шестерни — меняй муфту комплектом с шестернёй.",
+        "Болты корпуса муфты к ротору (часто Torx) ставь на фиксатор высокой прочности и затягивай по мануалу — открутившийся болт разбивает крышку генератора.",
+        "Собери: шпонка, ротор, гайка по моменту, крышка на новую прокладку. Залей масло, проверь запуск на холодную."] },
+
+    { id: "starter-relay", title: "Реле стартера и цепь запуска: проверка", area: "gen", time: "30 мин", diff: "просто",
+      tools: ["Мультиметр", "Толстый провод-перемычка или отвёртка с изолированной ручкой"], parts: ["starterrelay", "fuse", "clutchswitch"],
+      steps: ["Мотоцикл на нейтрали или с выжатым сцеплением. Нажимаешь кнопку — слушай реле стартера (рядом с АКБ): щелчок есть — управление в порядке, ищи проблему в силовой части.",
+        "Щелчок есть, стартер молчит: замерь напряжение на толстой клемме реле со стороны стартера при нажатой кнопке — нет 12 В, значит подгорели контакты реле. Есть 12 В — стартер или его масса.",
+        "Проверка стартера напрямую: на нейтрали замкни перемычкой две толстые клеммы реле — стартер должен крутить. Осторожно, будет искра; держи перемычку изолированными ручками.",
+        "Щелчка нет: проверь предохранитель (часто отдельный главный 20–30 А у реле), 12 В на тонком плюсовом проводе реле при нажатой кнопке и массу второго тонкого провода через блокировки.",
+        "Обмотка реле стартера обычно 3–5 Ом. Обрыв — реле под замену.",
+        "Если управление пропадает только на передаче — смотри инструкцию «Блокировки запуска»."] },
+
+    { id: "interlock-check", title: "Блокировки запуска: подножка, сцепление, нейтраль, кнопка Kill", area: "gen", time: "30 мин", diff: "просто",
+      tools: ["Мультиметр", "Очиститель контактов", "Диэлектрическая смазка"], parts: ["clutchswitch", "killswitch", "neutral", "switches"],
+      steps: ["Типичная логика: стартер работает на нейтрали или с выжатым сцеплением; если включить передачу при откинутой боковой подножке — мотор глохнет.",
+        "Не заводится или глохнет при включении передачи — первым делом проверь кнопку Kill (Run/Stop) и датчик боковой подножки: грязь и вода в нём — классика.",
+        "Датчик подножки: отсоедини разъём, проверь мультиметром — при поднятой подножке контакт замкнут (или разомкнут по схеме), при опущенной — наоборот. Почисти, смажь, проверь пружину подножки.",
+        "Датчик сцепления на рычаге: при выжатом рычаге контакты должны замыкаться. Часто ломается пластиковый толкатель или ослабевает кронштейн.",
+        "Датчик нейтрали — инструкция «Проверка и замена датчика нейтрали».",
+        "Временный обход для доезда — перемычка в разъёме датчика подножки. Сразу после поездки датчик почини: без него можно тронуться с откинутой подножкой."] },
+
+    { id: "ground-check", title: "Проверка масс и падения напряжения", area: "gen", time: "40 мин", diff: "средне",
+      tools: ["Мультиметр с длинными щупами", "Наждачная бумага", "Диэлектрическая смазка"], parts: ["ground", "connectors", "dielectric"],
+      steps: ["Падение напряжения показывает плохой контакт там, где обычный «прозвон» показывает 0 Ом. Мерить нужно под нагрузкой.",
+        "Минусовая цепь: один щуп на минус АКБ (на сам вывод, не на клемму), второй — на картер мотора. Нажми стартер: больше 0.2–0.3 В — плохая масса мотора.",
+        "Плюсовая цепь: щуп на плюс АКБ и на клемму стартера; при прокрутке больше 0.5 В — реле, клеммы или провод.",
+        "То же для света: при включённой фаре на массе фары и на плюсе разъёма должно быть не больше 0.3–0.5 В потерь. Тусклая фара и мигающая приборка часто лечатся именно массой.",
+        "Найденные точки разбери, зачисти до блеска, собери и смажь снаружи диэлектрической смазкой или вазелином.",
+        "Проверь массовый провод от минуса АКБ к раме и раму к мотору (особенно на мотоциклах с мотором на резиновых подушках)."] },
+
+    { id: "wiring-repair", title: "Ремонт проводки: пайка, термоусадка, разъёмы", area: "gen", time: "30 мин – 2 ч", diff: "средне",
+      tools: ["Паяльник 40–60 Вт и припой", "Термоусадка с клеем", "Стриппер", "Обжимник", "Термофен или зажигалка"], parts: ["wireset", "connectors", "dielectric"],
+      steps: ["Найди повреждение: чаще всего провода перетираются у рулевой колонки, под баком у рамы, у заднего крыла и у разъёмов датчиков.",
+        "Отключи минус АКБ. Обрежь повреждённый участок, зачисти концы на 8–10 мм.",
+        "Надень термоусадку заранее. Соедини жилы скруткой «в линию» или через гильзу и пропаяй. Скрутка без пайки на мотоцикле не живёт — вибрация и вода.",
+        "Сечение вставки — не меньше родного провода (силовые цепи генератора и стартера — 1.5–2.5 мм² и толще).",
+        "Термоусадку прогрей до выхода клея по краям. Жгут обмотай тканевой изолентой и закрепи стяжками так, чтобы при повороте руля провод не натягивался.",
+        "Окисленные разъёмы — разобрать, почистить контакт-спреем, подогнуть клеммы, заполнить диэлектрической смазкой."] },
+
+    { id: "fuse-hunt", title: "Горят предохранители: поиск замыкания", area: "gen", time: "1 ч", diff: "средне",
+      tools: ["Лампа 12 В 21 Вт с проводами", "Мультиметр", "Схема проводки"], parts: ["fuse", "wireset", "multimeter"],
+      steps: ["Не ставь предохранитель большего номинала и тем более «жучок» — сгорит проводка.",
+        "Вместо сгорающего предохранителя подключи лампу 21 Вт: при замыкании она горит ярко, а проводка остаётся целой.",
+        "Отключай потребителей этой цепи по очереди (разъёмы фары, поворотников, стопа, датчиков, аксессуаров). Лампа погасла — замыкание в последней отключённой ветке.",
+        "Покрути руль, понажимай кнопки, подвигай жгуты — если лампа вспыхивает, ищи перетёртый провод в этом месте (рулевая колонка, под баком, у заднего крыла).",
+        "Проверь недавно установленные аксессуары: USB, свет, подогрев — частая причина.",
+        "Найденный провод восстанови (инструкция «Ремонт проводки»), закрепи жгут, поставь предохранитель штатного номинала."] },
+
+    { id: "gripheat-install", title: "Установка подогрева ручек", area: "gen", time: "1.5–2 ч", diff: "средне",
+      tools: ["Ключи", "Клей для грипс (цианакрилат или двухкомпонентный)", "Мультиметр", "Стяжки"], parts: ["gripheat", "relay", "fuse", "connectors"],
+      steps: ["Проверь запас генератора: подогрев берёт 30–50 Вт. На маленьких моторах (125–250) со слабым генератором на холостых АКБ будет разряжаться — включай только в движении.",
+        "Сними старые грипсы (под них шприцем воды или сжатый воздух). Правая грипса подогрева надевается на втулку газа — штатную втулку иногда нужно укоротить.",
+        "Обезжирь руль и втулку, приклей грипсы, провода выведи вниз, чтобы не мешали повороту ручки газа.",
+        "Питание — через реле, которое включается от замка зажигания, и отдельный предохранитель (обычно 5–10 А по инструкции подогрева). Напрямую к АКБ без реле — разряд на стоянке.",
+        "Регулятор закрепи в доступном месте. Проведи провода вдоль жгута, проверь, что руль поворачивается от упора до упора без натяга.",
+        "Проверь работу и напряжение на АКБ при включённом подогреве на холостых — если ниже 12.8–13 В, генератор не справляется."] },
+
+    { id: "usb-install", title: "Установка USB-розетки на руль", area: "gen", time: "40 мин", diff: "просто",
+      tools: ["Стриппер", "Обжимник", "Мультиметр", "Стяжки"], parts: ["usb", "fuse", "relay", "connectors"],
+      steps: ["Выбирай влагозащищённую розетку с крышкой и, желательно, с вольтметром — заодно будешь видеть зарядку.",
+        "Питание бери от цепи, которая работает только при включённом зажигании (например, провод габарита или через реле от замка). Розетка напрямую на АКБ — частая причина утечки тока на стоянке.",
+        "Поставь в плюсовой провод отдельный предохранитель 3–5 А как можно ближе к точке подключения.",
+        "Минус — на массу рамы или на минус АКБ.",
+        "Проведи провод вдоль жгута, проверь поворот руля, закрепи стяжками.",
+        "Проверь: при выключенном зажигании на розетке 0 В, ток утечки АКБ не вырос."] },
+
+    { id: "speedo-fix", title: "Не работает спидометр: тросик, привод, датчик", area: null, time: "30–60 мин", diff: "просто",
+      tools: ["Отвёртка", "Ключи", "Литол или смазка для тросов", "Мультиметр"], parts: ["speedocable", "speedsensor", "connectors"],
+      steps: ["Механический спидометр: открути тросик от приборки, подними колесо и покрути — внутренний сердечник должен вращаться. Не вращается — оборван тросик или привод у колеса.",
+        "Привод спидометра (редуктор на передней оси): его «усики» должны входить в пазы ступицы. После снятия колеса их часто ставят мимо — привод проворачивается и ломается.",
+        "Тросик смажь тонким слоем смазки по всей длине, кроме верхних 10–15 см (иначе смазка уйдёт в прибор).",
+        "Электронный спидометр: датчик скорости (на звезде, на колесе или в КПП) — проверь разъём, зазор датчика до метки/зубьев (обычно 0.5–1.5 мм) и чистоту магнита.",
+        "Датчик на 3 провода: на разъёме должно быть питание 5 или 12 В и масса; сигнал при вращении колеса меняется. Нет питания — проводка или приборка.",
+        "На инжекторе неработающий датчик скорости может давать ошибку и влиять на холостой — не откладывай ремонт."] },
+
+    /* ---------- охлаждение ---------- */
+    { id: "fan-check", title: "Вентилятор радиатора: проверка, датчик и реле", area: "cooling", time: "30 мин", diff: "просто", only: ["liquid"],
+      tools: ["Мультиметр", "Провода-перемычки", "Кастрюля с водой и термометр (для датчика)"], parts: ["fan", "fansensor", "relay", "fuse"],
+      steps: ["Вентилятор должен включаться при 95–105 °C (у разных моделей по-разному). Прогрей мотор на холостых и следи по температуре на приборке.",
+        "Не включился: подай 12 В от АКБ прямо на разъём вентилятора. Не крутится — заклинил или сгорел мотор вентилятора.",
+        "Крутится от АКБ — проверь предохранитель и реле вентилятора (если есть).",
+        "Термовыключатель на радиаторе: отключи разъём и замкни его провода между собой при включённом зажигании — вентилятор должен заработать. Заработал — датчик неисправен.",
+        "Проверка датчика: в кастрюле с водой нагревай вместе с термометром, при температуре включения контакты должны замкнуться, при остывании — разомкнуться.",
+        "На инжекторных мотоциклах вентилятором часто управляет ЭБУ по датчику температуры — проверь его (инструкция «Проверка датчиков EFI»)."] },
+
+    { id: "waterpump-seal", title: "Помпа: замена сальника и крыльчатки", area: "cooling", time: "2–3 ч", diff: "сложно", only: ["liquid"],
+      tools: ["Ключи", "Съёмник или крюк для сальников", "Оправки", "Ёмкость для антифриза"], parts: ["waterpump", "coolant", "gengasket", "clutchgasket"],
+      steps: ["Признаки: капает из контрольного (дренажного) отверстия под помпой — течёт сальник; масло мутное, «кофе с молоком» — антифриз уходит в картер через сальник вала помпы.",
+        "Слей антифриз и (если меняется масляный сальник) моторное масло. Сними крышку помпы.",
+        "Сними крыльчатку: у многих японских моторов она накручивается на вал (держи вал за шестерню привода), у других стоит на штифте или гайке.",
+        "Вынь вал со стороны картера (обычно под правой крышкой), выпрессуй масляный сальник и механическое уплотнение (или водяной сальник). Проверь подшипник вала на люфт.",
+        "Запрессуй новые уплотнения ровно, оправкой по наружному кольцу. Вал смажь, не повреди кромки при установке.",
+        "Собери на новые прокладки и кольца. Залей антифриз ({coolant}), удали воздух (инструкция «Замена антифриза»), проверь, что из дренажного отверстия не капает.",
+        "Если масло было с антифризом — после ремонта меняй масло дважды через 100–200 км."] },
+
+    { id: "radiator-leak", title: "Течь радиатора и патрубков: поиск и ремонт", area: "cooling", time: "1 ч", diff: "средне", only: ["liquid"],
+      tools: ["Тестер давления системы охлаждения (если есть)", "Хомуты", "Отвёртки", "Мягкая щётка, тонкая отвёртка для сот"], parts: ["coolhoses", "clamps", "radiator", "radcap", "coolant"],
+      steps: ["Осмотри на холодном моторе: белые или зелёные кристаллы на сотах и бачках, мокрые хомуты, трещины на патрубках при сгибании.",
+        "Проверка давлением: тестер на горловину радиатора, давление как на крышке (обычно 0.9–1.4 бар). Падение за 5–10 минут — течь, ищи её по каплям.",
+        "Патрубки: старые резиновые трескаются у хомутов изнутри. Меняй весь комплект, хомуты — новые, затягивай без пережима.",
+        "Соты: замятые пластины аккуратно выпрями тонкой отвёрткой — замятие больше 20% площади заметно снижает охлаждение.",
+        "Течь в сотах: мелкий свищ можно заглушить эпоксидным составом или пережать трубку (теряя часть площади); сильная течь — пайка алюминия в мастерской или новый радиатор.",
+        "Герметики в антифриз — только как аварийный вариант до дома: они забивают каналы и термостат.",
+        "Долей антифриз ({coolant}), проверь крышку радиатора и отсутствие течи на горячем моторе."] },
+
+    /* ---------- сцепление и КПП ---------- */
+    { id: "clutch-inspect", title: "Дефектовка сцепления: замер дисков и пружин", area: "clutch", time: "1.5 ч", diff: "средне",
+      tools: ["Штангенциркуль", "Набор щупов", "Ровное стекло или плита", "Ключи", "Новая прокладка крышки"], parts: ["clutchdiscs", "clutchsprings", "clutchgasket", "clutchbasket"],
+      steps: ["Признаки износа: обороты растут, а скорость нет (буксует на 4–5 передаче при резком газе), запах гари, сцепление «берёт» в самом конце хода рычага.",
+        "Сначала проверь свободный ход рычага 10–15 мм и масло: масло с молибденом или «энергосберегающее» (без JASO MA) вызывает пробуксовку.",
+        "Сними крышку сцепления, ослабь болты пружин крест-накрест в 2–3 приёма, вынь диски по порядку.",
+        "Фрикционы: замерь толщину в 3–4 точках. У японских мотоциклов новый фрикцион обычно ≈ 2.9–3.0 мм, предел — около 2.6–2.8 мм (точные цифры в мануале). Сколы и обугливание накладок — замена.",
+        "Стальные диски: положи на стекло и проверь щупом коробление — предел обычно 0.1–0.2 мм. Синие пятна от перегрева — замена.",
+        "Пружины: замерь свободную длину штангенциркулем и сравни с пределом из мануала. Меняй все пружины комплектом.",
+        "Осмотри пазы корзины и ступицы (инструкция «Корзина сцепления»). Собери, новые фрикционы предварительно вымочи в масле."] },
+
+    { id: "clutch-basket", title: "Корзина сцепления: выработка пазов", area: "clutch", time: "2 ч", diff: "средне",
+      tools: ["Держатель корзины", "Надфили", "Ключи", "Новая стопорная шайба гайки"], parts: ["clutchbasket", "clutchdiscs", "clutchgasket"],
+      steps: ["Признаки: сцепление выключается рывками, нейтраль трудно найти, рычаг «ступенчато» ходит, треск на холостых, пропадающий при выжатом сцеплении.",
+        "Сними крышку и диски. Посмотри на пазы корзины под «лапки» фрикционов: ступеньки и зазубрины мешают дискам свободно сходиться и расходиться.",
+        "Небольшие ступеньки сними надфилем вдоль паза, не меняя ширину паза. Глубокая выработка — корзину менять.",
+        "Проверь шлицы ступицы под стальные диски — там тоже бывают ступени.",
+        "Проверь демпферные пружины корзины (люфт ведомой шестерни относительно корзины) и втулку/подшипник корзины на валу.",
+        "Гайку ступицы затягивай по мануалу с держателем корзины, новую стопорную шайбу загни. Собери и отрегулируй трос."] },
+
+    { id: "kick-repair", title: "Ремонт кикстартера: храповик и пружина", area: "clutch", time: "1.5–2 ч", diff: "средне",
+      tools: ["Ключи", "Держатель корзины (если сцепление нужно снять)", "Съёмник стопорных колец", "Новая прокладка правой крышки"], parts: ["kickkit", "clutchgasket"],
+      steps: ["Признаки: кик проваливается без сопротивления — износ храповика; кик не возвращается — сломана возвратная пружина; хруст при запуске — сколы зубьев.",
+        "Слей масло, сними рычаг кика (запомни положение по шлицам — пометь керном) и правую крышку.",
+        "На многих моторах вал кика доступен сразу, на других — нужно снять корзину сцепления.",
+        "Сними вал кика в сборе. Осмотри храповик и ответную шестерню: скруглённые зубья и износ рампы — замена комплектом.",
+        "Возвратную пружину ставь с правильным предварительным заводом (обычно на 1/4–1/2 оборота) — конец пружины в отверстие картера.",
+        "Собери на новую прокладку, залей масло, проверь работу кика на неподвижном мотоцикле и запуск."] },
+
+    { id: "shift-return-spring", title: "Пружина возврата переключения и фиксатор барабана", area: "gearbox", time: "1.5–2 ч", diff: "средне",
+      tools: ["Ключи", "Держатель корзины", "Новая прокладка правой крышки"], parts: ["shiftspring", "clutchgasket", "oil"],
+      steps: ["Признаки: лапка КПП не возвращается после переключения, передачи включаются через одну или не встают до конца, нейтраль «проскакивает».",
+        "Сначала исключи ведущее сцепление (свободный ход рычага) и погнутую лапку.",
+        "Слей масло, сними правую крышку картера (и сцепление, если механизм переключения за ним).",
+        "Найди механизм переключения: вал с возвратной пружиной, упирающейся в штифт картера, и рычаг-фиксатор барабана с роликом и пружиной.",
+        "Проверь пружины на трещины и вытягивание, штифт-упор — на ослабление (на некоторых моторах он выкручивается). Ролик фиксатора должен свободно вращаться.",
+        "Замени пружины, болт штифта — на фиксатор резьбы. Проверь переключение всех передач руками, вращая выходной вал.",
+        "Собери на новую прокладку, залей масло."] },
+
+    { id: "shiftlever-fix", title: "Лапка КПП после падения: выправить и заменить сальник вала", area: "gearbox", time: "40 мин", diff: "просто",
+      tools: ["Ключи", "Кернер или маркер", "Тиски с губками", "Крюк для сальника"], parts: ["shiftlever", "shift", "engseals"],
+      steps: ["Пометь положение лапки на шлицах вала керном или маркером, открути стяжной болт и сними лапку.",
+        "Посмотри на вал переключения: если его согнуло, он трётся о крышку или картер, а передачи включаются туго — вал менять (вскрытие правой стороны).",
+        "Лапку выправляй в тиськах холодной, без нагрева — литые алюминиевые часто трескаются, их лучше заменить. Складной наконечник проверь на подвижность и пружину.",
+        "Если подтекает масло по валу — подцепи сальник крюком, новый смажь и запрессуй трубкой подходящего диаметра.",
+        "Поставь лапку на прежние шлицы, чтобы носок ботинка доставал без выкручивания ноги. Затяни стяжной болт (М6 — около 10 Н·м).",
+        "Проверь переключение на месте и на ходу."] },
+
+    { id: "chain-rivet", title: "Клёпка замка цепи (заклёпочный замок)", area: "gearbox", time: "30 мин", diff: "средне",
+      tools: ["Выжимка-клёпка для цепи", "Штангенциркуль", "Смазка из комплекта замка"], parts: ["chainlock", "chaintool", "chain"],
+      steps: ["Заклёпочный замок надёжнее замка с защёлкой для мощных и дорожных мотоциклов; на сальниковых цепях (O/X-ring) обычно только он.",
+        "Укороти цепь до нужной длины выжимкой (выдавливая сразу оба пальца звена), отсчитай звенья правильно — нужен целый внутренний линк на концах.",
+        "Смажь пальцы замка смазкой из комплекта, надень сальники (кольца) в правильном порядке, вставь замок с внутренней стороны цепи.",
+        "Наружную пластину запрессуй выжимкой до размера: расстояние по наружным пластинам замка должно совпадать с соседними звеньями (сравни штангенциркулем). Звено не должно зажиматься.",
+        "Расклепай торцы пальцев насадкой выжимки до диаметра по инструкции к цепи (обычно 5.5–5.9 мм для 520–525). Края не должны трескаться.",
+        "Проверь подвижность звена замка, натяни цепь, смажь."] },
+
+    /* ---------- тормоза ---------- */
+    { id: "caliper-rebuild", title: "Переборка суппорта: манжеты и поршни", area: null, time: "1.5–2 ч", diff: "средне",
+      tools: ["Ключи", "Компрессор или прокачной шприц", "Пластиковый крючок", "Очиститель тормозов", "Новые медные шайбы"], parts: ["caliperkit", "brakefluid", "banjowashers", "brakecleaner"],
+      steps: ["Признаки: колесо подклинивает, колодки стираются неравномерно, поршни возвращаются туго, течь у поршня.",
+        "Пока суппорт на мотоцикле, сними колодки и аккуратно выдави поршни тормозом почти до конца (подложи деревяшку, чтобы не выпали полностью), затем открути банджо-болт.",
+        "Сними суппорт, разъедини половинки только если так сказано в мануале (на многих моноблоках и японских двухсекционных суппортах половинки не разбирают).",
+        "Вынь поршни (сжатым воздухом через штуцер, придерживая тряпкой), выньте пылевые и рабочие манжеты пластиковым крючком — не царапай канавки.",
+        "Очисти канавки и поршни от отложений. Поршни с коррозией и сколами — замена. Новые манжеты и поршни смажь тормозной жидкостью или специальной смазкой для манжет.",
+        "Собери, установи суппорт (болты крепления — по мануалу, на большинстве мотоциклов 25–45 Н·м), банджо-болт на новых шайбах (обычно 20–30 Н·м), прокачай (инструкция «Прокачка тормозов»)."] },
+
+    { id: "brake-bedding", title: "Притирка новых колодок и диска", area: null, time: "20 мин", diff: "просто",
+      tools: [], parts: ["padsF", "padsR"],
+      steps: ["Новые колодки первые 100–200 км тормозят заметно слабее. Это не брак, а притирка — первые торможения делай с запасом дистанции.",
+        "Перед установкой обезжирь диск очистителем тормозов, не трогай пальцами накладки.",
+        "Найди безопасный пустой участок. Сделай 8–10 торможений с 50 до 10 км/ч средним усилием без блокировки и без полной остановки.",
+        "Затем 3–4 более сильных торможения с 60–70 км/ч до 20 км/ч, между ними дай тормозам остыть 1–2 минуты на ходу.",
+        "Не стой на месте с зажатым тормозом сразу после интенсивных торможений — накладка отпечатается на горячем диске.",
+        "Если тормоз скрипит или «слабый» после притирки — проверь, что колодки не замаслены, а диск не изношен ниже минимальной толщины (выбита на диске)."] },
+
+    { id: "brake-light-switch", title: "Педаль тормоза и датчик стоп-сигнала: регулировка", area: null, time: "20 мин", diff: "просто",
+      tools: ["Ключи", "Линейка"], parts: ["brakepedal", "switches", "taillight"],
+      steps: ["Высота педали: выставь её так, чтобы нога на подножке касалась педали без подъёма носка. Регулируется упорным болтом и толкателем главного цилиндра с контргайкой.",
+        "Свободный ход педали — обычно несколько миллиметров (по мануалу): без хода тормоз может подклинивать на нагреве.",
+        "Задний стоп-датчик: стоп-сигнал должен загораться до того, как тормоз начнёт работать — примерно на первых 10–20 мм хода педали.",
+        "Регулировка — поворотом корпуса датчика в держателе (держи корпус, крути гайку), не крути его вместе с проводами.",
+        "Передний датчик в рычаге: при нажатии рычага на 2–3 мм стоп загорается. Не срабатывает — почисти контакты, проверь кнопку и провода.",
+        "Проверь лампу/светодиоды и работу стопа от обоих тормозов."] },
+
+    { id: "drum-adjust", title: "Барабанный тормоз: регулировка и смазка кулака", area: null, time: "40 мин", diff: "просто",
+      tools: ["Ключи", "Наждачная бумага", "Высокотемпературная смазка", "Штангенциркуль"], parts: ["brakeshoes", "brakecable", "grease"],
+      steps: ["Свободный ход рычага/педали — 20–30 мм. Больше — тормоз слабый, меньше — может подклинивать.",
+        "Регулируй гайкой на тяге или тросе у тормозного рычага барабана. Если гайка в конце хода, а ход большой — колодки изношены.",
+        "Индикатор износа: при нажатом тормозе стрелка на рычаге кулака не должна выходить за метку на щите. Вышла — новые колодки.",
+        "Разборка: сними колесо, вынь щит с колодками. Колодки тоньше 1.5–2 мм или замасленные — менять. Барабан внутри зачисти от глянца наждачкой.",
+        "Сними рычаг кулака (пометь шлицы), выньте кулак, очисти и смажь тонким слоем высокотемпературной смазки. На колодки смазка попасть не должна.",
+        "Собери, отрегулируй свободный ход, проверь, что колесо крутится свободно и тормоз полностью отпускает."] },
+
+    /* ---------- подвеска и колёса ---------- */
+    { id: "fork-cartridge", title: "Масло в картриджной вилке (USD и картриджи)", area: null, time: "2–3 ч", diff: "сложно", only: ["big"],
+      tools: ["Ключ на пробку пера", "Держатель штока или ключи на контргайку", "Мерный стакан", "Шприц-уровнемер", "Тиски с мягкими губками"], parts: ["forkoil", "forkseals", "forkdust"],
+      steps: ["Если вилка демпферная (без картриджа и без регулировок — многие круизеры, старые и бюджетные мотоциклы), хватит инструкции «Замена масла в вилке». Здесь — вилки с картриджем. Запиши положение кликеров (количество щелчков от закрытого положения) и высоту перьев в траверсах — потом выставишь как было. Перед разборкой открути кликеры на минимум.",
+        "Ослабь пробки перьев, пока перья зажаты в траверсах, затем сними перья.",
+        "Открытый картридж (большинство вилок японских спортбайков и дорожных USD): выкрути пробку, держа контргайку штока, сними пружину, слей масло, прокачивая шток картриджа и трубу 10–15 раз.",
+        "Закрытый картридж (кроссовые и топовые вилки): картридж снимается целиком и имеет свою камеру с маслом — его прокачка и уровень делаются по отдельной методике мануала. Если не уверен — отдай в сервис подвески.",
+        "Залей свежее масло нужной вязкости (по мануалу, обычно 5W–10W), прокачай шток и трубу до исчезновения пузырей и полного сопротивления хода.",
+        "Уровень: трубу полностью сжать, пружину вынуть, шприцем-уровнемером выставить воздушный зазор по мануалу (обычно 80–150 мм от края трубы). Одинаково в обоих перьях — разница даже 5 мм меняет работу вилки.",
+        "Поставь пружину, накрути пробку на шток до упора в контргайку, затяни пробку в трубе. Установи перья на прежнюю высоту, болты траверс — по мануалу, восстанови кликеры."] },
+
+    { id: "shock-spring", title: "Замена пружины заднего амортизатора", area: null, time: "1.5 ч", diff: "средне",
+      tools: ["Стяжка пружин амортизатора", "Ключ на гайку преднатяга (или молоток и выколотка)", "Ключи", "Рулетка"], parts: ["shockspring", "shock"],
+      steps: ["Пружину меняют, когда SAG не попадает в норму даже при крайних положениях преднатяга (инструкция «Провис подвески»): тяжёлому райдеру нужна жёстче, лёгкому — мягче. Жёсткость подбирают по калькуляторам производителей пружин по весу в экипировке.",
+        "Подними мотоцикл за раму, разгрузи заднее колесо. Открути нижний и верхний болты амортизатора, сними его (иногда мешает глушитель или корпус фильтра).",
+        "Ослабь контргайку и гайку преднатяга до полного освобождения пружины. Если пружина ещё нагружена — сожми её стяжкой.",
+        "Сними тарелку-фиксатор пружины снизу (иногда полукольца), сними пружину.",
+        "Поставь новую пружину, тарелку, выставь начальный преднатяг (обычно 3–8 мм от свободной длины) и затяни контргайку.",
+        "Установи амортизатор, болты — по мануалу (часто 40–60 Н·м). Выстави SAG, затем отбой и сжатие.",
+        "Не разбирай сам газовый амортизатор — он под давлением азота. Течь масла по штоку — сервис подвески."] },
+
+    { id: "cush-drive", title: "Демпфер ступицы заднего колеса", area: null, time: "40 мин", diff: "просто",
+      tools: ["Ключи", "Выколотка", "Силиконовая смазка или тальк"], parts: ["wheelbearing", "sprocketR"],
+      steps: ["Признаки изношенного демпфера: стук сзади при открытии и сбросе газа, большой люфт звезды относительно колеса (покачай звезду рукой при зажатом тормозе — должна ходить на несколько миллиметров, а не на сантиметр).",
+        "Сними заднее колесо. Сними ступицу звезды с колеса — она держится на резиновых демпферах.",
+        "Осмотри резинки: трещины, крошение, «расплющенность» — замена комплектом.",
+        "Проверь подшипник ступицы звезды на люфт и шум — меняй вместе с демпферами.",
+        "Новые резинки ставь на тальк или силиконовую смазку (не на масло — резина разбухнет).",
+        "Собери колесо, проверь натяжение цепи и момент затяжки оси."] },
+
+    { id: "wheel-balance", title: "Балансировка колеса", area: null, time: "40 мин", diff: "просто",
+      tools: ["Станок для балансировки или ось на двух подставках", "Грузики (самоклеящиеся или на спицы)", "Обезжириватель"], parts: ["tireF", "tireR"],
+      steps: ["Признак дисбаланса: вибрация руля на определённой скорости (обычно 80–120 км/ч), которая проходит выше или ниже. Сначала исключи давление, подшипники и ослабленные спицы.",
+        "Сними колесо, вынь его ось. Вставь колесо на балансировочный станок или прямую ось на двух ровных опорах (можно использовать подшипники колеса, если они крутятся очень легко).",
+        "Толкни колесо и дай остановиться. Самая тяжёлая точка окажется внизу. Повтори 3–4 раза — если останавливается в одном месте, отметь его мелом.",
+        "Ставь грузик напротив (в верхней точке) и проверяй: колесо должно останавливаться в случайных положениях.",
+        "Самоклеящиеся грузики — на обезжиренный обод, ближе к центру, на спицы — специальные зажимы. Не больше 60–80 г суммарно; если нужно больше — переставь покрышку на ободе на 180°.",
+        "На новой покрышке совмести метку лёгкой точки (часто жёлтая или белая) с ниппелем."] },
+
+    { id: "tubeless-plug", title: "Ремонт бескамерной шины жгутом в дороге", area: null, time: "20 мин", diff: "просто",
+      tools: ["Ремкомплект: рашпиль, шило, жгуты", "Насос или баллончики CO2", "Плоскогубцы", "Манометр"], parts: ["tiregauge"],
+      steps: ["Жгут — временный ремонт для проколов протектора диаметром до 5–6 мм. Проколы в боковине и у плеча так не ремонтируют.",
+        "Найди место прокола (шуруп, гвоздь). Пометь мелом и вытащи предмет плоскогубцами.",
+        "Прочисти отверстие рашпилем из комплекта несколькими движениями по оси прокола.",
+        "Вставь жгут в ушко шила, при необходимости смажь клеем из комплекта, вдави шило примерно на 2/3 длины жгута и резко вытащи — жгут останется в шине.",
+        "Обрежь концы, оставив 3–5 мм над протектором. Накачай до рабочего давления, проверь утечку слюной или водой.",
+        "Дальше — без резких манёвров и не быстрее 80–100 км/ч до шиномонтажа. Постоянно проверяй давление, при первой возможности — ремонт грибком изнутри или замена."] },
+
+    /* ---------- обслуживание и прочее ---------- */
+    { id: "first-service", title: "Первое ТО нового мотоцикла после обкатки", area: null, time: "2–3 ч", diff: "средне",
+      tools: ["Ключи и головки", "Щупы", "Динамометрический ключ", "Фиксатор резьбы"], parts: ["oil", "oilfilter", "spark", "chainlube", "loctite"],
+      steps: ["Обычно первое ТО — через 500–1000 км (у китайских моделей — часто 300–500 км). Делай его вовремя: после обкатки в масле много металлической пыли.",
+        "Замени масло и фильтр/промой сетку и центрифугу (если есть). Осмотри магнит сливной пробки.",
+        "Проверь и отрегулируй клапаны: впуск {valveIn}, выпуск {valveEx} — на новом моторе они чаще всего меняются в первые сотни км.",
+        "Протяни весь крепёж: оси колёс, болты мотора, маятника, траверс, суппортов, звёзд, подножек и глушителя. На китайских моделях часть болтов приходит без фиксатора — ставь синий фиксатор на крепёж выпуска, звёзд и защиты.",
+        "Натяни и смажь цепь, проверь натяжение спиц (новые колёса «садятся»).",
+        "Проверь тормоза, троса газа и сцепления, разъёмы проводки (особенно массы), свечу {spark}.",
+        "Китайские мотоциклы: проверь смазку рулевой колонки и прогрессии — с завода смазки часто мало."] },
+
+    { id: "post-crash", title: "Осмотр после падения", area: null, time: "30–60 мин", diff: "просто",
+      tools: ["Ключи", "Фонарик"], parts: ["levers", "shiftlever", "mirrors", "brakelever"],
+      steps: ["Перед тем как заводить: подними мотоцикл, проверь, нет ли течи бензина, масла или антифриза. Если он лежал на боку долго — масло могло попасть в цилиндр и фильтр: прокрути стартером без свечи.",
+        "Инжектор после падения может не заводиться из-за датчика опрокидывания — выключи и включи зажигание.",
+        "Органы управления: рычаги тормоза и сцепления (сломанный рычаг можно укоротить до доезда), лапка КПП и педаль тормоза — не упираются ли в картер, ход полный.",
+        "Руль и вилка: руль ровно относительно колеса? Если перекошен — ослабь траверсы и выставь (инструкция «Выставление вилки после падения»). Вилка не должна заедать.",
+        "Тормоза: диски без биения, шланги не пережаты, бачки целы и не текут.",
+        "Крышки двигателя: трещина на крышке генератора или сцепления — течь масла. Временно — холодная сварка, потом замена.",
+        "Первые километры — медленно, слушая мотоцикл. Проверь свет и поворотники."] },
+
+    { id: "engine-mounts", title: "Крепление двигателя и подушки: проверка и протяжка", area: null, time: "40 мин", diff: "просто",
+      tools: ["Ключи и головки", "Динамометрический ключ", "Фиксатор резьбы"], parts: ["loctite", "framerubber", "bolts"],
+      steps: ["Признаки: новая вибрация на определённых оборотах, стук при старте с места или сбросе газа, трещины краски вокруг кронштейнов.",
+        "Мотоцикл на подставке, мотор холодный. Проверь каждый болт крепления мотора к раме и кронштейны — без перетяга, по моменту из мануала (часто 40–70 Н·м для болтов М10).",
+        "Резиновые подушки (если есть): трещины, расслоение, сдвиг — замена.",
+        "Осмотри кронштейны и раму вокруг на трещины — полоска ржавчины у сварного шва выдаёт трещину.",
+        "Проверь крепление подножек, глушителя и кронштейнов бака — их болты от вибрации ослабевают первыми.",
+        "Повторная протяжка через 100–200 км после замены подушек или ремонта мотора."] },
+
+    { id: "long-trip", title: "Подготовка к дальней поездке", area: null, time: "2–3 ч", diff: "просто",
+      tools: ["Ключи", "Манометр", "Мультиметр"], parts: ["chainlube", "oil", "spark", "tube", "fuse", "tiregauge"],
+      steps: ["Посчитай пробег поездки: если в дороге подойдёт ТО (масло, цепь, шины, колодки), сделай его до выезда.",
+        "Шины: остаток протектора на весь маршрут, давление по мануалу с учётом пассажира и багажа (обычно +0.2–0.3 бар сзади).",
+        "Цепь и звёзды: износ, натяжение, смазка. Возьми маленькую смазку и ключ на ось.",
+        "Электрика: зарядка 13.5–14.5 В на 5000 об/мин, запасные предохранители и лампы, изолента и стяжки.",
+        "Тормоза: колодки с запасом, жидкость не старше 2 лет.",
+        "Набор в дорогу: инструмент под все основные болты, ремкомплект шин (камера/жгуты), насос или CO2, свеча {spark}, 0.5–1 л масла {oil}, бечёвка, трос, перчатки, аптечка.",
+        "Багаж: вес — ближе к центру и вниз, кофры не перегружай. После загрузки выставь преднатяг амортизатора."] },
+
+    { id: "wash-bike", title: "Мойка мотоцикла без вреда для техники", area: null, time: "30–60 мин", diff: "просто",
+      tools: ["Мягкая губка и щётки", "Шампунь для мото", "Обезжириватель для цепи", "Компрессор или фен"], parts: ["dielectric", "chainlube", "wd"],
+      steps: ["Мой на холодном мотоцикле — холодная вода на горячий коллектор и тормозной диск даёт трещины и коробление.",
+        "Закрой воздухозаборник или вход фильтра пакетом, глушитель — пробкой или пакетом.",
+        "Аппаратом высокого давления не направляй струю близко в: подшипники колёс и рулевой, сальники вилки, разъёмы проводки, приборку, замок зажигания, радиатор (сминает соты), шов сиденья.",
+        "Грязь сначала размочи, потом смывай. Цепь — отдельным очистителем и щёткой.",
+        "После мойки: вытри или продуй воздухом, особенно разъёмы и свечные колодцы. Прокатись несколько минут, чтобы просушить тормоза.",
+        "Смажь цепь, тросы и шарниры рычагов. Разъёмы обработай диэлектрической смазкой. Не забудь снять пакеты с воздухозаборника и глушителя."] }
+  ];
+
+  G2.forEach(function (g) { if (!hasId(GUIDES, g.id)) GUIDES.push(g); });
+
+  /* скутерам (вариатор) — без ручного сцепления, цепи и КПП */
+  if (typeof NO_CVT_GUIDES !== "undefined") ["clutch-inspect", "clutch-basket", "shift-return-spring", "shiftlever-fix", "chain-rivet", "cush-drive", "fork-cartridge"].forEach(function (id) { if (NO_CVT_GUIDES.indexOf(id) < 0) NO_CVT_GUIDES.push(id); });
+
+  /* узлы схемы двигателя и ходовой */
+  function areaAdd(map, a, guides, kinds) {
+    var A = map && map[a]; if (!A) return;
+    if (guides) { A.guides = A.guides || []; guides.forEach(function (g) { if (A.guides.indexOf(g) < 0) A.guides.push(g); }); }
+    if (kinds) { A.kinds = A.kinds || []; kinds.forEach(function (k) { if (A.kinds.indexOf(k) < 0) A.kinds.push(k); }); }
+  }
+  areaAdd(AREAS, "head", ["valves-screw", "boxer-valves"]);
+  areaAdd(AREAS, "timing", ["ducati-belts"]);
+  areaAdd(AREAS, "carb", ["carb-sync-multi", "vacuum-petcock", "intake-boot", "choke-service", "fuel-pressure"], ["choke", "petcock"]);
+  areaAdd(AREAS, "spark", ["plugs-multi", "points-ignition"]);
+  areaAdd(AREAS, "oil", ["oil-level", "oil-centrifuge", "breather-clean", "oil-leak-find", "hd-oils", "gearbox-oil-separate", "oilpump-2t"], ["breather"]);
+  areaAdd(AREAS, "exhaust", ["muffler-repack", "pipe-decoke-2t"]);
+  areaAdd(AREAS, "cyl", ["crankseal-2t"]);
+  areaAdd(AREAS, "gen", ["starter-clutch", "starter-relay", "interlock-check", "ground-check", "wiring-repair", "fuse-hunt", "gripheat-install", "usb-install"], ["sprag", "clutchswitch"]);
+  areaAdd(AREAS, "cooling", ["fan-check", "waterpump-seal", "radiator-leak"]);
+  areaAdd(AREAS, "clutch", ["clutch-inspect", "clutch-basket", "kick-repair"], ["clutchbasket"]);
+  areaAdd(AREAS, "gearbox", ["shift-return-spring", "shiftlever-fix", "chain-rivet"], ["shiftlever"]);
+  if (typeof CH_AREAS !== "undefined") {
+    areaAdd(CH_AREAS, "fork", ["fork-cartridge", "fork-bushings"]);
+    areaAdd(CH_AREAS, "shock", ["shock-spring", "suspension-clickers"]);
+    areaAdd(CH_AREAS, "brakes", ["caliper-rebuild", "brake-bedding", "brake-light-switch", "drum-adjust", "brakehose-replace"]);
+    areaAdd(CH_AREAS, "wheels", ["wheel-balance", "tubeless-plug", "cush-drive", "tire-mount"]);
+    areaAdd(CH_AREAS, "chain", ["chain-rivet"]);
+    areaAdd(CH_AREAS, "electric", ["wiring-repair", "fuse-hunt", "ground-check", "gripheat-install", "usb-install", "speedo-fix"], ["speedocable", "speedsensor", "gripheat", "usb"]);
+    areaAdd(CH_AREAS, "frame", ["post-crash", "engine-mounts", "wash-bike"]);
+    areaAdd(CH_AREAS, "cockpit", ["brake-light-switch"]);
+  }
+
+  /* «Установка: сложность · время · инструкция» у деталей, где её ещё не было */
+  if (typeof KIND_INSTALL !== "undefined") {
+    var ki = { expack: ["просто", "1 ч", "muffler-repack"], sprag: ["сложно", "2–3 ч", "starter-clutch"], kickkit: ["средне", "1.5–2 ч", "kick-repair"],
+      clutchbasket: ["средне", "2 ч", "clutch-basket"], starterrelay: ["просто", "20 мин", "starter-relay"], clutchswitch: ["просто", "20 мин", "interlock-check"],
+      usb: ["просто", "40 мин", "usb-install"], speedocable: ["просто", "30 мин", "speedo-fix"], speedsensor: ["просто", "30 мин", "speedo-fix"],
+      caliperkit: ["средне", "1.5–2 ч", "caliper-rebuild"], chaintool: ["средне", "30 мин", "chain-rivet"], chainlock: ["средне", "30 мин", "chain-rivet"],
+      shockspring: ["средне", "1.5 ч", "shock-spring"], radiator: ["средне", "1 ч", "radiator-leak"], coolhoses: ["средне", "1 ч", "radiator-leak"],
+      fansensor: ["просто", "30 мин", "fan-check"], choke: ["просто", "40 мин", "choke-service"], intakegasket: ["просто", "40 мин", "intake-boot"],
+      airboot: ["просто", "40 мин", "intake-boot"], breather: ["просто", "30 мин", "breather-clean"], shiftlever: ["просто", "30 мин", "shiftlever-fix"],
+      engseals: ["сложно", "2–3 ч", "crankseal-2t"], killswitch: ["просто", "20 мин", "interlock-check"], ground: ["просто", "30 мин", "ground-check"],
+      wireset: ["средне", "1 ч", "wiring-repair"], connectors: ["просто", "30 мин", "wiring-repair"], brakepedal: ["просто", "30 мин", "brake-light-switch"],
+      brakecable: ["просто", "30 мин", "drum-adjust"], pipe2t: ["средне", "2 ч", "pipe-decoke-2t"] };
+    Object.keys(ki).forEach(function (k) { if (!KIND_INSTALL[k]) KIND_INSTALL[k] = ki[k]; });
+  }
+
+  /* ---------- новые симптомы ---------- */
+  function addSym(cat, items) {
+    var g = SYMPTOMS.find(function (x) { return x.cat === cat; });
+    if (!g) { g = { cat: cat, items: [] }; SYMPTOMS.push(g); }
+    items.forEach(function (i) { if (!g.items.some(function (y) { return y[0] === i[0]; })) g.items.push(i); });
+  }
+  addSym("Запуск", [["kickslip", "Проскальзывает или не возвращается кик"]]);
+  addSym("Звуки", [["loud", "Глушитель стал громче, звенит"]]);
+  addSym("Электрика", [["starterspin", "Стартер крутится, а мотор не проворачивает"], ["nospeedo", "Не работает спидометр"]]);
+
+  /* ---------- веса и инструкции существующих причин ---------- */
+  function addW(id, w) { var c = CAUSES.find(function (x) { return x.id === id; }); if (c) Object.keys(w).forEach(function (k) { if (!c.w[k]) c.w[k] = w[k]; }); }
+  function setGuide(id, g) { var c = CAUSES.find(function (x) { return x.id === id; }); if (c && !c.guide && hasId(GUIDES, g)) c.guide = g; }
+  setGuide("airleak", "intake-boot"); setGuide("choke", "choke-service"); setGuide("float", "carb-float"); setGuide("nofuel", "tank-flush");
+  setGuide("badfuel", "tank-flush"); setGuide("cap", "spark"); setGuide("cdi", "coil-test"); setGuide("killsw", "interlock-check");
+  setGuide("stemseals", "valve-seals"); setGuide("waterpump", "waterpump-seal"); setGuide("fan", "fan-check");
+  setGuide("thermostat", "thermostat-replace"); setGuide("crank", "crank-bearings"); setGuide("exclog", "muffler-repack"); setGuide("batt", "battery-care");
+  setGuide("strelay", "starter-relay"); setGuide("starter", "starter-brushes"); setGuide("ground", "ground-check"); setGuide("efisensor", "efi-sensors");
+  setGuide("fuelpump", "fuelpump-replace"); setGuide("mix2t", "oil2t-mix"); setGuide("mounts", "engine-mounts"); setGuide("oilseal", "oil-leak-find");
+  setGuide("breather", "breather-clean"); setGuide("timing", "timing-marks"); setGuide("flasher", "turn-signals"); setGuide("short", "fuse-hunt");
+  setGuide("shiftspring", "shift-return-spring"); setGuide("shiftbent", "shiftlever-fix"); setGuide("exhaustplastic", "exhaust");
+  setGuide("tipsensor", "post-crash");
+  addW("exclog", { loud: 1 }); addW("exleak", { loud: 3 }); addW("starter", { starterspin: 2 }); addW("batt", { starterspin: 1 });
+  addW("clutchworn", { kickslip: 1 });
+
+  /* ---------- новые причины ---------- */
+  var NEW_CAUSES = [
+    C("sprag", "Обгонная муфта стартера проскальзывает", "gen", { starterspin: 5, nocrank: 1 }, { cond: { highmiles: 2, cold: 2 },
+      check: ["Стартер воет, а коленвал не крутится или проворачивается рывками?", "На тёплом моторе запускается лучше, чем на холодном?"], fix: "Заменить обгонную муфту и ведомую шестерню стартера.", parts: ["sprag", "puller"], guide: "starter-clutch" }),
+    C("kickratchet", "Храповик или возвратная пружина кикстартера", "clutch", { kickslip: 5 }, { cond: { highmiles: 2 },
+      check: ["Кик проваливается без сопротивления?", "Кик не возвращается в верхнее положение?"], fix: "Ремкомплект храповика и пружины кика.", parts: ["kickkit"], guide: "kick-repair" }),
+    C("clutchbasket", "Выработка пазов корзины сцепления", "clutch", { clutchdrag: 3, hardshift: 2, judder: 2 }, { cond: { highmiles: 3 }, skip: ["cvt"],
+      check: ["Нейтраль трудно найти, рычаг сцепления ходит «ступеньками»?", "На лапках фрикционов и в пазах корзины видны зарубки?"], fix: "Зачистить пазы надфилем или заменить корзину.", parts: ["clutchbasket"], guide: "clutch-basket" }),
+    C("speedodrive", "Тросик, привод или датчик спидометра", null, { nospeedo: 5 }, { cond: { afterwork: 3 },
+      check: ["После снятия переднего колеса привод встал «усиками» в пазы?", "Сердечник тросика вращается при прокрутке колеса?"], fix: "Заменить тросик или привод; на электронном — проверить датчик и зазор.", parts: ["speedocable", "speedsensor"], guide: "speedo-fix" }),
+    C("mufflerpack", "Выгорела набивка глушителя", "exhaust", { loud: 5, nopower: 1, smokeblue: 1 }, { cond: { highmiles: 2 },
+      check: ["Звук стал звонким, из среза вылетает пух?", "У 2T из шва глушителя течёт масло?"], fix: "Перенабить глушитель стекловолокном или базальтом.", parts: ["expack"], guide: "muffler-repack" }),
+    C("crankseal2t", "Подсос через сальники коленвала 2T", "cyl", { revhang: 4, idle: 3, plugwhite: 2, overheat: 2, hardcold: 1 }, { only: ["2t"], cond: { highmiles: 2 },
+      check: ["Обороты долго не падают после сброса газа?", "Брызни очистителем на сальник со стороны генератора на холостых — обороты меняются?"], fix: "Заменить сальники коленвала, при сомнениях — опрессовать картер.", parts: ["engseals"], guide: "crankseal-2t" }),
+    dyn(C("carbsync", "Рассинхронизация карбюраторов", "carb", { idle: 3, vibe: 3, hesitate: 2, stalldecel: 1 }, { cond: { afterwork: 3, highmiles: 1 },
+      check: ["Вибрация на малом газе и неровный холостой при исправных свечах?", "Снимали или чистили карбюраторы, меняли тросы?"], fix: "Синхронизировать карбюраторы по вакуумметрам.", parts: ["vacgauge"], guide: "carb-sync-multi" }), P.carbMulti),
+    dyn(C("tbsync", "Рассинхронизация дроссельных заслонок", "carb", { idle: 3, vibe: 3, hesitate: 2 }, { cond: { afterwork: 3, highmiles: 1 },
+      check: ["Вибрация на малом газе, рывки при трогании, ошибок в ЭБУ нет?", "Чистили или снимали дроссельный узел?"], fix: "Синхронизировать дроссели по вакуумметрам.", parts: ["vacgauge"], guide: "multi-sync" }), P.multiEfi),
+    C("sidestand", "Датчик боковой подножки или сцепления", "gen", { stallgear: 5, nocrank: 2, nostart: 1 }, { cond: { rain: 2 },
+      check: ["Глохнет сразу при включении передачи?", "Стартер не крутит на передаче даже с выжатым сцеплением?"], fix: "Почистить и проверить датчики подножки и сцепления, разъёмы.", parts: ["clutchswitch", "sidestand"], guide: "interlock-check" })
+  ];
+  NEW_CAUSES.forEach(function (c) { if (!hasId(CAUSES, c.id)) CAUSES.push(c); });
+
+  /* ---------- новые деревья диагностики ---------- */
+  var NEW_DIAG = [
+    { id: "charge", title: "Садится аккумулятор", icon: "🔋", steps: [
+      { q: "АКБ садится на стоянке (за ночь или за несколько дней), а в езде заряжается?", yes: "Да, на стоянке", no: "Нет, садится в езде", onYes: "next",
+        onNo: { result: "Не заряжает генератор", action: "Заведи, подними обороты до 5000: на АКБ должно быть 13.5–14.5 В. Ниже 13 В — проверь разъём реле-регулятора (оплавлен, окислен), затем статор: между фазами 0.2–1 Ом, на массу — обрыв, переменка на фазах без нагрузки растёт с оборотами. Статор в норме — меняй реле-регулятор. Выше 15 В — реле-регулятор неисправен.", parts: ["regulator", "stator", "connectors", "multimeter"] } },
+      { q: "Ток утечки (амперметр между минусом АКБ и проводом при выключенном зажигании) больше 1–2 мА?", yes: "Больше", no: "В норме", onYes: { result: "Утечка тока", action: "Вынимай предохранители по одному, следя за амперметром. Частые виновники — сигнализация, USB и свет напрямую от АКБ, пробитый диод реле-регулятора (отключи его разъём на ночь).", parts: ["multimeter", "fuse", "regulator"] },
+        onNo: { result: "Аккумулятор потерял ёмкость", action: "АКБ не держит заряд — нагрузочная проверка или замена. Старше 3–4 лет или глубоко разряжался — скорее всего под замену.", parts: ["battery", "charger"] } }
+    ] },
+    { id: "fuses", title: "Горят предохранители", icon: "⚡", steps: [
+      { q: "Предохранитель сгорает сразу при включении зажигания?", yes: "Сразу", no: "Иногда, на ходу", onYes: "next", onNo: { result: "Перетирающийся провод", action: "Покрути руль и пошевели жгуты с лампой 21 Вт вместо предохранителя: вспыхивает — ищи перетёртый провод у рулевой, под баком, у заднего крыла.", parts: ["wireset", "fuse"] } },
+      { q: "Недавно ставили аксессуары (USB, свет, сигнал, подогрев)?", yes: "Да", no: "Нет", onYes: { result: "Ошибка подключения аксессуара", action: "Отключи аксессуар и проверь. Подключай через свой предохранитель и реле от зажигания.", parts: ["fuse", "relay", "connectors"] },
+        onNo: { result: "Замыкание в штатной цепи", action: "Лампа вместо предохранителя и поочерёдное отключение потребителей (фара, поворотники, стоп, датчики) покажут ветку с замыканием.", parts: ["fuse", "wireset", "multimeter"] } }
+    ] }
+  ];
+  NEW_DIAG.forEach(function (d) { if (!hasId(DIAG, d.id)) DIAG.push(d); });
+
+  /* ---------- проверка перед выездом ---------- */
+  [["leaks", "Под мотоциклом нет свежих пятен масла, антифриза, бензина"], ["steer", "Руль поворачивается свободно, тросы не натягиваются в крайних положениях"], ["killsw", "Кнопка глушения и датчик подножки работают"]].forEach(function (p) {
+    if (PRERIDE.some(function (x) { return x[0] === p[0]; })) return;
+    var i = PRERIDE.findIndex(function (x) { return x[0] === "kit"; });
+    if (i < 0) PRERIDE.push(p); else PRERIDE.splice(i, 0, p);
+  });
+
+  /* ---------- сезон ---------- */
+  if (typeof SEASON !== "undefined") {
+    var seasonAdd = function (w, item, before) {
+      var S = SEASON[w]; if (!S || S.items.some(function (x) { return x[0] === item[0]; })) return;
+      var i = before ? S.items.findIndex(function (x) { return x[0] === before; }) : -1;
+      if (i < 0) S.items.push(item); else S.items.splice(i, 0, item);
+    };
+    var wash = SEASON.winter && SEASON.winter.items.find(function (x) { return x[0] === "wash"; });
+    if (wash && !wash[3]) wash[3] = "wash-bike";
+    seasonAdd("winter", ["protect", "Неокрашенный металл, спицы и разъёмы обработать консервантом (ACF-50, WD-40, диэлектрическая смазка)", null, "wash-bike"], "fuel");
+    seasonAdd("winter", ["lube", "Смазать рулевую, прогрессию и оси, если давно не смазывались", null, "linkage"], "fuel");
+    seasonAdd("spring", ["brakefluid", "Тормозной жидкости больше 2 лет или она тёмная — заменить", null, "brakes-bleed"], "oil");
+    seasonAdd("spring", ["bolts", "Протянуть оси колёс, рулевую, суппорты и звёзды", null, "engine-mounts"], "lights");
+    seasonAdd("spring", ["leaks", "После первого запуска проверить течи масла и антифриза", null, "oil-leak-find"], "lights");
+  }
+})();
 /* @@DB-FRAGMENTS@@ */
 /* ===================== v35: Keeway K-Light 202 и Kayo TS90 — свой объём ===================== */
 CL("V223KW", "V250LF", { code: "Keeway V223", name: "Keeway V-twin 223 воздушный (K-Light 202, Superlight 200)", cc: 223, hp: 17, torque: "16 Н·м" }, 1.1);
@@ -8896,15 +10353,20 @@ setEngine("Kayo", "TS90", 0, "1P50FMG", { approx: true });
   /* «сборные» и старые моторы, с которых все модели переведены на свои, — убираем вместе с их деталями */
   var used = {};
   BIKES.forEach(function (b) { b.versions.forEach(function (v) { used[v.engine] = 1; }); });
-  var gone = Object.keys(ENGINES).filter(function (id) { return !used[id] && !Object.keys(SHARE).some(function (k) { return SHARE[k] === id; }); });
+  var shared = {};
+  Object.keys(SHARE).forEach(function (k) { shared[SHARE[k]] = 1; });
+  var gone = Object.keys(ENGINES).filter(function (id) { return !used[id] && !shared[id]; });
   gone.forEach(function (id) { delete ENGINES[id]; delete ENGINE_AKA[id]; });
   var dead = {};
   gone.forEach(function (id) { dead[id] = 1; });
-  for (var j = PARTS.length - 1; j >= 0; j--) {
-    var p = PARTS[j];
-    if (!p.fit) continue;
-    var keep = p.fit.filter(function (f) { return !dead[f]; });
-    if (!keep.length) PARTS.splice(j, 1);else p.fit = keep;
+  if (gone.length) {
+    var kept = PARTS.filter(function (p) {
+      if (!p.fit || !p.fit.some(function (f) { return dead[f]; })) return true;
+      p.fit = p.fit.filter(function (f) { return !dead[f]; });
+      return p.fit.length > 0;
+    });
+    PARTS.length = 0;
+    kept.forEach(function (p) { PARTS.push(p); });
   }
 })();
 /* ===================== v31: после всех моторов — вариатор, цепи по размеру, фильтр китайских DOHC только им ===================== */
@@ -8928,6 +10390,10 @@ sortBikes();
   var ids = Object.keys(ENGINES).sort(function (a, b) { return b.length - a.length; });
   var codes = ids.map(function (k) { return ENGINES[k].code; }).filter(Boolean).sort(function (a, b) { return b.length - a.length; });
   function ends(s, t) { return s.length > t.length && s.slice(-t.length - 1) === " " + t; }
+  /* коды по последним трём символам — чтобы не перебирать все коды для каждой из 25 тысяч деталей */
+  var byTail = {};
+  codes.forEach(function (c) { if (c.length < 3) return; var k = c.slice(-3); (byTail[k] = byTail[k] || []).push(c); });
+  var shortCodes = codes.filter(function (c) { return c.length < 3; });
   PARTS.forEach(function (p) {
     /* самый длинный id мотора, с которого начинается id детали («172FMM-3A-pis» → 172FMM-3A) */
     var own = null;
@@ -8935,7 +10401,7 @@ sortBikes();
     if (!own) return;
     var e = ENGINES[own], mine = e.code;
     if (ends(p.name, mine)) return;
-    var old = codes.find(function (c) { return c !== mine && ends(p.name, c); });
+    var old = (byTail[p.name.slice(-3)] || []).concat(shortCodes).find(function (c) { return c !== mine && ends(p.name, c); });
     if (!old) return;
     p.name = p.name.slice(0, -old.length) + mine;
     /* у ZS174MN-5 один распредвал, а не пара, как у DOHC-мотора 182 */

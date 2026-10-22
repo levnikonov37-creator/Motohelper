@@ -57,7 +57,7 @@ const server = http.createServer((req, res) => {
     const input = page.getByPlaceholder(/Марка, модель или мотор/);
     // Поиск по мотору: «174» → подсказка ZS174MN-5 → все модели с ним; вкладка «Моторы» понимает русскую раскладку
     await input.fill("174");
-    const hint = page.locator(".bf-enghints .chip", { hasText: "ZS174MN-5" });
+    const hint = page.locator(".bf-enghints .chip", { hasText: "ZS174MN-5 —" });
     await hint.waitFor({ timeout: 5000 });
     await hint.click();
     const engHead = await page.locator(".bf-brandhead h3").innerText();
