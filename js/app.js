@@ -1608,8 +1608,21 @@ function bfTokens(q) {
   Object.keys(BF_ALIAS).forEach(k => {
     s = s.split(k).join(BF_ALIAS[k] + " ");
   });
-  return s.split(/\s+/).map(bfNorm).filter(Boolean);
+  return s.split(/\s+/).filter(w => !BF_STOP[w]).map(bfNorm).filter(Boolean);
 }
+/* служебные слова в запросе ничего не ищут: «мотор 174mn» = «174mn» */
+const BF_STOP = {
+  "мотор": 1,
+  "мотора": 1,
+  "двигатель": 1,
+  "двигателя": 1,
+  "движок": 1,
+  "мотоцикл": 1,
+  "мотоцикла": 1,
+  "на": 1,
+  "с": 1,
+  "для": 1
+};
 /* Опечатки раскладки («лфнщ» → kayo) и русские буквы вместо латинских («тт250» → tt250) */
 const BF_RU = "йцукенгшщзхъфывапролджэячсмитьбю",
   BF_EN = "qwertyuiop[]asdfghjkl;'zxcvbnm,.";
@@ -1703,16 +1716,32 @@ function BikeFinder({
     BIKES.forEach(b => b.versions.forEach(v => {
       if (b.brand === "Любая модель") gen[v.engine] = b;else cnt[v.engine] = (cnt[v.engine] || 0) + 1;
     }));
-    return Object.keys(ENGINES).filter(id => cnt[id] || gen[id]).map(id => {
-      const e = ENGINES[id];
-      return {
+    /* варианты одного мотора (тот же код, другая КПП или стартер) — одной строкой */
+    const by = {};
+    Object.keys(ENGINES).filter(id => cnt[id] || gen[id]).forEach(id => {
+      const e = ENGINES[id],
+        k = (e.code || id).replace(/\s*\(\d ст\.\)$/, ""),
+        s = bfNorm(id + " " + e.code + " " + e.name + " " + (e.maker || "") + " " + aka(id));
+      const x = by[k];
+      if (!x) by[k] = {
         id: id,
+        ids: [id],
         e: e,
         n: cnt[id] || 0,
         gen: gen[id] || null,
-        s: bfNorm(id + " " + e.code + " " + e.name + " " + (e.maker || "") + " " + aka(id))
-      };
-    }).sort((a, b) => b.n - a.n);
+        s: s
+      };else {
+        x.ids.push(id);
+        x.s += " " + s;
+        if ((cnt[id] || 0) > (cnt[x.id] || 0)) {
+          x.id = id;
+          x.e = e;
+        }
+        x.n += cnt[id] || 0;
+        x.gen = x.gen || gen[id] || null;
+      }
+    });
+    return Object.keys(by).map(k => by[k]).sort((a, b) => b.n - a.n);
   }, []);
   const engMatch = q => {
     const t = bfTokens(q);
@@ -1725,7 +1754,9 @@ function BikeFinder({
     const c = (ENGINES[v.engine] || {}).cc || 0;
     return c >= ccR[1] && c <= ccR[2];
   })));
-  const okBase = x => (!brand || x.b.brand === brand) && (!engF || x.b.versions.some(v => v.engine === engF));
+  const engCur = engF ? engIdx.find(x => x.ids.indexOf(engF) >= 0) : null;
+  const engIds = engCur ? engCur.ids : [engF];
+  const okBase = x => (!brand || x.b.brand === brand) && (!engF || x.b.versions.some(v => engIds.indexOf(v.engine) >= 0));
   let list = pool.filter(x => okBase(x) && toks.every(t => bfHas(x.s, t))).map(x => x.b);
   /* ничего не нашлось: убираем слова, которых нет ни у одной модели, а марку с опечаткой («кавасаки», «хонды») ищем приблизительно */
   let hint = "";
@@ -1751,7 +1782,6 @@ function BikeFinder({
       hint = "Похоже, ты искал " + near.join(", ");
     }
   }
-  const engCur = engF ? engIdx.find(x => x.id === engF) : null;
   if (engCur && engCur.gen && !toks.length) list = [engCur.gen].concat(list);
   /* запрос похож на код мотора («174», «NB300», «172») — предложим показать все модели с ним */
   const engHints = toks.length && !engF && toks.join("").length >= 3 ? engMatch(q).filter(x => x.n > 0).slice(0, 3) : [];
@@ -1764,6 +1794,11 @@ function BikeFinder({
       let sum = ta.reduce((sum, alts) => sum + Math.max.apply(null, alts.map(a => words.indexOf(a) >= 0 ? 4 : words.some(w => w.indexOf(a) === 0) ? 3 : words.some(w => a.indexOf(w) === 0 && w.length >= 2) ? 2 : nm.indexOf(a) >= 0 ? 1 : 0)), 0);
       /* два слова подряд вместе — одно слово названия («св 400» → CB400, «мт 09» → MT-09) */
       for (let i = 0; i + 1 < ta.length; i++) if (ta[i].some(a => ta[i + 1].some(c => words.some(w => w.indexOf(a + c) === 0)))) sum += 4;
+      /* слово запроса прямо в коде мотора («172fmm») — выше, чем совпадение по синонимам */
+      const codes = b.versions.map(v => bfNorm((ENGINES[v.engine] || {}).code || "")).join(" ");
+      ta.forEach(alts => {
+        if (alts.some(a => a.length >= 4 && /\d/.test(a) && /[a-z]/.test(a) && codes.indexOf(a) >= 0)) sum += 2;
+      });
       return sum;
     };
     const m = new Map(list.map(b => [b, sc(b)]));
