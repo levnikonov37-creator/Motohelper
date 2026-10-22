@@ -12,7 +12,7 @@ const GEMINI_MODEL = "gemini-2.5-flash";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const CF_MODEL = "@cf/meta/llama-3.1-8b-instruct";
 // Чужие сайты не тратят твои бесплатные лимиты: запросы принимаются только отсюда (и с локальной копии)
-const ALLOWED = ["https://levnikonov37-creator.github.io"];
+const ALLOWED = ["https://motohelper.ru", "https://www.motohelper.ru", "https://levnikonov37-creator.github.io"];
 const allowed = (o) => !o || o === "null" || ALLOWED.includes(o) || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o);
 
 const CORS = {
