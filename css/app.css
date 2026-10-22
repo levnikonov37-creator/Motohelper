@@ -440,7 +440,8 @@ textarea { resize: vertical; }
   .qresults button { grid-template-columns: 1fr auto; }
   .qr-type { grid-column: 1 / -1; }
 }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+/* мотор в «Мотоцикле» запускается кнопкой «Завести» — его анимацию не выключаем даже при «меньше движения» */
+@media (prefers-reduced-motion: reduce) { :not(.stage, .stage *), :not(.stage, .stage *)::before, :not(.stage, .stage *)::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
 /* ===================== v4 ===================== */
 body { background: radial-gradient(1200px 500px at 70% -10%, rgba(229,231,235,.08), transparent 60%), var(--bg); }
