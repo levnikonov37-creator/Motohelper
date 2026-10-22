@@ -5644,7 +5644,7 @@ function Internals({
   const [phi, setPhi] = useState(30);
   const reduce = useRef(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   useEffect(() => {
-    if (reduce.current) return;
+    if (reduce.current && !running) return;
     let raf,
       last = performance.now();
     const revPerSec = !running ? 0.35 : rpm < 2500 ? 0.6 : rpm < 5500 ? 1.2 : 2.2;
@@ -10328,9 +10328,10 @@ function Engine3D({
         R = G && G.phase && G.phase !== "off" ? G.r : L.rpm;
       /* скорость анимации растёт с реальными оборотами (замедленно): стартер, холостые, отсечка, остановка — синхронно со звуком */
       const vis = R < 600 ? 0.3 * R / 600 : 0.3 + 1.4 * Math.pow((R - 600) / 9000, 0.8);
-      const speed = reduce ? 0 : L.running ? vis : L.cut ? 0.2 : 0;
+      /* мотор запускают кнопкой сами, поэтому он крутится и при системном «уменьшить движение» */
+      const speed = L.running ? vis : L.cut && !reduce ? 0.2 : 0;
       /* мотор трясётся в такт звуку: громче (газ, отсечка, отстрелы) — сильнее */
-      if (L.running && !reduce) {
+      if (L.running) {
         const lv = G && G.level ? G.level() : -1,
           amp = (lv >= 0 ? 0.003 + lv * 0.035 : 0.003 + Math.min(1, R / 9000) * 0.012) * (G && G.phase === "crank" ? 1.6 : 1);
         holder.position.set((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp * 1.4, (Math.random() - 0.5) * amp * 0.6);
@@ -10457,7 +10458,7 @@ function Engine3D({
       /* выхлопные газы и нагрев коллектора */
       heat = L.running ? Math.min(1, heat + dt / 12) : Math.max(0, heat - dt / 25);
       E.exMats.forEach(m => m.emissive.setRGB(0.9 * heat * 0.45, 0.35 * heat * 0.45, 0.05 * heat * 0.45));
-      if (L.running && !reduce) {
+      if (L.running) {
         spawnAcc += dt * (5 + R / 330) * (E.two ? 1.4 : 1);
         E.smokeO.getWorldPosition(sp0);
         E.smokeO.getWorldQuaternion(sq);
@@ -12550,7 +12551,7 @@ function EngineExplorer({
       }
       G.phase = "stop";
       setStopping(true);
-      if (reduceMotion()) finishStop();else kick();
+      kick();
     } else {
       setRunning(true);
       setSel(null);
@@ -12559,10 +12560,7 @@ function EngineExplorer({
       G.base = RPMS[0][1];
       G.held = false;
       G.flare = 0;
-      if (reduceMotion()) {
-        G.phase = "run";
-        G.r = G.base;
-      } else {
+      {
         G.phase = "crank";
         G.r = 0;
         G.t0 = performance.now();
