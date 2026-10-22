@@ -36,12 +36,16 @@
     var newPage = page !== lastPage; // вся страница сменилась — её анимирует .page-anim
     lastPage = page;
     var vh = window.innerHeight, n = 0;
-    var list = document.querySelectorAll(BLOCKS);
+    var list = document.querySelectorAll(BLOCKS), fresh = [], tops = [];
+    // сначала все замеры, потом все изменения — иначе браузер пересчитывает раскладку на каждом блоке
     for (var i = 0; i < list.length; i++) {
-      var el = list[i];
-      if (seen.has(el)) continue;
-      seen.add(el);
-      var top = el.getBoundingClientRect().top;
+      if (seen.has(list[i])) continue;
+      seen.add(list[i]);
+      fresh.push(list[i]);
+      tops.push(list[i].getBoundingClientRect().top);
+    }
+    for (var j = 0; j < fresh.length; j++) {
+      var el = fresh[j], top = tops[j];
       if (top > vh) {
         el.classList.add("mh-rv");
         io.observe(el);

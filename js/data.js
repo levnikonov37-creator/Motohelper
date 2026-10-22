@@ -319,7 +319,12 @@ function addVersion(brand, name, eng, years, extra) {
 /* Порядок списка: марки по алфавиту, внутри марки — порядок добавления, «Любая модель» в конце */
 function sortBikes() {
   var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  rest.sort(function (a, b) { return a.brand === b.brand ? 0 : a.brand.localeCompare(b.brand, "ru"); });
+  var coll = new Intl.Collator("ru"), key = {};
+  rest.forEach(function (b, i) { if (!(b.brand in key)) key[b.brand] = 0; b.__i = i; });
+  var brands = Object.keys(key).sort(coll.compare);
+  brands.forEach(function (x, i) { key[x] = i; });
+  rest.sort(function (a, b) { return key[a.brand] - key[b.brand] || a.__i - b.__i; });
+  rest.forEach(function (b) { delete b.__i; });
   BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 }
 (function () {
@@ -7989,8 +7994,11 @@ function fixE(id, o) {
     ["hose-clamps", "Хомуты для патрубков (набор)", 350, "Двигатель", "clamps", null, "Червячные или пружинные под диаметр патрубка"],
     ["shift-seal", "Сальник и уплотнения вала переключения", 250, "Трансмиссия", "shift", null, "Меняется при снятой лапке"]
   ];
+  var have = {};
+  PARTS.forEach(function (p) { have[p.id] = 1; });
   NEW_PARTS.forEach(function (x) {
-    if (PARTS.some(function (p) { return p.id === x[0]; })) return;
+    if (have[x[0]]) return;
+    have[x[0]] = 1;
     var p = P(x[0], x[1], x[2], x[3], x[4], x[5]);
     if (x[6]) { PART_INFO[x[0]] = x[6]; p.info = x[6]; }
     PARTS.push(p);
@@ -8896,15 +8904,20 @@ setEngine("Kayo", "TS90", 0, "1P50FMG", { approx: true });
   /* «сборные» и старые моторы, с которых все модели переведены на свои, — убираем вместе с их деталями */
   var used = {};
   BIKES.forEach(function (b) { b.versions.forEach(function (v) { used[v.engine] = 1; }); });
-  var gone = Object.keys(ENGINES).filter(function (id) { return !used[id] && !Object.keys(SHARE).some(function (k) { return SHARE[k] === id; }); });
+  var shared = {};
+  Object.keys(SHARE).forEach(function (k) { shared[SHARE[k]] = 1; });
+  var gone = Object.keys(ENGINES).filter(function (id) { return !used[id] && !shared[id]; });
   gone.forEach(function (id) { delete ENGINES[id]; delete ENGINE_AKA[id]; });
   var dead = {};
   gone.forEach(function (id) { dead[id] = 1; });
-  for (var j = PARTS.length - 1; j >= 0; j--) {
-    var p = PARTS[j];
-    if (!p.fit) continue;
-    var keep = p.fit.filter(function (f) { return !dead[f]; });
-    if (!keep.length) PARTS.splice(j, 1);else p.fit = keep;
+  if (gone.length) {
+    var kept = PARTS.filter(function (p) {
+      if (!p.fit || !p.fit.some(function (f) { return dead[f]; })) return true;
+      p.fit = p.fit.filter(function (f) { return !dead[f]; });
+      return p.fit.length > 0;
+    });
+    PARTS.length = 0;
+    kept.forEach(function (p) { PARTS.push(p); });
   }
 })();
 /* ===================== v31: после всех моторов — вариатор, цепи по размеру, фильтр китайских DOHC только им ===================== */
@@ -8928,6 +8941,10 @@ sortBikes();
   var ids = Object.keys(ENGINES).sort(function (a, b) { return b.length - a.length; });
   var codes = ids.map(function (k) { return ENGINES[k].code; }).filter(Boolean).sort(function (a, b) { return b.length - a.length; });
   function ends(s, t) { return s.length > t.length && s.slice(-t.length - 1) === " " + t; }
+  /* коды по последним трём символам — чтобы не перебирать все коды для каждой из 25 тысяч деталей */
+  var byTail = {};
+  codes.forEach(function (c) { if (c.length < 3) return; var k = c.slice(-3); (byTail[k] = byTail[k] || []).push(c); });
+  var shortCodes = codes.filter(function (c) { return c.length < 3; });
   PARTS.forEach(function (p) {
     /* самый длинный id мотора, с которого начинается id детали («172FMM-3A-pis» → 172FMM-3A) */
     var own = null;
@@ -8935,7 +8952,7 @@ sortBikes();
     if (!own) return;
     var e = ENGINES[own], mine = e.code;
     if (ends(p.name, mine)) return;
-    var old = codes.find(function (c) { return c !== mine && ends(p.name, c); });
+    var old = (byTail[p.name.slice(-3)] || []).concat(shortCodes).find(function (c) { return c !== mine && ends(p.name, c); });
     if (!old) return;
     p.name = p.name.slice(0, -old.length) + mine;
     /* у ZS174MN-5 один распредвал, а не пара, как у DOHC-мотора 182 */

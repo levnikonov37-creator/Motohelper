@@ -8262,7 +8262,16 @@ const EX_LABEL = {
   full: "полная система",
   pipe: "тюнинг-труба"
 };
-function engineSound(eng) {
+/* короткая вибрация телефона в такт мотору (запуск, отсечка), если телефон умеет */
+function buzz(p) {
+  try {
+    if (navigator.vibrate && !reduceMotion()) navigator.vibrate(p);
+  } catch (e) {}
+}
+function reduceMotion() {
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+function engineSoundLegacy(eng) {
   let ctx = null,
     timer = null,
     P = null,
@@ -8543,6 +8552,147 @@ function engineSound(eng) {
         }, 300);
       }
       ctx = null;
+    }
+  };
+}
+/* Звук двигателя: синтез в AudioWorklet (js/engine-worklet.js), если браузер не умеет — старый синтезатор.
+   Кроме оборотов и газа умеет стартер и зажигание (запуск и заглушка), отдаёт громкость для тряски 3D-мотора. */
+function engineSound(eng) {
+  let ctx = null,
+    node = null,
+    legacy = null,
+    P = null,
+    lvl = 0,
+    gainN = null;
+  const queued = {};
+  function send(m) {
+    Object.assign(queued, m);
+    if (node) {
+      node.port.postMessage(Object.assign({}, queued));
+      Object.keys(queued).forEach(k => delete queued[k]);
+    }
+  }
+  function useLegacy(r, ex) {
+    legacy = engineSoundLegacy(eng);
+    if (!legacy.start(r || 1600, ex)) legacy = null;
+  }
+  return {
+    start(r, exOverride, opts) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      const o = opts || {};
+      if (!window.AudioWorkletNode) {
+        useLegacy(r, exOverride);
+        return !!legacy;
+      }
+      try {
+        ctx = new AC({
+          latencyHint: "interactive"
+        });
+      } catch (e) {
+        return false;
+      }
+      P = soundProfile(eng, exOverride);
+      const red = enginePeak(eng).red;
+      const c = ctx;
+      gainN = c.createGain();
+      gainN.gain.value = 1.15;
+      gainN.connect(c.destination);
+      if (c.state === "suspended") c.resume().catch(() => {});
+      c.audioWorklet.addModule("js/engine-worklet.js").then(() => {
+        if (ctx !== c) return;
+        node = new AudioWorkletNode(c, "mh-engine", {
+          numberOfInputs: 0,
+          numberOfOutputs: 1,
+          outputChannelCount: [1],
+          processorOptions: {
+            two: P.two,
+            cycle: P.cycle,
+            fire: P.fire,
+            vc: P.vc,
+            air: P.air,
+            ex: P.ex,
+            red: red,
+            rpm: o.crank ? 0 : r,
+            ign: !o.crank
+          }
+        });
+        node.port.onmessage = e => {
+          lvl = e.data.l || 0;
+        };
+        node.connect(gainN);
+        send({});
+      }).catch(() => {
+        if (ctx !== c) return;
+        try {
+          c.close();
+        } catch (e) {}
+        ctx = null;
+        useLegacy(r, exOverride);
+      });
+      if (o.crank) send({
+        starter: true,
+        ign: false,
+        rpm: 0
+      });else send({
+        rpm: r
+      });
+      return true;
+    },
+    setRpm(r) {
+      if (legacy) return legacy.setRpm(Math.max(900, r));
+      send({
+        rpm: r
+      });
+    },
+    setThrottle(on) {
+      if (legacy) return legacy.setThrottle(on);
+      send({
+        thr: on ? 1 : 0
+      });
+    },
+    setIgnition(on) {
+      if (!legacy) send({
+        ign: !!on
+      });
+    },
+    setStarter(on) {
+      if (!legacy) send({
+        starter: !!on
+      });
+    },
+    setExhaust(x) {
+      if (legacy) return legacy.setExhaust(x);
+      P = soundProfile(eng, x);
+      send({
+        ex: P.ex
+      });
+    },
+    label() {
+      if (legacy) return legacy.label();
+      return P ? EX_LABEL[P.ex] : "";
+    },
+    level() {
+      return legacy ? -1 : lvl;
+    },
+    stop() {
+      if (legacy) {
+        legacy.stop();
+        legacy = null;
+        return;
+      }
+      const c = ctx;
+      ctx = null;
+      if (!c) return;
+      if (node) node.port.postMessage({
+        vol: 0
+      });
+      setTimeout(() => {
+        try {
+          c.close();
+        } catch (e) {}
+      }, 250);
+      node = null;
     }
   };
 }
@@ -10139,8 +10289,17 @@ function Engine3D({
         return;
       }
       dirty--;
-      const R = L.rpmLive && L.rpmLive.current && L.rpmLive.current.raf ? L.rpmLive.current.r : L.rpm;
-      const speed = reduce ? 0 : L.running ? 0.2 + R / 5200 : L.cut ? 0.2 : 0;
+      const G = L.rpmLive && L.rpmLive.current,
+        R = G && G.phase && G.phase !== "off" ? G.r : L.rpm;
+      /* скорость анимации растёт с реальными оборотами (замедленно): стартер, холостые, отсечка, остановка — синхронно со звуком */
+      const vis = R < 600 ? 0.3 * R / 600 : 0.3 + 1.4 * Math.pow((R - 600) / 9000, 0.8);
+      const speed = reduce ? 0 : L.running ? vis : L.cut ? 0.2 : 0;
+      /* мотор трясётся в такт звуку: громче (газ, отсечка, отстрелы) — сильнее */
+      if (L.running && !reduce) {
+        const lv = G && G.level ? G.level() : -1,
+          amp = (lv >= 0 ? 0.003 + lv * 0.035 : 0.003 + Math.min(1, R / 9000) * 0.012) * (G && G.phase === "crank" ? 1.6 : 1);
+        holder.position.set((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp * 1.4, (Math.random() - 0.5) * amp * 0.6);
+      } else if (holder.position.x || holder.position.y) holder.position.set(0, 0, 0);
       const w = speed * Math.PI * 2;
       phi += w * dt;
       placeCam();
@@ -11157,6 +11316,7 @@ ICONS.ai = "M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4zM18.5 14l.9 2
 ICONS.wrench = "M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z";
 ICONS.send = "M4 12l16-8-6 16-2.5-6.5z";
 ICONS.stop = "M7 7h10v10H7z";
+ICONS.down = "M6 9l6 6 6-6";
 ICONS.photo = "M4 7h3l2-2h6l2 2h3v12H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z";
 ICONS.plus = "M12 5v14M5 12h14";
 ICONS.book = "M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5M8 7h7";
@@ -11314,9 +11474,13 @@ function App() {
   };
   const ovOpen = useRef(null);
   function applyNav(n, y) {
-    setPage(n.page || "home");
-    setBikeTab(n.tab || "overview");
-    setRv(n.rv || "hub");
+    /* новая страница рисуется «в фоне»: интерфейс не замирает, пока она строится */
+    const upd = () => {
+      setPage(n.page || "home");
+      setBikeTab(n.tab || "overview");
+      setRv(n.rv || "hub");
+    };
+    if (React.startTransition) React.startTransition(upd);else upd();
     window.scrollTo({
       top: 0
     });
@@ -11868,6 +12032,7 @@ function App() {
   }, NAV.map(n => /*#__PURE__*/React.createElement("button", {
     key: n.id,
     className: "tab" + (page === n.id ? " on" : "") + (n.id === "ai" ? " tab-ai" : ""),
+    onPointerDown: e => e.currentTarget.classList.add("tap"),
     onClick: () => go(n.id)
   }, /*#__PURE__*/React.createElement("span", {
     className: "tab-ico"
@@ -12166,6 +12331,7 @@ function EngineExplorer({
   const [no3d, setNo3d] = useState(false);
   const [sel, setSel] = useState(null);
   const [running, setRunning] = useState(false);
+  const [stopping, setStopping] = useState(false);
   const [rpm, setRpm] = useState(1600);
   const [xray, setXray] = useState(false);
   const [sound, setSound] = useState(false);
@@ -12177,9 +12343,12 @@ function EngineExplorer({
     r: 1600,
     raf: 0,
     last: 0,
-    shown: 0
+    shown: 0,
+    phase: "off",
+    flare: 0
   });
   const snd = useRef(null);
+  gas.current.level = () => snd.current && snd.current.level ? snd.current.level() : -1;
   /* газ: живые обороты в gas.current.r; React перерисовывает схему и 3D только при смене диапазона оборотов */
   const tacho = useRef(null);
   const [viz, setViz] = useState(null);
@@ -12211,17 +12380,35 @@ function EngineExplorer({
     setSel(id);
   }
   const RPMS = [["Холостые", 1600], ["Средние", Math.round(pk.peak * 0.55 / 100) * 100], ["Высокие", Math.round(pk.peak * 0.95 / 100) * 100]];
+  function haltEngine() {
+    const G = gas.current;
+    if (G.raf) cancelAnimationFrame(G.raf);
+    G.raf = 0;
+    G.last = 0;
+    G.held = false;
+    G.phase = "off";
+    G.flare = 0;
+    G.viz = 0;
+  }
   useEffect(() => {
     setSel(null);
     setDet(null);
     stopSound();
+    haltEngine();
     setRunning(false);
+    setStopping(false);
+    setViz(null);
     setXray(false);
   }, [eng.id, bike.name]);
-  useEffect(() => () => stopSound(), []);
-  useEffect(() => {
-    if (snd.current) snd.current.setRpm(rpm);
-  }, [rpm]);
+  useEffect(() => () => {
+    stopSound();
+    haltEngine();
+  }, []);
+  function kick() {
+    const G = gas.current;
+    if (!G.raf) G.raf = requestAnimationFrame(gasLoop);
+  }
+  /* одни «живые» обороты на всё: стрелка тахометра, звук и 3D-мотор берут их отсюда */
   function gasLoop(t) {
     const G = gas.current,
       dt = Math.min(0.05, (t - (G.last || t)) / 1000);
@@ -12230,10 +12417,41 @@ function EngineExplorer({
     const up = (eng.stroke === "2T" ? 9500 : 6500) * Math.pow(250 / vc, 0.3),
       down = (eng.stroke === "2T" ? 6000 : 4200) * Math.pow(250 / vc, 0.2);
     const top = pk.red * 0.97;
-    if (G.held) {
+    if (G.phase === "crank") {
+      /* стартер крутит, мотор ещё не схватил */
+      G.r = Math.min(G.crankR, G.r + 1400 * dt);
+      if (t - G.t0 > G.crankMs) {
+        G.phase = "run";
+        G.flare = 1;
+        G.r = Math.max(G.r, G.base * 0.75);
+        buzz([40, 30, 25]);
+        if (snd.current) {
+          snd.current.setStarter(false);
+          snd.current.setIgnition(true);
+        }
+      }
+    } else if (G.phase === "stop") {
+      /* зажигание выключено — мотор останавливается сам */
+      G.r = Math.max(0, G.r - (G.r > 900 ? down * 0.55 : 900) * dt);
+      if (G.r <= 0) {
+        finishStop();
+        return;
+      }
+    } else if (G.held) {
       G.r = Math.min(top, G.r + up * dt * (1 - 0.45 * G.r / top));
-      if (G.r >= top - 30) G.r = top - Math.random() * 260;
-    } else G.r = Math.max(G.base, G.r - down * dt);
+      if (G.r >= top - 30) {
+        G.r = top - Math.random() * 260;
+        if (t - (G.buzzT || 0) > 160) {
+          G.buzzT = t;
+          buzz(12);
+        }
+      }
+    } else {
+      /* после запуска обороты подскакивают и оседают к холостым; смена режима — плавно */
+      const tgt = G.base * (1 + 0.45 * G.flare);
+      G.flare = Math.max(0, G.flare - dt * 1.4);
+      G.r = G.r > tgt ? Math.max(tgt, G.r - down * dt) : Math.min(tgt, G.r + up * 0.7 * dt);
+    }
     if (tacho.current) tacho.current(G.r);
     if (snd.current) snd.current.setRpm(G.r);
     const band = G.r < 2500 ? 1600 : G.r < 5500 ? 4000 : 7000;
@@ -12241,7 +12459,9 @@ function EngineExplorer({
       G.viz = band;
       setViz(band);
     }
-    if (G.held || G.r > G.base + 1) G.raf = requestAnimationFrame(gasLoop);else {
+    const settled = G.phase === "run" && !G.held && G.flare <= 0 && Math.abs(G.r - G.base) < 1;
+    if (!settled) G.raf = requestAnimationFrame(gasLoop);else {
+      G.r = G.base;
       G.raf = 0;
       G.last = 0;
       G.viz = 0;
@@ -12250,12 +12470,24 @@ function EngineExplorer({
       if (snd.current) snd.current.setRpm(G.base);
     }
   }
+  function finishStop() {
+    haltEngine();
+    gas.current.r = 1600;
+    stopSound();
+    setRunning(false);
+    setStopping(false);
+    setViz(null);
+    setRpm(1600);
+  }
+  function setPreset(v) {
+    const G = gas.current;
+    setRpm(v);
+    G.base = v;
+    if (G.phase === "run") kick();
+  }
   function gasDown() {
     const G = gas.current;
-    if (!G.held && !G.raf) {
-      G.base = rpm;
-      G.r = rpm;
-    }
+    if (G.phase !== "run") return;
     G.held = true;
     if (snd.current) snd.current.setThrottle(true);
     if (!G.raf) G.raf = requestAnimationFrame(gasLoop);
@@ -12273,32 +12505,58 @@ function EngineExplorer({
     setSound(false);
   }
   function toggleRun() {
+    const G = gas.current;
     if (running) {
-      setRunning(false);
-      stopSound();
-      const G = gas.current;
+      if (stopping) return;
       G.held = false;
-      if (G.raf) cancelAnimationFrame(G.raf);
-      G.raf = 0;
-      setRpm(1600);
+      if (snd.current) {
+        snd.current.setThrottle(false);
+        snd.current.setIgnition(false);
+      }
+      G.phase = "stop";
+      setStopping(true);
+      if (reduceMotion()) finishStop();else kick();
     } else {
       setRunning(true);
       setSel(null);
       setRpm(RPMS[0][1]);
       bumpStat("start");
+      G.base = RPMS[0][1];
+      G.held = false;
+      G.flare = 0;
+      if (reduceMotion()) {
+        G.phase = "run";
+        G.r = G.base;
+      } else {
+        G.phase = "crank";
+        G.r = 0;
+        G.t0 = performance.now();
+        G.crankMs = 550 + Math.random() * 500;
+        G.crankR = eng.cc > 450 ? 230 : 290;
+      }
+      if (load("engSound", false)) startSound(G.phase === "crank");
+      kick();
     }
+  }
+  function startSound(crank) {
+    const s = engineSound(eng);
+    if (s.start(gas.current.r || rpm, exPrev, {
+      crank: crank
+    })) {
+      snd.current = s;
+      setSound(true);
+      setExLabel(s.label());
+      return true;
+    }
+    return false;
   }
   function toggleSound() {
     if (sound) {
       stopSound();
+      save("engSound", false);
       return;
     }
-    const s = engineSound(eng);
-    if (s.start(rpm, exPrev)) {
-      snd.current = s;
-      setSound(true);
-      setExLabel(s.label());
-    }
+    if (startSound(false)) save("engSound", true);
   }
   const efi = eng.groups.indexOf("efi") >= 0;
   return /*#__PURE__*/React.createElement("div", {
@@ -12387,21 +12645,22 @@ function EngineExplorer({
   }), /*#__PURE__*/React.createElement("div", {
     className: "stage-ctrl"
   }, /*#__PURE__*/React.createElement("button", {
-    className: "start-btn" + (running ? " on" : ""),
+    className: "start-btn" + (running ? " on" : "") + (stopping ? " stopping" : ""),
+    disabled: stopping,
     onClick: toggleRun
   }, /*#__PURE__*/React.createElement("span", {
     className: "sb-ring"
   }, /*#__PURE__*/React.createElement(Icon, {
     n: running ? "stop" : "play",
     s: 18
-  })), running ? "Заглушить" : "Завести"), running && /*#__PURE__*/React.createElement("div", {
+  })), stopping ? "Глохнет…" : running ? "Заглушить" : "Завести"), running && /*#__PURE__*/React.createElement("div", {
     className: "seg dark",
     role: "group",
     "aria-label": "\u041E\u0431\u043E\u0440\u043E\u0442\u044B"
   }, RPMS.map(r => /*#__PURE__*/React.createElement("button", {
     key: r[0],
     className: rpm === r[1] ? "on" : "",
-    onClick: () => setRpm(r[1])
+    onClick: () => setPreset(r[1])
   }, r[0]))), (view === "engine" || view === "3d") && /*#__PURE__*/React.createElement("button", {
     className: "ctl" + (xray ? " on" : ""),
     "aria-pressed": xray,
@@ -13140,6 +13399,11 @@ function PreRide({
   const items = PRERIDE.filter(p => !p[2] || eng.groups.indexOf(p[2]) >= 0).map(p => p[0] === "fuel" ? [p[0], eng.stroke === "2T" ? eng.groups.indexOf("efi") >= 0 || eng.cvt ? "Бензин и масло 2T в бачке" : "Бензин (смесь с маслом 2T!)" : "Бензин"].concat(p.slice(2)) : eng.cvt && p[0] === "chain" ? null : p).filter(Boolean);
   const n = items.filter(i => st.done[i[0]]).length;
   const pct = n / items.length;
+  const [open, setOpen] = useState(() => load("prerideOpen", false));
+  function toggleOpen() {
+    setOpen(!open);
+    save("prerideOpen", !open);
+  }
   function tog(id) {
     const next = {
       d: today,
@@ -13156,11 +13420,17 @@ function PreRide({
     setSt(next);
     save("preride", next);
   }
+  const all = n === items.length;
   return /*#__PURE__*/React.createElement("div", {
-    className: "panel preride"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "panel-head"
-  }, /*#__PURE__*/React.createElement("h2", null, "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043F\u0435\u0440\u0435\u0434 \u0432\u044B\u0435\u0437\u0434\u043E\u043C"), /*#__PURE__*/React.createElement("svg", {
+    className: "panel preride" + (open ? " open" : "") + (all ? " all" : "")
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "panel-head pr-toggle",
+    "aria-expanded": open,
+    onClick: toggleOpen
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "pr-title"
+  }, /*#__PURE__*/React.createElement("h2", null, "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043F\u0435\u0440\u0435\u0434 \u0432\u044B\u0435\u0437\u0434\u043E\u043C"), /*#__PURE__*/React.createElement("small", null, all ? "Всё проверено — хорошей поездки!" : open ? "Отмечай по ходу осмотра" : n ? "Проверено " + n + " из " + items.length + " — продолжить" : items.length + " пунктов · нажми, чтобы начать")), /*#__PURE__*/React.createElement("svg", {
     className: "ring",
     viewBox: "0 0 36 36",
     "aria-label": n + " из " + items.length
@@ -13181,7 +13451,19 @@ function PreRide({
     x: "18",
     y: "22",
     textAnchor: "middle"
-  }, n, "/", items.length))), /*#__PURE__*/React.createElement("ul", {
+  }, n, "/", items.length)), /*#__PURE__*/React.createElement("span", {
+    className: "pr-chev",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "down",
+    s: 18
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "pr-body",
+    "aria-hidden": !open,
+    inert: open ? undefined : ""
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pr-inner"
+  }, /*#__PURE__*/React.createElement("ul", {
     className: "checklist"
   }, items.map(i => /*#__PURE__*/React.createElement("li", {
     key: i[0],
@@ -13194,7 +13476,7 @@ function PreRide({
     onClick: () => tog(i[0])
   })))), n === items.length && /*#__PURE__*/React.createElement("p", {
     className: "ok-msg"
-  }, "\u0412\u0441\u0451 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E \u2014 \u0445\u043E\u0440\u043E\u0448\u0435\u0439 \u043F\u043E\u0435\u0437\u0434\u043A\u0438!"));
+  }, "\u0412\u0441\u0451 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E \u2014 \u0445\u043E\u0440\u043E\u0448\u0435\u0439 \u043F\u043E\u0435\u0437\u0434\u043A\u0438!"))));
 }
 
 /* ===== Мой мотоцикл ===== */
