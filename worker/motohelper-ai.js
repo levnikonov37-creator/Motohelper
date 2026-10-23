@@ -1,13 +1,18 @@
 // Сервер ИИ-механика для Cloudflare Workers (бесплатный тариф).
-// Умеет: текст и фото (фото смотрит Gemini). Если Gemini недоступен — Groq, потом встроенный Workers AI.
+// Умеет: текст и фото. Порядок: DeepSeek (платный, основной) → Gemini → Groq → встроенный Workers AI.
+// Если у DeepSeek кончился дневной лимит или деньги — отвечают бесплатные.
 //
 // Как обновить: Cloudflare → Workers & Pages → motohelper-ai → Edit code → вставить этот файл целиком → Deploy.
 // Ключи (Settings → Variables and Secrets):
-//   GEMINI_API_KEY — ключ Google AI Studio (aistudio.google.com → Get API key), нужен для фото;
+//   DEEPSEEK_API_KEY — ключ platform.deepseek.com (API keys), основной ИИ; тратит деньги с баланса DeepSeek;
+//   DAILY_TOTAL      — необязательно: сколько ответов DeepSeek в сутки на всех (по умолчанию 300 ≈ 9 тыс. в месяц);
+//   DAILY_PER_USER   — необязательно: сколько ответов DeepSeek в сутки одному человеку (по умолчанию 40);
+//   GEMINI_API_KEY — ключ Google AI Studio (aistudio.google.com → Get API key), бесплатный запасной, умеет фото;
 //   GROQ_API_KEY   — необязательно, запасной вариант для текста (console.groq.com);
 //   привязка AI (Settings → Bindings → Workers AI, имя AI) — необязательно, последний запасной вариант.
 // Сайт сам узнаёт, что фото работают: GET на адрес сервера отвечает {"images": true}.
 
+const DEEPSEEK_MODEL = "deepseek-flash";
 const GEMINI_MODEL = "gemini-2.5-flash";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const CF_MODEL = "@cf/meta/llama-3.1-8b-instruct";
@@ -36,7 +41,7 @@ export default {
       const u = new URL(request.url);
       // список сообщений о неточностях: открой в браузере <адрес сервера>/?feedback=1&token=<FEEDBACK_TOKEN>
       if (u.searchParams.get("feedback")) return listFeedback(env, u.searchParams.get("token"));
-      return json({ ok: true, images: !!env.GEMINI_API_KEY, feedback: !!env.FEEDBACK });
+      return json({ ok: true, images: !!(env.DEEPSEEK_API_KEY || env.GEMINI_API_KEY), feedback: !!env.FEEDBACK, deepseek: !!env.DEEPSEEK_API_KEY });
     }
     if (request.method !== "POST") return json({ error: "method" }, 405);
 
@@ -52,6 +57,13 @@ export default {
     if (!messages.length) return json({ error: "no_messages" }, 400);
 
     const errors = [];
+    if (env.DEEPSEEK_API_KEY && (await deepseekAllowed(env, request.headers.get("CF-Connecting-IP") || "?"))) {
+      try {
+        return sse(await deepseek(env, messages, images), "deepseek");
+      } catch (e) {
+        errors.push("deepseek: " + e.message);
+      }
+    }
     if (env.GEMINI_API_KEY) {
       try {
         return sse(await gemini(env, messages, images), "gemini");
@@ -82,6 +94,45 @@ export default {
 
 function textOnly(messages) {
   return messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : m.role === "system" ? "system" : "user", content: String(m.content || "") }));
+}
+
+/* Лимиты DeepSeek, чтобы не съели весь баланс: на человека — в памяти сервера (примерно, сбрасывается
+   при перезапуске), на всех — счётчик в KV (одна запись на ответ). Сверх лимита отвечают бесплатные ИИ. */
+const PER_USER = new Map();
+async function deepseekAllowed(env, ip) {
+  const day = new Date().toISOString().slice(0, 10);
+  const perUser = Number(env.DAILY_PER_USER) || 40,
+    total = Number(env.DAILY_TOTAL) || 300;
+  const k = day + "|" + ip,
+    n = (PER_USER.get(k) || 0) + 1;
+  if (PER_USER.size > 20000) PER_USER.clear();
+  PER_USER.set(k, n);
+  if (n > perUser) return false;
+  const kv = env.LIMITS || env.FEEDBACK;
+  if (!kv) return true;
+  try {
+    const key = "rl:" + day,
+      used = Number(await kv.get(key)) || 0;
+    if (used >= total) return false;
+    await kv.put(key, String(used + 1), { expirationTtl: 60 * 60 * 48 });
+  } catch (e) {}
+  return true;
+}
+
+// DeepSeek: формат как у OpenAI, ответ потоком (сайт его понимает, как у Groq). Без «размышлений» — быстрее и дешевле.
+async function deepseek(env, messages, images) {
+  const msgs = textOnly(messages);
+  const last = msgs.map((m) => m.role).lastIndexOf("user");
+  const pics = images.filter((u) => /^data:image\/[a-z+]+;base64,/i.test(String(u)));
+  if (last >= 0 && pics.length)
+    msgs[last] = { role: "user", content: [{ type: "text", text: msgs[last].content }].concat(pics.map((url) => ({ type: "image_url", image_url: { url: url, detail: "low" } }))) };
+  const res = await fetch("https://api.deepseek.com/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + env.DEEPSEEK_API_KEY },
+    body: JSON.stringify({ model: DEEPSEEK_MODEL, messages: msgs, stream: true, max_tokens: 1500, temperature: 0.4, thinking: { type: "disabled" } }),
+  });
+  if (!res.ok || !res.body) throw new Error(res.status + " " + (await res.text()).slice(0, 200));
+  return res.body;
 }
 
 async function gemini(env, messages, images) {
@@ -161,7 +212,7 @@ async function saveFeedback(env, f) {
 async function listFeedback(env, token) {
   if (!env.FEEDBACK) return json({ ok: false, error: "no_kv" }, 501);
   if (!env.FEEDBACK_TOKEN || token !== env.FEEDBACK_TOKEN) return json({ ok: false, error: "token" }, 403);
-  const keys = (await env.FEEDBACK.list({ limit: 200 })).keys.map((k) => k.name).sort().reverse();
+  const keys = (await env.FEEDBACK.list({ limit: 300 })).keys.map((k) => k.name).filter((k) => k.indexOf("rl:") !== 0).sort().reverse().slice(0, 200);
   const items = await Promise.all(keys.map(async (k) => JSON.parse((await env.FEEDBACK.get(k)) || "{}")));
   return json({ ok: true, count: items.length, items });
 }
