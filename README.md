@@ -95,8 +95,10 @@ npm run test:data    # только база, без браузера, за се
 
 ## Сервер ИИ-механика
 
-Код лежит в `worker/motohelper-ai.js`. Чтобы обновить сервер: Cloudflare → Workers & Pages → `motohelper-ai` →
-Edit code → вставить файл целиком → Deploy. Ключи задаются в Settings → Variables and Secrets:
+Код лежит в `worker/motohelper-ai.js`, настройки — в `worker/wrangler.toml`. Обновление автоматическое: в Cloudflare
+у воркера `motohelper-ai` → Settings → Build → Connect подключён этот репозиторий (Root directory: `worker`), и после
+каждого мержа в main Cloudflare сам выкладывает новый код. Вручную (если автодеплой не подключён): Edit code →
+вставить файл целиком → Deploy. Самопроверка: открыть `<адрес сервера>/?test=1`. Ключи задаются в Settings → Variables and Secrets:
 
 - `DEEPSEEK_API_KEY` — основной ИИ (platform.deepseek.com → API keys), платный: деньги списываются с баланса
   DeepSeek, больше баланса не потратит. Около 300–700 ₽ за 5 тыс. сообщений. Понимает и фото;
