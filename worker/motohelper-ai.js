@@ -15,7 +15,8 @@
 const DEEPSEEK_MODEL = "deepseek-flash";
 const GEMINI_MODEL = "gemini-2.5-flash";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
-const CF_MODEL = "@cf/meta/llama-3.1-8b-instruct";
+// встроенный ИИ Cloudflare: пробуем по очереди — если модель убрали или она перегружена, берём следующую
+const CF_MODELS = ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-4-scout-17b-16e-instruct", "@cf/meta/llama-3.1-8b-instruct-fast", "@cf/meta/llama-3.1-8b-instruct"];
 // Чужие сайты не тратят твои бесплатные лимиты: запросы принимаются только отсюда (и с локальной копии)
 const ALLOWED = ["https://motohelper.ru", "https://www.motohelper.ru", "https://levnikonov37-creator.github.io"];
 const allowed = (o) => !o || o === "null" || ALLOWED.includes(o) || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o);
@@ -41,6 +42,8 @@ export default {
       const u = new URL(request.url);
       // список сообщений о неточностях: открой в браузере <адрес сервера>/?feedback=1&token=<FEEDBACK_TOKEN>
       if (u.searchParams.get("feedback")) return listFeedback(env, u.searchParams.get("token"));
+      // самопроверка: <адрес сервера>/?test=1 — какой ИИ отвечает и какие ошибки у остальных (без ключей)
+      if (u.searchParams.get("test")) return selfTest(env);
       return json({ ok: true, images: !!(env.DEEPSEEK_API_KEY || env.GEMINI_API_KEY), feedback: !!env.FEEDBACK, deepseek: !!env.DEEPSEEK_API_KEY });
     }
     if (request.method !== "POST") return json({ error: "method" }, 405);
@@ -56,8 +59,13 @@ export default {
     const images = Array.isArray(body.images) ? body.images.slice(0, 2) : [];
     if (!messages.length) return json({ error: "no_messages" }, 400);
 
+    return answer(env, messages, images, request.headers.get("CF-Connecting-IP") || "?");
+  },
+};
+
+async function answer(env, messages, images, ip, noDeepseek) {
     const errors = [];
-    if (env.DEEPSEEK_API_KEY && (await deepseekAllowed(env, request.headers.get("CF-Connecting-IP") || "?"))) {
+    if (!noDeepseek && env.DEEPSEEK_API_KEY && (await deepseekAllowed(env, ip))) {
       try {
         return sse(await deepseek(env, messages, images), "deepseek");
       } catch (e) {
@@ -80,17 +88,28 @@ export default {
       }
     }
     if (env.AI) {
-      try {
-        const stream = await env.AI.run(CF_MODEL, { messages: textOnly(messages), stream: true, max_tokens: 1500 });
-        return sse(stream, "workers-ai");
-      } catch (e) {
-        errors.push("workers-ai: " + e.message);
+      for (const model of CF_MODELS) {
+        try {
+          const stream = await env.AI.run(model, { messages: textOnly(messages), stream: true, max_tokens: 1500 });
+          return sse(stream, "workers-ai");
+        } catch (e) {
+          errors.push("workers-ai " + model + ": " + e.message);
+        }
       }
     }
-    const limited = errors.some((x) => /429|quota|limit|exhaust/i.test(x));
+    if (!env.DEEPSEEK_API_KEY && !env.GEMINI_API_KEY && !env.GROQ_API_KEY && !env.AI) errors.push("нет ни одного ключа и нет привязки AI");
+    const limited = errors.some((x) => /429|quota|limit|exhaust|neuron/i.test(x));
     return json({ error: limited ? "rate_limited" : "upstream_error", details: errors }, limited ? 429 : 502);
-  },
-};
+}
+
+/* самопроверка: короткий вопрос через ту же цепочку, ответ читаем целиком (DeepSeek не трогаем — тратит деньги) */
+async function selfTest(env) {
+  const have = { deepseek: !!env.DEEPSEEK_API_KEY, gemini: !!env.GEMINI_API_KEY, groq: !!env.GROQ_API_KEY, workersAI: !!env.AI, feedbackKV: !!env.FEEDBACK };
+  const res = await answer(env, [{ role: "user", content: "Ответь одним словом по-русски: привет" }], [], "selftest", true);
+  const provider = res.headers.get("x-mh-provider");
+  const text = (await res.text()).slice(0, 400);
+  return json({ ok: !!provider, provider: provider || null, have, reply: provider ? text : undefined, error: provider ? undefined : JSON.parse(text) });
+}
 
 function textOnly(messages) {
   return messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : m.role === "system" ? "system" : "user", content: String(m.content || "") }));
