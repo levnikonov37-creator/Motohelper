@@ -3,7 +3,8 @@
   "private": true,
   "description": "MotoHelper — справочник китайских эндуро",
   "scripts": {
-    "test": "node tests/check-data.js && node tests/check-page.js",
+    "test": "node tests/check-data.js && node scripts/build-pages.js --check && node tests/check-page.js",
+    "pages": "node scripts/build-pages.js",
     "test:data": "node tests/check-data.js",
     "test:page": "node tests/check-page.js"
   },

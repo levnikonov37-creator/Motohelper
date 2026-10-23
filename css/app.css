@@ -2061,3 +2061,5 @@ html.egg-ny .tabbar::before { content: ""; position: absolute; left: 0; right: 0
 /* кнопка вкладки откликается сразу, ещё до того, как страница дорисуется */
 .tab.tap { color: var(--stage-ink); }
 .tab.tap .tab-ico { transform: scale(.92); background-color: rgba(139,92,246,.22); }
+.catalog-link { margin: 18px 0 4px; text-align: center; font-size: 14px; }
+.catalog-link a { color: #C4B5FD; }

@@ -13446,7 +13446,11 @@ function Home(props) {
     className: "home-grid"
   }, /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(PreRide, {
     eng: eng
-  })), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null));
+  })), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null), /*#__PURE__*/React.createElement("p", {
+    className: "catalog-link"
+  }, /*#__PURE__*/React.createElement("a", {
+    href: "/m/"
+  }, "Каталог всех моделей: масло, свечи, зазоры клапанов →")));
 }
 function PreRide({
   eng
