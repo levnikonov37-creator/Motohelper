@@ -97,7 +97,11 @@ npm run test:data    # только база, без браузера, за се
 Код лежит в `worker/motohelper-ai.js`. Чтобы обновить сервер: Cloudflare → Workers & Pages → `motohelper-ai` →
 Edit code → вставить файл целиком → Deploy. Ключи задаются в Settings → Variables and Secrets:
 
-- `GEMINI_API_KEY` — ключ Google AI Studio; с ним ИИ смотрит фото;
+- `DEEPSEEK_API_KEY` — основной ИИ (platform.deepseek.com → API keys), платный: деньги списываются с баланса
+  DeepSeek, больше баланса не потратит. Около 300–700 ₽ за 5 тыс. сообщений. Понимает и фото;
+- `DAILY_TOTAL` / `DAILY_PER_USER` — необязательно: сколько ответов DeepSeek в сутки всего (по умолчанию 300)
+  и одному человеку (40). Сверх лимита, без денег или при сбое отвечают бесплатные ИИ ниже;
+- `GEMINI_API_KEY` — ключ Google AI Studio, бесплатный запасной; тоже смотрит фото;
 - `GROQ_API_KEY` — необязательно, запасной вариант для текста;
 - привязка Workers AI с именем `AI` — необязательно, последний запасной вариант.
 
