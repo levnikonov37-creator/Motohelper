@@ -666,24 +666,50 @@ function Issues({
 /* ---------- Запчасти ---------- */
 /* Где купить: поиск детали на площадках, в новой вкладке. Код мотора добавляется, если деталь под конкретный мотор */
 const SHOPS = [["Авито", "https://www.avito.ru/rossiya?q="], ["Ozon", "https://www.ozon.ru/search/?text="], ["WB", "https://www.wildberries.ru/catalog/0/search.aspx?search="], ["Маркет", "https://market.yandex.ru/search?text="]];
-/* Запрос в магазин: что за деталь + к чему.
-   Ходовая — по модели мотоцикла; мотор японцев/европейцев — по модели (продавцы пишут так), китайцев — по коду мотора;
-   свечи, масло, инструмент — по самому названию (там уже маркировка). */
+/* Запрос в магазин: что за деталь + к чему. Магазины ищут по всем словам, поэтому лишнее только мешает:
+   - расходники и детали со своей маркировкой (свечи, масла, смазки, подшипник 6301, покрышка 110/100-18,
+     аккумулятор 12V 7Ah) — только название + «мото», без модели (иначе выдаёт наклейки и пластик на эту модель);
+   - мотор: у китайцев — код мотора («172FMM», «PR300»), у японцев/европейцев — модель (продавцы пишут так);
+   - карбюратор и жиклёры — по модели карбюратора;
+   - ходовая — по короткой модели мотоцикла. */
 const BUY_BIKE_CATS = ["Подвеска", "Тормоза", "Колёса", "Рама", "Защита"],
   BUY_PLAIN_CATS = ["Инструмент", "Экипировка", "Поход", "Смазки"];
+const BUY_PLAIN_KINDS = ["spark", "oil", "oil2", "gearoil", "filteroil", "filterclean", "brakefluid", "brakefluid2", "coolant", "chainlube", "chainclean", "carbcleaner", "brakecleaner", "forkoil", "forkoil2", "forkoil3", "bearing", "tube", "tireF", "tireR", "rimtape", "battery", "battery2", "fuse", "usb", "scanner", "flasher", "chainlock", "chain", "chain2", "fuelhose", "fuelfilter", "radflush", "clamps", "valvecore", "moussegel", "hourmeter"];
+const BUY_ENGINE_KINDS = ["stator", "rotor", "starter", "sprag", "regulator", "cdi", "cdi2", "ecu", "coil", "pickup", "starterrelay", "clutchdiscs", "clutchbasket", "clutchsprings", "gears", "shiftforks", "csseal", "reed", "reedpetals", "intake", "intakegasket", "exgasket", "header", "fuelpump", "injector", "tps", "mapsensor", "o2", "pipe2t"];
+const BUY_CARB_KINDS = ["carb", "carbkit", "jets", "jets2", "needle", "floatvalve"];
+/* модель без лишних слов: «Kayo T2 300 Enduro (2020+)» → «Kayo T2 300» */
+function shortModel(bike) {
+  if (!bike || bike.brand === "Любая модель") return "";
+  const n = bike.name.replace(/\s*\([^)]*\)/g, "").replace(/\b\d{2}\/\d{2}\b/, "").split(" / ")[0].replace(/\s+(Enduro|Motard|Edition|Race Edition|Lux|Road|Street)\b/gi, "").trim();
+  return (bike.brand + " " + n).replace(/\s+/g, " ");
+}
+/* код мотора так, как его пишут продавцы: «ZS172FMM» → «172FMM», «ZS PR300» → «PR300» */
+function shopCode(eng) {
+  return String(eng.code || "").replace(/\s*\([^)]*\)/g, "").replace(/^ZS\s?(?=\d|[A-Z]{2})/, "").trim();
+}
+function engForeign(eng) {
+  return !!eng.jp || (eng.groups || []).some(g => g === "eu" || g === "jp" || g === "in");
+}
 function buyQuery(p, eng, bike) {
   bike = bike || window.mhBike;
-  const code = String(eng.code || "").replace(/\s*\([^)]*\)/g, "");
+  const code = shopCode(eng);
   let name = p.name;
   if (eng.code && name.slice(-String(eng.code).length) === eng.code) name = name.slice(0, -String(eng.code).length);
-  name = name.replace(/\s*\([^)]*\)/g, "").split(" / ")[0].trim();
-  const model = bike && bike.brand !== "Любая модель" ? bike.brand + " " + bike.name.replace(/\s*\([^)]*\)/g, "").replace(/\b\d{2}\/\d{2}\b/, "").trim() : "";
-  if (BUY_PLAIN_CATS.indexOf(p.cat) >= 0 || p.kind === "spark" || p.kind === "oil" || /NGK|Denso|Motul|Liqui|Castrol|DID|RK /.test(name)) return name;
-  if (BUY_BIKE_CATS.indexOf(p.cat) >= 0) return model ? name + " " + model : name + " мотоцикл";
+  name = name.replace(/\s*\([^)]*\)/g, "").split(" / ")[0].replace(/\s+\+\s+/g, " ").replace(/[«»"]/g, "").trim();
+  const model = shortModel(bike);
+  const moto = /мото|скутер/i.test(name) ? "" : eng.cvt ? " скутер" : " мото";
+  /* у детали своя маркировка или это расходник — модель не нужна */
+  if (BUY_PLAIN_KINDS.indexOf(p.kind) >= 0 || BUY_PLAIN_CATS.indexOf(p.cat) >= 0 || /NGK|Denso|Motul|Liqui|Castrol|DID|RK |\b\d{4}-2RS|\d{2,3}\/\d{2,3}-\d{2}|\b12V\b|DOT/.test(p.name)) return name + moto;
+  if (BUY_CARB_KINDS.indexOf(p.kind) >= 0) {
+    const carb = String(eng.carb || "").split(/[\/,]/)[0].replace(/^(Keihin|Mikuni|NIBBI|Dell'Orto|Dellorto)\s+/i, "").trim();
+    if (/[A-Z]{2}\s?\d{2}/.test(name)) return name + moto;
+    return /инжектор|впрыск/i.test(carb) || !carb ? name + " " + (engForeign(eng) ? model : code) : name + " " + carb + moto;
+  }
   const engineSpecific = (p.fit || []).indexOf(eng.id) >= 0;
-  if (eng.jp && model) return name + " " + model;
-  if (engineSpecific || /двигател|цилиндр|поршн|клапан|распредвал|коленвал|статор|прокладк/i.test(name)) return name + " " + code;
-  return name + (model ? " " + model : " " + code);
+  const enginePart = engineSpecific || p.cat === "Двигатель" || BUY_ENGINE_KINDS.indexOf(p.kind) >= 0;
+  if (BUY_BIKE_CATS.indexOf(p.cat) >= 0 && !enginePart) return model ? name + " " + model : name + moto;
+  if (enginePart) return name + " " + (engForeign(eng) && model ? model : code);
+  return model ? name + " " + model : name + " " + code + moto;
 }
 function BuyLinks({
   q
@@ -699,14 +725,18 @@ function BuyLinks({
 }
 /* видео по работе: поиск сразу на нескольких площадках (YouTube в России бывает медленным) */
 const VIDEO = [["VK Видео", "https://vkvideo.ru/?q=", "vk"], ["Rutube", "https://rutube.ru/search/?query=", "rt"], ["YouTube", "https://www.youtube.com/results?search_query=", "yt"], ["Яндекс Видео", "https://yandex.ru/video/search?text=", "ya"]];
-/* Видео: работа по мотору — с кодом мотора (китайцы) или моделью (японцы/европейцы); работа по ходовой — с моделью.
-   Длинные заголовки укорачиваем до сути, чтобы поиск не терялся */
+/* Видео: работа по мотору — с кодом мотора (китайцы) или моделью (японцы/европейцы);
+   ходовая — у японцев/европейцев с моделью, у китайцев — с типом техники (роликов «на свою модель» почти нет);
+   общие темы (мойка, зимовка) — без модели. Длинные заголовки укорачиваем до сути. */
 function videoQuery(title, eng, bike, area) {
-  const model = bike && bike.brand !== "Любая модель" ? bike.brand + " " + bike.name.replace(/\s*\([^)]*\)/g, "").replace(/\b\d{2}\/\d{2}\b/, "").trim() : "";
+  const model = shortModel(bike);
   const engineWork = area && typeof AREAS === "object" && AREAS[area];
+  const chassisWork = area && typeof CH_AREAS === "object" && CH_AREAS[area];
   const t = title.replace(/\s*\([^)]*\)/g, "").split(/[:—]/)[0].trim();
-  const who = engineWork && !eng.jp ? eng.code : model || eng.code;
-  return (t + " " + who + (eng.cvt ? " скутер" : " мотоцикл")).replace(/\s+/g, " ");
+  const type = bike && bike.type || "";
+  const kind = /мото|мопед|скутер|питбайк/i.test(t) ? "" : eng.cvt ? "скутер" : type === "Питбайк" ? "питбайк" : type === "Мопед" ? "мопед" : /эндуро/i.test(type) ? "эндуро" : "мотоцикл";
+  const who = engineWork ? engForeign(eng) && model ? model : shopCode(eng) : chassisWork && engForeign(eng) ? model : "";
+  return (t + " " + who + " " + kind).replace(/\s+/g, " ").trim();
 }
 function VideoLinks({
   q
