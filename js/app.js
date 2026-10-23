@@ -13433,7 +13433,7 @@ function Home(props) {
   }), /*#__PURE__*/React.createElement(SeasonCard, {
     eng: eng,
     go: go
-  }), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement(CatalogCard, null), /*#__PURE__*/React.createElement("div", {
     className: "actions4 home-acts"
   }, [["list", "ТО по пробегу", () => go("repair", "to"), "", "Что и когда менять"], ["book", "Инструкции", () => go("repair", "guides"), "", "Пошагово, со схемами"], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 ? "В проекте " + project.length : "Что даст прибавку"], ["check", "Проверка б/у", () => go("repair", "buy"), "", "Перед покупкой"]].map(a => /*#__PURE__*/React.createElement("button", {
     key: a[1],
@@ -13446,11 +13446,41 @@ function Home(props) {
     className: "home-grid"
   }, /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(PreRide, {
     eng: eng
-  })), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null), /*#__PURE__*/React.createElement("p", {
-    className: "catalog-link"
+  })), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null));
+}
+/* Каталог моделей (страницы /m/ для поисковиков) — с главной, с популярными марками */
+const CAT_TR = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya"
+};
+/* тот же адрес, что делает scripts/build-pages.js */
+function catSlug(s) {
+  return String(s).toLowerCase().split("").map(c => c in CAT_TR ? CAT_TR[c] : c).join("").replace(/\+/g, "-plus").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+function CatalogCard() {
+  const n = useMemo(() => BIKES.filter(b => b.brand !== "Любая модель").length, []);
+  const top = ["Kayo", "Motoland", "BSE", "Regulmoto", "Honda", "Yamaha", "KTM", "Kawasaki"].filter(br => BIKES.some(b => b.brand === br));
+  return /*#__PURE__*/React.createElement("section", {
+    className: "panel catalog-card"
   }, /*#__PURE__*/React.createElement("a", {
+    className: "cc-main",
     href: "/m/"
-  }, "Каталог всех моделей: масло, свечи, зазоры клапанов →")));
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cc-ico"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "book",
+    s: 24
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "cc-t"
+  }, /*#__PURE__*/React.createElement("b", null, "Каталог моделей"), /*#__PURE__*/React.createElement("small", null, n, " моделей: масло, свечи, зазоры клапанов, слабые места")), /*#__PURE__*/React.createElement("span", {
+    className: "cc-go",
+    "aria-hidden": "true"
+  }, "→")), /*#__PURE__*/React.createElement("div", {
+    className: "cc-brands"
+  }, top.map(br => /*#__PURE__*/React.createElement("a", {
+    key: br,
+    className: "chip",
+    href: "/m/" + catSlug(br) + "/"
+  }, br))));
 }
 function PreRide({
   eng

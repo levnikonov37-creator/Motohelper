@@ -2061,5 +2061,16 @@ html.egg-ny .tabbar::before { content: ""; position: absolute; left: 0; right: 0
 /* кнопка вкладки откликается сразу, ещё до того, как страница дорисуется */
 .tab.tap { color: var(--stage-ink); }
 .tab.tap .tab-ico { transform: scale(.92); background-color: rgba(139,92,246,.22); }
-.catalog-link { margin: 18px 0 4px; text-align: center; font-size: 14px; }
-.catalog-link a { color: #C4B5FD; }
+/* каталог моделей на главной */
+.catalog-card { margin: 16px 0; padding: 14px !important; border-left: 3px solid #EC4899 !important;
+  background: linear-gradient(120deg, rgba(139,92,246,.22), rgba(20,16,32,.88) 60%) !important; }
+.catalog-card .cc-main { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.catalog-card .cc-ico { flex: none; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 12px; color: #fff; background: linear-gradient(135deg, #8B5CF6, #EC4899); box-shadow: 0 0 22px -4px rgba(236,72,153,.7); }
+.catalog-card .cc-t { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.catalog-card .cc-t b { font: 400 17px var(--display); font-style: italic; text-transform: uppercase; letter-spacing: .01em; }
+.catalog-card .cc-t small { font-size: 13px; color: var(--muted); }
+.catalog-card .cc-go { font: 400 22px var(--display); color: #C4B5FD; transition: transform .2s; }
+.catalog-card .cc-main:hover .cc-go { transform: translateX(4px); }
+.catalog-card .cc-brands { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.catalog-card .cc-brands .chip { text-decoration: none; color: #C4B5FD !important; background: rgba(139,92,246,.16) !important; border: 1px solid rgba(167,139,250,.32) !important; border-radius: 999px !important; padding: 5px 12px; font: 600 13px var(--cond); }
+.catalog-card .cc-brands .chip:hover { background: #8B5CF6 !important; color: #fff !important; }
