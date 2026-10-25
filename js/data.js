@@ -10429,3 +10429,17 @@ sortBikes();
   var vg = GUIDES.find(function (g) { return g.id === "valves-dohc"; });
   if (vg && vg.only.indexOf("NB300") < 0) vg.only.push("NB300");
 })();
+
+/* Версия без годов рядом с версиями с годами: подписываем годы по соседям («до 2026» / «2021+»). */
+BIKES.forEach(function (b) {
+  if (b.versions.length < 2) return;
+  var bare = b.versions.filter(function (v) { return v.label && !/^(\d{4}|до )/.test(v.label); });
+  if (bare.length !== 1) return;
+  var plus = [], ends = [];
+  b.versions.forEach(function (v) {
+    var m = /^(\d{4})(?:\+|–(\d{4}))/.exec(v.label || "");
+    if (m) (m[2] ? ends.push(+m[2]) : plus.push(+m[1]));
+  });
+  var pre = plus.length ? "до " + Math.min.apply(null, plus) : ends.length ? Math.max.apply(null, ends) + 1 + "+" : "";
+  if (pre) bare[0].label = pre + " · " + bare[0].label;
+});

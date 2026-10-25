@@ -2074,3 +2074,49 @@ html.egg-ny .tabbar::before { content: ""; position: absolute; left: 0; right: 0
 .catalog-card .cc-brands { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .catalog-card .cc-brands .chip { text-decoration: none; color: #C4B5FD !important; background: rgba(139,92,246,.16) !important; border: 1px solid rgba(167,139,250,.32) !important; border-radius: 999px !important; padding: 5px 12px; font: 600 13px var(--cond); }
 .catalog-card .cc-brands .chip:hover { background: #8B5CF6 !important; color: #fff !important; }
+
+/* v53: полировка */
+/* логотип «MH» — в фирменных цветах, как в каталоге и приветствии */
+.brand-mark { background: linear-gradient(135deg, #8B5CF6, #EC4899) !important; color: #fff !important; box-shadow: 0 0 16px -4px rgba(236,72,153,.75) !important; font-family: var(--display); }
+/* «Что сломалось?» в шапке главной не упирается в срезанный угол кнопки */
+@media (max-width: 560px) {
+  .hero-cta { grid-template-columns: 1.25fr 1fr !important; }
+  .hero-cta .btn.primary { font-size: 13px; letter-spacing: 0; padding: 10px 14px 10px 8px; gap: 6px; min-width: 0; }
+}
+/* «Спросить ИИ» — в стиле сайта, а не белой плашкой */
+.btn.ai-btn { background: rgba(139,92,246,.16) !important; color: #E9E3FF !important; border: 1px solid rgba(167,139,250,.45) !important; }
+.btn.ai-btn:hover { background: rgba(139,92,246,.3) !important; }
+.btn.ai-btn svg { color: #C4B5FD; }
+.nowrap { white-space: nowrap; }
+.total b.nowrap { font: inherit; font-weight: 700; }
+/* длинный список моделей с тем же мотором — сворачиваем */
+.more-chips { margin-top: 8px; }
+.more-chips summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; padding: 7px 14px; border-radius: 999px; border: 1px dashed rgba(167,139,250,.5); color: #C4B5FD; font: 600 14px var(--cond); }
+.more-chips summary::-webkit-details-marker { display: none; }
+.more-chips summary::after { content: "▾"; transition: transform .2s; }
+.more-chips[open] summary::after { transform: rotate(180deg); }
+.more-chips .tags { margin-top: 10px; }
+/* резервная копия внизу главной — понятной карточкой */
+.backup-bar { margin: 18px 0 8px !important; padding: 14px 16px !important; border: 1px solid rgba(167,139,250,.22) !important; border-radius: 12px; background: rgba(20,16,32,.7); }
+.backup-bar > span { display: grid; gap: 2px; }
+.backup-bar > span b { font: 400 15px var(--display); font-style: italic; text-transform: uppercase; }
+.backup-bar > span small { color: var(--muted); font-size: 13px; }
+/* заголовки подразделов («Зима и весна», «Справочник»…) — в одном стиле с остальными */
+.sub-head h1, .page > h1 { font-style: italic; text-transform: uppercase; letter-spacing: .01em; text-shadow: 0 0 22px rgba(167,139,250,.35); }
+
+/* v54: список деталей — отдельные карточки, единая кнопка «+», всплывашка сверху (не закрывает корзину и кнопки снизу) */
+.plist li + li { margin-top: 6px; }
+.plist li { padding: 10px 12px !important; }
+.mini { border-radius: 8px; border-color: rgba(167,139,250,.45); background: rgba(139,92,246,.14); color: #DDD6FE; transition: background .15s, transform .1s; }
+.mini:hover { background: rgba(139,92,246,.3); }
+.mini:active { transform: scale(.92); }
+.mini.in { background: linear-gradient(135deg, #8B5CF6, #EC4899); border-color: transparent; color: #fff; box-shadow: 0 0 12px -3px rgba(236,72,153,.7); }
+.toast { bottom: auto !important; top: calc(70px + env(safe-area-inset-top, 0px)); width: max-content; text-align: center; line-height: 1.35; animation: toastIn .25s ease-out; }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+/* заголовок блока в «Настроить» — внутри карточки, а не на рамке */
+.edit legend { float: left; width: 100%; padding: 0; margin: 0 0 12px; font-style: italic; text-transform: uppercase; letter-spacing: .02em; color: #EDE9FE; }
+.edit legend + * { clear: both; }
+/* цвета пластика в один ряд; плитки «Ремонта» на широком экране без пустых мест */
+.edit .swatches { gap: 6px; }
+.edit .sw { width: 32px; height: 32px; }
+@media (min-width: 900px) { .actions4.rhub, .rhub-group .actions4 { display: flex; flex-wrap: wrap; } .actions4.rhub > .act, .rhub-group .actions4 > .act { flex: 1 1 220px; } .actions4.rhub > .act-main { flex-basis: 100%; } }

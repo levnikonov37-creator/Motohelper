@@ -1,0 +1,18 @@
+# Настройки ИИ-сервера для автодеплоя (Cloudflare → motohelper-ai → Settings → Build → Connect: репозиторий
+# Motohelper, Root directory: worker). После каждого мержа в main Cloudflare сам выкладывает motohelper-ai.js.
+# Секреты (DEEPSEEK_API_KEY, GEMINI_API_KEY, FEEDBACK_TOKEN…) задаются в Cloudflare и при деплое не стираются.
+name = "motohelper-ai"
+main = "motohelper-ai.js"
+compatibility_date = "2025-01-01"
+workers_dev = true
+# не стирать переменные, заданные в Cloudflare руками (DAILY_TOTAL, DAILY_PER_USER)
+keep_vars = true
+
+# встроенный ИИ Cloudflare (запасной, бесплатный)
+[ai]
+binding = "AI"
+
+# сообщения «Нашёл неточность» и счётчик лимитов
+[[kv_namespaces]]
+binding = "FEEDBACK"
+id = "158eaf5afe82443b80c2ae3b721b57de"
