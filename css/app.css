@@ -2308,3 +2308,49 @@ code { background: #141414 !important; color: #fff; }
     radial-gradient(90% 120% at 0% 100%, #050505 30%, rgba(5,5,5,.6) 55%, transparent 80%),
     radial-gradient(circle at center, rgba(255,255,255,.2) 1.1px, transparent 1.5px) 0 0 / 9px 9px,
     #050505 !important; }
+
+/* =====================================================================
+   v57: цвет в мелочах. Основа остаётся чёрно-белой; цвет — только там, где он что-то значит
+   или узнаётся: магазины, видео, сложность, важность, «готово», значки плиток.
+   ===================================================================== */
+:root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+  --c-ok: #34D399; --c-warn: #FBBF24; --c-bad: #F87171; --c-info: #60A5FA;
+  --ok: #34D399; --warn: #FBBF24;
+}
+/* магазины — в своих цветах (точка + цветная рамка при наведении) */
+.pbuy a { display: inline-flex; align-items: center; gap: 5px; }
+.pbuy a::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #777; flex: none; }
+.pbuy a.sh-av::before { background: #00AAFF; } .pbuy a.sh-av:hover { border-color: #00AAFF !important; }
+.pbuy a.sh-oz::before { background: #005BFF; } .pbuy a.sh-oz:hover { border-color: #005BFF !important; }
+.pbuy a.sh-wb::before { background: #CB11AB; } .pbuy a.sh-wb:hover { border-color: #CB11AB !important; }
+.pbuy a.sh-ym::before { background: #FFCC00; } .pbuy a.sh-ym:hover { border-color: #FFCC00 !important; }
+/* видео: значок «плей» в цвете площадки */
+.vlink.v-yt .ico { color: #FF0033 !important; } .vlink.v-vk .ico { color: #2787F5 !important; }
+.vlink.v-rt .ico { color: #14A3FF !important; } .vlink.v-ya .ico { color: #FC3F1D !important; }
+/* сложность инструкций */
+.d-просто, .diff.d-easy, .d-easy { color: var(--c-ok) !important; }
+.d-средне, .diff.d-mid, .d-mid { color: var(--c-warn) !important; }
+.guide::before { background: var(--c-ok) !important; }
+.guide:has(.d-средне)::before { background: var(--c-warn) !important; }
+.guide:has(.d-сложно)::before { background: var(--m-red) !important; }
+/* важность поломок */
+.sev-high { border-left-color: var(--m-red) !important; } .sev-high .sev { color: var(--c-bad) !important; }
+.sev-med { border-left-color: var(--c-warn) !important; } .sev-med .sev { color: var(--c-warn) !important; }
+.callout.warn-soft, .callout.warn { border-left-color: var(--c-warn) !important; }
+/* «готово» — зелёным */
+.sg-list li.done .sg-n { background: var(--c-ok) !important; border-color: var(--c-ok) !important; color: #000 !important; }
+.tick-btn.on, .checklist button.tick-btn.on { background: var(--c-ok) !important; border-color: var(--c-ok) !important; color: #000 !important; }
+.cmp td.win { color: var(--c-ok) !important; text-decoration: none; }
+.cmp td.win .cbar span { background: var(--c-ok) !important; }
+.live { background: var(--c-ok) !important; box-shadow: 0 0 0 3px rgba(52,211,153,.2) !important; }
+/* значки плиток — каждый своим спокойным оттенком */
+.actions4 > .act:nth-child(6n+1) > .ico { color: #60A5FA !important; }
+.actions4 > .act:nth-child(6n+2) > .ico { color: #34D399 !important; }
+.actions4 > .act:nth-child(6n+3) > .ico { color: #FBBF24 !important; }
+.actions4 > .act:nth-child(6n+4) > .ico { color: #F472B6 !important; }
+.actions4 > .act:nth-child(6n+5) > .ico { color: #A78BFA !important; }
+.actions4 > .act:nth-child(6n) > .ico { color: #22D3EE !important; }
+.actions4 > .act-main > .ico { color: #000 !important; }
+/* пояснение к моточасам в регламенте ТО */
+.plan-note { margin: 0 0 12px; padding: 10px 12px; border: 1px dashed var(--m-line2, rgba(255,255,255,.28)); border-radius: 4px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.plan-every { white-space: normal; }

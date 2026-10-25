@@ -196,6 +196,27 @@ function buildSpec(bike, ver, cu) {
   return s;
 }
 
+/* ---------- моточасы ↔ км ----------
+   Счётчика моточасов у большинства нет, поэтому пересчитываем по износу мотора, а не по скорости:
+   час по бездорожью нагружает мотор как ≈ 50 км по дороге (так считают продавцы эндуро: масло 1500 км ≈ 30 моточ.).
+   Эндуро/кросс/питбайк/тур-эндуро ≈ 50 км на моточас, скутер/мопед ≈ 40, дорожные ≈ 60. */
+function kmPerHour(eng, bike) {
+  const t = bike && bike.type || "";
+  if (/Питбайк|Кросс|Эндуро|Мотард|Триал/i.test(t)) return 50;
+  if (/Скутер|Мопед/i.test(t) || eng && eng.cvt) return 40;
+  if (t) return 60;
+  return eng && eng.cc > 300 ? 60 : 50;
+}
+function roundHours(h) {
+  return h >= 20 ? Math.round(h / 5) * 5 : Math.max(1, Math.round(h));
+}
+/* «6 000 км · ≈ 300 моточ.» — или наоборот, если регламент у мотора в моточасах */
+function kmHours(v, eng, bike) {
+  if (!v) return "—";
+  const k = kmPerHour(eng, bike);
+  if (eng && eng.hours) return num(v) + "\u00a0моточ. · ≈\u00a0" + num(Math.round(v * k / 50) * 50 || v * k) + "\u00a0км";
+  return num(v) + "\u00a0км · ≈\u00a0" + num(roundHours(v / k)) + "\u00a0моточ.";
+}
 /* ---------- ТО: статус ---------- */
 function maintStatus(eng, mt) {
   const unit = eng.hours ? "моточ." : "км";
@@ -609,6 +630,7 @@ function EditBike({
 }
 function Maint({
   eng,
+  bike,
   go
 }) {
   const st = maintItems(eng);
@@ -623,7 +645,9 @@ function Maint({
       if (p && buy.indexOf(p) < 0) buy.push(p);
     });
   });
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+    className: "plan-note"
+  }, eng.hours ? "Регламент этого мотора — в моточасах; км даны для ориентира" : "Моточасы — для тех, кто ездит по ним", ": 1 моточас ≈ ", kmPerHour(eng, bike), " км (час по бездорожью нагружает мотор сильнее, чем час по дороге). Что наступит раньше — то и срок."), /*#__PURE__*/React.createElement("ul", {
     className: "plan"
   }, st.map(x => {
     const g = go && toGuide(x.id, eng);
@@ -631,7 +655,7 @@ function Maint({
       key: x.id
     }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, x.t), /*#__PURE__*/React.createElement("span", {
       className: "plan-every"
-    }, "\u043A\u0430\u0436\u0434\u044B\u0435 ", num(x.every), " ", unit)), g && /*#__PURE__*/React.createElement("button", {
+    }, "\u043A\u0430\u0436\u0434\u044B\u0435 ", kmHours(x.every, eng, bike))), g && /*#__PURE__*/React.createElement("button", {
       className: "btn sm plan-go",
       onClick: () => go("repair", g.id)
     }, /*#__PURE__*/React.createElement(Icon, {
@@ -718,6 +742,7 @@ function BuyLinks({
     className: "pbuy"
   }, SHOPS.map(sh => /*#__PURE__*/React.createElement("a", {
     key: sh[0],
+    className: "sh-" + ({ "Авито": "av", "Ozon": "oz", "WB": "wb", "Маркет": "ym" }[sh[0]] || "x"),
     href: sh[1] + encodeURIComponent(q),
     target: "_blank",
     rel: "noopener"
@@ -11325,7 +11350,7 @@ function CompareView({
     return p ? p.price : "—";
   };
   const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Макс. скорость", speedFor(eng, bike, {}, []).v, speedFor(e2, b2, {}, []).v, "км/ч", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на ТО", toCost(eng), toCost(e2), "₽", -1], ["Слабые места (серьёзные)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Поршень", kp("piston", eng), kp("piston", e2), "₽", -1], ["Комплект сцепления", kp("clutchdiscs", eng), kp("clutchdiscs", e2), "₽", -1], ["Свеча", kp("spark spark2", eng), kp("spark spark2", e2), "₽", -1], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng).ok).length, TUNING.filter(t => tuningFor(t, e2).ok).length, "", 1]];
-  const fmtv = (v, u) => typeof v === "number" ? u === "₽" ? rub(v) : num(v) + (u ? " " + u : "") : v;
+  const fmtv = (v, u, e, b) => typeof v === "number" ? u === "₽" ? rub(v) : u === "км" ? kmHours(v, e, b) : num(v) + (u ? " " + u : "") : v;
   return /*#__PURE__*/React.createElement("section", {
     className: "panel compare"
   }, /*#__PURE__*/React.createElement("div", {
@@ -11360,7 +11385,7 @@ function CompareView({
       key: r[0]
     }, /*#__PURE__*/React.createElement("th", null, r[0]), /*#__PURE__*/React.createElement("td", {
       className: w1 ? "win" : ""
-    }, fmtv(r[1], r[3]), n1 && n2 && /*#__PURE__*/React.createElement("span", {
+    }, fmtv(r[1], r[3], eng, bike), n1 && n2 && /*#__PURE__*/React.createElement("span", {
       className: "cbar"
     }, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -11368,7 +11393,7 @@ function CompareView({
       }
     }))), /*#__PURE__*/React.createElement("td", {
       className: w2 ? "win" : ""
-    }, fmtv(r[2], r[3]), n1 && n2 && /*#__PURE__*/React.createElement("span", {
+    }, fmtv(r[2], r[3], e2, b2), n1 && n2 && /*#__PURE__*/React.createElement("span", {
       className: "cbar"
     }, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -15898,7 +15923,7 @@ function aiCardBase(eng, bike, ver, cu, mt) {
   L.push("Двигатель: " + eng.name + ", код " + eng.code + (eng.swapped ? " — СВАП, с завода стоял " + ENGINES[ver.engine].code : "") + ".");
   L.push("Схема: " + eng.stroke + ", " + eng.cam + "; охлаждение: " + eng.cooling + "; объём " + eng.cc + " см³; мощность около " + eng.hp + " л.с. (сток " + eng.stockHp + "); компрессия " + eng.compression + "; топливо " + eng.fuel + "; зажигание " + eng.ignition + "; привод ГРМ: " + eng.timing + "; запуск: " + eng.start + "; КПП: " + eng.gearbox + ".");
   if (efi) L.push("Питание: инжектор. Холостой ход " + eng.idle + ".");else L.push("Карбюратор: " + eng.carb + (eng.carb !== S.carb ? " (с завода " + S.carb + ")" : "") + "; главный жиклёр " + eng.jetMain + "; холостой " + eng.jetPilot + "; игла " + eng.needle + "; холостой ход " + eng.idle + " об/мин" + (eng.jetsFromPreset ? " (жиклёры типовые для карбюратора, точные владелец не указал)" : "") + ".");
-  if (eng.stroke === "4T") L.push("Клапаны на холодную: впуск " + eng.valveIn + ", выпуск " + eng.valveEx + ", интервал " + eng.valveInt + " км.");
+  if (eng.stroke === "4T") L.push("Клапаны на холодную: впуск " + eng.valveIn + ", выпуск " + eng.valveEx + ", интервал " + kmHours(eng.valveInt, eng, bike) + ".");
   L.push("Свеча " + eng.spark + ", зазор " + eng.gap + ", затяжка " + eng.sparkTorque + ". Масло " + eng.oil + ", " + eng.oilVol + (eng.coolant ? ". Антифриз " + eng.coolant : "") + ".");
   const inst = TUNING.filter(t => eng.installed.indexOf(t.id) >= 0).map(t => t.title);
   if (inst.length) L.push("Установлено владельцем: " + inst.join(", ") + ".");
@@ -16324,7 +16349,7 @@ function Overview({
     })], ["Выпуск", /*#__PURE__*/React.createElement(Val, {
       v: eng.valveEx,
       stock: S.valveEx
-    })], ["Интервал", eng.valveInt ? num(eng.valveInt) + " км" : "—"]]
+    })], ["Интервал", eng.valveInt ? kmHours(eng.valveInt, eng, bike) : "—"]]
   }, {
     h: "Зажигание и масло",
     r: [["Свеча", /*#__PURE__*/React.createElement(Val, {
