@@ -10449,3 +10449,34 @@ BIKES.forEach(function (b) {
 [["TUAREG660", "≈ 1.5 л"], ["DESERTX", "≈ 2 л"], ["NX500", "≈ 1.3 л"], ["NX400", "≈ 1.3 л"], ["XR650R", "≈ 1.5 л"],
  ["HD_M8_107", "≈ 1 л (только Twin-Cooled)"], ["HD_M8_114", "≈ 1 л (только Twin-Cooled)"], ["HD_M8_117", "≈ 1 л (только Twin-Cooled)"], ["X26_HD_M8_121", "≈ 1 л"]]
   .forEach(function (x) { var e = ENGINES[x[0]]; if (e && !e.coolant) e.coolant = x[1]; });
+
+/* Свечи и зазоры по регламентам ТО производителей (maintenanceschedule.com, по мануалам владельца).
+   Зазоры клапанов — только там, где они опубликованы; остальное честно остаётся «по мануалу». */
+[
+  ["T400K", { spark: "NGK LMAR9G", gap: "0.7–0.8 мм" }],
+  ["T650K", { spark: "NGK CR9EIA-9", gap: "0.8–0.9 мм" }],
+  ["I4_900K", { spark: "NGK CR9EIA-9", gap: "0.8–0.9 мм" }],
+  ["T800S", { spark: "NGK LMAR8BI-9", gap: "0.8–0.9 мм" }],
+  ["S400T", { spark: "Bosch VR6NEU", gap: "0.7–0.8 мм", valveIn: "0.05–0.10 мм", valveEx: "0.10–0.15 мм" }],
+  ["I3_660T", { spark: "NGK CR9EK" }],
+  ["T650RE", { spark: "Bosch UR5CC (= NGK CR8E)", gap: "0.7–0.8 мм" }],
+  ["V805S", { spark: "NGK DPR7EA-9", gap: "0.8–0.9 мм" }],
+  ["V853G", { spark: "NGK MR8BI-8", gap: "0.8 мм", valveIn: "0.10 мм", valveEx: "0.15 мм" }],
+  ["T700C", { spark: "NGK CR8EI", gap: "0.7–0.9 мм" }],
+  ["V955D", { spark: "NGK MAR9A-J" }],
+  ["T800C", { spark: "NGK LMAR9AI-10", gap: "1.0 мм" }]
+].forEach(function (x) {
+  var e = ENGINES[x[0]]; if (!e) return;
+  Object.keys(x[1]).forEach(function (k) { if (k === "spark" || k === "gap" || !e[k] || /мануал/i.test(e[k])) e[k] = x[1][k]; });
+});
+
+/* Зазор свечи сверяем с маркировкой NGK: цифра после дефиса — заводской зазор (-9 = 0.9 мм, -10 = 1.0 мм).
+   Раньше у таких моторов стоял шаблонный 0.7–0.8 мм. Только одиночные свечи NGK. */
+Object.keys(ENGINES).forEach(function (id) {
+  var e = ENGINES[id], sp = String(e.spark || "");
+  if (!/^NGK\s/.test(sp) || sp.indexOf("/") >= 0 || /мануал/i.test(e.gap || "")) return;
+  var m = /\b[A-Z]{1,6}\d{1,2}[A-Z]{0,4}-(9|10|11)\b/.exec(sp); if (!m) return;
+  var g = +m[1] / 10, nums = (String(e.gap || "").replace(/,/g, ".").match(/\d+(?:\.\d+)?/g) || []).map(Number);
+  if (nums.length && g >= Math.min.apply(null, nums) - 0.001 && g <= Math.max.apply(null, nums) + 0.001) return;
+  e.gap = (g - 0.1).toFixed(1) + "–" + g.toFixed(1) + " мм";
+});
