@@ -10339,6 +10339,81 @@ var SEASON = {
     seasonAdd("spring", ["leaks", "После первого запуска проверить течи масла и антифриза", null, "oil-leak-find"], "lights");
   }
 })();
+/* ===================== cn26: JHL, Promax, EX-Moto, Faidet, Kovi — по официальным сайтам и каталогам дилеров (моторы указаны продавцом) ===================== */
+(function () {
+  var EN = "Эндуро", PB = "Питбайк", AX = { approx: true };
+  /* JHL (jhlmoto.ru) */
+  G("JHL", "Z1 CB300F", EN, [["175FMM", "", AX]]);
+  G("JHL", "Z2 PR300", EN, [["PR300"]]);
+  G("JHL", "LX3 PR300", EN, [["PR300"]]);
+  G("JHL", "MX300 PR300", EN, [["PR300"]]);
+  G("JHL", "Z6 NB300", EN, [["NB300"]]);
+  G("JHL", "Z6 YBS300", EN, [["YBS300"]]);
+  G("JHL", "L5 NB300", EN, [["NB300"]]);
+  G("JHL", "LX6 NB300", EN, [["NB300"]]);
+  G("JHL", "H6 YBS300", EN, [["YBS300"]]);
+  G("JHL", "LX YBS300 Pro", EN, [["YBS300G2", "", AX]]);
+  G("JHL", "ZR6 YBS300", EN, [["YBS300"]]);
+  G("JHL", "ZR3 CB300RL", EN, [["FIXCN_CB300RL_6"]]);
+  G("JHL", "LK140", PB, [["Z155"]]);
+  /* Promax (каталог X-Motors, коды моторов в названии) */
+  G("Promax", "RX1 CB300RL", EN, [["FIXCN_CB300RL_6"]]);
+  G("Promax", "RX2 YB300H", EN, [["FIXCN_YB300H_6"]]);
+  G("Promax", "Blackout NB300", EN, [["NB300"]]);
+  G("Promax", "Blackout NB300 EFI", EN, [["FIXCN_NB300E_5"]]);
+  G("Promax", "Blackout YBS300", EN, [["YBS300"]]);
+  G("Promax", "Adventure 300 PR300", "Тур-эндуро", [["PR300"]]);
+  G("Promax", "Adventure 300 PRO CBS300", "Тур-эндуро", [["CBS300"]]);
+  G("Promax", "Adventure 300 PRO EFI NB300", "Тур-эндуро", [["FIXCN_NB300E_5"]]);
+  G("Promax", "Touring PR300", "Тур-эндуро", [["PR300"]]);
+  G("Promax", "Touring PR300 PRO", "Тур-эндуро", [["FIXCN_PR300_6"]]);
+  G("Promax", "K1 PR300", EN, [["PR300"]]);
+  G("Promax", "Hellcat NC450S EFI", EN, [["NC450", "", AX]]);
+  /* EX-Moto */
+  G("EX-Moto", "SR300 177FMN", EN, [["FIXCN_PR300PRO"]]);
+  G("EX-Moto", "CB300F 177FMN", EN, [["FIXCN_PR300PRO"]]);
+  G("EX-Moto", "CB250 172FMM", EN, [["172FMM"]]);
+  /* Faidet (питбайки, мотор ZS1P62YML-2 190 см³) */
+  G("Faidet", "190E 17/14", PB, [["Z190"]]);
+  G("Faidet", "190E PRO 17/14", PB, [["Z190"]]);
+  G("Faidet", "190E MAX PRO LUX 19/16", PB, [["Z190"]]);
+  /* Kovi */
+  G("Kovi", "250 Advance", EN, [["172FMM"]]);
+  G("Kovi", "300 Pro S", EN, [["NC300", "", AX]]);
+})();
+
+/* cn26b: Avantis A7 NEW — три версии мотора (avantis.club); Regulmoto Sport-003 PR 300 с 6 передачами (regulmoto.ru) */
+(function () {
+  if (BIKE_KEYS["Avantis|A7 NEW"]) {
+    setEngine("Avantis", "A7 NEW", 0, "NB300");
+    addVersion("Avantis", "A7 NEW", "FIXCN_CB300RL_6", "вариант CB300RL");
+    addVersion("Avantis", "A7 NEW", "PR300", "вариант PR300");
+  }
+  G("Regulmoto", "Sport-003 PR 300 6 ст.", "Эндуро", [["FIXCN_PR300_6"]]);
+})();
+
+/* cn26c: новинки 2026 по каталогу Motoland (motoland-shop.ru, мотор в названии модели) */
+(function () {
+  var EN = "Эндуро", AX = { approx: true };
+  G("Motoland", "SMX300 S5 PRO (NB300F)", EN, [["NB300", "2026+", AX]]);
+  G("Motoland", "SMX300 S3 PRO (YB300H)", EN, [["LON_YB300H", "2026+"]]);
+  G("Motoland", "XR300 Lite", "Тур-эндуро", [["175FMM", "2026+"]]);
+  G("Apollo", "F4 300 (YB300H)", EN, [["LON_YB300H"]]);
+  G("Apollo", "F5 300 (175FMM)", EN, [["175FMM"]]);
+  G("Apollo", "F5 300 NB300", EN, [["NB300"]]);
+  G("PWR", "FS5 300 (175FMM)", EN, [["175FMM"]]);
+  var st = BIKES.find(function (b) { return b.brand === "Motoland" && b.name === "XT300 ST"; });
+  if (st && !st.versions.some(function (v) { return v.engine === "175FMM"; })) addVersion("Motoland", "XT300 ST", "175FMM", "2026+");
+})();
+
+/* cn26d: модификации на уже известных моторах (CFMOTO, Kove) */
+(function () {
+  G("CFMOTO", "700CL-X Sport", "Нейкед", [["T700C"]]);
+  G("CFMOTO", "700CL-X Adventure", "Классика", [["T700C"]]);
+  G("CFMOTO", "800NK Advanced", "Нейкед", [["T800C"]]);
+  G("Kove", "450 Rally Factory", "Эндуро", [["KOVE450"]]);
+})();
+
 /* @@DB-FRAGMENTS@@ */
 /* ===================== v35: Keeway K-Light 202 и Kayo TS90 — свой объём ===================== */
 CL("V223KW", "V250LF", { code: "Keeway V223", name: "Keeway V-twin 223 воздушный (K-Light 202, Superlight 200)", cc: 223, hp: 17, torque: "16 Н·м" }, 1.1);
@@ -10441,5 +10516,42 @@ BIKES.forEach(function (b) {
     if (m) (m[2] ? ends.push(+m[2]) : plus.push(+m[1]));
   });
   var pre = plus.length ? "до " + Math.min.apply(null, plus) : ends.length ? Math.max.apply(null, ends) + 1 + "+" : "";
-  if (pre) bare[0].label = pre + " · " + bare[0].label;
+  if (pre) { bare[0].label = pre + " · " + bare[0].label; if (!bare[0].years) bare[0].years = pre; }
+});
+
+/* Мелкие исправления базы: у инжекторных моторов нет жиклёров; объём антифриза там, где его не было. */
+["CRF250F", "IN_BAJ160N"].forEach(function (id) { var e = ENGINES[id]; if (e) { e.jetMain = e.jetPilot = e.needle = "—"; } });
+[["TUAREG660", "≈ 1.5 л"], ["DESERTX", "≈ 2 л"], ["NX500", "≈ 1.3 л"], ["NX400", "≈ 1.3 л"], ["XR650R", "≈ 1.5 л"],
+ ["HD_M8_107", "≈ 1 л (только Twin-Cooled)"], ["HD_M8_114", "≈ 1 л (только Twin-Cooled)"], ["HD_M8_117", "≈ 1 л (только Twin-Cooled)"], ["X26_HD_M8_121", "≈ 1 л"]]
+  .forEach(function (x) { var e = ENGINES[x[0]]; if (e && !e.coolant) e.coolant = x[1]; });
+
+/* Свечи и зазоры по регламентам ТО производителей (maintenanceschedule.com, по мануалам владельца).
+   Зазоры клапанов — только там, где они опубликованы; остальное честно остаётся «по мануалу». */
+[
+  ["T400K", { spark: "NGK LMAR9G", gap: "0.7–0.8 мм" }],
+  ["T650K", { spark: "NGK CR9EIA-9", gap: "0.8–0.9 мм" }],
+  ["I4_900K", { spark: "NGK CR9EIA-9", gap: "0.8–0.9 мм" }],
+  ["T800S", { spark: "NGK LMAR8BI-9", gap: "0.8–0.9 мм" }],
+  ["S400T", { spark: "Bosch VR6NEU", gap: "0.7–0.8 мм", valveIn: "0.05–0.10 мм", valveEx: "0.10–0.15 мм" }],
+  ["I3_660T", { spark: "NGK CR9EK" }],
+  ["T650RE", { spark: "Bosch UR5CC (= NGK CR8E)", gap: "0.7–0.8 мм" }],
+  ["V805S", { spark: "NGK DPR7EA-9", gap: "0.8–0.9 мм" }],
+  ["V853G", { spark: "NGK MR8BI-8", gap: "0.8 мм", valveIn: "0.10 мм", valveEx: "0.15 мм" }],
+  ["T700C", { spark: "NGK CR8EI", gap: "0.7–0.9 мм" }],
+  ["V955D", { spark: "NGK MAR9A-J" }],
+  ["T800C", { spark: "NGK LMAR9AI-10", gap: "1.0 мм" }]
+].forEach(function (x) {
+  var e = ENGINES[x[0]]; if (!e) return;
+  Object.keys(x[1]).forEach(function (k) { if (k === "spark" || k === "gap" || !e[k] || /мануал/i.test(e[k])) e[k] = x[1][k]; });
+});
+
+/* Зазор свечи сверяем с маркировкой NGK: цифра после дефиса — заводской зазор (-9 = 0.9 мм, -10 = 1.0 мм).
+   Раньше у таких моторов стоял шаблонный 0.7–0.8 мм. Только одиночные свечи NGK. */
+Object.keys(ENGINES).forEach(function (id) {
+  var e = ENGINES[id], sp = String(e.spark || "");
+  if (!/^NGK\s/.test(sp) || sp.indexOf("/") >= 0 || /мануал/i.test(e.gap || "")) return;
+  var m = /\b[A-Z]{1,6}\d{1,2}[A-Z]{0,4}-(9|10|11)\b/.exec(sp); if (!m) return;
+  var g = +m[1] / 10, nums = (String(e.gap || "").replace(/,/g, ".").match(/\d+(?:\.\d+)?/g) || []).map(Number);
+  if (nums.length && g >= Math.min.apply(null, nums) - 0.001 && g <= Math.max.apply(null, nums) + 0.001) return;
+  e.gap = (g - 0.1).toFixed(1) + "–" + g.toFixed(1) + " мм";
 });

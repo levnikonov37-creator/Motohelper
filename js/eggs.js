@@ -138,7 +138,7 @@
   }
   function confetti() {
     if (reduce) return;
-    var L = layer("egg-confetti", 2800), cols = ["#8B5CF6", "#EC4899", "#C4B5FD", "#FFB547", "#72C793"];
+    var L = layer("egg-confetti", 2800), cols = ["#FFFFFF", "#BDBDBD", "#7A7A7A", "#FFFFFF", "#3A3A3A"];
     for (var i = 0; i < 70; i++) {
       var c = el("i");
       c.style.left = Math.random() * 100 + "%";
