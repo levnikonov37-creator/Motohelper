@@ -156,13 +156,20 @@ const crumbLd = (crumbs) => ({ "@context": "https://schema.org", "@type": "Bread
   itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c[0], item: c[1] ? SITE.replace(/\/$/, "") + c[1] : undefined })) });
 
 /* характеристики группами: мотор / масло и ТО / зажигание и клапаны / питание */
-function specGroups(e, v) {
+/* моточасы: тот же пересчёт, что в приложении (kmPerHour в js/app.js) — по износу мотора */
+function kmh(km, e, b) {
+  const t = b && b.type || "";
+  const k = /Питбайк|Кросс|Эндуро|Мотард|Триал/i.test(t) ? 50 : /Скутер|Мопед/i.test(t) || e.cvt ? 40 : t ? 60 : e.cc > 300 ? 60 : 50;
+  const h = km / k, r = h >= 20 ? Math.round(h / 5) * 5 : Math.max(1, Math.round(h));
+  return "каждые " + Number(km).toLocaleString("ru-RU").replace(/\u00a0/g, " ") + "\u00a0км · ≈\u00a0" + r + "\u00a0моточ.";
+}
+function specGroups(e, v, b) {
   const ok = (x) => x != null && String(x).trim() && String(x) !== "—";
   const g = (title, rows) => ({ title, rows: rows.filter((r) => ok(r[1])) });
   return [
     g("Мотор", [["Двигатель", e.name], ["Код", e.code], ["Объём", e.cc ? e.cc + " см³" : ""], ["Мощность", (v.hp || e.hp) ? (v.hp || e.hp) + " л.с." : ""], ["Момент", e.torque], ["Тип", [e.stroke, e.cam].filter(Boolean).join(", ")], ["Охлаждение", e.cooling], ["Коробка", e.gearbox], ["Запуск", e.start], ["Компрессия", e.compression]]),
-    g("Масло и ТО", [["Масло", e.oil], ["Объём масла", e.oilVol], ["Замена масла", e.oilInt ? "каждые " + e.oilInt + " км" : ""], ["Антифриз", e.coolant], ["Топливо", e.fuel]]),
-    g("Свеча и клапаны", [["Свеча", e.spark], ["Зазор свечи", e.gap], ["Клапаны, впуск", e.valveIn], ["Клапаны, выпуск", e.valveEx], ["Проверка клапанов", e.valveInt ? "каждые " + e.valveInt + " км" : ""]]),
+    g("Масло и ТО", [["Масло", e.oil], ["Объём масла", e.oilVol], ["Замена масла", e.oilInt ? kmh(e.oilInt, e, b) : ""], ["Антифриз", e.coolant], ["Топливо", e.fuel]]),
+    g("Свеча и клапаны", [["Свеча", e.spark], ["Зазор свечи", e.gap], ["Клапаны, впуск", e.valveIn], ["Клапаны, выпуск", e.valveEx], ["Проверка клапанов", e.valveInt ? kmh(e.valveInt, e, b) : ""]]),
     g("Питание", [["Карбюратор / впрыск", v.carb || e.carb], ["Главный жиклёр", e.jetMain], ["Жиклёр ХХ", e.jetPilot], ["Игла", e.needle], ["Холостые", e.idle]]),
   ].filter((x) => x.rows.length);
 }
@@ -183,7 +190,7 @@ BIKES.forEach((b) => {
     const e = ENGINES[v.engine];
     const head = b.versions.length > 1 ? `<h2>${esc(verName(v, vi, e))}</h2>` : "";
     const approx = v.approx ? `<p class="note">≈ Мотор подобран по похожей модели — сверь код на картере.</p>` : "";
-    const groups = `<div class="groups">${specGroups(e, v).map((g) => `<div class="grp"><h3>${g.title}</h3><dl>${g.rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl></div>`).join("")}</div>`;
+    const groups = `<div class="groups">${specGroups(e, v, b).map((g) => `<div class="grp"><h3>${g.title}</h3><dl>${g.rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl></div>`).join("")}</div>`;
     const iss = (e.issues || []).length ? `<h2>Слабые места</h2><ul class="iss">${e.issues.map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     return `<section class="ver">${head}<div class="tiles">${tiles(e, v)}</div>${approx}${groups}${iss}
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a></section>`;

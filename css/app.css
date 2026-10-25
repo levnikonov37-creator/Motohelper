@@ -2351,3 +2351,6 @@ code { background: #141414 !important; color: #fff; }
 .actions4 > .act:nth-child(6n+5) > .ico { color: #A78BFA !important; }
 .actions4 > .act:nth-child(6n) > .ico { color: #22D3EE !important; }
 .actions4 > .act-main > .ico { color: #000 !important; }
+/* пояснение к моточасам в регламенте ТО */
+.plan-note { margin: 0 0 12px; padding: 10px 12px; border: 1px dashed var(--m-line2, rgba(255,255,255,.28)); border-radius: 4px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.plan-every { white-space: normal; }
