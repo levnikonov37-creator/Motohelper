@@ -718,6 +718,7 @@ function BuyLinks({
     className: "pbuy"
   }, SHOPS.map(sh => /*#__PURE__*/React.createElement("a", {
     key: sh[0],
+    className: "sh-" + ({ "Авито": "av", "Ozon": "oz", "WB": "wb", "Маркет": "ym" }[sh[0]] || "x"),
     href: sh[1] + encodeURIComponent(q),
     target: "_blank",
     rel: "noopener"
