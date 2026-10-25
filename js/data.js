@@ -10441,7 +10441,7 @@ BIKES.forEach(function (b) {
     if (m) (m[2] ? ends.push(+m[2]) : plus.push(+m[1]));
   });
   var pre = plus.length ? "до " + Math.min.apply(null, plus) : ends.length ? Math.max.apply(null, ends) + 1 + "+" : "";
-  if (pre) bare[0].label = pre + " · " + bare[0].label;
+  if (pre) { bare[0].label = pre + " · " + bare[0].label; if (!bare[0].years) bare[0].years = pre; }
 });
 
 /* Мелкие исправления базы: у инжекторных моторов нет жиклёров; объём антифриза там, где его не было. */

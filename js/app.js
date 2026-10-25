@@ -16848,8 +16848,12 @@ function AiChat({
     }
   }
   function copyAnswer(text) {
-    const t = String(text || "").replace(/\[part:[^\]]*\]/g, "").trim();
-    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => flash("Ответ скопирован"), () => flash("Не удалось скопировать"));
+    /* в буфер — обычный текст: метки деталей → «название (цена)», без звёздочек и решёток разметки */
+    const t = String(text || "").replace(/\[\[p:([\w-]+)\]\]/g, (m, id) => {
+      const p = partById(id);
+      return p ? p.name + " (" + rub(p.price) + ")" : "";
+    }).replace(/\*\*([^*]+)\*\*/g, "$1").replace(/(^|[^\w*])\*([^*\s][^*\n]*?)\*(?![\w*])/g, "$1$2").replace(/^#{1,6}\s+/gm, "").replace(/^\|?\s*:?-{2,}.*$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
+    copyText(t).then(ok => flash(ok ? "Ответ скопирован" : "Не удалось скопировать"));
   }
   const ctl = useRef(null);
   const listRef = useRef(null);

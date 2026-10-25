@@ -18,6 +18,13 @@ const ENGINES = ctx.__E, BIKES = ctx.__B.filter((b) => b.brand !== "Любая �
 const TR = { а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya" };
 const slugify = (s) => String(s).toLowerCase().split("").map((c) => (c in TR ? TR[c] : c)).join("")
   .replace(/\+/g, "-plus").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "model";
+// подпись версии: «2014–2020 · CP3 847»; без годов — заводская подпись версии («PR250 · ZS172FMM»), а не «Версия 2»
+function verName(v, vi, e) {
+  if (v.years) return v.years + " · " + e.code;
+  const l = (v.label || "").replace(/,\s*[\d.]+\s*см³$/, "");
+  if (!l) return "Версия " + (vi + 1) + " · " + e.code;
+  return l.indexOf(e.code) >= 0 ? l : l + " · " + e.code;
+}
 const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const appLink = (b, vi) => "/#bike=" + encodeURIComponent(b.brand + " " + b.name) + "&v=" + vi;
 
@@ -155,7 +162,7 @@ BIKES.forEach((b) => {
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], [b.brand, "/m/" + brandSlug[b.brand] + "/"], [b.name, null]];
   const vers = b.versions.map((v, vi) => {
     const e = ENGINES[v.engine];
-    const head = b.versions.length > 1 ? `<h2>${esc(v.years || "Версия " + (vi + 1))} · ${esc(e.code)}</h2>` : "";
+    const head = b.versions.length > 1 ? `<h2>${esc(verName(v, vi, e))}</h2>` : "";
     const approx = v.approx ? `<p class="note">≈ Мотор подобран по похожей модели — сверь код на картере.</p>` : "";
     const groups = `<div class="groups">${specGroups(e, v).map((g) => `<div class="grp"><h3>${g.title}</h3><dl>${g.rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl></div>`).join("")}</div>`;
     const iss = (e.issues || []).length ? `<h2>Слабые места</h2><ul class="iss">${e.issues.map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
@@ -165,7 +172,7 @@ BIKES.forEach((b) => {
   const others = BIKES.filter((x) => x.brand === b.brand && x !== b).slice(0, 12);
   const body = `<section class="hero"><div class="kick">${esc(b.brand)} · ${esc(b.type)}</div><h1>${esc(b.name)}</h1>
 <p class="lead">Мотор ${esc(e0.code)}${e0.cc ? ", " + e0.cc + " см³" : ""}${e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с" : ""}. Какое масло и сколько, свеча, зазоры клапанов, жиклёры и слабые места${b.versions.length > 1 ? " — по поколениям" : ""}.</p>
-${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(v.years || "версия " + (vi + 1))} · ${esc(ENGINES[v.engine].code)}</span>`).join("")}</div>` : ""}</section>
+${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}</section>
 ${vers}
 ${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
   const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${e0.oil || "—"}${e0.oilVol ? " " + e0.oilVol : ""}, свеча ${e0.spark || "—"}, зазоры клапанов ${e0.valveIn || "—"} / ${e0.valveEx || "—"}. Слабые места и ремонт.`;
