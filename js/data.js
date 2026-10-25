@@ -10443,3 +10443,9 @@ BIKES.forEach(function (b) {
   var pre = plus.length ? "до " + Math.min.apply(null, plus) : ends.length ? Math.max.apply(null, ends) + 1 + "+" : "";
   if (pre) bare[0].label = pre + " · " + bare[0].label;
 });
+
+/* Мелкие исправления базы: у инжекторных моторов нет жиклёров; объём антифриза там, где его не было. */
+["CRF250F", "IN_BAJ160N"].forEach(function (id) { var e = ENGINES[id]; if (e) { e.jetMain = e.jetPilot = e.needle = "—"; } });
+[["TUAREG660", "≈ 1.5 л"], ["DESERTX", "≈ 2 л"], ["NX500", "≈ 1.3 л"], ["NX400", "≈ 1.3 л"], ["XR650R", "≈ 1.5 л"],
+ ["HD_M8_107", "≈ 1 л (только Twin-Cooled)"], ["HD_M8_114", "≈ 1 л (только Twin-Cooled)"], ["HD_M8_117", "≈ 1 л (только Twin-Cooled)"], ["X26_HD_M8_121", "≈ 1 л"]]
+  .forEach(function (x) { var e = ENGINES[x[0]]; if (e && !e.coolant) e.coolant = x[1]; });

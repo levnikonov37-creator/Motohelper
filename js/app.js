@@ -1915,7 +1915,7 @@ function BikeFinder({
     value: q,
     onChange: e => setQ(e.target.value),
     autoFocus: !compact,
-    placeholder: mode === "engines" ? "Код мотора: 174, NB300, 172FMM, CB300" : "Марка, модель или мотор: TT250, Kayo, 174",
+    placeholder: mode === "engines" ? "Код мотора, напр. 172FMM" : "Марка, модель или мотор",
     "aria-label": "\u041F\u043E\u0438\u0441\u043A \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u0430",
     enterKeyHint: "search"
   }), q && /*#__PURE__*/React.createElement("button", {
@@ -11324,7 +11324,7 @@ function CompareView({
     const p = k.split(" ").map(x => partByKind(x, e)).find(Boolean);
     return p ? p.price : "—";
   };
-  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Макс. скорость", speedFor(eng, bike, {}, []).v, speedFor(e2, b2, {}, []).v, "км/ч", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на обслуживание", toCost(eng), toCost(e2), "₽", -1], ["Слабых мест (серьёзных)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Поршень", kp("piston", eng), kp("piston", e2), "₽", -1], ["Комплект сцепления", kp("clutchdiscs", eng), kp("clutchdiscs", e2), "₽", -1], ["Свеча", kp("spark spark2", eng), kp("spark spark2", e2), "₽", -1], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng).ok).length, TUNING.filter(t => tuningFor(t, e2).ok).length, "", 1]];
+  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Макс. скорость", speedFor(eng, bike, {}, []).v, speedFor(e2, b2, {}, []).v, "км/ч", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на ТО", toCost(eng), toCost(e2), "₽", -1], ["Слабые места (серьёзные)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Поршень", kp("piston", eng), kp("piston", e2), "₽", -1], ["Комплект сцепления", kp("clutchdiscs", eng), kp("clutchdiscs", e2), "₽", -1], ["Свеча", kp("spark spark2", eng), kp("spark spark2", e2), "₽", -1], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng).ok).length, TUNING.filter(t => tuningFor(t, e2).ok).length, "", 1]];
   const fmtv = (v, u) => typeof v === "number" ? u === "₽" ? rub(v) : num(v) + (u ? " " + u : "") : v;
   return /*#__PURE__*/React.createElement("section", {
     className: "panel compare"
@@ -15921,7 +15921,7 @@ function aiCatalog(eng, max) {
   const rest = list.filter(p => own.indexOf(p) < 0);
   return own.concat(rest).slice(0, max || 220).map(p => p.id + "|" + p.name + "|" + p.price).join("\n");
 }
-const AI_RULES = "Ты — ИИ-механик в приложении MotoHelper. Помогаешь владельцам китайских эндуро, питбайков и мопедов с диагностикой и ремонтом. Отвечай по-русски, по делу, простым гаражным языком, без воды.\n" + "Правила:\n" + "1. Опирайся на карточку мотоцикла ниже: там характеристики именно этого экземпляра с изменениями владельца. Если нужного числа нет — так и скажи и дай типовой диапазон с пометкой «сверь с мануалом».\n" + "2. Диагностику веди от простого и дешёвого к сложному. Если данных мало — задай 1–2 уточняющих вопроса и остановись.\n" + "3. Для ремонта: пронумерованные шаги, нужный инструмент, на что обратить внимание.\n" + "4. Безопасность: если неисправность угрожает безопасности (тормоза, течь бензина, заклинивание), прямо скажи не ездить. Сложные работы (расточка, коленвал, сварка рамы) — советуй сервис.\n" + "5. Если советуешь деталь из каталога ниже, ставь метку [[p:ID]] сразу после названия, например «ремкомплект карбюратора [[p:rk-pe30]]». Используй только ID из каталога, не выдумывай.\n" + "6. Форматирование: короткие абзацы, списки через «- » или «1. », важное выделяй **жирным**. Без таблиц и без заголовков крупнее «### ».\n" + "7. Ответ обычно до 250 слов, если пользователь не просит подробнее.";
+const AI_RULES = "Ты — ИИ-механик в приложении MotoHelper. Помогаешь владельцам мотоциклов, питбайков и мопедов (от китайских эндуро до японских и европейских моделей) с диагностикой и ремонтом. Отвечай по-русски, по делу, простым гаражным языком, без воды.\n" + "Правила:\n" + "1. Опирайся на карточку мотоцикла ниже: там характеристики именно этого экземпляра с изменениями владельца. Если нужного числа нет — так и скажи и дай типовой диапазон с пометкой «сверь с мануалом».\n" + "2. Диагностику веди от простого и дешёвого к сложному. Если данных мало — задай 1–2 уточняющих вопроса и остановись.\n" + "3. Для ремонта: пронумерованные шаги, нужный инструмент, на что обратить внимание.\n" + "4. Безопасность: если неисправность угрожает безопасности (тормоза, течь бензина, заклинивание), прямо скажи не ездить. Сложные работы (расточка, коленвал, сварка рамы) — советуй сервис.\n" + "5. Если советуешь деталь из каталога ниже, ставь метку [[p:ID]] сразу после названия, например «ремкомплект карбюратора [[p:rk-pe30]]». Используй только ID из каталога, не выдумывай.\n" + "6. Форматирование: короткие абзацы, списки через «- » или «1. », важное выделяй **жирным**. Без таблиц и без заголовков крупнее «### ».\n" + "7. Ответ обычно до 250 слов, если пользователь не просит подробнее.";
 
 /* ===== Мини-markdown ===== */
 function Inline({
@@ -15930,14 +15930,18 @@ function Inline({
   cartIds
 }) {
   const out = [];
-  const re = /(\*\*[^*]+\*\*|\[\[p:[\w-]+\]\]|`[^`]+`)/g;
+  const re = /(\*\*[^*]+\*\*|\[\[p:[\w-]+\]\]|`[^`]+`|\*(?=[^\s*])[^*\n]*[^\s*]\*(?![\w*]))/g;
   let last = 0,
     m,
     k = 0;
   while (m = re.exec(text)) {
     if (m.index > last) out.push(text.slice(last, m.index));
     const tok = m[0];
-    if (tok.startsWith("**")) out.push(/*#__PURE__*/React.createElement("b", {
+    /* *курсив* — только если перед звёздочкой не буква/цифра (не «2*3*4») */
+    if (tok[0] === "*" && tok[1] !== "*" && m.index > 0 && /[\w\u0400-\u04FF]/.test(text[m.index - 1])) continue;
+    if (tok[0] === "*" && tok[1] !== "*") out.push(/*#__PURE__*/React.createElement("i", {
+      key: k++
+    }, tok.slice(1, -1)));else if (tok.startsWith("**")) out.push(/*#__PURE__*/React.createElement("b", {
       key: k++
     }, tok.slice(2, -2)));else if (tok.startsWith("`")) out.push(/*#__PURE__*/React.createElement("code", {
       key: k++
@@ -15996,6 +16000,27 @@ function Md({
       return;
     }
     let m;
+    /* таблица «| a | b |»: строка-разделитель «|---|» пропускается */
+    if (/^\|.*\|$/.test(l)) {
+      flushP();
+      const cells = l.slice(1, -1).split("|").map(c => c.trim());
+      if (cells.every(c => /^:?-{2,}:?$/.test(c))) return;
+      if (!list || list.t !== "tb") {
+        flushL();
+        list = {
+          t: "tb",
+          v: []
+        };
+      }
+      list.v.push(cells);
+      return;
+    }
+    /* «---» / «***» — разделитель, не текст */
+    if (/^([-*_])\1{2,}$/.test(l)) {
+      flushP();
+      flushL();
+      return;
+    }
     if (m = l.match(/^#{1,6}\s+(.*)/)) {
       flushP();
       flushL();
@@ -16011,7 +16036,8 @@ function Md({
         flushL();
         list = {
           t: "ol",
-          v: []
+          v: [],
+          start: +m[1] || 1
         };
       }
       list.v.push(m[2]);
@@ -16045,8 +16071,16 @@ function Md({
     key: i
   }, I(b.v)) : b.t === "p" ? /*#__PURE__*/React.createElement("p", {
     key: i
-  }, I(b.v)) : b.t === "ol" ? /*#__PURE__*/React.createElement("ol", {
-    key: i
+  }, I(b.v)) : b.t === "tb" ? /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "md-table"
+  }, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("tbody", null, b.v.map((row, j) => /*#__PURE__*/React.createElement("tr", {
+    key: j
+  }, row.map((c, n) => /*#__PURE__*/React.createElement(j === 0 ? "th" : "td", {
+    key: n
+  }, I(c)))))))) : b.t === "ol" ? /*#__PURE__*/React.createElement("ol", {
+    key: i,
+    start: b.start > 1 ? b.start : undefined
   }, b.v.map((x, j) => /*#__PURE__*/React.createElement("li", {
     key: j
   }, I(x)))) : /*#__PURE__*/React.createElement("ul", {
