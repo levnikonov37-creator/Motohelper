@@ -2354,3 +2354,6 @@ code { background: #141414 !important; color: #fff; }
 /* пояснение к моточасам в регламенте ТО */
 .plan-note { margin: 0 0 12px; padding: 10px 12px; border: 1px dashed var(--m-line2, rgba(255,255,255,.28)); border-radius: 4px; font-size: 13px; line-height: 1.45; color: var(--muted); }
 .plan-every { white-space: normal; }
+/* «Поддержать»: сердце красное, полоса карточки — тоже */
+.support-card { border-left-color: #EF4444 !important; background: linear-gradient(120deg, rgba(239,68,68,.10), rgba(14,14,14,.85) 55%) !important; }
+.support-card .sc-ico { color: #fff !important; background: linear-gradient(135deg, #FF5A5F, #DC2626) !important; box-shadow: 0 0 22px -4px rgba(239,68,68,.7) !important; }
