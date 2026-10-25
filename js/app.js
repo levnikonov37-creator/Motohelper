@@ -14096,7 +14096,7 @@ function RepairHub(props) {
 /* плитки раздела «Ремонт» по группам: [заголовок, [[иконка, название, вид, подпись, класс]]] */
 function RHUB_GROUPS(eng) {
   const se = seasonNow();
-  return [["Что-то не так", [["diag", "Что сломалось?", "find", "Найти причину по симптомам", " act-main"], ["ai", "Спросить ИИ", "ai", "Опиши проблему словами или фото"], ["list", "Коды ошибок", "ref", "Неисправности и справка"]]], ["Обслуживание", [["list", "ТО по пробегу", "to", "Что и когда менять"], ["theme", se === "spring" ? "Весна: к сезону" : "Зима: консервация", "season", se === "spring" ? "Чек-лист после зимы" : "Чек-лист перед хранением"]]], ["Как сделать", [["book", "Все инструкции", "guides", guidesFor(eng).length + " инструкций со схемами"], ["engine", "Узлы мотоцикла", "units", "Всё по узлу на одной странице"], ["bolt", "Схема электрики", "wiring", "Провода и что куда идёт"], ["tire", "Шины и затяжка", "specs", "Давление и моменты"], ["check", "Проверка б/у", "buy", "Перед покупкой"]]]];
+  return [["Что-то не так", [["diag", "Что сломалось?", "find", "Найти причину по симптомам", " act-main"], ["ai", "Спросить ИИ", "ai", "Опиши проблему словами или фото"], ["list", "Коды ошибок", "ref", "Неисправности и справка"]]], ["Обслуживание", [["list", "ТО по пробегу", "to", "Что и когда менять"], ["theme", se === "spring" ? "Весна: к сезону" : "Зима: консервация", "season", se === "spring" ? "Чек-лист после зимы" : "Чек-лист перед хранением"]]], ["Как сделать", [["book", "Все инструкции", "guides", (n => n + " " + plural(n, "инструкция", "инструкции", "инструкций") + " со схемами")(guidesFor(eng).length)], ["engine", "Узлы мотоцикла", "units", "Всё по узлу на одной странице"], ["bolt", "Схема электрики", "wiring", "Провода и что куда идёт"], ["tire", "Шины и затяжка", "specs", "Давление и моменты"], ["check", "Проверка б/у", "buy", "Перед покупкой"]]]];
 }
 /* какой сезон сейчас: октябрь–февраль — зима, март–май — весна, лето — null */
 function seasonNow(d) {
@@ -15663,7 +15663,9 @@ function Tuning({
     className: "price"
   }, rub(p.t.price))))), /*#__PURE__*/React.createElement("div", {
     className: "total"
-  }, /*#__PURE__*/React.createElement("span", null, "\u041D\u0430\u0431\u043E\u0440 \u043D\u0430 ", rub(plan.total)), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("span", null, "\u041D\u0430\u0431\u043E\u0440 \u043D\u0430 ", /*#__PURE__*/React.createElement("b", {
+    className: "nowrap"
+  }, rub(plan.total))), /*#__PURE__*/React.createElement("button", {
     className: "btn primary sm",
     disabled: planAllIn,
     onClick: () => {
@@ -16355,11 +16357,19 @@ function Overview({
     className: "muted"
   }, "У этих моделей тот же мотор ", eng.code, ": поршень, прокладки, сцепление, клапаны, статор и другие детали мотора взаимозаменяемы — можно брать с донора или искать запчасти по любой из них. Ходовая (вилка, колёса, тормоза) у них своя."), /*#__PURE__*/React.createElement("div", {
     className: "tags"
-  }, sameEngineBikes.slice(0, 24).map(b => /*#__PURE__*/React.createElement("button", {
+  }, sameEngineBikes.slice(0, 12).map(b => /*#__PURE__*/React.createElement("button", {
     key: bikeKey(b),
     className: "chip",
     onClick: () => onPickBike(b)
-  }, b.brand, " ", b.name)))), /*#__PURE__*/React.createElement(FeedbackBox, {
+  }, b.brand, " ", b.name))), sameEngineBikes.length > 12 && /*#__PURE__*/React.createElement("details", {
+    className: "more-chips"
+  }, /*#__PURE__*/React.createElement("summary", null, "Ещё ", sameEngineBikes.length - 12, " ", plural(sameEngineBikes.length - 12, "модель", "модели", "моделей")), /*#__PURE__*/React.createElement("div", {
+    className: "tags"
+  }, sameEngineBikes.slice(12, 80).map(b => /*#__PURE__*/React.createElement("button", {
+    key: bikeKey(b),
+    className: "chip",
+    onClick: () => onPickBike(b)
+  }, b.brand, " ", b.name))))), /*#__PURE__*/React.createElement(FeedbackBox, {
     eng: eng,
     bike: bike,
     ver: ver,
@@ -16692,7 +16702,7 @@ function BackupBar({
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "backup-bar"
-  }, null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, "Резервная копия"), /*#__PURE__*/React.createElement("small", null, "Гараж, настройки и отметки — в файл, чтобы перенести на другой телефон")), /*#__PURE__*/React.createElement("div", {
     className: "row-gap"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn sm",
