@@ -13448,7 +13448,7 @@ function Home(props) {
     s: 18
   }), "Мотор в 3D")), /*#__PURE__*/React.createElement(SiteSearchInline, {
     ctx: props,
-    placeholder: "Поиск: «не заводится», «клапаны», «свеча», «PWK»"
+    placeholder: "Поломка, деталь или инструкция"
   })), /*#__PURE__*/React.createElement(GarageBar, _extends({}, props, {
     compact: true
   })), /*#__PURE__*/React.createElement(StartGuide, {
