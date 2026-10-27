@@ -2357,3 +2357,25 @@ code { background: #141414 !important; color: #fff; }
 /* «Поддержать»: сердце красное, полоса карточки — тоже */
 .support-card { border-left-color: #EF4444 !important; background: linear-gradient(120deg, rgba(239,68,68,.10), rgba(14,14,14,.85) 55%) !important; }
 .support-card .sc-ico { color: #fff !important; background: linear-gradient(135deg, #FF5A5F, #DC2626) !important; box-shadow: 0 0 22px -4px rgba(239,68,68,.7) !important; }
+
+/* v58: удобство и аккуратность */
+/* всплывашка — под верхней полосой, не закрывает выбор мотоцикла и поиск */
+.toast { top: calc(66px + env(safe-area-inset-top, 0px)) !important; max-width: min(92vw, 420px); white-space: normal; }
+/* поле поиска в выборе мотоцикла — одноцветное, как остальные поля */
+.bf-search { background: #0A0A0A !important; color: #9B9B9B !important; border: 1px solid var(--m-line2, rgba(255,255,255,.28)) !important; box-shadow: none !important; }
+.bf-search:focus-within { border-color: #fff !important; }
+.bf-search input, .bf-search input:focus { color: #fff !important; -webkit-text-fill-color: #fff; }
+.bf-search input::placeholder { color: #8A8A8A; -webkit-text-fill-color: #8A8A8A; }
+/* шапка «Мой мотоцикл» на телефоне: полосы меньше, не задевают название */
+@media (max-width: 560px) {
+  .phero, .ai-head { background-size: 72px 72px, auto, 9px 9px !important; }
+  .phero h1 { padding-right: 40px; }
+}
+/* крупнее зона нажатия у мелких кнопок (палец, перчатка) */
+.mini { width: 34px !important; height: 34px !important; }
+.pbuy a { min-height: 30px; padding: 4px 10px !important; }
+.chip, .symchip { min-height: 36px; }
+/* поля внутри рамки (выбор мотоцикла, поиск, ИИ): без второй белой рамки при фокусе — рамка у контейнера */
+.bf-search input:focus, .bf-search input:focus-visible, .qsearch input:focus-visible, .composer textarea, .composer textarea:focus, .composer textarea:focus-visible {
+  outline: none !important; box-shadow: none !important; border-color: transparent !important; }
+.composer:focus-within { border-color: #fff !important; }
