@@ -91,8 +91,9 @@ const server = http.createServer((req, res) => {
       await page.getByRole("button", { name: tab }).last().click({ timeout: 5000 });
       await page.waitForTimeout(400);
     }
-    // Запчасти: у деталей есть ссылки на поиск в магазинах
+    // Запчасти: у деталей есть кнопка «Где купить», по нажатию — ссылки на поиск в магазинах
     await page.getByRole("button", { name: "Запчасти" }).last().click();
+    await page.locator(".pbuy-t").first().click({ timeout: 5000 }).catch(() => errors.push("Запчасти: нет кнопки «Где купить»"));
     const ozon = await page.locator('.pbuy a[href*="ozon.ru"]').first().getAttribute("href", { timeout: 5000 }).catch(() => null);
     if (!ozon) errors.push("Запчасти: нет ссылок на магазины");
     // Шапка: меню «Мои мотоциклы» открывается и закрывается
