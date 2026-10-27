@@ -2379,3 +2379,23 @@ code { background: #141414 !important; color: #fff; }
 .bf-search input:focus, .bf-search input:focus-visible, .qsearch input:focus-visible, .composer textarea, .composer textarea:focus, .composer textarea:focus-visible {
   outline: none !important; box-shadow: none !important; border-color: transparent !important; }
 .composer:focus-within { border-color: #fff !important; }
+
+/* v59: проще и спокойнее */
+/* «Где купить» — одна кнопка, магазины по нажатию */
+.pbuy-t { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--m-line2, rgba(255,255,255,.28)); background: #0A0A0A; color: #fff; font: 600 13px var(--cond); cursor: pointer; }
+.pbuy-t::after { content: "▾"; font-size: 11px; opacity: .7; }
+.pbuy-t:hover { border-color: #fff; }
+.pbuy.open { animation: pbIn .18s ease-out; }
+@keyframes pbIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+/* главная: плитки сразу под шапкой */
+.home-acts { margin: 14px 0 6px; }
+.checkchip.more { border-style: dashed !important; color: #BDBDBD; }
+/* верхняя полоса: сначала название модели, код мотора мелко; стрелка — понятно, что можно сменить */
+.bike-chip { display: inline-flex !important; align-items: center; gap: 6px; max-width: 58vw; }
+.bike-chip .bc-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.bike-chip .bc-code { order: 2; flex: none; margin: 0 !important; font: 600 11px var(--cond) !important; color: #8A8A8A !important; letter-spacing: .02em; }
+.bike-chip .bc-caret { order: 3; flex: none; font-size: 11px; color: #BDBDBD; }
+@media (max-width: 420px) { .bike-chip .bc-code { display: none; } }
+/* всплывашка: над нижним меню и корзиной, не закрывает кнопки «Назад» и выбор мотоцикла; сквозь неё можно нажимать */
+.toast { top: auto !important; bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important; pointer-events: none; }
+@media (min-width: 980px) { .toast { bottom: 32px !important; } }

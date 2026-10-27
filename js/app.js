@@ -296,6 +296,7 @@ function EditBike({
   const S = eng.stock;
   const baseEngine = ENGINES[ver.engine];
   const efi = eng.groups.indexOf("efi") >= 0;
+  const [showAllTune, setShowAllTune] = useState(false);
   const range = carbRange(eng);
   const carbSel = cu.carbId || "";
   const carbObj = CARBS.find(c => c.id === carbSel);
@@ -314,7 +315,7 @@ function EditBike({
     className: "edit"
   }, /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "Меняй только то, что у тебя отличается от заводского. Пустое поле — значит как с завода (заводское значение подсказано серым). Всё сохраняется сразу и учитывается в диагностике, тюнинге и подборе запчастей."), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u041C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("div", {
+  }, "Меняй только то, что у тебя не как с завода. Пустое поле — заводское значение (подсказано серым). Сохраняется сразу."), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u041C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("div", {
     className: "fgrid"
   }, /*#__PURE__*/React.createElement("label", {
     className: "f wide"
@@ -596,7 +597,8 @@ function EditBike({
     value: s
   })))), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u0427\u0442\u043E \u0443\u0436\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E"), null, /*#__PURE__*/React.createElement("div", {
     className: "checks"
-  }, tuneOk.map(t => {
+  }, /* сначала установленное и самое частое — остальное по кнопке «Ещё», чтобы не было стены из 60 кнопок */
+  (showAllTune ? tuneOk : tuneOk.filter((t, i) => i < 10 || eng.installed.indexOf(t.id) >= 0)).map(t => {
     const on = eng.installed.indexOf(t.id) >= 0;
     return /*#__PURE__*/React.createElement("button", {
       key: t.id,
@@ -613,7 +615,11 @@ function EditBike({
       n: "check",
       s: 16
     }), t.title, t.power > 0 && /*#__PURE__*/React.createElement("small", null, "+", t.power, "%"));
-  }))), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u0417\u0430\u043C\u0435\u0442\u043A\u0438"), /*#__PURE__*/React.createElement("textarea", {
+  }), !showAllTune && tuneOk.length > 10 && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "checkchip more",
+    onClick: () => setShowAllTune(true)
+  }, "Ещё ", tuneOk.filter((t, i) => i >= 10 && eng.installed.indexOf(t.id) < 0).length, " ▾"))), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "\u0417\u0430\u043C\u0435\u0442\u043A\u0438"), /*#__PURE__*/React.createElement("textarea", {
     rows: "3",
     value: cu.notes || "",
     placeholder: "VIN, \u0433\u0434\u0435 \u043F\u043E\u043A\u0443\u043F\u0430\u043B \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0438, \u0447\u0442\u043E \u0434\u0435\u043B\u0430\u043B \u0432 \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u0440\u0430\u0437\u2026",
@@ -735,11 +741,24 @@ function buyQuery(p, eng, bike) {
   if (enginePart) return name + " " + (engForeign(eng) && model ? model : code);
   return model ? name + " " + model : name + " " + code + moto;
 }
+/* «Где купить»: одна кнопка вместо четырёх ссылок на каждой детали — магазины раскрываются по нажатию */
 function BuyLinks({
   q
 }) {
-  return /*#__PURE__*/React.createElement("span", {
+  const [open, setOpen] = useState(false);
+  if (!open) return /*#__PURE__*/React.createElement("span", {
     className: "pbuy"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "pbuy-t",
+    "aria-expanded": "false",
+    onClick: e => {
+      e.stopPropagation();
+      setOpen(true);
+    }
+  }, "Где купить"));
+  return /*#__PURE__*/React.createElement("span", {
+    className: "pbuy open"
   }, SHOPS.map(sh => /*#__PURE__*/React.createElement("a", {
     key: sh[0],
     className: "sh-" + ({ "Авито": "av", "Ozon": "oz", "WB": "wb", "Маркет": "ym" }[sh[0]] || "x"),
@@ -11776,7 +11795,7 @@ function App() {
   function flash(m) {
     setToast(m);
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setToast(""), 2400);
+    timer.current = setTimeout(() => setToast(""), 2000);
   }
   function go(t, arg) {
     const cur = navCur.current;
@@ -12039,8 +12058,13 @@ function App() {
     "aria-expanded": bmenu,
     onClick: openBikeMenu
   }, /*#__PURE__*/React.createElement("span", {
+    className: "bc-name"
+  }, cu.nick || bike.name), /*#__PURE__*/React.createElement("span", {
     className: "bc-code"
-  }, eng.code), cu.nick || bike.name), /*#__PURE__*/React.createElement("button", {
+  }, eng.code), /*#__PURE__*/React.createElement("span", {
+    className: "bc-caret",
+    "aria-hidden": "true"
+  }, "▾")), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn dark",
     "aria-label": "Поиск по сайту",
     onClick: openSearch
@@ -12817,7 +12841,7 @@ function EngineExplorer({
     className: "stage-note"
   }, "\u041A\u0440\u0443\u0442\u0438 \u043C\u043E\u0442\u043E\u0440 \u043F\u0430\u043B\u044C\u0446\u0435\u043C, \u0449\u0438\u043F\u043E\u043A \u2014 \u043F\u0440\u0438\u0431\u043B\u0438\u0436\u0435\u043D\u0438\u0435, \u043A\u0430\u0441\u0430\u043D\u0438\u0435 \u0434\u0435\u0442\u0430\u043B\u0438 \u2014 \u0447\u0442\u043E \u044D\u0442\u043E \u0438 \u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0441\u0442\u043E\u0438\u0442. \xAB\u0420\u0430\u0437\u0440\u0435\u0437\xBB \u043F\u043E\u043A\u0430\u0436\u0435\u0442 \u043A\u043E\u043B\u0435\u043D\u0432\u0430\u043B, \u043F\u043E\u0440\u0448\u0435\u043D\u044C, \u043A\u043B\u0430\u043F\u0430\u043D\u044B, \u0441\u0446\u0435\u043F\u043B\u0435\u043D\u0438\u0435 \u0438 \u0448\u0435\u0441\u0442\u0435\u0440\u043D\u0438 \u041A\u041F\u041F \u0432 \u0440\u0430\u0431\u043E\u0442\u0435."), view === "3d" && xray && /*#__PURE__*/React.createElement("p", {
     className: "stage-note"
-  }, "\u041A\u043E\u0440\u043F\u0443\u0441 \u043F\u0440\u043E\u0437\u0440\u0430\u0447\u043D\u044B\u0439 \u2014 \u043D\u0430\u0436\u043C\u0438 \u043D\u0430 \u043F\u043E\u0440\u0448\u0435\u043D\u044C, \u043A\u043B\u0430\u043F\u0430\u043D, \u0448\u0435\u0441\u0442\u0435\u0440\u043D\u044E \u0438\u043B\u0438 \u0434\u0438\u0441\u043A \u0441\u0446\u0435\u043F\u043B\u0435\u043D\u0438\u044F, \u0447\u0442\u043E\u0431\u044B \u0443\u0432\u0438\u0434\u0435\u0442\u044C \u0434\u0435\u0442\u0430\u043B\u044C \u0438 \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u0438. \u0416\u0451\u043B\u0442\u044B\u043C \u043F\u043E\u0434\u0441\u0432\u0435\u0447\u0435\u043D\u0430 \u043F\u0430\u0440\u0430 \u0448\u0435\u0441\u0442\u0435\u0440\u0451\u043D \u0432\u043A\u043B\u044E\u0447\u0451\u043D\u043D\u043E\u0439 \u043F\u0435\u0440\u0435\u0434\u0430\u0447\u0438. \u0417\u0432\u0435\u0437\u0434\u0430 \u0438 \u0446\u0435\u043F\u044C \u043A\u0440\u0443\u0442\u044F\u0442\u0441\u044F \u043F\u0440\u0438 \u0432\u043A\u043B\u044E\u0447\u0451\u043D\u043D\u043E\u0439 \u043F\u0435\u0440\u0435\u0434\u0430\u0447\u0435. \u0410\u043D\u0438\u043C\u0430\u0446\u0438\u044F \u0437\u0430\u043C\u0435\u0434\u043B\u0435\u043D\u0430."), xray && view === "engine" && /*#__PURE__*/React.createElement("p", {
+  }, "Нажми на деталь — покажу, что это и где купить. Жёлтым — включённая передача."), xray && view === "engine" && /*#__PURE__*/React.createElement("p", {
     className: "stage-note"
   }, eng.stroke === "2T" ? "Двухтактный цикл: каждый оборот коленвала — рабочий ход. Анимация замедлена." : "Четыре такта: впуск, сжатие, рабочий ход, выпуск — за два оборота коленвала. Анимация замедлена."), !running && (view === "3d" || !xray) && /*#__PURE__*/React.createElement("div", {
     className: "stage-chips",
@@ -13455,10 +13479,7 @@ function Home(props) {
     mt: mt,
     go: go,
     setPicker: props.setPicker
-  }), /*#__PURE__*/React.createElement(SeasonCard, {
-    eng: eng,
-    go: go
-  }), /*#__PURE__*/React.createElement(CatalogCard, null), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "actions4 home-acts"
   }, [["list", "ТО по пробегу", () => go("repair", "to"), "", "Что и когда менять"], ["book", "Инструкции", () => go("repair", "guides"), "", "Пошагово, со схемами"], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 ? "В проекте " + project.length : "Что даст прибавку"], ["check", "Проверка б/у", () => go("repair", "buy"), "", "Перед покупкой"]].map(a => /*#__PURE__*/React.createElement("button", {
     key: a[1],
@@ -13467,11 +13488,12 @@ function Home(props) {
   }, /*#__PURE__*/React.createElement(Icon, {
     n: a[0],
     s: 26
-  }), /*#__PURE__*/React.createElement("b", null, a[1]), a[4] && /*#__PURE__*/React.createElement("span", null, a[4])))), /*#__PURE__*/React.createElement("div", {
-    className: "home-grid"
-  }, /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(PreRide, {
+  }), /*#__PURE__*/React.createElement("b", null, a[1]), a[4] && /*#__PURE__*/React.createElement("span", null, a[4])))),  /*#__PURE__*/React.createElement(PreRide, {
     eng: eng
-  })), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null));
+  }), /*#__PURE__*/React.createElement(SeasonCard, {
+    eng: eng,
+    go: go
+  }), /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(CatalogCard, null), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null));
 }
 /* Каталог моделей (страницы /m/ для поисковиков) — с главной, с популярными марками */
 const CAT_TR = {
@@ -13483,7 +13505,6 @@ function catSlug(s) {
 }
 function CatalogCard() {
   const n = useMemo(() => BIKES.filter(b => b.brand !== "Любая модель").length, []);
-  const top = ["Kayo", "Motoland", "BSE", "Regulmoto", "Honda", "Yamaha", "KTM", "Kawasaki"].filter(br => BIKES.some(b => b.brand === br));
   return /*#__PURE__*/React.createElement("section", {
     className: "panel catalog-card"
   }, /*#__PURE__*/React.createElement("a", {
@@ -13499,13 +13520,7 @@ function CatalogCard() {
   }, /*#__PURE__*/React.createElement("b", null, "Каталог моделей"), /*#__PURE__*/React.createElement("small", null, n, " моделей: масло, свечи, зазоры клапанов, слабые места")), /*#__PURE__*/React.createElement("span", {
     className: "cc-go",
     "aria-hidden": "true"
-  }, "→")), /*#__PURE__*/React.createElement("div", {
-    className: "cc-brands"
-  }, top.map(br => /*#__PURE__*/React.createElement("a", {
-    key: br,
-    className: "chip",
-    href: "/m/" + catSlug(br) + "/"
-  }, br))));
+  }, "→")));
 }
 function PreRide({
   eng
@@ -13656,7 +13671,7 @@ function BikePage(props) {
     })
   }, v.label)))), /*#__PURE__*/React.createElement(GarageBar, props), eng.jp && /*#__PURE__*/React.createElement("div", {
     className: "callout info"
-  }, "\u0426\u0438\u0444\u0440\u044B \u043F\u043E \u044D\u0442\u043E\u0439 \u043C\u043E\u0434\u0435\u043B\u0438 (\u0437\u0430\u0437\u043E\u0440\u044B, \u0441\u0432\u0435\u0447\u0438, \u043E\u0431\u044A\u0451\u043C\u044B) \u2014 \u0442\u0438\u043F\u043E\u0432\u044B\u0435 \u0438\u0437 \u0441\u0435\u0440\u0432\u0438\u0441-\u043C\u0430\u043D\u0443\u0430\u043B\u043E\u0432. \u0414\u043B\u044F \u0441\u0432\u043E\u0435\u0433\u043E \u0433\u043E\u0434\u0430 \u0432\u044B\u043F\u0443\u0441\u043A\u0430 \u0441\u0432\u0435\u0440\u044C \u0441 \u043C\u0430\u043D\u0443\u0430\u043B\u043E\u043C."), cmp && /*#__PURE__*/React.createElement(CompareView, {
+  }, "Цифры — типовые из сервис-мануалов. Для своего года выпуска сверь с мануалом."), cmp && /*#__PURE__*/React.createElement(CompareView, {
     eng: eng,
     bike: bike,
     other: cmp,
@@ -14491,7 +14506,7 @@ function SmartDiag({
     }
   }, "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C")), res.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "\u0414\u043B\u044F \u0442\u0430\u043A\u043E\u0433\u043E \u043D\u0430\u0431\u043E\u0440\u0430 \u0441\u0438\u043C\u043F\u0442\u043E\u043C\u043E\u0432 \u0432 \u0431\u0430\u0437\u0435 \u043D\u0435\u0442 \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u0439. \u041E\u043F\u0438\u0448\u0438 \u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A\u0443 \u0438\u043B\u0438 \u043F\u0440\u043E\u0439\u0434\u0438 \u043F\u043E\u0448\u0430\u0433\u043E\u0432\u0443\u044E \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u043D\u0438\u0436\u0435."), res.map((r, i) => {
+  }, "Совпадений нет. Спроси ИИ-механика или пройди проверку по шагам ниже."), res.map((r, i) => {
     const c = r.c,
       isOpen = open === i;
     const parts = [];
@@ -15084,7 +15099,7 @@ function WiringView({
     }
   }), /*#__PURE__*/React.createElement("b", null, WIRE[k][1]), /*#__PURE__*/React.createElement("span", null, WIRE[k][2])))), /*#__PURE__*/React.createElement("div", {
     className: "callout info"
-  }, eng.jp ? "У японских и европейских мотоциклов цвета проводов свои — схема показывает, как всё связано и что мерить. Цвета сверяй со схемой в сервис-мануале своей модели." : "Цвета — самые частые у китайских мотоциклов. У твоего могут отличаться: сверяй по фишкам и прозванивай."), /*#__PURE__*/React.createElement("div", {
+  }, eng.jp ? "Цвета проводов у японских и европейских моделей свои — сверяй со схемой из сервис-мануала." : "Цвета — самые частые у китайских мотоциклов. У твоего могут отличаться: сверяй по фишкам и прозванивай."), /*#__PURE__*/React.createElement("div", {
     className: "g-video"
   }, /*#__PURE__*/React.createElement("b", null, "Видео"), /*#__PURE__*/React.createElement(VideoLinks, {
     q: "схема электрики проверка мультиметром " + eng.code
@@ -15474,7 +15489,7 @@ function JetWeather({
     className: "panel jetw"
   }, /*#__PURE__*/React.createElement("h2", null, "Жиклёры под погоду и местность"), /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "Заводские жиклёры ", eng.code, " рассчитаны на тёплую погоду на равнине. В горах и в жару воздух разреженный — смесь становится богаче, в мороз — беднее. Выбери, где и в какую погоду катаешься:"), /*#__PURE__*/React.createElement("div", {
+  }, "Заводские жиклёры ", eng.code, " — под тёплую погоду на равнине. В горах и в жару смесь богаче, в мороз — беднее. Где катаешься?"), /*#__PURE__*/React.createElement("div", {
     className: "jw-q"
   }, "Где катаешься"), chips(JW_ALT, alt, setA), /*#__PURE__*/React.createElement("div", {
     className: "jw-q"
@@ -15565,7 +15580,7 @@ function Sprockets({
     className: "panel sprockets"
   }, /*#__PURE__*/React.createElement("h2", null, "Вариатор"), /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "Передаточное у скутера меняет вариатор: на разгон влияют грузики (ролики) и пружина сцепления, на максималку — ремень и ролики. Тяжелее ролики — выше максималка, но вялее разгон; легче — резвее со старта."));
+  }, "У скутера передаточное меняет вариатор: тяжелее ролики — выше максималка, но вялее разгон; легче — наоборот. Жёстче пружина сцепления — подхват на более высоких оборотах."));
   return /*#__PURE__*/React.createElement("div", {
     className: "panel sprockets"
   }, /*#__PURE__*/React.createElement("h2", null, "\u041A\u0430\u043B\u044C\u043A\u0443\u043B\u044F\u0442\u043E\u0440 \u0437\u0432\u0451\u0437\u0434"), null, /*#__PURE__*/React.createElement("div", {
@@ -15888,7 +15903,7 @@ function PartsPage(props) {
     title: /*#__PURE__*/React.createElement(React.Fragment, null, "\u0417\u0430\u043F\u0447\u0430\u0441\u0442\u0438 ", /*#__PURE__*/React.createElement("span", {
       className: "grad"
     }, "\u043F\u043E\u0434 \u0442\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0440")),
-    sub: "\u0422\u043E\u043B\u044C\u043A\u043E \u0434\u0435\u0442\u0430\u043B\u0438, \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u043F\u043E\u0434\u0445\u043E\u0434\u044F\u0442 \u043A \u0442\u0432\u043E\u0435\u043C\u0443 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u0443, \u0441 \u0430\u043D\u0430\u043B\u043E\u0433\u0430\u043C\u0438, \u0441\u043B\u043E\u0436\u043D\u043E\u0441\u0442\u044C\u044E \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438 и ссылками на магазины.",
+    sub: "Детали под твой мотор: аналоги, сложность установки, где купить.",
     stats: [[cart.length + " " + plural(cart.length, "деталь", "детали", "деталей"), "в корзине"], [rub(cartTotal(cart)), "на сумму"]]
   }), /*#__PURE__*/React.createElement(Parts, props));
 }
@@ -16414,7 +16429,7 @@ function Overview({
     onClick: card
   }, "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0443")), sameEngineBikes.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", null, "Детали мотора подходят от"), /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "У этих моделей тот же мотор ", eng.code, ": поршень, прокладки, сцепление, клапаны, статор и другие детали мотора взаимозаменяемы — можно брать с донора или искать запчасти по любой из них. Ходовая (вилка, колёса, тормоза) у них своя."), /*#__PURE__*/React.createElement("div", {
+  }, "Тот же мотор ", eng.code, " — детали мотора подходят, можно искать запчасти по любой из этих моделей. Ходовая у них своя."), /*#__PURE__*/React.createElement("div", {
     className: "tags"
   }, sameEngineBikes.slice(0, 12).map(b => /*#__PURE__*/React.createElement("button", {
     key: bikeKey(b),

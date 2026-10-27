@@ -10397,7 +10397,6 @@ var SEASON = {
   var EN = "Эндуро", AX = { approx: true };
   G("Motoland", "SMX300 S5 PRO (NB300F)", EN, [["NB300", "2026+", AX]]);
   G("Motoland", "SMX300 S3 PRO (YB300H)", EN, [["LON_YB300H", "2026+"]]);
-  G("Motoland", "XR300 Lite", "Тур-эндуро", [["175FMM", "2026+"]]);
   G("Apollo", "F4 300 (YB300H)", EN, [["LON_YB300H"]]);
   G("Apollo", "F5 300 (175FMM)", EN, [["175FMM"]]);
   G("Apollo", "F5 300 NB300", EN, [["NB300"]]);
@@ -10414,6 +10413,16 @@ var SEASON = {
   G("Kove", "450 Rally Factory", "Эндуро", [["KOVE450"]]);
 })();
 
+/* audit27: Pulsar 180 DTS-i — карбюраторный (UCAL BS29), не инжектор */
+(function () { var e = ENGINES.S180BJ; if (e && /^Инжектор$/.test(e.carb)) e.carb = "UCAL BS29 (карбюратор)"; })();
+/* audit27: «Коленвал / шатун 2T 2T 250» → без повтора «2T» */
+PARTS.forEach(function (p) { if (/\b2T 2T\b/.test(p.name)) p.name = p.name.replace(/\b2T 2T\b/g, "2T"); });
+/* audit27: у ZS174MN-5 (NB300) бумажный масляный фильтр есть — как у его вариантов на 5 ст. и EFI */
+(function () {
+  var src = PARTS.find(function (p) { return p.id === "FIXCN_NB300_5-of"; });
+  if (src && !PARTS.some(function (p) { return p.id === "NB300-of"; }))
+    PARTS.push(Object.assign({}, src, { id: "NB300-of", name: "Масляный фильтр ZS174MN-5 (NB300)", fit: ["NB300"] }));
+})();
 /* @@DB-FRAGMENTS@@ */
 /* ===================== v35: Keeway K-Light 202 и Kayo TS90 — свой объём ===================== */
 CL("V223KW", "V250LF", { code: "Keeway V223", name: "Keeway V-twin 223 воздушный (K-Light 202, Superlight 200)", cc: 223, hp: 17, torque: "16 Н·м" }, 1.1);
