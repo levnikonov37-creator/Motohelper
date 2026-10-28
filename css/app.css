@@ -2399,3 +2399,32 @@ code { background: #141414 !important; color: #fff; }
 /* всплывашка: над нижним меню и корзиной, не закрывает кнопки «Назад» и выбор мотоцикла; сквозь неё можно нажимать */
 .toast { top: auto !important; bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important; pointer-events: none; }
 @media (min-width: 980px) { .toast { bottom: 32px !important; } }
+
+/* ===== v60 «Ровно»: без срезанных углов, наклонов и параллакса — всё стоит ровно и рисуется чётко ===== */
+/* срезанный угол маской отрезал рамку — углы выглядели оборванными */
+.hero, .phero, .ai-head, .btn.primary, .hero .btn.primary { clip-path: none !important; }
+.btn.primary, .hero .btn.primary { box-shadow: none !important; }
+/* 3D-наклон и «пустой» 3D-слой размывали текст и мотоцикл */
+.hero, .phero, .panel, .act, .guide, .tcard, .cause, .gb-item, .vmax, .photo-card { transform: none !important; }
+.act:hover, .guide:hover, .tcard:hover { transform: translateY(-2px) !important; }
+.rv { transform: translateY(14px) !important; }
+.rv.in { transform: none !important; }
+.hero .home-title, .phero h1, .hero-stats, .phero-stats, .hero-cta, .phero-act, .hero-k, .hero-sub { transform: none !important; }
+.phero-ico { transform: rotate(-12deg) !important; }
+.hero-glow { translate: none !important; }
+.hero-bike:hover svg { transform: none !important; }
+/* карточки: одна тонкая рамка вместо толстой полосы слева и светящихся линий */
+.panel, .act, .guide, .g-steps li, .plist li, .season-home, .unit-tile, .tcard, .issues li, .cause, .symptom, .adj-block, .gb-item, .vmax {
+  border: 1px solid rgba(255,255,255,.14) !important; border-radius: 8px !important; box-shadow: none !important; }
+.panel::before, .panel::after { display: none !important; }
+.act:hover, .guide:hover, .tcard:hover { border-color: rgba(255,255,255,.34) !important; }
+.hero, .phero, .ai-head { border-radius: 8px !important; }
+.btn, .chip, .seg, .tabs, .site-search input, .jw-chip, .tick-btn { border-radius: 8px !important; }
+.act > .ico { transform: none !important; box-shadow: none !important; }
+/* плитки на главной: последняя строка растягивается, без одинокой плитки */
+@media (min-width: 900px) { .actions4.home-acts { display: flex !important; flex-wrap: wrap; } .actions4.home-acts > .act { flex: 1 1 220px; } }
+/* полосы шапки не заходят на рамку; без полупрозрачного значка, который обрезался у края */
+.hero, .phero, .ai-head { background-clip: padding-box !important; }
+.phero-ico { display: none !important; }
+/* низ главной: блок резервной копии во всю ширину, как карточки выше */
+.foot { max-width: none !important; }
