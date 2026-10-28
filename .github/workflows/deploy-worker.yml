@@ -1,0 +1,23 @@
+name: Выкладка ИИ-сервера
+
+# Выкладывает worker/ в Cloudflare (воркер motohelper-ai) после мержа в main.
+# Нужны секреты репозитория: CLOUDFLARE_API_TOKEN (Cloudflare → motohelper-ai → Create API token)
+# и CLOUDFLARE_ACCOUNT_ID (из адреса dash.cloudflare.com/<id>/…).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker/**"
+      - ".github/workflows/deploy-worker.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
