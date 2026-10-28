@@ -13,7 +13,8 @@
 // Сайт сам узнаёт, что фото работают: GET на адрес сервера отвечает {"images": true}.
 
 const DEEPSEEK_MODEL = "deepseek-flash";
-const GEMINI_MODEL = "gemini-2.5-flash";
+// Gemini: по очереди — старые модели Google снимает, а свежие бывают перегружены (503)
+const GEMINI_MODELS = ["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.5-flash", "gemini-flash-lite-latest"];
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 // встроенный ИИ Cloudflare: пробуем по очереди — если модель убрали или она перегружена, берём следующую
 const CF_MODELS = ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-4-scout-17b-16e-instruct", "@cf/meta/llama-3.1-8b-instruct-fast", "@cf/meta/llama-3.1-8b-instruct"];
@@ -166,19 +167,25 @@ async function gemini(env, messages, images) {
       if (m) contents[last].parts.push({ inline_data: { mime_type: m[1], data: m[2] } });
     });
   }
-  const res = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":streamGenerateContent?alt=sse&key=" + env.GEMINI_API_KEY,
-    {
+  const body = JSON.stringify({
+    systemInstruction: system ? { parts: [{ text: system }] } : undefined,
+    contents,
+    generationConfig: { maxOutputTokens: 4096, temperature: 0.4 },
+  });
+  let res, err = "";
+  for (const model of GEMINI_MODELS) {
+    res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":streamGenerateContent?alt=sse", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: system ? { parts: [{ text: system }] } : undefined,
-        contents,
-        generationConfig: { maxOutputTokens: 2048, temperature: 0.4 },
-      }),
-    }
-  );
-  if (!res.ok || !res.body) throw new Error(res.status + " " + (await res.text()).slice(0, 200));
+      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+      body,
+    });
+    if (res.ok && res.body) break;
+    err += model + " " + res.status + " " + (await res.text()).slice(0, 120) + "; ";
+    res = null;
+    // неверный ключ или регион не поддерживается — другие модели не помогут
+    if (err.indexOf(" 400 ") >= 0 || err.indexOf(" 403 ") >= 0) break;
+  }
+  if (!res) throw new Error(err);
   // ответ Gemini → строки «data: {"response": "..."}», которые понимает сайт
   const enc = new TextEncoder(), dec = new TextDecoder();
   let buf = "";
