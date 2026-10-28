@@ -1,0 +1,55 @@
+name: Сообщить Яндексу о новых страницах
+
+# После обновления сайта отправляет изменённые страницы в IndexNow (Яндекс и Bing) —
+# они попадают в поиск за дни, а не за недели. Ключ — файл 9c35b22c53833cc514eeb2f06ad32ed9.txt в корне сайта.
+# Запуск вручную (Actions → Run workflow) отправляет весь sitemap.xml.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Список адресов
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" > changed.txt
+            # data.js и app.js меняют все страницы приложения, но адрес у приложения один — главная
+            python3 - <<'EOF'
+          import re
+          urls = set()
+          for f in open("changed.txt").read().split():
+              if f == "index.html" or f.startswith("js/") or f.startswith("css/"):
+                  urls.add("https://motohelper.ru/")
+              m = re.match(r"^(m/.*)index\.html$", f)
+              if m:
+                  urls.add("https://motohelper.ru/" + m.group(1))
+          open("urls.txt", "w").write("\n".join(sorted(urls)))
+          EOF
+          else
+            grep -o '<loc>[^<]*' sitemap.xml | sed 's/<loc>//' > urls.txt
+          fi
+          echo "Адресов: $(grep -c . urls.txt || true)"
+      - name: Подождать выкладку сайта
+        run: sleep 120
+      - name: Отправить в IndexNow
+        run: |
+          [ -s urls.txt ] || { echo "Нечего отправлять"; exit 0; }
+          python3 - <<'EOF'
+          import json, urllib.request
+          urls = [u for u in open("urls.txt").read().split() if u][:10000]
+          body = json.dumps({"host": "motohelper.ru", "key": "9c35b22c53833cc514eeb2f06ad32ed9",
+                             "keyLocation": "https://motohelper.ru/9c35b22c53833cc514eeb2f06ad32ed9.txt", "urlList": urls}).encode()
+          for api in ["https://yandex.com/indexnow", "https://api.indexnow.org/indexnow"]:
+              req = urllib.request.Request(api, data=body, headers={"Content-Type": "application/json; charset=utf-8"})
+              try:
+                  r = urllib.request.urlopen(req, timeout=30)
+                  print(api, r.status, len(urls), "адресов")
+              except urllib.error.HTTPError as e:
+                  print(api, e.code, e.read()[:300])
+          EOF
