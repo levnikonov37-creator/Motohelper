@@ -135,6 +135,7 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky }) {
 <html lang="ru">
 <head>
 <meta charset="utf-8" />
+<script>if(location.protocol==="http:"&&/(^|\\.)motohelper\\.ru$/.test(location.hostname))location.replace("https://"+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}" />

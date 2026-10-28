@@ -19,8 +19,9 @@ const GROQ_MODEL = "llama-3.3-70b-versatile";
 // встроенный ИИ Cloudflare: пробуем по очереди — если модель убрали или она перегружена, берём следующую
 const CF_MODELS = ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-4-scout-17b-16e-instruct", "@cf/meta/llama-3.1-8b-instruct-fast", "@cf/meta/llama-3.1-8b-instruct"];
 // Чужие сайты не тратят твои бесплатные лимиты: запросы принимаются только отсюда (и с локальной копии)
-const ALLOWED = ["https://motohelper.ru", "https://www.motohelper.ru", "https://levnikonov37-creator.github.io"];
-const allowed = (o) => !o || o === "null" || ALLOWED.includes(o) || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o);
+// http и https: ссылку без «https://» (из Telegram, ВК) браузер открывает как http://motohelper.ru
+const ALLOWED = ["motohelper.ru", "www.motohelper.ru", "levnikonov37-creator.github.io"];
+const allowed = (o) => !o || o === "null" || ALLOWED.some((h) => o === "https://" + h || o === "http://" + h) || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o);
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
