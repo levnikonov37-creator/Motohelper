@@ -3,7 +3,7 @@
 # Секреты (DEEPSEEK_API_KEY, GEMINI_API_KEY, FEEDBACK_TOKEN…) задаются в Cloudflare и при деплое не стираются.
 name = "motohelper-ai"
 main = "motohelper-ai.js"
-compatibility_date = "2025-01-01"
+compatibility_date = "2026-10-08"
 workers_dev = true
 # не стирать переменные, заданные в Cloudflare руками (DAILY_TOTAL, DAILY_PER_USER)
 keep_vars = true
