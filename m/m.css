@@ -57,4 +57,14 @@ a.chip:hover,button.chip:hover,.chip.on{background:#fff;color:#000;border-color:
 .cta:active{background:#000;color:#fff}
 .search input{border-radius:4px}.search input:focus{border-color:#fff;box-shadow:0 0 0 1px #fff}
 a{color:#fff}
+/* инструкции и поломки */
+.steps{margin:0;padding:0;list-style:none;counter-reset:st;display:grid;gap:8px}.steps li{position:relative;padding:12px 14px 12px 48px;border-radius:4px;background:#0E0E0E;border:1px solid rgba(255,255,255,.14)}
+.steps li::before{counter-increment:st;content:counter(st);position:absolute;left:12px;top:11px;width:26px;height:26px;display:grid;place-items:center;background:#fff;color:#000;font:400 14px var(--display);border-radius:3px}
+.steps .no{display:block;margin-top:8px;padding:8px 10px;border-left:2px solid #F43F5E;background:rgba(244,63,94,.07);font-size:15px}.steps .no b{display:block}
+.steps .hint{display:block;color:var(--muted);font-size:14px;margin-top:4px}
+.ph{color:#fff;font-weight:600;border-bottom:1px dashed rgba(255,255,255,.5)}
+.tblw{overflow-x:auto;margin:0 0 8px;border:1px solid rgba(255,255,255,.14);border-radius:4px}.tbl{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+.tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.1);text-align:left;vertical-align:top}.tbl th{font:600 12px var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:#0A0A0A}
+.tbl td a{white-space:nowrap}.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+ul.plain{margin:0;padding-left:20px}ul.plain li{margin:3px 0}
 

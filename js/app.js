@@ -11504,7 +11504,8 @@ function App() {
       localStorage.setItem("mh2-picked", "true");
     } catch (e) {}
   }
-  const [onb, setOnb] = useState(() => firstVisit.current && !load("onboarded", false) ? 0 : null);
+  /* пришёл по прямой ссылке (со страниц поиска: инструкция, проверка, модель) — сразу к делу, без приветствия */
+  const [onb, setOnb] = useState(() => firstVisit.current && !load("onboarded", false) && !/(^|[#&])(g|d|bike)=/.test(location.hash || "") ? 0 : null);
   useEffect(() => {
     const h = e => {
       const b = e.target.closest && e.target.closest(".tabs button, .view-toggle button, .seg button, .tags .chip");
@@ -11531,9 +11532,9 @@ function App() {
       return false;
     }
   });
-  const [page, setPage] = useState(() => guideFromHash() ? "repair" : "home");
+  const [page, setPage] = useState(() => guideFromHash() || diagFromHash() ? "repair" : "home");
   const [bikeTab, setBikeTab] = useState("overview");
-  const [rv, setRv] = useState(() => guideFromHash() ? "guide:" + guideFromHash() : "hub");
+  const [rv, setRv] = useState(() => guideFromHash() ? "guide:" + guideFromHash() : diagFromHash() ? "tree:" + diagFromHash() : "hub");
   const [partsQ, setPartsQ] = useState(null);
   /* направление выезда раздела: перешёл вправо по меню — выезжает справа, влево — слева */
   const pageDir = useRef({
@@ -11557,10 +11558,14 @@ function App() {
     const h = () => {
       const s = bikeFromHash();
       if (s) setSel(s);
-      const g = guideFromHash();
+      const g = guideFromHash(),
+        d = diagFromHash();
       if (g) navTo({
         page: "repair",
         rv: "guide:" + g
+      });else if (d) navTo({
+        page: "repair",
+        rv: "tree:" + d
       });
     };
     window.addEventListener("hashchange", h);
@@ -16657,6 +16662,15 @@ function bikeFromHash() {
   }
 }
 /* «…/#bike=…&g=spark» — сразу открыть эту инструкцию */
+/* /#d=start — сразу открыть проверку по неисправности (ссылки со страниц /m/polomka/) */
+function diagFromHash() {
+  try {
+    const d = new URLSearchParams(String(location.hash || "").replace(/^#/, "")).get("d");
+    return d && DIAG.find(x => x.id === d) ? d : null;
+  } catch (e) {
+    return null;
+  }
+}
 function guideFromHash() {
   try {
     const g = new URLSearchParams(String(location.hash || "").replace(/^#/, "")).get("g");
