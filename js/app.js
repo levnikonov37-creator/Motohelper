@@ -15935,6 +15935,61 @@ function aiLookup(text) {
   const line = e => e.code + " — " + e.cc + " см³, " + e.hp + " л.с., " + e.stroke + ", " + e.cam + ", " + e.cooling + ", питание: " + e.carb + ", свеча " + e.spark + ", клапаны " + e.valveIn + "/" + e.valveEx + ", масло " + e.oil + " " + e.oilVol;
   return "\n\n=== ИЗ БАЗЫ ПО ВОПРОСУ (другие модели и моторы) ===\n" + hit.map(b => b.brand + " " + b.name + " (" + b.type + "): " + b.versions.map(v => (v.years ? v.years + ": " : "") + line(ENGINES[v.engine])).join("; ")).concat(engs.map(id => "Мотор " + line(ENGINES[id]))).join("\n");
 }
+/* База знаний сайта по вопросу: подходящие инструкции (с цифрами этого мотора), проверка по неисправности и вероятные
+   причины — через тот же поиск, что на сайте. ИИ берёт цифры отсюда и даёт ссылку на страницу с подробностями. */
+const AI_STOP = "как что где когда почему зачем нет не да на в во и с со у к по от до за из мой моя моё мои мне меня мотоцикл мотоцикла мотоцикле питбайк питбайка мот мота байк байка какое какой какая какие лить делать надо нужно сделать это после при очень если или уже есть был была было стал стала стало можно ли чем там тут сам сама".split(" ");
+function aiWords(t) {
+  return String(t || "").toLowerCase().replace(/ё/g, "е").split(/[^a-zа-я0-9]+/).filter(w => w.length >= 4 && AI_STOP.indexOf(w) < 0);
+}
+/* слова «одного корня»: общий префикс не короче 4 букв и не короче (короткое слово − 2) — «клапана/клапанов», «искры/искра» */
+function aiSame(a, b) {
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  /* короткий общий префикс (4 буквы) — только у коротких слов: «горячую» и «горят» — не одно и то же */
+  return i >= Math.max(4, Math.min(a.length, b.length) - 2) && (i >= 5 || Math.max(a.length, b.length) <= 6);
+}
+function aiKnowledge(text, eng) {
+  const q = aiWords(String(text || "").slice(0, 300));
+  if (!q.length) return "";
+  const score = t => {
+    const w = aiWords(t);
+    return w.length ? q.filter(x => w.some(y => aiSame(x, y))).length : 0;
+  };
+  const res = [];
+  guidesFor(eng).forEach(g => res.push({ type: "Инструкция", k: "g" + g.id, s: score(g.title) }));
+  diagFor(eng).forEach(d => res.push({ type: "Проверка", k: "d" + d.id, s: score(d.title) + 0.5 }));
+  [].concat.apply([], SYMPTOMS.map(c => c.items)).filter(i => !i[2] || eng.groups.indexOf(i[2]) >= 0).forEach(sy => res.push({ type: "Симптом", k: "s" + sy[0], s: score(sy[1]) }));
+  CAUSES.filter(c => okFor(c, eng)).forEach(c => res.push({ type: "Причина", k: "c" + c.id, s: score(c.t) - 0.5 }));
+  const best = res.filter(r => r.s >= 1).sort((a, b) => b.s - a.s);
+  if (!best.length) return "";
+  /* только то, что совпало почти так же хорошо, как лучшее — иначе ИИ получит лишнее */
+  for (let i = best.length - 1; i >= 0; i--) if (best[i].s < best[0].s - 1) best.splice(i, 1);
+  const res2 = best;
+  const pick = (type, n) => res2.filter(r => r.type === type).slice(0, n);
+  const out = [];
+  pick("Инструкция", 2).forEach(r => {
+    const g = GUIDES.find(x => x.id === r.k.slice(1));
+    if (g) out.push("Инструкция «" + g.title + "» (" + [g.time, g.diff].filter(Boolean).join(", ") + "), страница: https://motohelper.ru/m/remont/" + g.id + "/\n" + g.steps.map((st, i) => i + 1 + ". " + sub(st, eng)).join("\n"));
+  });
+  pick("Проверка", 1).forEach(r => {
+    const d = DIAG.find(x => x.id === r.k.slice(1));
+    if (d) out.push("Проверка «" + d.title + "», страница: https://motohelper.ru/m/polomka/" + d.id + "/\n" + d.steps.map((st, i) => {
+      const ends = [[st.no || "Нет", st.onNo], [st.yes || "Да", st.onYes]].filter(x => x[1] && typeof x[1] === "object").map(x => x[0] + " → " + x[1].result + ": " + sub(x[1].action, eng));
+      return i + 1 + ". " + sub(st.q, eng) + (ends.length ? " (" + ends.join("; ") + ")" : "");
+    }).join("\n"));
+  });
+  const syms = pick("Симптом", 2).map(r => r.k.slice(1));
+  const causes = [];
+  if (syms.length) CAUSES.filter(c => okFor(c, eng) && syms.some(sy => c.w[sy])).sort((a, b) => syms.reduce((s, sy) => s + (b.w[sy] || 0), 0) - syms.reduce((s, sy) => s + (a.w[sy] || 0), 0)).slice(0, 4).forEach(c => causes.push(c));
+  pick("Причина", 2).forEach(r => {
+    const c = CAUSES.find(x => x.id === r.k.slice(1));
+    if (c && causes.indexOf(c) < 0) causes.push(c);
+  });
+  if (causes.length) out.push("Вероятные причины (по базе, от частых к редким):\n" + causes.slice(0, 5).map(c => "- " + c.t + ". Проверить: " + (c.check || []).map(x => sub(x, eng)).join(" ") + (c.fix ? " Исправить: " + sub(c.fix, eng) : "")).join("\n"));
+  if (!out.length) return "";
+  const txt = out.join("\n\n");
+  return "\n\n=== ИЗ БАЗЫ MOTOHELPER ПО ВОПРОСУ ===\n" + (txt.length > 4000 ? txt.slice(0, 4000) + "…" : txt);
+}
 function aiCardBase(eng, bike, ver, cu, mt) {
   const S = eng.stock,
     efi = eng.groups.indexOf("efi") >= 0;
@@ -15966,7 +16021,7 @@ function aiCatalog(eng, max) {
   const rest = list.filter(p => own.indexOf(p) < 0);
   return own.concat(rest).slice(0, max || 220).map(p => p.id + "|" + p.name + "|" + p.price).join("\n");
 }
-const AI_RULES = "Ты — ИИ-механик в приложении MotoHelper. Помогаешь владельцам мотоциклов, питбайков и мопедов (от китайских эндуро до японских и европейских моделей) с диагностикой и ремонтом. Отвечай по-русски, по делу, простым гаражным языком, без воды.\n" + "Правила:\n" + "1. Опирайся на карточку мотоцикла ниже: там характеристики именно этого экземпляра с изменениями владельца. Если нужного числа нет — так и скажи и дай типовой диапазон с пометкой «сверь с мануалом».\n" + "2. Диагностику веди от простого и дешёвого к сложному. Если данных мало — задай 1–2 уточняющих вопроса и остановись.\n" + "3. Для ремонта: пронумерованные шаги, нужный инструмент, на что обратить внимание.\n" + "4. Безопасность: если неисправность угрожает безопасности (тормоза, течь бензина, заклинивание), прямо скажи не ездить. Сложные работы (расточка, коленвал, сварка рамы) — советуй сервис.\n" + "5. Если советуешь деталь из каталога ниже, ставь метку [[p:ID]] сразу после названия, например «ремкомплект карбюратора [[p:rk-pe30]]». Используй только ID из каталога, не выдумывай.\n" + "6. Форматирование: короткие абзацы, списки через «- » или «1. », важное выделяй **жирным**. Без таблиц и без заголовков крупнее «### ».\n" + "7. Ответ обычно до 250 слов, если пользователь не просит подробнее.";
+const AI_RULES = "Ты — ИИ-механик в приложении MotoHelper. Помогаешь владельцам мотоциклов, питбайков и мопедов (от китайских эндуро до японских и европейских моделей) с диагностикой и ремонтом. Отвечай по-русски, по делу, простым гаражным языком, без воды.\n" + "Правила:\n" + "1. Опирайся на карточку мотоцикла ниже: там характеристики именно этого экземпляра с изменениями владельца. Если нужного числа нет — так и скажи и дай типовой диапазон с пометкой «сверь с мануалом».\n" + "2. Диагностику веди от простого и дешёвого к сложному. Если данных мало — задай 1–2 уточняющих вопроса и остановись.\n" + "3. Для ремонта: пронумерованные шаги, нужный инструмент, на что обратить внимание.\n" + "4. Безопасность: если неисправность угрожает безопасности (тормоза, течь бензина, заклинивание), прямо скажи не ездить. Сложные работы (расточка, коленвал, сварка рамы) — советуй сервис.\n" + "5. Если советуешь деталь из каталога ниже, ставь метку [[p:ID]] сразу после названия, например «ремкомплект карбюратора [[p:rk-pe30]]». Используй только ID из каталога, не выдумывай.\n" + "6. Форматирование: короткие абзацы, списки через «- » или «1. », важное выделяй **жирным**. Без таблиц и без заголовков крупнее «### ».\n" + "7. Ответ обычно до 250 слов, если пользователь не просит подробнее.\n" + "8. Если ниже есть раздел «ИЗ БАЗЫ MOTOHELPER» — опирайся на него в первую очередь и бери цифры оттуда. Если ответ основан на инструкции или проверке оттуда, закончи строкой «Подробно: <ссылка на страницу>».";
 
 /* ===== Мини-markdown ===== */
 function Inline({
@@ -15975,7 +16030,7 @@ function Inline({
   cartIds
 }) {
   const out = [];
-  const re = /(\*\*[^*]+\*\*|\[\[p:[\w-]+\]\]|`[^`]+`|\*(?=[^\s*])[^*\n]*[^\s*]\*(?![\w*]))/g;
+  const re = /(\*\*[^*]+\*\*|\[\[p:[\w-]+\]\]|`[^`]+`|https:\/\/motohelper\.ru\/[\w\-\/#=&.%]*[\w\/]|\*(?=[^\s*])[^*\n]*[^\s*]\*(?![\w*]))/g;
   let last = 0,
     m,
     k = 0;
@@ -15984,6 +16039,16 @@ function Inline({
     const tok = m[0];
     /* *курсив* — только если перед звёздочкой не буква/цифра (не «2*3*4») */
     if (tok[0] === "*" && tok[1] !== "*" && m.index > 0 && /[\w\u0400-\u04FF]/.test(text[m.index - 1])) continue;
+    if (tok.startsWith("https://")) {
+      out.push(/*#__PURE__*/React.createElement("a", {
+        key: k++,
+        href: tok,
+        target: "_blank",
+        rel: "noopener"
+      }, tok.replace(/^https:\/\//, "")));
+      last = m.index + tok.length;
+      continue;
+    }
     if (tok[0] === "*" && tok[1] !== "*") out.push(/*#__PURE__*/React.createElement("i", {
       key: k++
     }, tok.slice(1, -1)));else if (tok.startsWith("**")) out.push(/*#__PURE__*/React.createElement("b", {
@@ -16993,7 +17058,7 @@ function AiChat({
     setBusy(true);
     const c = new AbortController();
     ctl.current = c;
-    const context = AI_RULES + (ai.provider === "worker" ? "\nВсегда отвечай только на русском языке." : "") + "\n\n=== КАРТОЧКА МОТОЦИКЛА ===\n" + aiCard(eng, bike, ver, cu, mt) + "\n\n=== КАТАЛОГ ЗАПЧАСТЕЙ (ID|название|цена ₽) ===\n" + aiCatalog(eng, ai.provider === "worker" ? 40 : 220) + aiLookup(history.slice(-3).filter(m => m.role === "user").map(m => m.text).join(" "));
+    const context = AI_RULES + (ai.provider === "worker" ? "\nВсегда отвечай только на русском языке." : "") + "\n\n=== КАРТОЧКА МОТОЦИКЛА ===\n" + aiCard(eng, bike, ver, cu, mt) + "\n\n=== КАТАЛОГ ЗАПЧАСТЕЙ (ID|название|цена ₽) ===\n" + aiCatalog(eng, ai.provider === "worker" ? 40 : 220) + aiLookup(history.slice(-3).filter(m => m.role === "user").map(m => m.text).join(" ")) + aiKnowledge(text, eng);
     const turns = [{
       role: "user",
       content: context
