@@ -68,6 +68,7 @@ a{color:#fff}
 .tbl td a{overflow-wrap:anywhere}.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 ul.plain{margin:0;padding-left:20px}ul.plain li{margin:3px 0}
 .hero h1{padding-right:52px}
+.ad{margin:22px 0 0;min-height:90px}
 .tbl.cmp{min-width:0;table-layout:fixed}.tbl.cmp th:first-child,.tbl.cmp td:first-child{width:30%;color:var(--muted)}.tbl.cmp td{overflow-wrap:anywhere}
 .faq{display:grid;gap:8px}.faq details{border:1px solid rgba(255,255,255,.14);border-radius:4px;background:#0E0E0E}
 .faq summary{cursor:pointer;padding:12px 14px;font:600 16px var(--cond);list-style:none}.faq summary::-webkit-details-marker{display:none}

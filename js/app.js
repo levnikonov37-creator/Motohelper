@@ -696,6 +696,22 @@ function Issues({
 /* ---------- Запчасти ---------- */
 /* Где купить: поиск детали на площадках, в новой вкладке. Код мотора добавляется, если деталь под конкретный мотор */
 const SHOPS = [["Авито", "https://www.avito.ru/rossiya?q="], ["Ozon", "https://www.ozon.ru/search/?text="], ["WB", "https://www.wildberries.ru/catalog/0/search.aspx?search="], ["Маркет", "https://market.yandex.ru/search?text="]];
+/* Настройки сайта из ai-config.json (один раз на загрузку): партнёрские ссылки магазинов и блок рекламы Яндекса.
+   "aff": { "Ozon": "https://партнёрка/…?ulp={url}" } — поиск в магазине идёт через партнёрскую ссылку ({url} — адрес поиска;
+   без {url} адрес дописывается в конец). "rsya": { "blockId": "R-A-…" } — показывать рекламный блок РСЯ. */
+let SITE_CFG = {};
+const siteCfgReady = typeof fetch === "function" ? fetch("ai-config.json", {
+  cache: "no-cache"
+}).then(r => r.ok ? r.json() : {}).then(j => {
+  SITE_CFG = j && typeof j === "object" ? j : {};
+  return SITE_CFG;
+}).catch(() => SITE_CFG) : Promise.resolve(SITE_CFG);
+function shopHref(sh, q) {
+  const url = sh[1] + encodeURIComponent(q);
+  const a = SITE_CFG.aff && SITE_CFG.aff[sh[0]];
+  if (typeof a !== "string" || !/^https:\/\//.test(a)) return url;
+  return a.indexOf("{url}") >= 0 ? a.replace("{url}", encodeURIComponent(url)) : a + encodeURIComponent(url);
+}
 /* Запрос в магазин: что за деталь + к чему. Магазины ищут по всем словам, поэтому лишнее только мешает:
    - расходники и детали со своей маркировкой (свечи, масла, смазки, подшипник 6301, покрышка 110/100-18,
      аккумулятор 12V 7Ah) — только название + «мото», без модели (иначе выдаёт наклейки и пластик на эту модель);
@@ -762,10 +778,51 @@ function BuyLinks({
   }, SHOPS.map(sh => /*#__PURE__*/React.createElement("a", {
     key: sh[0],
     className: "sh-" + ({ "Авито": "av", "Ozon": "oz", "WB": "wb", "Маркет": "ym" }[sh[0]] || "x"),
-    href: sh[1] + encodeURIComponent(q),
+    href: shopHref(sh, q),
     target: "_blank",
-    rel: "noopener"
+    rel: SITE_CFG.aff && SITE_CFG.aff[sh[0]] ? "sponsored noopener" : "noopener"
   }, sh[0])));
+}
+/* Рекламный блок РСЯ: появляется, только если в ai-config.json задан rsya.blockId; иначе ничего не рисует */
+function AdSlot({
+  place
+}) {
+  const [id, setId] = useState(() => SITE_CFG.rsya && SITE_CFG.rsya.blockId || "");
+  const box = useRef(null);
+  useEffect(() => {
+    let live = true;
+    siteCfgReady.then(c => live && setId(c.rsya && c.rsya.blockId || ""));
+    return () => {
+      live = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (!id || !box.current) return;
+    const el = box.current;
+    el.id = "rsya-" + place;
+    window.yaContextCb = window.yaContextCb || [];
+    if (!document.querySelector("script[data-rsya]")) {
+      const sc = document.createElement("script");
+      sc.src = "https://yandex.ru/ads/system/context.js";
+      sc.async = true;
+      sc.dataset.rsya = "1";
+      document.head.appendChild(sc);
+    }
+    window.yaContextCb.push(() => {
+      try {
+        window.Ya.Context.AdvManager.render({
+          blockId: id,
+          renderTo: el.id
+        });
+      } catch (e) {}
+    });
+  }, [id]);
+  if (!id) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "ad-slot",
+    ref: box,
+    "aria-label": "Реклама"
+  });
 }
 /* видео по работе: поиск сразу на нескольких площадках (YouTube в России бывает медленным) */
 const VIDEO = [["VK Видео", "https://vkvideo.ru/?q=", "vk"], ["Rutube", "https://rutube.ru/search/?query=", "rt"], ["YouTube", "https://www.youtube.com/results?search_query=", "yt"], ["Яндекс Видео", "https://yandex.ru/video/search?text=", "ya"]];
@@ -13498,7 +13555,9 @@ function Home(props) {
   }), /*#__PURE__*/React.createElement(SeasonCard, {
     eng: eng,
     go: go
-  }), /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(CatalogCard, null), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null));
+  }), /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(CatalogCard, null), /*#__PURE__*/React.createElement(AdSlot, {
+    place: "home"
+  }), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null));
 }
 /* Каталог моделей (страницы /m/ для поисковиков) — с главной, с популярными марками */
 const CAT_TR = {

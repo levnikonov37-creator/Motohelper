@@ -116,6 +116,7 @@ a{color:#fff}
 .tbl td a{overflow-wrap:anywhere}.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 ul.plain{margin:0;padding-left:20px}ul.plain li{margin:3px 0}
 .hero h1{padding-right:52px}
+.ad{margin:22px 0 0;min-height:90px}
 .tbl.cmp{min-width:0;table-layout:fixed}.tbl.cmp th:first-child,.tbl.cmp td:first-child{width:30%;color:var(--muted)}.tbl.cmp td{overflow-wrap:anywhere}
 .faq{display:grid;gap:8px}.faq details{border:1px solid rgba(255,255,255,.14);border-radius:4px;background:#0E0E0E}
 .faq summary{cursor:pointer;padding:12px 14px;font:600 16px var(--cond);list-style:none}.faq summary::-webkit-details-marker{display:none}
@@ -134,6 +135,10 @@ i.addEventListener("input",show)})();`;
 const FILTER_JS = `(function(){var b=document.querySelectorAll("[data-t]");document.querySelectorAll("button[data-f]").forEach(function(c){c.addEventListener("click",function(){var f=c.getAttribute("data-f");
 document.querySelectorAll("button[data-f]").forEach(function(x){x.classList.toggle("on",x===c)});b.forEach(function(x){x.classList.toggle("hide",f!=="*"&&x.getAttribute("data-t")!==f)})})})})();`;
 
+/* реклама РСЯ на страницах каталога — только если в ai-config.json задан rsya.blockId */
+const SITE_CFG = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, "ai-config.json"), "utf8")); } catch (e) { return {}; } })();
+const RSYA_ID = SITE_CFG.rsya && /^R-A-[\d-]+$/.test(SITE_CFG.rsya.blockId || "") ? SITE_CFG.rsya.blockId : "";
+const AD = RSYA_ID ? `<div class="ad" id="yandex_rtb_${RSYA_ID}"></div><script>window.yaContextCb=window.yaContextCb||[]</script><script src="https://yandex.ru/ads/system/context.js" async></script><script>window.yaContextCb.push(function(){Ya.Context.AdvManager.render({blockId:"${RSYA_ID}",renderTo:"yandex_rtb_${RSYA_ID}"})})</script>` : "";
 const METRIKA = `<!-- Yandex.Metrika counter --><script>(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=113844391","ym");ym(113844391,"init",{webvisor:true,clickmap:true,referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true,trackHash:false});</script><noscript><div><img src="https://mc.yandex.ru/watch/113844391" style="position:absolute;left:-9999px" alt="" /></div></noscript><!-- /Yandex.Metrika counter -->`;
 function page({ title, desc, canon, crumbs, body, ld, js, sticky }) {
   return `<!doctype html>
@@ -164,6 +169,7 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky }) {
 <main>
 <nav class="crumbs">${crumbs.map((c) => (c[1] ? `<a href="${c[1]}">${esc(c[0])}</a>` : esc(c[0]))).join(" › ")}</nav>
 ${body}
+${AD}
 <footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/">Приложение</a></footer>
 </main>
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}

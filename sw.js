@@ -2,7 +2,7 @@
    Онлайн: всегда свежая версия с сервера (и она же сохраняется в кэш).
    Без сети: сайт открывается из кэша. ИИ-механику интернет нужен всегда.
    При изменении списка файлов увеличь VERSION. */
-const VERSION = "mh-v18";
+const VERSION = "mh-v19";
 const CORE = [
   "./", "index.html", "manifest.webmanifest",
   "css/app.css", "js/data.js", "js/bike-art.js", "js/app.js", "js/motion.js", "js/eggs.js", "js/engine-worklet.js",
