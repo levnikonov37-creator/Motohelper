@@ -2428,3 +2428,6 @@ code { background: #141414 !important; color: #fff; }
 .phero-ico { display: none !important; }
 /* низ главной: блок резервной копии во всю ширину, как карточки выше */
 .foot { max-width: none !important; }
+
+/* рекламный блок РСЯ (появляется, только если в ai-config.json задан rsya.blockId) */
+.ad-slot { margin: 14px 0; min-height: 90px; border-radius: 8px; overflow: hidden; }
