@@ -10,6 +10,7 @@
 //   GEMINI_API_KEY — ключ Google AI Studio (aistudio.google.com → Get API key), бесплатный запасной, умеет фото;
 //   GROQ_API_KEY   — необязательно, запасной вариант для текста (console.groq.com);
 //   привязка AI (Settings → Bindings → Workers AI, имя AI) — необязательно, последний запасной вариант.
+//   TELEGRAM_BOT_TOKEN — ключ бота (@BotFather), бот — админ канала: тогда сервер ведёт Telegram-канал по tg/posts.json.
 // Сайт сам узнаёт, что фото работают: GET на адрес сервера отвечает {"images": true}.
 
 const DEEPSEEK_MODEL = "deepseek-flash";
@@ -37,6 +38,10 @@ const sse = (body, provider) =>
   new Response(body, { headers: { ...CORS, "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache", "x-mh-provider": provider } });
 
 export default {
+  // раз в день (Cloudflare → Triggers → Cron, 15:00 UTC = 18:00 МСК) — очередной пост в Telegram-канал
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(tgRun(env));
+  },
   async fetch(request, env) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (!allowed(request.headers.get("Origin"))) return json({ error: "not_allowed" }, 403);
@@ -46,6 +51,9 @@ export default {
       if (u.searchParams.get("feedback")) return listFeedback(env, u.searchParams.get("token"));
       // самопроверка: <адрес сервера>/?test=1 — какой ИИ отвечает и какие ошибки у остальных (без ключей)
       if (u.searchParams.get("test")) return selfTest(env);
+      // Telegram-канал: ?tg=status — что выйдет следующим; ?tg=run — опубликовать пост на сегодня, если ещё не вышел
+      if (u.searchParams.get("tg") === "run") return json(await tgRun(env));
+      if (u.searchParams.get("tg")) return json(await tgStatus(env));
       return json({ ok: true, images: !!(env.DEEPSEEK_API_KEY || env.GEMINI_API_KEY), feedback: !!env.FEEDBACK, deepseek: !!env.DEEPSEEK_API_KEY });
     }
     if (request.method !== "POST") return json({ error: "method" }, 405);
@@ -242,4 +250,51 @@ async function listFeedback(env, token) {
   const keys = (await env.FEEDBACK.list({ limit: 300 })).keys.map((k) => k.name).filter((k) => k.indexOf("rl:") !== 0).sort().reverse().slice(0, 200);
   const items = await Promise.all(keys.map(async (k) => JSON.parse((await env.FEEDBACK.get(k)) || "{}")));
   return json({ ok: true, count: items.length, items });
+}
+
+// --- Telegram-канал: посты из tg/posts.json на сайте, по одному в день, каждый — один раз (отметка в KV) ---
+const TG_POSTS = "https://motohelper.ru/tg/posts.json";
+const mskDay = () => new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+async function tgQueue(env) {
+  const res = await fetch(TG_POSTS + "?t=" + Date.now(), { cf: { cacheTtl: 0 } });
+  if (!res.ok) throw new Error("posts.json " + res.status);
+  const cfg = await res.json();
+  const today = mskDay(), posts = (cfg.posts || []).filter((p) => p && p.id && p.text && p.date);
+  const sent = {};
+  if (env.FEEDBACK) await Promise.all(posts.map(async (p) => (sent[p.id] = !!(await env.FEEDBACK.get("tg:sent:" + p.id)))));
+  return { cfg, today, posts, sent };
+}
+async function tgStatus(env) {
+  try {
+    const { cfg, today, posts, sent } = await tgQueue(env);
+    const left = posts.filter((p) => !sent[p.id]).sort((a, b) => (a.date < b.date ? -1 : 1));
+    return { ok: true, bot: !!env.TELEGRAM_BOT_TOKEN, channel: cfg.channel, today, sent: posts.length - left.length, left: left.length, next: left[0] ? { id: left[0].id, date: left[0].date } : null };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+async function tgRun(env) {
+  try {
+    if (!env.TELEGRAM_BOT_TOKEN) return { ok: false, error: "нет TELEGRAM_BOT_TOKEN" };
+    if (!env.FEEDBACK) return { ok: false, error: "нет KV FEEDBACK — некуда записать, что пост вышел" };
+    const { cfg, today, posts, sent } = await tgQueue(env);
+    if (!cfg.channel || cfg.channel === "@CHANNEL") return { ok: false, error: "в posts.json не указан канал" };
+    const due = posts.filter((p) => !sent[p.id] && p.date <= today).sort((a, b) => (a.date < b.date ? -1 : 1))[0];
+    if (!due) return { ok: true, posted: null, today };
+    // отметка до отправки: если cron и ручной запуск совпадут, пост не выйдет дважды
+    await env.FEEDBACK.put("tg:sent:" + due.id, new Date().toISOString());
+    const r = await fetch("https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN + "/sendMessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: cfg.channel, text: String(due.text).slice(0, 4096) }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!j.ok) {
+      await env.FEEDBACK.delete("tg:sent:" + due.id);
+      return { ok: false, error: "telegram: " + (j.description || r.status), id: due.id };
+    }
+    return { ok: true, posted: due.id, today };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
 }

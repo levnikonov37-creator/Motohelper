@@ -16,3 +16,7 @@ binding = "AI"
 [[kv_namespaces]]
 binding = "FEEDBACK"
 id = "158eaf5afe82443b80c2ae3b721b57de"
+
+# Telegram-канал: раз в день в 15:00 UTC (18:00 МСК) — очередной пост из tg/posts.json
+[triggers]
+crons = ["0 15 * * *"]
