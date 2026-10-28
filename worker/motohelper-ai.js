@@ -10,7 +10,8 @@
 //   GEMINI_API_KEY — ключ Google AI Studio (aistudio.google.com → Get API key), бесплатный запасной, умеет фото;
 //   GROQ_API_KEY   — необязательно, запасной вариант для текста (console.groq.com);
 //   привязка AI (Settings → Bindings → Workers AI, имя AI) — необязательно, последний запасной вариант.
-//   TELEGRAM_BOT_TOKEN — ключ бота (@BotFather), бот — админ канала: тогда сервер ведёт Telegram-канал по tg/posts.json.
+//   TELEGRAM_BOT_TOKEN — ключ бота (@BotFather), бот — админ канала: тогда сервер ведёт Telegram-канал по tg/posts.json;
+//   YANDEX_METRIKA_TOKEN — OAuth-ключ Метрики: по понедельникам отчёт о посещаемости владельцу (тому, кто написал боту /start).
 // Сайт сам узнаёт, что фото работают: GET на адрес сервера отвечает {"images": true}.
 
 const DEEPSEEK_MODEL = "deepseek-flash";
@@ -39,8 +40,9 @@ const sse = (body, provider) =>
 
 export default {
   // раз в день (Cloudflare → Triggers → Cron, 15:00 UTC = 18:00 МСК) — очередной пост в Telegram-канал
+  // и по понедельникам в 06:00 UTC (09:00 МСК) — отчёт о посещаемости владельцу
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(tgRun(env));
+    ctx.waitUntil(event.cron === "0 6 * * 1" ? weeklyReport(env) : tgRun(env));
   },
   async fetch(request, env) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -53,6 +55,8 @@ export default {
       if (u.searchParams.get("test")) return selfTest(env);
       // Telegram-канал: ?tg=status — что выйдет следующим; ?tg=run — опубликовать пост на сегодня, если ещё не вышел
       if (u.searchParams.get("tg") === "run") return json(await tgRun(env));
+      // отчёт уходит только владельцу бота, так что ручной запуск безопасен
+      if (u.searchParams.get("tg") === "report") return json(await weeklyReport(env));
       if (u.searchParams.get("tg")) return json(await tgStatus(env));
       return json({ ok: true, images: !!(env.DEEPSEEK_API_KEY || env.GEMINI_API_KEY), feedback: !!env.FEEDBACK, deepseek: !!env.DEEPSEEK_API_KEY });
     }
@@ -294,6 +298,69 @@ async function tgRun(env) {
       return { ok: false, error: "telegram: " + (j.description || r.status), id: due.id };
     }
     return { ok: true, posted: due.id, today };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+// --- Отчёт о посещаемости за неделю из Яндекс Метрики — в личку владельцу бота ---
+const METRIKA_ID = 113844391;
+const tgApi = (env, method, body) =>
+  fetch("https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN + "/" + method, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) }).then((r) => r.json());
+/* владелец — первый, кто написал боту /start в личке; запоминаем в KV */
+async function ownerChat(env) {
+  const saved = env.FEEDBACK && (await env.FEEDBACK.get("tg:owner"));
+  if (saved) return saved;
+  const up = await tgApi(env, "getUpdates", { allowed_updates: ["message"] });
+  const m = (up.result || []).map((u) => u.message).find((m) => m && m.chat && m.chat.type === "private" && /^\/start/.test(m.text || ""));
+  if (!m) return null;
+  if (env.FEEDBACK) await env.FEEDBACK.put("tg:owner", String(m.chat.id));
+  return String(m.chat.id);
+}
+async function metrika(env, q) {
+  const r = await fetch("https://api-metrika.yandex.net/stat/v1/data?ids=" + METRIKA_ID + "&lang=ru&" + q, { headers: { Authorization: "OAuth " + env.YANDEX_METRIKA_TOKEN } });
+  const j = await r.json();
+  if (!r.ok) throw new Error("Метрика " + r.status + ": " + (j.message || "").slice(0, 150));
+  return j;
+}
+async function weeklyReport(env) {
+  try {
+    if (!env.TELEGRAM_BOT_TOKEN) return { ok: false, error: "нет TELEGRAM_BOT_TOKEN" };
+    if (!env.YANDEX_METRIKA_TOKEN) return { ok: false, error: "нет YANDEX_METRIKA_TOKEN" };
+    const chat = await ownerChat(env);
+    if (!chat) return { ok: false, error: "владелец не найден — напиши боту /start" };
+    const M = "metrics=ym:s:visits,ym:s:users,ym:s:pageviews,ym:s:avgVisitDurationSeconds";
+    const [cur, prev, src, pages] = await Promise.all([
+      metrika(env, M + "&date1=7daysAgo&date2=yesterday"),
+      metrika(env, M + "&date1=14daysAgo&date2=8daysAgo"),
+      metrika(env, "metrics=ym:s:visits&dimensions=ym:s:lastTrafficSource&sort=-ym:s:visits&limit=5&date1=7daysAgo&date2=yesterday"),
+      metrika(env, "metrics=ym:pv:pageviews&dimensions=ym:pv:URLPath&sort=-ym:pv:pageviews&limit=5&date1=7daysAgo&date2=yesterday"),
+    ]);
+    const t = cur.totals || [0, 0, 0, 0], p = prev.totals || [0, 0, 0, 0];
+    const n = (x) => Math.round(x || 0).toLocaleString("ru-RU");
+    const delta = (a, b) => (!b ? "" : " (" + (a >= b ? "+" : "") + Math.round(((a - b) / b) * 100) + "% к прошлой неделе)");
+    const min = Math.floor((t[3] || 0) / 60), sec = Math.round((t[3] || 0) % 60);
+    let subs = null;
+    try {
+      const posts = await fetch(TG_POSTS).then((r) => r.json());
+      const c = await tgApi(env, "getChatMemberCount", { chat_id: posts.channel });
+      if (c.ok) subs = c.result;
+    } catch (e) {}
+    const lines = [
+      "📊 MotoHelper за неделю",
+      "",
+      "👤 Посетителей: " + n(t[1]) + delta(t[1], p[1]),
+      "🔁 Визитов: " + n(t[0]) + delta(t[0], p[0]),
+      "📄 Просмотров страниц: " + n(t[2]),
+      "⏱ В среднем на сайте: " + min + " мин " + sec + " с",
+      subs != null ? "📣 Подписчиков канала: " + n(subs) : "",
+      "",
+      (src.data || []).length ? "Откуда пришли:\n" + src.data.map((d) => "• " + d.dimensions[0].name + " — " + n(d.metrics[0])).join("\n") : "",
+      "",
+      (pages.data || []).length ? "Что смотрели:\n" + pages.data.map((d) => "• " + (d.dimensions[0].name || "/") + " — " + n(d.metrics[0])).join("\n") : "",
+    ].filter((x, i, a) => x !== "" || (a[i - 1] !== "" && i < a.length - 1)).join("\n").trim();
+    const r = await tgApi(env, "sendMessage", { chat_id: chat, text: lines, disable_web_page_preview: true });
+    return r.ok ? { ok: true, sent: true } : { ok: false, error: "telegram: " + r.description };
   } catch (e) {
     return { ok: false, error: e.message };
   }

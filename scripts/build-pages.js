@@ -379,6 +379,43 @@ ${vt.html}
   files.set("m/polomka/index.html", page({ title: "Неисправности мотоцикла и питбайка: причины и проверка по шагам | MotoHelper", desc: "Не заводится, глохнет, дымит, перегревается, не тянет — что проверить по шагам и как починить мотоцикл, питбайк или скутер.", canon: SITE + "m/polomka/", crumbs, body, ld: [crumbLd(crumbs)] }));
 }
 
+
+/* Telegram-канал: tg/posts.json = написанные посты (tg/manual.json) + «мотор дня» на свободные дни.
+   Порядок моторов — по числу моделей; без масла, свечи или зазоров клапанов мотор пропускаем. */
+{
+  const manual = JSON.parse(fs.readFileSync(path.join(ROOT, "tg/manual.json"), "utf8"));
+  const busy = new Set(manual.posts.map((p) => p.date));
+  const ok = (v) => v && v !== "—" && !/мануал/i.test(v);
+  const seen = new Set(), manualText = manual.posts.map((p) => p.text).join("\n");
+  const cards = popular.filter((id) => { const e = ENGINES[id], c = e.code; if (seen.has(c) || manualText.indexOf("/m/motor/" + engSlug[id] + "/") >= 0 || !ok(e.oil) || !ok(e.oilVol) || !ok(e.spark) || !ok(e.valveIn) || !ok(e.valveEx)) return false; seen.add(c); return true; })
+    .map((id) => {
+      const e = ENGINES[id], list = bikesOf[id], iss = (e.issues || []).find((x) => x.sev === "high") || (e.issues || [])[0];
+      const names = list.slice(0, 4).map((b) => b.brand + " " + b.name).join(", ") + (list.length > 4 ? " и ещё " + (list.length - 4) : "");
+      const text = [
+        "⚙️ Мотор дня: " + e.code + (e.cc ? " (" + Math.round(e.cc) + " см³" + (e.hp ? ", " + e.hp + " л.с." : "") + ")" : ""),
+        "",
+        "Стоит на: " + names,
+        "",
+        "🛢 Масло: " + e.oil + ", " + e.oilVol + (e.oilInt ? " — менять " + kmh(e.oilInt, e, list[0]) : ""),
+        "🕯 Свеча: " + e.spark + (ok(e.gap) ? ", зазор " + e.gap : ""),
+        "🔧 Клапаны (на холодную): впуск " + e.valveIn + ", выпуск " + e.valveEx,
+        iss ? "⚠️ Слабое место: " + iss.t + ". " + (iss.fix || "") : "",
+        "",
+        "Всё про мотор: " + SITE + "m/motor/" + engSlug[id] + "/",
+      ].filter((x, i, a) => x !== "" || a[i - 1] !== "").join("\n").replace(/\n{3,}/g, "\n\n").trim();
+      return { id: "eng-" + engSlug[id], text };
+    });
+  const posts = manual.posts.slice();
+  const day = new Date(Date.UTC(2026, 9, 30)), last = Date.UTC(2027, 5, 30);
+  let k = 0;
+  for (; day.getTime() <= last && k < cards.length; day.setUTCDate(day.getUTCDate() + 1)) {
+    const d = day.toISOString().slice(0, 10);
+    if (!busy.has(d)) posts.push(Object.assign({ date: d }, cards[k++]));
+  }
+  posts.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  files.set("tg/posts.json", JSON.stringify({ _: "Собрано scripts/build-pages.js из tg/manual.json и базы моторов — правь tg/manual.json", channel: manual.channel, posts }, null, 1) + "\n");
+}
+
 files.set("m/m.css", CSS + "\n");
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
