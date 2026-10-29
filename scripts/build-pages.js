@@ -530,6 +530,20 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
   files.set("tg/posts.json", JSON.stringify({ _: "Собрано scripts/build-pages.js из tg/manual.json и базы моторов — правь tg/manual.json", channel: manual.channel, posts }, null, 1) + "\n");
 }
 
+/* Telegram-бот: tg/bot-index.json — короткий справочник для ответов в личке бота. Сервер ищет в нём модели,
+   моторы, инструкции и поломки по словам вопроса и даёт ИИ точные цифры и ссылки на страницы сайта. */
+{
+  const ok = (v) => v && v !== "—";
+  const facts = (e) => [e.code + (e.cc ? " " + Math.round(e.cc) + " см³" : "") + (e.hp ? " " + e.hp + " л.с." : ""), ok(e.oil) ? "масло " + e.oil + (ok(e.oilVol) ? " " + e.oilVol : "") : "", ok(e.spark) ? "свеча " + e.spark + (ok(e.gap) ? " зазор " + e.gap : "") : "", ok(e.valveIn) ? "клапаны впуск " + e.valveIn + " выпуск " + (e.valveEx || "—") : ""].filter(Boolean).join("; ");
+  // модель: [название, адрес без m/, номер мотора в e]; мотор: [код, адрес без m/motor/, цифры]
+  const eIdx = {};
+  engIds.forEach((id, i) => (eIdx[id] = i));
+  const m = BIKES.map((b) => [b.brand + " " + b.name, bikeSlug.get(b), eIdx[b.versions[0].engine]]);
+  const e = engIds.map((id) => [ENGINES[id].code, engSlug[id], facts(ENGINES[id])]);
+  const g = GUIDES.map((x) => [x.title, "remont/" + x.id]).concat(DIAG.map((x) => [x.title, "polomka/" + x.id]));
+  files.set("tg/bot-index.json", JSON.stringify({ _: "Собрано scripts/build-pages.js — справочник для Telegram-бота", m, e, g }) + "\n");
+}
+
 files.set("m/m.css", CSS + "\n");
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
