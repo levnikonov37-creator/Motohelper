@@ -603,7 +603,8 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
   Object.keys(inv).sort().forEach((t) => { if (inv[t].length > 40) return; const c = t.slice(0, 2); (shards[c] = shards[c] || {})[t] = inv[t]; }); // слишком общие слова («250», «motoland») не ищем
   Object.keys(shards).forEach((c) => files.set("tg/idx/" + c + ".json", JSON.stringify(shards[c]) + "\n"));
   for (let i = 0; i * 100 < lines.length; i++) files.set("tg/idx/l" + i + ".json", JSON.stringify(lines.slice(i * 100, i * 100 + 100)) + "\n");
-  const stems = (x) => (String(x).toLowerCase().replace(/ё/g, "е").match(/[а-я]{4,}/g) || []).map((w) => w.slice(0, 5));
+  // основа слова без окончания: «масло»/«масла» → «масл», «цепь»/«цепи» → «цеп» (так же в worker/motohelper-ai.js)
+  const stems = (x) => (String(x).toLowerCase().replace(/ё/g, "е").match(/[а-я]{4,}/g) || []).map((w) => w.slice(0, Math.max(3, Math.min(5, w.length - 1))));
   const g = GUIDES.map((x) => [x.title, SITE + "m/remont/" + x.id + "/"]).concat(DIAG.map((x) => [x.title, SITE + "m/polomka/" + x.id + "/"])).map((x) => [x[0] + " — " + x[1], [...new Set(stems(x[0]))]]);
   files.set("tg/idx/g.json", JSON.stringify(g) + "\n");
 }

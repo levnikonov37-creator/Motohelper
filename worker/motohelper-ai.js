@@ -400,7 +400,8 @@ const latTokens = (s) => {
 };
 const tokW = (t) => (/\d/.test(t) && /[a-z]/.test(t) ? (t.length > 2 ? 3 : 2) : /^\d+$/.test(t) ? 1 : t.length >= 4 ? 1 : 0);
 const STOP = new Set("как что где когда почему зачем какой какая какое какие можно нужно надо есть если или для при без под над мотоцикл мотоцикла мотор мотора питбайк".split(" "));
-const ruStems = (s) => (String(s).toLowerCase().replace(/ё/g, "е").match(/[а-я]{4,}/g) || []).filter((w) => !STOP.has(w)).map((w) => w.slice(0, 5));
+// основа слова без окончания: «масло»/«масла» → «масл», «цепь»/«цепи» → «цеп» (так же в scripts/build-pages.js)
+const ruStems = (s) => (String(s).toLowerCase().replace(/ё/g, "е").match(/[а-я]{4,}/g) || []).filter((w) => !STOP.has(w)).map((w) => w.slice(0, Math.max(3, Math.min(5, w.length - 1))));
 async function botRefs(text) {
   const toks = [...new Set(latTokens(text))].filter((t) => tokW(t) > 0).slice(0, 40);
   const pre = [...new Set(toks.map((t) => t.slice(0, 2)))].slice(0, 12);
@@ -411,8 +412,10 @@ async function botRefs(text) {
   const buckets = {};
   await Promise.all([...new Set(ids.map((id) => Math.floor(id / 100)))].map(async (b) => (buckets[b] = (await idxFile("l" + b)) || [])));
   const out = ids.map((id) => buckets[Math.floor(id / 100)][id % 100]).filter(Boolean);
-  const st = new Set(ruStems(text));
-  (guides || []).map((g) => [g[1].filter((w) => st.has(w)).length, g[0]]).filter((x) => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3).forEach((x) => out.push(x[1]));
+  // основы совпадают, если одна начинается с другой: «сту» (стук) ↔ «стучи» (стучит)
+  const st = [...new Set(ruStems(text))], hit = (w) => st.some((q) => q.startsWith(w) || w.startsWith(q));
+  const gs = (guides || []).map((g) => [g[1].filter(hit).length, g[0]]).filter((x) => x[0] > 0).sort((a, b) => b[0] - a[0] || a[1].length - b[1].length);
+  gs.filter((x) => x[0] === gs[0][0]).slice(0, 3).forEach((x) => out.push(x[1])); // только лучшие совпадения
   return out;
 }
 const BOT_RULES = `Ты — ИИ-механик сайта MotoHelper (motohelper.ru) и отвечаешь в Telegram.
