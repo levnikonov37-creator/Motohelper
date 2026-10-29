@@ -385,7 +385,7 @@ function logQuestion(env, src, messages) {
 
 /* --- Telegram-бот: отвечает в личке как ИИ-механик, с цифрами и ссылками из справочника сайта --- */
 const BOT_INDEX = "https://motohelper.ru/tg/bot-index.json";
-const BOT_DAILY = 30; // ответов в сутки одному человеку
+const BOT_DAILY = 100; // ответов в сутки одному человеку
 let BOT_IDX = null, BOT_IDX_T = 0;
 async function botIndex() {
   if (!BOT_IDX || Date.now() - BOT_IDX_T > 6 * 3600e3) {
@@ -459,8 +459,20 @@ async function botHook(request, env, ctx) {
     return new Response("ok");
   }
   const m = up.message;
-  // только личка: в канале и группах бот молчит; ответ — в фоне, Telegram ждать не должен
-  if (m && m.chat && m.chat.type === "private") ctx.waitUntil(botReply(env, m).catch(() => {}));
+  // только личка: в канале и группах бот молчит. Отвечаем, не отпуская запрос: в фоне (waitUntil) Cloudflare даёт
+  // лишь 30 секунд, а ИИ иногда пишет дольше. Telegram при долгом ответе повторяет запрос — повтор отсекаем по update_id.
+  if (!m || !m.chat || m.chat.type !== "private") return new Response("ok");
+  if (env.FEEDBACK) {
+    const k = "tg:upd:" + up.update_id;
+    if (await env.FEEDBACK.get(k)) return new Response("ok");
+    await env.FEEDBACK.put(k, "1", { expirationTtl: 3600 });
+  }
+  try {
+    await botReply(env, m);
+  } catch (e) {
+    if (env.FEEDBACK) await env.FEEDBACK.put("tg:err", new Date().toISOString() + " " + String(e && e.stack || e).slice(0, 800), { expirationTtl: 60 * 60 * 24 * 7 });
+    await tgApi(env, "sendMessage", { chat_id: m.chat.id, text: "Что-то сломалось при ответе 😕 Попробуй ещё раз через минуту." }).catch(() => {});
+  }
   return new Response("ok");
 }
 async function botReply(env, m) {
@@ -479,7 +491,16 @@ async function botReply(env, m) {
   const day = mskDay(), rk = "tg:rl:" + day + ":" + chat;
   const used = env.FEEDBACK ? Number(await env.FEEDBACK.get(rk)) || 0 : 0;
   if (used >= BOT_DAILY) return say("На сегодня лимит ответов исчерпан — приходи завтра. Пока можно поискать на сайте: https://motohelper.ru/");
-  tgApi(env, "sendChatAction", { chat_id: chat, action: "typing" }).catch(() => {});
+  const typing = () => tgApi(env, "sendChatAction", { chat_id: chat, action: "typing" }).catch(() => {});
+  typing();
+  const tick = setInterval(typing, 4500); // «печатает…» гаснет через 5 секунд — обновляем, пока ИИ пишет
+  try {
+    return await botAnswer(env, m, chat, say, text, hist, rk, used);
+  } finally {
+    clearInterval(tick);
+  }
+}
+async function botAnswer(env, m, chat, say, text, hist, rk, used) {
   let past = [];
   try {
     past = (env.FEEDBACK && JSON.parse((await env.FEEDBACK.get(hist)) || "[]")) || [];
