@@ -400,7 +400,8 @@ const latTokens = (s) => {
 };
 const tokW = (t) => (/\d/.test(t) && /[a-z]/.test(t) ? (t.length > 2 ? 3 : 2) : /^\d+$/.test(t) ? 1 : t.length >= 4 ? 1 : 0);
 const STOP = new Set("как что где когда почему зачем какой какая какое какие можно нужно надо есть если или для при без под над мотоцикл мотоцикла мотор мотора питбайк".split(" "));
-const ruStems = (s) => (String(s).toLowerCase().replace(/ё/g, "е").match(/[а-я]{4,}/g) || []).filter((w) => !STOP.has(w)).map((w) => w.slice(0, 5));
+// основа слова без окончания: «масло»/«масла» → «масл», «цепь»/«цепи» → «цеп» (так же в scripts/build-pages.js)
+const ruStems = (s) => (String(s).toLowerCase().replace(/ё/g, "е").match(/[а-я]{4,}/g) || []).filter((w) => !STOP.has(w)).map((w) => w.slice(0, Math.max(3, Math.min(5, w.length - 1))));
 async function botRefs(text) {
   const toks = [...new Set(latTokens(text))].filter((t) => tokW(t) > 0).slice(0, 40);
   const pre = [...new Set(toks.map((t) => t.slice(0, 2)))].slice(0, 12);
@@ -411,8 +412,10 @@ async function botRefs(text) {
   const buckets = {};
   await Promise.all([...new Set(ids.map((id) => Math.floor(id / 100)))].map(async (b) => (buckets[b] = (await idxFile("l" + b)) || [])));
   const out = ids.map((id) => buckets[Math.floor(id / 100)][id % 100]).filter(Boolean);
-  const st = new Set(ruStems(text));
-  (guides || []).map((g) => [g[1].filter((w) => st.has(w)).length, g[0]]).filter((x) => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3).forEach((x) => out.push(x[1]));
+  // основы совпадают, если одна начинается с другой: «сту» (стук) ↔ «стучи» (стучит)
+  const st = [...new Set(ruStems(text))], hit = (w) => st.some((q) => q.startsWith(w) || w.startsWith(q));
+  const gs = (guides || []).map((g) => [g[1].filter(hit).length, g[0]]).filter((x) => x[0] > 0).sort((a, b) => b[0] - a[0] || a[1].length - b[1].length);
+  gs.filter((x) => x[0] === gs[0][0]).slice(0, 3).forEach((x) => out.push(x[1])); // только лучшие совпадения
   return out;
 }
 const BOT_RULES = `Ты — ИИ-механик сайта MotoHelper (motohelper.ru) и отвечаешь в Telegram.
@@ -463,15 +466,15 @@ async function botHook(request, env, ctx) {
   ctx.waitUntil(botSafe(env, m, up.update_id));
   return new Response("ok");
 }
+const SEEN = new Set();
 async function botSafe(env, m, updateId) {
   const dbg = (step) => env.FEEDBACK && env.FEEDBACK.put("tg:dbg", new Date().toISOString() + " " + step, { expirationTtl: 60 * 60 * 24 * 7 }).catch(() => {});
   const fail = (text) => tgApi(env, "sendMessage", { chat_id: m.chat.id, text }).catch(() => {});
   try {
-    if (env.FEEDBACK) {
-      const k = "tg:upd:" + updateId; // Telegram иногда присылает одно сообщение дважды
-      if (await env.FEEDBACK.get(k)) return;
-      await env.FEEDBACK.put(k, "1", { expirationTtl: 3600 });
-    }
+    // Telegram повторяет сообщение, только если не получил «ok»; отвечаем сразу, так что хватает памяти сервера
+    if (SEEN.has(updateId)) return;
+    if (SEEN.size > 5000) SEEN.clear();
+    SEEN.add(updateId);
     const late = new Promise((r) => setTimeout(() => r("__late"), 25000));
     const r = await Promise.race([botReply(env, m, dbg), late]);
     if (r === "__late") {
@@ -486,33 +489,37 @@ async function botSafe(env, m, updateId) {
 async function botReply(env, m, dbg = () => {}) {
   const chat = m.chat.id, say = (text) => tgApi(env, "sendMessage", { chat_id: chat, text: String(text).slice(0, 4096), disable_web_page_preview: true });
   const text = String(m.text || m.caption || "").trim();
-  const hist = "tg:chat:" + chat;
+  // всё о собеседнике — в одной записи KV (на бесплатном тарифе 1000 записей в сутки):
+  // d — день, n — ответов за день, t — время последнего ответа, h — последние реплики (разговор забывается через 6 часов)
+  const key = "tg:u:" + chat, day = mskDay();
+  let st = null;
+  try {
+    st = env.FEEDBACK && JSON.parse((await env.FEEDBACK.get(key)) || "null");
+  } catch (e) {}
+  st = st || { d: day, n: 0, t: 0, h: [] };
+  if (st.d !== day) (st.d = day), (st.n = 0);
+  if (Date.now() - st.t > 6 * 3600e3) st.h = [];
   if (/^\/start/.test(text)) {
     if (env.FEEDBACK && !(await env.FEEDBACK.get("tg:owner"))) await env.FEEDBACK.put("tg:owner", String(chat));
     return say("Привет! Я ИИ-механик MotoHelper 🏍\n\nНапиши, что случилось и какой у тебя мотоцикл — например: «TT250 не заводится на холодную». Можно прислать фото детали или поломки.\n\nНовый разговор — /new\nСайт: https://motohelper.ru/");
   }
   if (/^\/new/.test(text)) {
-    if (env.FEEDBACK) await env.FEEDBACK.delete(hist);
+    if (env.FEEDBACK && st.h.length) await env.FEEDBACK.put(key, JSON.stringify(Object.assign(st, { h: [] })), { expirationTtl: 60 * 60 * 48 });
     return say("Начнём заново. Какой мотоцикл и что с ним?");
   }
   if (!text && !m.photo) return say("Я понимаю текст и фото. Опиши поломку словами 🙂");
-  const day = mskDay(), rk = "tg:rl:" + day + ":" + chat;
-  const used = env.FEEDBACK ? Number(await env.FEEDBACK.get(rk)) || 0 : 0;
-  if (used >= BOT_DAILY) return say("На сегодня лимит ответов исчерпан — приходи завтра. Пока можно поискать на сайте: https://motohelper.ru/");
+  if (st.n >= BOT_DAILY) return say("На сегодня лимит ответов исчерпан — приходи завтра. Пока можно поискать на сайте: https://motohelper.ru/");
   const typing = () => tgApi(env, "sendChatAction", { chat_id: chat, action: "typing" }).catch(() => {});
   typing();
   const tick = setInterval(typing, 4500); // «печатает…» гаснет через 5 секунд — обновляем, пока ИИ пишет
   try {
-    return await botAnswer(env, m, chat, say, text, hist, rk, used, dbg);
+    return await botAnswer(env, m, chat, say, text, key, st, dbg);
   } finally {
     clearInterval(tick);
   }
 }
-async function botAnswer(env, m, chat, say, text, hist, rk, used, dbg) {
-  let past = [];
-  try {
-    past = (env.FEEDBACK && JSON.parse((await env.FEEDBACK.get(hist)) || "[]")) || [];
-  } catch (e) {}
+async function botAnswer(env, m, chat, say, text, key, st, dbg) {
+  const past = st.h;
   const q = text || "Что на фото и что с этим делать?";
   const refs = await botRefs(past.filter((x) => x.role === "user").map((x) => x.content).concat(q).join(" "));
   const sys = BOT_RULES + "\n\nСправочник сайта по теме вопроса:\n" + (refs.length ? refs.join("\n") : "(ничего не нашлось — отвечай в общем и предложи https://motohelper.ru/)");
@@ -523,8 +530,8 @@ async function botAnswer(env, m, chat, say, text, hist, rk, used, dbg) {
   const reply = await collect(res);
   if (!reply) return say("ИИ сейчас перегружен — попробуй через пару минут.");
   if (env.FEEDBACK) {
-    await env.FEEDBACK.put(rk, String(used + 1), { expirationTtl: 60 * 60 * 48 });
-    await env.FEEDBACK.put(hist, JSON.stringify(past.concat([{ role: "user", content: q }, { role: "assistant", content: reply.slice(0, 1500) }]).slice(-8)), { expirationTtl: 60 * 60 * 6 });
+    const h = past.concat([{ role: "user", content: q }, { role: "assistant", content: reply.slice(0, 1500) }]).slice(-8);
+    await env.FEEDBACK.put(key, JSON.stringify({ d: st.d, n: st.n + 1, t: Date.now(), h }), { expirationTtl: 60 * 60 * 48 });
   }
   const shop = await shopLine(q, refs);
   const esc = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
