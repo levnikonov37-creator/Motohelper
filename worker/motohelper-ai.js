@@ -12,6 +12,8 @@
 //   привязка AI (Settings → Bindings → Workers AI, имя AI) — необязательно, последний запасной вариант.
 //   TELEGRAM_BOT_TOKEN — ключ бота (@BotFather), бот — админ канала: тогда сервер ведёт Telegram-канал по tg/posts.json;
 //   YANDEX_METRIKA_TOKEN — OAuth-ключ Метрики: по понедельникам отчёт о посещаемости владельцу (тому, кто написал боту /start).
+//   TG_HOOK_SECRET — любой пароль: с ним бот отвечает в личке как ИИ-механик (Telegram шлёт сообщения на <адрес>/tg-hook).
+//     Подключить один раз: открыть <адрес сервера>/?tg=setup.
 // Сайт сам узнаёт, что фото работают: GET на адрес сервера отвечает {"images": true}.
 
 const DEEPSEEK_MODEL = "deepseek-flash";
@@ -42,10 +44,12 @@ export default {
   // раз в день (Cloudflare → Triggers → Cron, 15:00 UTC = 18:00 МСК) — очередной пост в Telegram-канал
   // и по понедельникам в 06:00 UTC (09:00 МСК) — отчёт о посещаемости владельцу
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(event.cron === "0 6 * * 1" ? weeklyReport(env) : tgRun(env));
+    ctx.waitUntil(event.cron === "0 6 * * 1" ? weeklyReport(env) : daily(env));
   },
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
+    // сообщения боту в личку (Telegram шлёт их сюда с секретом из TG_HOOK_SECRET)
+    if (new URL(request.url).pathname === "/tg-hook") return botHook(request, env, ctx);
     if (!allowed(request.headers.get("Origin"))) return json({ error: "not_allowed" }, 403);
     if (request.method === "GET") {
       const u = new URL(request.url);
@@ -57,6 +61,7 @@ export default {
       if (u.searchParams.get("tg") === "run") return json(await tgRun(env));
       // отчёт уходит только владельцу бота, так что ручной запуск безопасен
       if (u.searchParams.get("tg") === "report") return json(await weeklyReport(env));
+      if (u.searchParams.get("tg") === "setup") return json(await botSetup(env, u.origin));
       if (u.searchParams.get("tg")) return json(await tgStatus(env));
       return json({ ok: true, images: !!(env.DEEPSEEK_API_KEY || env.GEMINI_API_KEY), feedback: !!env.FEEDBACK, deepseek: !!env.DEEPSEEK_API_KEY });
     }
@@ -72,6 +77,7 @@ export default {
     const messages = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
     const images = Array.isArray(body.images) ? body.images.slice(0, 2) : [];
     if (!messages.length) return json({ error: "no_messages" }, 400);
+    logQuestion(env, "site", messages);
 
     return answer(env, messages, images, request.headers.get("CF-Connecting-IP") || "?");
   },
@@ -251,7 +257,7 @@ async function saveFeedback(env, f) {
 async function listFeedback(env, token) {
   if (!env.FEEDBACK) return json({ ok: false, error: "no_kv" }, 501);
   if (!env.FEEDBACK_TOKEN || token !== env.FEEDBACK_TOKEN) return json({ ok: false, error: "token" }, 403);
-  const keys = (await env.FEEDBACK.list({ limit: 300 })).keys.map((k) => k.name).filter((k) => k.indexOf("rl:") !== 0).sort().reverse().slice(0, 200);
+  const keys = (await env.FEEDBACK.list({ limit: 300 })).keys.map((k) => k.name).filter((k) => /^\d{4}-/.test(k)).sort().reverse().slice(0, 200);
   const items = await Promise.all(keys.map(async (k) => JSON.parse((await env.FEEDBACK.get(k)) || "{}")));
   return json({ ok: true, count: items.length, items });
 }
@@ -364,4 +370,165 @@ async function weeklyReport(env) {
   } catch (e) {
     return { ok: false, error: e.message };
   }
+}
+
+/* --- Вопросы к ИИ: без IP и имён, 90 дней — раз в неделю по ним пишутся новые инструкции и чинится база --- */
+function logQuestion(env, src, messages) {
+  if (!env.FEEDBACK) return;
+  const users = messages.filter((m) => m.role === "user");
+  const q = String((users[users.length - 1] || {}).content || "").trim();
+  if (q.length < 4 || q.length > 3000) return;
+  const card = /КАРТОЧКА МОТОЦИКЛА ===\n([^\n]{0,120})/.exec(String((users[0] || {}).content || ""));
+  const t = new Date().toISOString();
+  return env.FEEDBACK.put("q:" + t + "-" + Math.random().toString(36).slice(2, 6), JSON.stringify({ t, src, bike: card ? card[1] : "", q: q.slice(0, 600) }), { expirationTtl: 60 * 60 * 24 * 90 }).catch(() => {});
+}
+
+/* --- Telegram-бот: отвечает в личке как ИИ-механик, с цифрами и ссылками из справочника сайта --- */
+const BOT_INDEX = "https://motohelper.ru/tg/bot-index.json";
+const BOT_DAILY = 30; // ответов в сутки одному человеку
+let BOT_IDX = null, BOT_IDX_T = 0;
+async function botIndex() {
+  if (!BOT_IDX || Date.now() - BOT_IDX_T > 6 * 3600e3) {
+    try {
+      const r = await fetch(BOT_INDEX, { cf: { cacheTtl: 3600 } });
+      if (r.ok) (BOT_IDX = await r.json()), (BOT_IDX_T = Date.now());
+    } catch (e) {}
+  }
+  return BOT_IDX;
+}
+const LAT = { а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya" };
+// слова латиницей + склейки соседних («тт 250» → tt250), чтобы «тт250» нашло Motoland TT250
+const latTokens = (s) => {
+  const w = (String(s).toLowerCase().split("").map((c) => (c in LAT ? LAT[c] : c)).join("").match(/[a-z0-9]+/g) || []);
+  return w.concat(w.slice(1).map((x, i) => w[i] + x));
+};
+const tokW = (t) => (/\d/.test(t) && /[a-z]/.test(t) ? (t.length > 2 ? 3 : 2) : /^\d+$/.test(t) ? 1 : t.length >= 4 ? 1 : 0);
+const STOP = new Set("как что где когда почему зачем какой какая какое какие можно нужно надо есть если или для при без под над мотоцикл мотоцикла мотор мотора питбайк".split(" "));
+const ruStems = (s) => (String(s).toLowerCase().replace(/ё/g, "е").match(/[а-я]{4,}/g) || []).filter((w) => !STOP.has(w)).map((w) => w.slice(0, 5));
+function botRefs(idx, text) {
+  if (!idx) return [];
+  const q = new Set(latTokens(text)), out = [];
+  const top = (list, score, n, min) =>
+    list.map((x) => [score(x), x]).filter((p) => p[0] >= min).sort((a, b) => b[0] - a[0]).slice(0, n).map((p) => p[1]);
+  const sc = (name) => latTokens(name).reduce((a, t) => a + (q.has(t) ? tokW(t) : 0), 0);
+  top(idx.m, (x) => sc(x[0]), 3, 3).forEach((x) => { const e = idx.e[x[2]]; out.push(x[0] + ": мотор " + (e ? e[2] : "—") + " — https://motohelper.ru/m/" + x[1] + "/"); });
+  top(idx.e, (x) => sc(x[0]), 2, 3).forEach((x) => out.push("Мотор " + x[2] + " — https://motohelper.ru/m/motor/" + x[1] + "/"));
+  const st = new Set(ruStems(text));
+  top(idx.g, (x) => ruStems(x[0]).filter((w) => st.has(w)).length, 3, 1).forEach((x) => out.push(x[0] + " — https://motohelper.ru/m/" + x[1] + "/"));
+  return out;
+}
+const BOT_RULES = `Ты — ИИ-механик сайта MotoHelper (motohelper.ru) и отвечаешь в Telegram.
+Правила:
+1. Только по-русски, коротко и по делу: до 12 строк. Простой текст без markdown: без звёздочек, решёток и таблиц; пункты — с «•».
+2. Тема — ремонт, обслуживание, выбор и езда на мотоциклах, питбайках, мопедах, скутерах, квадроциклах. На другое вежливо откажи одной фразой.
+3. Цифры (масло, объём, свечи, зазоры, моменты) бери только из справочника ниже. Если нужной цифры там нет — так и скажи и посоветуй мануал своей модели. Ничего не выдумывай.
+4. Если неясно, какой мотоцикл или мотор, — сначала коротко ответь в общем, потом спроси модель.
+5. Тормоза, руль, подвеска, течь топлива — предупреди, что ездить нельзя до ремонта.
+6. В конце, если в справочнике есть подходящая страница, дай одну-две ссылки строкой «Подробно: <ссылка>». Ссылки — только из справочника.`;
+async function collect(res) {
+  if ((res.headers.get("Content-Type") || "").indexOf("event-stream") < 0) return "";
+  let out = "";
+  for (const line of (await res.text()).split("\n")) {
+    const l = line.trim();
+    if (l.indexOf("data:") !== 0) continue;
+    try {
+      const j = JSON.parse(l.slice(5));
+      out += j.response || (j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content) || "";
+    } catch (e) {}
+  }
+  return out.replace(/\*\*/g, "").replace(/^#+\s*/gm, "").trim();
+}
+async function tgPhoto(env, photos) {
+  try {
+    const f = await tgApi(env, "getFile", { file_id: photos[photos.length - 1].file_id });
+    if (!f.ok || f.result.file_size > 4e6) return null;
+    const buf = new Uint8Array(await (await fetch("https://api.telegram.org/file/bot" + env.TELEGRAM_BOT_TOKEN + "/" + f.result.file_path)).arrayBuffer());
+    let bin = "";
+    for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+    return "data:image/jpeg;base64," + btoa(bin);
+  } catch (e) {
+    return null;
+  }
+}
+async function botHook(request, env, ctx) {
+  if (!env.TG_HOOK_SECRET || request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== env.TG_HOOK_SECRET) return new Response("forbidden", { status: 403 });
+  let up;
+  try {
+    up = await request.json();
+  } catch (e) {
+    return new Response("ok");
+  }
+  const m = up.message;
+  // только личка: в канале и группах бот молчит; ответ — в фоне, Telegram ждать не должен
+  if (m && m.chat && m.chat.type === "private") ctx.waitUntil(botReply(env, m).catch(() => {}));
+  return new Response("ok");
+}
+async function botReply(env, m) {
+  const chat = m.chat.id, say = (text) => tgApi(env, "sendMessage", { chat_id: chat, text: String(text).slice(0, 4096), disable_web_page_preview: true });
+  const text = String(m.text || m.caption || "").trim();
+  const hist = "tg:chat:" + chat;
+  if (/^\/start/.test(text)) {
+    if (env.FEEDBACK && !(await env.FEEDBACK.get("tg:owner"))) await env.FEEDBACK.put("tg:owner", String(chat));
+    return say("Привет! Я ИИ-механик MotoHelper 🏍\n\nНапиши, что случилось и какой у тебя мотоцикл — например: «TT250 не заводится на холодную». Можно прислать фото детали или поломки.\n\nНовый разговор — /new\nСайт: https://motohelper.ru/");
+  }
+  if (/^\/new/.test(text)) {
+    if (env.FEEDBACK) await env.FEEDBACK.delete(hist);
+    return say("Начнём заново. Какой мотоцикл и что с ним?");
+  }
+  if (!text && !m.photo) return say("Я понимаю текст и фото. Опиши поломку словами 🙂");
+  const day = mskDay(), rk = "tg:rl:" + day + ":" + chat;
+  const used = env.FEEDBACK ? Number(await env.FEEDBACK.get(rk)) || 0 : 0;
+  if (used >= BOT_DAILY) return say("На сегодня лимит ответов исчерпан — приходи завтра. Пока можно поискать на сайте: https://motohelper.ru/");
+  tgApi(env, "sendChatAction", { chat_id: chat, action: "typing" }).catch(() => {});
+  let past = [];
+  try {
+    past = (env.FEEDBACK && JSON.parse((await env.FEEDBACK.get(hist)) || "[]")) || [];
+  } catch (e) {}
+  const q = text || "Что на фото и что с этим делать?";
+  const refs = botRefs(await botIndex(), past.filter((x) => x.role === "user").map((x) => x.content).concat(q).join(" "));
+  const sys = BOT_RULES + "\n\nСправочник сайта по теме вопроса:\n" + (refs.length ? refs.join("\n") : "(ничего не нашлось — отвечай в общем и предложи https://motohelper.ru/)");
+  const images = m.photo ? [await tgPhoto(env, m.photo)].filter(Boolean) : [];
+  const msgs = [{ role: "system", content: sys }].concat(past, [{ role: "user", content: q }]);
+  logQuestion(env, "tg", [{ role: "user", content: q }]);
+  const res = await answer(env, msgs, images, "tg:" + chat);
+  const reply = await collect(res);
+  if (!reply) return say("ИИ сейчас перегружен — попробуй через пару минут.");
+  if (env.FEEDBACK) {
+    await env.FEEDBACK.put(rk, String(used + 1), { expirationTtl: 60 * 60 * 48 });
+    await env.FEEDBACK.put(hist, JSON.stringify(past.concat([{ role: "user", content: q }, { role: "assistant", content: reply.slice(0, 1500) }]).slice(-8)), { expirationTtl: 60 * 60 * 6 });
+  }
+  return say(reply);
+}
+async function botSetup(env, origin) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TG_HOOK_SECRET) return { ok: false, error: "нужны TELEGRAM_BOT_TOKEN и TG_HOOK_SECRET" };
+  const hook = await tgApi(env, "setWebhook", { url: origin + "/tg-hook", secret_token: env.TG_HOOK_SECRET, allowed_updates: ["message"], drop_pending_updates: true });
+  await tgApi(env, "setMyCommands", { commands: [{ command: "new", description: "Новый разговор" }, { command: "start", description: "Как пользоваться" }] });
+  await tgApi(env, "setMyName", { name: "MotoHelper — ИИ-механик" });
+  await tgApi(env, "setMyShortDescription", { short_description: "ИИ-механик: поломки, ТО и ремонт мотоциклов и питбайков. motohelper.ru" });
+  await tgApi(env, "setMyDescription", { description: "Опиши поломку и модель — ИИ-механик MotoHelper подскажет, что проверить, и даст цифры: масло, свечи, зазоры клапанов. Можно прислать фото." });
+  const me = await tgApi(env, "getMe", {});
+  return { ok: !!hook.ok, webhook: hook.description, bot: me.result && me.result.username };
+}
+async function tellOwner(env, text) {
+  try {
+    const chat = env.FEEDBACK && (await env.FEEDBACK.get("tg:owner"));
+    if (chat) await tgApi(env, "sendMessage", { chat_id: chat, text });
+  } catch (e) {}
+  return { ok: false, error: text };
+}
+
+/* раз в день: пост в канал и самопроверка ИИ; итог — в KV «health» (его читает ежедневная проверка по расписанию) */
+async function daily(env) {
+  const tg = await tgRun(env);
+  let ai;
+  try {
+    const r = await selfTest(env);
+    ai = await r.json();
+  } catch (e) {
+    ai = { ok: false, error: e.message };
+  }
+  const health = { t: new Date().toISOString(), tg: { ok: tg.ok, posted: tg.posted, error: tg.error }, ai: { ok: ai.ok, provider: ai.provider, error: ai.ok ? undefined : JSON.stringify(ai.error).slice(0, 300) } };
+  if (env.FEEDBACK) await env.FEEDBACK.put("health", JSON.stringify(health));
+  if (!tg.ok) await tellOwner(env, "⚠️ Пост в канал не вышел: " + tg.error);
+  return health;
 }
