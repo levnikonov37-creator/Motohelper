@@ -44,7 +44,7 @@ export default {
   // раз в день (Cloudflare → Triggers → Cron, 15:00 UTC = 18:00 МСК) — очередной пост в Telegram-канал
   // и по понедельникам в 06:00 UTC (09:00 МСК) — отчёт о посещаемости владельцу
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(event.cron === "0 6 * * 1" ? weeklyReport(env) : tgRun(env).then((r) => (r.ok ? r : tellOwner(env, "⚠️ Пост в канал не вышел: " + r.error))));
+    ctx.waitUntil(event.cron === "0 6 * * 1" ? weeklyReport(env) : daily(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -515,4 +515,20 @@ async function tellOwner(env, text) {
     if (chat) await tgApi(env, "sendMessage", { chat_id: chat, text });
   } catch (e) {}
   return { ok: false, error: text };
+}
+
+/* раз в день: пост в канал и самопроверка ИИ; итог — в KV «health» (его читает ежедневная проверка по расписанию) */
+async function daily(env) {
+  const tg = await tgRun(env);
+  let ai;
+  try {
+    const r = await selfTest(env);
+    ai = await r.json();
+  } catch (e) {
+    ai = { ok: false, error: e.message };
+  }
+  const health = { t: new Date().toISOString(), tg: { ok: tg.ok, posted: tg.posted, error: tg.error }, ai: { ok: ai.ok, provider: ai.provider, error: ai.ok ? undefined : JSON.stringify(ai.error).slice(0, 300) } };
+  if (env.FEEDBACK) await env.FEEDBACK.put("health", JSON.stringify(health));
+  if (!tg.ok) await tellOwner(env, "⚠️ Пост в канал не вышел: " + tg.error);
+  return health;
 }
