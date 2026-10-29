@@ -17174,7 +17174,12 @@ function AiChat({
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "ai",
     s: 26
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A"), /*#__PURE__*/React.createElement("p", null, "\u0417\u043D\u0430\u0435\u0442 \u0442\u0432\u043E\u0439 ", bike.brand, " ", bike.name, ": ", eng.code, ", ", efi ? "инжектор" : eng.carb, eng.installed.length ? ", доработки" : "", "."))), ready && /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A"), /*#__PURE__*/React.createElement("p", null, "\u0417\u043D\u0430\u0435\u0442 \u0442\u0432\u043E\u0439 ", bike.brand, " ", bike.name, ": ", eng.code, ", ", efi ? "инжектор" : eng.carb, eng.installed.length ? ", доработки" : "", "."), /*#__PURE__*/React.createElement("a", {
+    className: "ai-tg",
+    href: "https://t.me/motohelper_post_bot",
+    target: "_blank",
+    rel: "noopener"
+  }, "\u041C\u0435\u0445\u0430\u043D\u0438\u043A \u0435\u0441\u0442\u044C \u0438 \u0432 Telegram \u2192"))), ready && /*#__PURE__*/React.createElement("div", {
     className: "ai-tools"
   }, ai.provider === "claude" && /*#__PURE__*/React.createElement("div", {
     className: "seg sm",

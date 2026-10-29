@@ -348,6 +348,7 @@ async function weeklyReport(env) {
     const n = (x) => Math.round(x || 0).toLocaleString("ru-RU");
     const delta = (a, b) => (!b ? "" : " (" + (a >= b ? "+" : "") + Math.round(((a - b) / b) * 100) + "% к прошлой неделе)");
     const min = Math.floor((t[3] || 0) / 60), sec = Math.round((t[3] || 0) % 60);
+    const qs = await questionStats(env).catch(() => null);
     let subs = null;
     try {
       const posts = await fetch(TG_POSTS).then((r) => r.json());
@@ -362,6 +363,7 @@ async function weeklyReport(env) {
       "📄 Просмотров страниц: " + n(t[2]),
       "⏱ В среднем на сайте: " + min + " мин " + sec + " с",
       subs != null ? "📣 Подписчиков канала: " + n(subs) : "",
+      qs ? "🤖 Вопросов ИИ-механику: " + n(qs.total) + " (сайт " + n(qs.site) + ", Telegram " + n(qs.tg) + ")" + (qs.top.length ? "\nО чём спрашивали: " + qs.top.join(", ") : "") : "",
       "",
       (src.data || []).length ? "Откуда пришли:\n" + src.data.map((d) => "• " + d.dimensions[0].name + " — " + n(d.metrics[0])).join("\n") : "",
       "",
@@ -389,7 +391,7 @@ function logQuestion(env, src, messages) {
 const BOT_IDX = "https://motohelper.ru/tg/idx/";
 const BOT_DAILY = 100; // ответов в сутки одному человеку
 // справочник лежит на сайте мелкими файлами (см. scripts/build-pages.js): читаем только нужные, кэш Cloudflare — час
-const idxFile = (name) => fetch(BOT_IDX + name + ".json", { cf: { cacheTtl: 3600, cacheEverything: true } }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+const idxFile = (name) => fetch(BOT_IDX + name + ".json", { cf: { cacheTtlByStatus: { "200-299": 3600, "404": 0, "500-599": 0 }, cacheEverything: true } }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 const LAT = { а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya" };
 // слова латиницей + склейки соседних («тт 250» → tt250), чтобы «тт250» нашло Motoland TT250
 const latTokens = (s) => {
@@ -524,7 +526,11 @@ async function botAnswer(env, m, chat, say, text, hist, rk, used, dbg) {
     await env.FEEDBACK.put(rk, String(used + 1), { expirationTtl: 60 * 60 * 48 });
     await env.FEEDBACK.put(hist, JSON.stringify(past.concat([{ role: "user", content: q }, { role: "assistant", content: reply.slice(0, 1500) }]).slice(-8)), { expirationTtl: 60 * 60 * 6 });
   }
-  const sent = await say(reply);
+  const shop = await shopLine(q, refs);
+  const esc = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // ссылки на магазины — короткими словами (HTML), а не длинными адресами; если Telegram не принял HTML — шлём текстом
+  let sent = shop ? await tgApi(env, "sendMessage", { chat_id: chat, text: (esc(reply) + "\n\n" + shop).slice(0, 4096), parse_mode: "HTML", disable_web_page_preview: true }) : null;
+  if (!sent || !sent.ok) sent = await say(reply);
   if (!sent || !sent.ok) dbg("Telegram не принял ответ: " + JSON.stringify(sent).slice(0, 200));
   return sent;
 }
@@ -571,8 +577,55 @@ async function botDry(env, q) {
     log.push("ИИ " + res.headers.get("x-mh-provider") + " за " + (Date.now() - t0) + " мс");
     const reply = await Promise.race([collect(res), new Promise((r) => setTimeout(() => r("__timeout"), 45000))]);
     log.push((reply === "__timeout" ? "ТАЙМАУТ чтения ответа" : "ответ") + " за " + (Date.now() - t0) + " мс");
-    return { ok: !!reply, log, refs, reply };
+    return { ok: !!reply, log, refs, reply, shop: await shopLine(q, refs) };
   } catch (e) {
     return { ok: false, log, error: String(e && e.stack || e) };
   }
+}
+
+/* «Где купить»: если в вопросе есть деталь — ссылки на поиск в магазинах (через партнёрку из ai-config.json, когда она есть).
+   Расходники ищем как «<деталь> мото», остальное — с кодом мотора, иначе магазин выдаёт что попало. */
+const PARTS = [[/свеч/, "свеча зажигания", 1], [/масл/, "масло 10W-40 мото", 1], [/аккумулятор|акб/, "аккумулятор мото", 1], [/покрышк|резин|шин[аыу]/, "покрышка мото", 1], [/камер/, "камера мото", 1],
+  [/цеп[ьи] грм|грм|натяжител/, "цепь ГРМ", 0], [/цеп[ьи]/, "цепь мото", 1], [/звезд/, "звезда", 0], [/колодк/, "тормозные колодки", 0], [/воздушн.*фильтр|фильтр.*воздух|нулев/, "воздушный фильтр", 0], [/масл.*фильтр|фильтр.*масл/, "масляный фильтр", 0],
+  [/карбюратор|карб\b/, "карбюратор", 0], [/поршн|поршен/, "поршень", 0], [/кольц/, "поршневые кольца", 0], [/сцеплен/, "диски сцепления", 0], [/прокладк/, "прокладки", 0],
+  [/сальник/, "сальники", 0], [/трос/, "трос", 0], [/катушк/, "катушка зажигания", 0], [/коммутатор|cdi/, "коммутатор CDI", 0], [/стартер/, "стартер", 0], [/реле/, "реле стартера", 0], [/генератор|статор/, "статор генератора", 0], [/подшипник/, "подшипник", 0]];
+let SITE_CFG = null;
+async function shopLine(q, refs) {
+  const t = String(q).toLowerCase().replace(/ё/g, "е");
+  const p = PARTS.find((x) => x[0].test(t));
+  if (!p) return "";
+  const r0 = refs[0] || "";
+  // код мотора из справочника: «мотор ZS172FMM 249 см³» → 172FMM (продавцы пишут без ZS)
+  const code = ((/мотор (.+?) \d+ см³/.exec(r0) || [])[1] || "").replace(/^ZS\s*/i, "").replace(/\s*\(.*$/, "");
+  const spark = ((/свеча ([A-Z0-9]+)/.exec(r0) || [])[1]) || "";
+  const oil = ((/масло (\d+W-\d+)/.exec(r0) || [])[1]) || "";
+  const query = /свеч/.test(p[1]) && spark ? "свеча " + spark : /масло/.test(p[1]) && oil ? "масло " + oil + " мото" : p[2] || !code ? p[1] : p[1] + " " + code;
+  if (!SITE_CFG) SITE_CFG = await fetch("https://motohelper.ru/ai-config.json", { cf: { cacheTtl: 3600 } }).then((r) => r.json()).catch(() => ({}));
+  const href = (name, base) => {
+    const url = base + encodeURIComponent(query), a = SITE_CFG.aff && SITE_CFG.aff[name];
+    return typeof a === "string" && /^https:\/\//.test(a) ? (a.indexOf("{url}") >= 0 ? a.replace("{url}", encodeURIComponent(url)) : a + encodeURIComponent(url)) : url;
+  };
+  const link = (name, base) => '<a href="' + href(name, base).replace(/&/g, "&amp;").replace(/"/g, "&quot;") + '">' + name + "</a>";
+  return "🛒 " + query.replace(/&/g, "&amp;").replace(/</g, "&lt;") + ": " + [link("Ozon", "https://www.ozon.ru/search/?text="), link("Авито", "https://www.avito.ru/rossiya?q="), link("WB", "https://www.wildberries.ru/catalog/0/search.aspx?search=")].join(" · ");
+}
+
+/* сколько вопросов задали ИИ за 7 дней и о чём — для понедельничного отчёта */
+const TOPICS = [["не заводится", /не завод|не запуск/], ["глохнет", /глохн|глохет/], ["клапаны", /клапан/], ["масло", /масл/], ["свечи", /свеч/], ["карбюратор и жиклёры", /карб|жикл/],
+  ["цепь и звёзды", /цеп|звезд/], ["дым", /дым/], ["перегрев", /гре[её]тся|перегр|кипит/], ["стук и шумы", /стук|шум|гремит/], ["тормоза", /тормоз|колодк/], ["электрика", /аккум|зарядк|провод|реле|генератор|катушк|искр/],
+  ["сцепление", /сцеплен/], ["тюнинг", /тюнинг|прямоток|мощност|инжектор/], ["выбор мотоцикла", /какой (выбрать|купить)|что (выбрать|купить)|посовет/]];
+async function questionStats(env) {
+  if (!env.FEEDBACK) return null;
+  const since = new Date(Date.now() - 7 * 864e5).toISOString();
+  let keys = [], cursor;
+  do {
+    const r = await env.FEEDBACK.list({ prefix: "q:", cursor, limit: 1000 });
+    keys = keys.concat(r.keys.map((k) => k.name).filter((k) => k.slice(2) >= since));
+    cursor = r.list_complete ? null : r.cursor;
+  } while (cursor && keys.length < 5000);
+  const vals = await Promise.all(keys.slice(-300).map(async (k) => { try { return JSON.parse((await env.FEEDBACK.get(k)) || "{}"); } catch (e) { return {}; } }));
+  const cnt = {};
+  vals.forEach((v) => { const q = String(v.q || "").toLowerCase(); TOPICS.forEach(([name, re]) => re.test(q) && (cnt[name] = (cnt[name] || 0) + 1)); });
+  const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]).slice(0, 5).map((k) => k + " — " + cnt[k]);
+  const tg = vals.filter((v) => v.src === "tg").length;
+  return { total: keys.length, tg: Math.round((tg / (vals.length || 1)) * keys.length), site: keys.length - Math.round((tg / (vals.length || 1)) * keys.length), top };
 }

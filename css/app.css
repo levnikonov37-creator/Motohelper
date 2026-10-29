@@ -2477,3 +2477,4 @@ code { background: #141414 !important; color: #fff; }
   .install-card h3, .install-card b { font-size: 15px !important; }
   .install-card p { font-size: 13px !important; margin: 2px 0 8px !important; }
 }
+.ai-tg { display: inline-block; margin-top: 4px; font-size: 13px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
