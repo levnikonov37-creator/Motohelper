@@ -2431,3 +2431,49 @@ code { background: #141414 !important; color: #fff; }
 
 /* рекламный блок РСЯ (появляется, только если в ai-config.json задан rsya.blockId) */
 .ad-slot { margin: 14px 0; min-height: 90px; border-radius: 8px; overflow: hidden; }
+
+/* v61 «Компактно»: меньше воздуха и крупных элементов, мелкие метки на схеме мотора */
+.pin-pulse, .pin-core { display: none !important; }
+.pin-dot { r: 6 !important; opacity: .75; }
+.pin.on .pin-dot { r: 9 !important; opacity: 1; }
+.pin:hover .pin-dot { opacity: 1; }
+.panel { padding: 14px !important; }
+.panel h2 { font-size: 19px !important; margin-bottom: 8px !important; }
+.act > .ico { width: 34px !important; height: 34px !important; padding: 7px !important; }
+@media (max-width: 600px) {
+  .panel { padding: 12px !important; margin: 10px 0 !important; }
+  .panel h2 { font-size: 17px !important; }
+  /* главная */
+  .hero .home-title { font-size: 23px !important; margin: 6px 0 6px !important; }
+  .hero-bike svg { max-height: 110px !important; }
+  .hero-bike { margin: 0 auto 4px !important; }
+  .hero-cta .btn { min-height: 38px !important; padding: 6px 12px !important; font-size: 14px !important; }
+  .site-search input { min-height: 40px !important; font-size: 15px !important; }
+  .actions4.home-acts { gap: 8px !important; }
+  .actions4.home-acts .act { display: grid !important; grid-template-columns: 30px 1fr !important; column-gap: 10px !important; row-gap: 0 !important; align-items: center !important; padding: 10px !important; }
+  .actions4.home-acts .act > .ico { grid-row: 1 / span 2 !important; width: 30px !important; height: 30px !important; padding: 6px !important; }
+  .actions4.home-acts .act b { font-size: 14px !important; }
+  .actions4.home-acts .act span { font-size: 12px !important; }
+  .season-home, .catalog-card { padding: 10px 12px !important; }
+  .cc-ico { width: 34px !important; height: 34px !important; }
+  /* страница модели */
+  .phero-stats .hs { padding: 6px 8px !important; min-width: 88px !important; }
+  .phero-stats .hs b { font-size: 16px !important; }
+  .phero-stats .hs span { font-size: 11px !important; }
+  .phero-act .btn { min-height: 36px !important; padding: 5px 10px !important; font-size: 13px !important; }
+  .tabs button { min-height: 38px !important; font-size: 14px !important; }
+  .stage-top { padding: 12px 12px 0 !important; }
+  .start-btn { font-size: 15px !important; padding: 4px 14px 4px 4px !important; }
+  .chip, .symchip, .seg button, .btn, .ctl, .schip { min-height: 36px !important; }
+  .ctl { padding: 6px 10px !important; font-size: 13px !important; }
+  .schip { padding: 4px 10px !important; font-size: 12px !important; }
+  .vmax { padding: 10px 12px !important; gap: 10px !important; }
+  .vmax-n { width: 64px !important; height: 64px !important; border-width: 3px !important; }
+  .vmax-n b { font-size: 22px !important; }
+  dl.specs > div { padding: 6px 10px !important; min-height: 0 !important; }
+  .stage-ctrl .ctl { white-space: nowrap; }
+  .install-card { padding: 12px !important; }
+  .install-card .ic-ico { width: 40px !important; height: 40px !important; font-size: 15px !important; }
+  .install-card h3, .install-card b { font-size: 15px !important; }
+  .install-card p { font-size: 13px !important; margin: 2px 0 8px !important; }
+}

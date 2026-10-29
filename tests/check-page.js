@@ -53,7 +53,7 @@ const server = http.createServer((req, res) => {
     if (counts.bikes < 1000) errors.push("Слишком мало моделей: " + counts.bikes);
 
     // Поиск в окне «Найди свой мотоцикл»
-    await page.getByText("Выбрать", { exact: true }).first().click({ timeout: 10000 });
+    await page.locator(".bike-chip").first().click({ timeout: 10000 });
     const input = page.getByPlaceholder(/Марка, модель или мотор/);
     // Поиск по мотору: «174» → подсказка ZS174MN-5 → все модели с ним; вкладка «Моторы» понимает русскую раскладку
     await input.fill("174");
