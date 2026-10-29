@@ -110,6 +110,7 @@ a{color:#fff}
 .steps li::before{counter-increment:st;content:counter(st);position:absolute;left:12px;top:11px;width:26px;height:26px;display:grid;place-items:center;background:#fff;color:#000;font:400 14px var(--display);border-radius:3px}
 .steps .no{display:block;margin-top:8px;padding:8px 10px;border-left:2px solid #F43F5E;background:rgba(244,63,94,.07);font-size:15px}.steps .no b{display:block}
 .steps .hint{display:block;color:var(--muted);font-size:14px;margin-top:4px}
+.steps strong{font-weight:700;color:#fff}.steps .opts{margin:8px 0 0;padding-left:18px;display:grid;gap:6px}.steps .opts li{padding:0;border:0;background:none;font-size:15px}.steps .opts li::before{content:none}
 .ph{color:#fff;font-weight:600;border-bottom:1px dashed rgba(255,255,255,.5)}
 .tblw{overflow-x:auto;margin:0 0 8px;border:1px solid rgba(255,255,255,.14);border-radius:4px}.tbl{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
 .tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.1);text-align:left;vertical-align:top}.tbl th{font:600 12px var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:#0A0A0A}
@@ -117,7 +118,7 @@ a{color:#fff}
 ul.plain{margin:0;padding-left:20px}ul.plain li{margin:3px 0}
 .hero h1{padding-right:52px}
 .ad{margin:22px 0 0;min-height:90px}
-.tbl.cmp{min-width:0;table-layout:fixed}.tbl.cmp th:first-child,.tbl.cmp td:first-child{width:30%;color:var(--muted)}.tbl.cmp td{overflow-wrap:anywhere}
+.tbl.cmp{min-width:0;table-layout:fixed}.tbl:not(.cmp) td:first-child{white-space:nowrap}.tbl.cmp th:first-child,.tbl.cmp td:first-child{width:30%;color:var(--muted)}.tbl.cmp td{overflow-wrap:anywhere}
 .faq{display:grid;gap:8px}.faq details{border:1px solid rgba(255,255,255,.14);border-radius:4px;background:#0E0E0E}
 .faq summary{cursor:pointer;padding:12px 14px;font:600 16px var(--cond);list-style:none}.faq summary::-webkit-details-marker{display:none}
 .faq summary::after{content:"+";float:right;color:var(--muted)}.faq details[open] summary::after{content:"–"}.faq p{margin:0;padding:0 14px 12px;color:#D0D0D0}
@@ -170,7 +171,7 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky }) {
 <nav class="crumbs">${crumbs.map((c) => (c[1] ? `<a href="${c[1]}">${esc(c[0])}</a>` : esc(c[0]))).join(" › ")}</nav>
 ${body}
 ${AD}
-<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/">Приложение</a></footer>
+<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/">Приложение</a> · <a href="https://t.me/motohelper_post_bot">ИИ-механик в Telegram</a></footer>
 </main>
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}
 ${js ? `<script>${js}</script>` : ""}
@@ -222,6 +223,19 @@ engIds.forEach((id) => { let x = slugify(ENGINES[id].code), i = 2; const b0 = x;
 const dupCode = {};
 engIds.forEach((id) => (dupCode[ENGINES[id].code] = (dupCode[ENGINES[id].code] || 0) + 1));
 const popular = engIds.slice().sort((a, b) => bikesOf[b].length - bikesOf[a].length);
+const CMP_BRANDS = ["Motoland", "Kayo", "Regulmoto", "BSE", "Avantis", "Progasi", "Racer", "Irbis", "Stels", "Sharmax", "Apollo", "JHL", "Kove", "CFMOTO"];
+const FLAGSHIP = ["Motoland TT250", "Kayo T2 250", "Regulmoto Sport-003 PR", "Avantis Enduro 250", "Progasi Super Max 250 RR", "BSE Z8", "Kayo K1 300", "Regulmoto Athlete 300", "Avantis A7 NEW", "Motoland TT125", "BSE PH10 125"];
+/* «модель + поломка»: /m/<модель>/<поломка>/ — шаги проверки с цифрами именно этого мотора (свеча, зазоры, ХХ).
+   Только популярные модели: флагманы и по 4 базовые модели каждой марки из CMP_BRANDS на 30 самых частых моторах,
+   иначе страниц с одинаковым мотором было бы слишком много. */
+const PROB = { start: "{M} не заводится", cold: "{M} глохнет на холодную", hot: "{M} глохнет на горячую", idle: "{M} не держит холостые", smoke: "{M} дымит",
+  knock: "Стучит мотор {M}", power: "{M} не тянет", overheat: "{M} перегревается", "stall-gear": "{M} глохнет при включении передачи", charge: "На {M} садится аккумулятор" };
+const probBikes = new Set(BIKES.filter((b) => FLAGSHIP.indexOf(b.brand + " " + b.name) >= 0));
+const topE = new Set(popular.slice(0, 30));
+CMP_BRANDS.forEach((br) => BIKES.filter((b) => b.brand === br && topE.has(b.versions[0].engine)).sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name)).slice(0, 4).forEach((b) => probBikes.add(b)));
+// первая буква строчная, остальное как есть: «Слишком жирная смесь 2T» → «слишком жирная смесь 2T»
+const lc1 = (t) => (/^[А-ЯЁ][а-яё]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t);
+const probsFor = (b) => { const e = ENGINES[b.versions[0].engine]; return DIAG.filter((d) => PROB[d.id] && (!d.only || d.only.some((g) => (e.groups || []).indexOf(g) >= 0))); };
 const engTitle = (e) => e.code + (e.name && e.name.indexOf(e.code) < 0 ? " (" + e.name + ")" : "");
 /* значения в шагах ({valveIn}, {spark}…) свои у каждого мотора: в тексте — название, ниже — таблица по популярным моторам */
 const PH = { valveIn: "зазор впуска", valveEx: "зазор выпуска", spark: "свеча", gap: "зазор свечи", idle: "обороты ХХ", jetMain: "главный жиклёр", jetPilot: "жиклёр ХХ",
@@ -277,6 +291,7 @@ BIKES.forEach((b) => {
 <p class="lead">Мотор ${esc(e0.code)}${e0.cc ? ", " + e0.cc + " см³" : ""}${e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с" : ""}. Какое масло и сколько, свеча, зазоры клапанов, жиклёры и слабые места${b.versions.length > 1 ? " — по поколениям" : ""}.</p>
 ${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}</section>
 ${vers}
+${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>` : ""}
 ${faqHtml}
 ${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
   const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${e0.oil || "—"}${e0.oilVol ? " " + e0.oilVol : ""}, свеча ${e0.spark || "—"}, зазоры клапанов ${e0.valveIn || "—"} / ${e0.valveEx || "—"}. Слабые места и ремонт.`;
@@ -360,6 +375,7 @@ ${(g.tools || []).length ? `<h2>Понадобится</h2><ul class="plain">${g
 <h2>Пошагово</h2><ol class="steps">${g.steps.map((x) => `<li>${phText(x, vt.keys)}</li>`).join("")}</ol>
 ${vt.html}
 <a class="cta" href="/#g=${g.id}">Открыть с цифрами для своего мотоцикла →</a>
+<p>Не нашёл ответ? Опиши поломку <a href="https://t.me/motohelper_post_bot">ИИ-механику в Telegram</a> — подскажет по твоей модели.</p>
 <h2>Другие инструкции</h2><div class="chips">${GUIDES.filter((x) => x !== g && x.area && x.area === g.area).slice(0, 12).concat(GUIDES.filter((x) => KEY_GUIDES.indexOf(x.id) >= 0 && x !== g)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 16).map((x) => `<a class="chip" href="/m/remont/${x.id}/">${esc(x.title)}</a>`).join("")}<a class="chip" href="/m/remont/">Все инструкции →</a></div>`;
   const desc = (g.title + ": " + plain.slice(0, 3).join(" ")).slice(0, 230).replace(/\s+\S*$/, "") + "…";
   const ld = { "@context": "https://schema.org", "@type": "HowTo", name: g.title, inLanguage: "ru", url: canon, step: plain.map((t, i) => ({ "@type": "HowToStep", position: i + 1, text: t })) };
@@ -379,24 +395,64 @@ DIAG.forEach((d) => {
   const canon = SITE + "m/polomka/" + d.id + "/";
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Неисправности", "/m/polomka/"], [d.title, null]];
   const texts = [];
-  d.steps.forEach((st) => [st.q, st.hint, st.efiQ, st.onNo && st.onNo.action, st.onYes && st.onYes.action].forEach((t) => t && texts.push(t)));
+  d.steps.forEach((st) => [st.q, st.hint, st.efiQ, st.onNo && st.onNo.action, st.onYes && st.onYes.action].concat((st.options || []).map((o) => o.result.action)).forEach((t) => t && texts.push(t)));
   const okE = (e) => !d.only || d.only.some((x) => (e.groups || []).indexOf(x) >= 0);
   const vt = valuesTable(phKeys(texts), okE), ph = (t) => phText(t, vt.keys);
   const res = (r, word) => r && typeof r === "object" ? `<span class="no"><b>${esc(word)} → ${esc(r.result || "")}</b>${ph(r.action || "")}</span>` : "";
-  const steps = d.steps.map((st) => `<li>${ph(st.q)}${st.efiQ ? `<span class="hint">На инжекторе: ${ph(st.efiQ)}</span>` : ""}${st.hint ? `<span class="hint">${ph(st.hint)}</span>` : ""}${res(st.onYes, st.yes || "Да")}${res(st.onNo, st.no || "Нет")}</li>`).join("");
-  const causes = d.steps.flatMap((st) => [st.onYes, st.onNo]).filter((r) => r && typeof r === "object" && r.result).map((r) => r.result);
-  const body = `<section class="hero"><div class="kick">Неисправность</div><h1>${esc(d.title)}</h1><p class="lead">Проверяй по порядку — от простого к сложному. ${causes.length ? "Частые причины: " + esc(causes.slice(0, 5).join(", ").toLowerCase()) + "." : ""}</p></section>
+  const opts = (st) => (st.options ? `<ul class="opts">${st.options.map((o) => `<li><b>${esc(o.text)} → ${esc(o.result.result)}.</b> ${ph(o.result.action || "")}</li>`).join("")}</ul>` : "");
+  const steps = d.steps.map((st) => `<li>${ph(st.q)}${st.efiQ ? `<span class="hint">На инжекторе: ${ph(st.efiQ)}</span>` : ""}${st.hint ? `<span class="hint">${ph(st.hint)}</span>` : ""}${res(st.onYes, st.yes || "Да")}${res(st.onNo, st.no || "Нет")}${opts(st)}</li>`).join("");
+  const causes = d.steps.flatMap((st) => [st.onYes, st.onNo].concat((st.options || []).map((o) => o.result))).filter((r) => r && typeof r === "object" && r.result).map((r) => lc1(r.result));
+  const body = `<section class="hero"><div class="kick">Неисправность</div><h1>${esc(d.title)}</h1><p class="lead">Проверяй по порядку — от простого к сложному. ${causes.length ? "Частые причины: " + esc(causes.slice(0, 5).join(", ")) + "." : ""}</p></section>
 <h2>Что проверить</h2><ol class="steps">${steps}</ol>
 ${vt.html}
 <a class="cta" href="/#d=${d.id}">Пройти проверку в MotoHelper под свой мотоцикл →</a>
+<p>Не нашёл ответ? Опиши поломку <a href="https://t.me/motohelper_post_bot">ИИ-механику в Telegram</a> — подскажет по твоей модели.</p>
 <h2>Другие неисправности</h2><div class="chips">${DIAG.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/polomka/${x.id}/">${esc(x.title)}</a>`).join("")}</div>`;
-  const desc = `${d.title} — мотоцикл, питбайк, скутер: что проверить по шагам${causes.length ? " (" + causes.slice(0, 4).join(", ").toLowerCase() + ")" : ""} и как исправить.`;
+  const desc = `${d.title} — мотоцикл, питбайк, скутер: что проверить по шагам${causes.length ? " (" + causes.slice(0, 4).join(", ") + ")" : ""} и как исправить.`;
   const faq = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: d.steps.filter((st) => st.onNo && st.onNo.result || st.onYes && st.onYes.result).slice(0, 8).map((st) => {
     const r = typeof st.onNo === "object" ? st.onNo : st.onYes;
     const pl = (t) => String(t).replace(/\{(\w+)\}/g, (m, k) => vt.keys.indexOf(k) >= 0 ? PHI[k] || "по таблице" : "по мануалу");
     return { "@type": "Question", name: pl(st.q), acceptedAnswer: { "@type": "Answer", text: pl(r.result + ". " + r.action) } };
   }) };
   files.set("m/polomka/" + d.id + "/index.html", page({ title: `${d.title}: причины и что проверить — мотоцикл, питбайк | MotoHelper`, desc, canon, crumbs, body, sticky: "/#d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
+});
+
+/* «модель + поломка» (см. PROB выше) */
+const probPages = [];
+probBikes.forEach((b) => {
+  const slug = bikeSlug.get(b), full = b.brand + " " + b.name, e = ENGINES[b.versions[0].engine], efi = (e.groups || []).indexOf("efi") >= 0;
+  const val = (k) => (k === "name" ? e.code : e[k] && e[k] !== "—" ? e[k] : null);
+  const fillT = (t) => String(t).replace(/\{(\w+)\}/g, (m, k) => val(k) || "по мануалу");
+  const fill = (t) => esc(t).replace(/\{(\w+)\}/g, (m, k) => (val(k) ? `<strong>${esc(val(k))}</strong>` : "по мануалу"));
+  // варианты ответа про 2T не показываем на 4T-моторе и наоборот
+  const fitOpt = (o) => (e.stroke === "2T" ? !/\b4T\b/.test(o.text) : !/\b2T\b/.test(o.text));
+  const act = (r) => (r.skip2t && e.stroke === "2T" ? "Для 2T: износ поршня и колец, проверь лепестковый клапан и прокладки картера." : r.action || "");
+  const res = (r, word) => (r && typeof r === "object" ? `<span class="no"><b>${esc(word)} → ${esc(r.result || "")}</b>${fill(act(r))}</span>` : "");
+  const list = probsFor(b);
+  const nums = [["Свеча", val("spark") && val("spark") + (val("gap") ? ", зазор " + val("gap") : "")], ["Клапаны (на холодную)", val("valveIn") && "впуск " + val("valveIn") + ", выпуск " + (val("valveEx") || "—")],
+    ["Масло", val("oil") && val("oil") + (val("oilVol") ? ", " + val("oilVol") : "")], ["Обороты ХХ", val("idle")], ["Компрессия", val("compression")], [efi ? "Питание" : "Карбюратор", efi ? "инжектор" : val("carb")], ["Главный жиклёр", !efi && val("jetMain")]].filter((x) => x[1]);
+  list.forEach((d) => {
+    const phrase = PROB[d.id].replace("{M}", full), canon = SITE + "m/" + slug + "/" + d.id + "/";
+    const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], [b.brand, "/m/" + brandSlug[b.brand] + "/"], [b.name, "/m/" + slug + "/"], [d.title, null]];
+    const steps = d.steps.map((st) => `<li>${fill(efi && st.efiQ ? st.efiQ : st.q)}${st.hint ? `<span class="hint">${fill(st.hint)}</span>` : ""}${res(st.onYes, st.yes || "Да")}${res(st.onNo, st.no || "Нет")}${st.options ? `<ul class="opts">${st.options.filter(fitOpt).map((o) => `<li><b>${esc(o.text)} → ${esc(o.result.result)}.</b> ${fill(act(o.result))}</li>`).join("")}</ul>` : ""}</li>`).join("");
+    const causes = d.steps.flatMap((st) => [st.onYes, st.onNo].concat((st.options || []).filter(fitOpt).map((o) => o.result))).filter((r) => r && typeof r === "object" && r.result).map((r) => lc1(r.result));
+    const iss = (e.issues || []).length ? `<h2>Слабые места мотора ${esc(e.code)}</h2><ul class="iss">${e.issues.map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
+    const body = `<section class="hero"><div class="kick">${esc(b.brand)} · неисправность</div><h1>${esc(phrase)}</h1><p class="lead">Проверка по шагам для мотора ${esc(e.code)}${e.cc ? " (" + e.cc + " см³)" : ""} — с его цифрами. Иди по порядку, от простого к сложному.${causes.length ? " Частые причины: " + esc(causes.slice(0, 4).join(", ")) + "." : ""}</p></section>
+${nums.length ? `<h2>Цифры ${esc(e.code)}</h2><div class="tiles">${nums.map((x) => `<div class="tile"><small>${esc(x[0])}</small><b>${esc(x[1])}</b></div>`).join("")}</div>` : ""}
+<h2>Что проверить</h2><ol class="steps">${steps}</ol>
+${iss}
+<a class="cta" href="${appLink(b, 0)}&d=${d.id}">Пройти проверку в MotoHelper для ${esc(full)} →</a>
+<p>Не нашёл ответ? Опиши поломку <a href="https://t.me/motohelper_post_bot">ИИ-механику в Telegram</a> — он знает ${esc(full)}.</p>
+<h2>Другие поломки ${esc(full)}</h2><div class="chips">${list.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/${slug}/${x.id}/">${esc(x.title)}</a>`).join("")}<a class="chip" href="/m/${slug}/">Всё о ${esc(b.name)} →</a></div>
+<p><a href="/m/polomka/${d.id}/">${esc(d.title)} — общая проверка для любого мотоцикла</a></p>`;
+    const desc = `${phrase}: что проверить по шагам — свеча ${val("spark") || "по мануалу"}${val("valveIn") ? ", зазоры клапанов " + val("valveIn") + " / " + (val("valveEx") || "—") : ""}${causes.length ? ". Причины: " + causes.slice(0, 3).join(", ") : ""}.`;
+    const faq = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: d.steps.filter((st) => (st.onNo && st.onNo.result) || (st.onYes && st.onYes.result)).slice(0, 6).map((st) => {
+      const r = typeof st.onNo === "object" ? st.onNo : st.onYes;
+      return { "@type": "Question", name: fillT(efi && st.efiQ ? st.efiQ : st.q), acceptedAnswer: { "@type": "Answer", text: fillT(r.result + ". " + act(r)) } };
+    }) };
+    files.set("m/" + slug + "/" + d.id + "/index.html", page({ title: `${phrase}: причины и что проверить | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b, 0) + "&d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
+    probPages.push(canon);
+  });
 });
 {
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Неисправности", null]];
@@ -417,10 +473,8 @@ const podKeys = Object.keys(groups).filter((k) => groups[k].length >= 5).sort((a
 podKeys.forEach((k) => { const [t, c] = k.split("|"); podSlug[k] = slugify(t) + "-" + c; });
 const podName = (k) => { const [t, c] = k.split("|"); return (TYPE_MANY[t] || t) + " " + c + " см³"; };
 /* сравнения: в классе (тип + объём) по одной модели от популярной марки — та, у которой больше поколений; до 6 марок, все пары */
-const CMP_BRANDS = ["Motoland", "Kayo", "Regulmoto", "BSE", "Avantis", "Progasi", "Racer", "Irbis", "Stels", "Sharmax", "Apollo", "JHL", "Kove", "CFMOTO"];
 const compareByGroup = {}, compares = [];
 /* самые продаваемые модели — в сравнениях их класса они выбираются первыми */
-const FLAGSHIP = ["Motoland TT250", "Kayo T2 250", "Regulmoto Sport-003 PR", "Avantis Enduro 250", "Progasi Super Max 250 RR", "BSE Z8", "Kayo K1 300", "Regulmoto Athlete 300", "Avantis A7 NEW", "Motoland TT125", "BSE PH10 125"];
 Object.keys(groups).forEach((k) => {
   const pick = {};
   groups[k].filter((b) => CMP_BRANDS.indexOf(b.brand) >= 0).forEach((b) => { const p = pick[b.brand]; const fl = (x) => FLAGSHIP.indexOf(x.brand + " " + x.name) >= 0;
@@ -558,7 +612,7 @@ files.set("m/m.css", CSS + "\n");
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),
-  [SITE + "m/podborka/", SITE + "m/sravnenie/"], podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"));
+  [SITE + "m/podborka/", SITE + "m/sravnenie/"], podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
 const hi = 5 + brands.length + GUIDES.length + DIAG.length;
 files.set("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${u}</loc><changefreq>${i ? "monthly" : "weekly"}</changefreq><priority>${i === 0 ? "1.0" : i < hi ? "0.7" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
 
