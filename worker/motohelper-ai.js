@@ -79,7 +79,7 @@ export default {
     const messages = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
     const images = Array.isArray(body.images) ? body.images.slice(0, 2) : [];
     if (!messages.length) return json({ error: "no_messages" }, 400);
-    logQuestion(env, "site", messages);
+    ctx.waitUntil(Promise.resolve(logQuestion(env, "site", messages))); // запись не должна задерживать ответ и не должна теряться
 
     return answer(env, messages, images, request.headers.get("CF-Connecting-IP") || "?");
   },
@@ -518,7 +518,7 @@ async function botAnswer(env, m, chat, say, text, hist, rk, used, dbg) {
   const sys = BOT_RULES + "\n\nСправочник сайта по теме вопроса:\n" + (refs.length ? refs.join("\n") : "(ничего не нашлось — отвечай в общем и предложи https://motohelper.ru/)");
   const images = m.photo ? [await tgPhoto(env, m.photo)].filter(Boolean) : [];
   const msgs = [{ role: "system", content: sys }].concat(past, [{ role: "user", content: q }]);
-  logQuestion(env, "tg", [{ role: "user", content: q }]);
+  await logQuestion(env, "tg", [{ role: "user", content: q }]);
   const res = await answer(env, msgs, images, "tg:" + chat);
   const reply = await collect(res);
   if (!reply) return say("ИИ сейчас перегружен — попробуй через пару минут.");
