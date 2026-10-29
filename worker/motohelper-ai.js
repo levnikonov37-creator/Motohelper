@@ -517,18 +517,15 @@ async function botAnswer(env, m, chat, say, text, hist, rk, used, dbg) {
   const images = m.photo ? [await tgPhoto(env, m.photo)].filter(Boolean) : [];
   const msgs = [{ role: "system", content: sys }].concat(past, [{ role: "user", content: q }]);
   logQuestion(env, "tg", [{ role: "user", content: q }]);
-  dbg("справочник: " + refs.length);
   const res = await answer(env, msgs, images, "tg:" + chat);
-  dbg("ИИ: " + res.headers.get("x-mh-provider"));
   const reply = await collect(res);
-  dbg("ответ: " + reply.length + " знаков");
   if (!reply) return say("ИИ сейчас перегружен — попробуй через пару минут.");
   if (env.FEEDBACK) {
     await env.FEEDBACK.put(rk, String(used + 1), { expirationTtl: 60 * 60 * 48 });
     await env.FEEDBACK.put(hist, JSON.stringify(past.concat([{ role: "user", content: q }, { role: "assistant", content: reply.slice(0, 1500) }]).slice(-8)), { expirationTtl: 60 * 60 * 6 });
   }
   const sent = await say(reply);
-  dbg("отправлено: " + (sent && sent.ok ? "да" : JSON.stringify(sent).slice(0, 200)));
+  if (!sent || !sent.ok) dbg("Telegram не принял ответ: " + JSON.stringify(sent).slice(0, 200));
   return sent;
 }
 async function botSetup(env, origin) {
