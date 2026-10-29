@@ -2169,9 +2169,7 @@ function Onboarding({
     s: 22
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, t[1]), /*#__PURE__*/React.createElement("p", null, t[2]))))), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, "\u042D\u0442\u0438 \u0440\u0430\u0437\u0434\u0435\u043B\u044B \u2014 \u0432 \u043C\u0435\u043D\u044E \u0432\u043D\u0438\u0437\u0443 \u044D\u043A\u0440\u0430\u043D\u0430. \u041F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u0443 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u043D\u043E\u0432\u0430 \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \xAB?\xBB \u0432\u0432\u0435\u0440\u0445\u0443."), window.mhEggs && /*#__PURE__*/React.createElement("p", {
-    className: "muted small onb-eggs"
-  }, "🥚 На сайте спрятаны пасхалки. Найдено: ", window.mhEggs().found, " из ", window.mhEggs().total, "."), /*#__PURE__*/React.createElement(SupportCard, {
+  }, "\u042D\u0442\u0438 \u0440\u0430\u0437\u0434\u0435\u043B\u044B \u2014 \u0432 \u043C\u0435\u043D\u044E \u0432\u043D\u0438\u0437\u0443 \u044D\u043A\u0440\u0430\u043D\u0430. \u041F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u0443 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u043D\u043E\u0432\u0430 \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \xAB?\xBB \u0432\u0432\u0435\u0440\u0445\u0443."), /*#__PURE__*/React.createElement(SupportCard, {
     compact: true
   }), /*#__PURE__*/React.createElement("div", {
     className: "onb-actions"
@@ -8264,16 +8262,10 @@ function EngineSVG({
     }
   }, /*#__PURE__*/React.createElement("title", null, AREAS[p.id].t), /*#__PURE__*/React.createElement("circle", {
     className: "pin-hit",
-    r: "24"
-  }), /*#__PURE__*/React.createElement("circle", {
-    className: "pin-pulse",
-    r: "13"
+    r: "22"
   }), /*#__PURE__*/React.createElement("circle", {
     className: "pin-dot",
-    r: "11"
-  }), /*#__PURE__*/React.createElement("circle", {
-    className: "pin-core",
-    r: "4"
+    r: sel === p.id ? "9" : "6"
   }))));
 }
 
@@ -13537,11 +13529,7 @@ function Home(props) {
     placeholder: "Поломка, деталь или инструкция"
   })), /*#__PURE__*/React.createElement(GarageBar, _extends({}, props, {
     compact: true
-  })), /*#__PURE__*/React.createElement(StartGuide, {
-    mt: mt,
-    go: go,
-    setPicker: props.setPicker
-  }), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     className: "actions4 home-acts"
   }, [["list", "ТО по пробегу", () => go("repair", "to"), "", "Что и когда менять"], ["book", "Инструкции", () => go("repair", "guides"), "", "Пошагово, со схемами"], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 ? "В проекте " + project.length : "Что даст прибавку"], ["check", "Проверка б/у", () => go("repair", "buy"), "", "Перед покупкой"]].map(a => /*#__PURE__*/React.createElement("button", {
     key: a[1],
@@ -13555,7 +13543,7 @@ function Home(props) {
   }), /*#__PURE__*/React.createElement(SeasonCard, {
     eng: eng,
     go: go
-  }), /*#__PURE__*/React.createElement(TipCard, null), /*#__PURE__*/React.createElement(CatalogCard, null), /*#__PURE__*/React.createElement(AdSlot, {
+  }), /*#__PURE__*/React.createElement(CatalogCard, null), /*#__PURE__*/React.createElement(AdSlot, {
     place: "home"
   }), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null));
 }
