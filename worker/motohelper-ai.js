@@ -62,6 +62,8 @@ export default {
       // отчёт уходит только владельцу бота, так что ручной запуск безопасен
       if (u.searchParams.get("tg") === "report") return json(await weeklyReport(env));
       if (u.searchParams.get("tg") === "setup") return json(await botSetup(env, u.origin));
+      // проверка бота без Telegram: ?tg=dry&q=вопрос&token=<DEBUG_TOKEN>
+      if (u.searchParams.get("tg") === "dry" && env.DEBUG_TOKEN && u.searchParams.get("token") === env.DEBUG_TOKEN) return json(await botDry(env, u.searchParams.get("q") || "TT250 не заводится"));
       if (u.searchParams.get("tg")) return json(await tgStatus(env));
       return json({ ok: true, images: !!(env.DEEPSEEK_API_KEY || env.GEMINI_API_KEY), feedback: !!env.FEEDBACK, deepseek: !!env.DEEPSEEK_API_KEY });
     }
@@ -453,23 +455,33 @@ async function botHook(request, env, ctx) {
     return new Response("ok");
   }
   const m = up.message;
-  // только личка: в канале и группах бот молчит. Отвечаем, не отпуская запрос: в фоне (waitUntil) Cloudflare даёт
-  // лишь 30 секунд, а ИИ иногда пишет дольше. Telegram при долгом ответе повторяет запрос — повтор отсекаем по update_id.
+  // только личка: в канале и группах бот молчит. Telegram отвечаем сразу, а ответ ИИ готовим в фоне: если держать
+  // запрос, Telegram может оборвать соединение, и Cloudflare остановит работу. В фоне есть ~30 с — ставим срок 25 с.
   if (!m || !m.chat || m.chat.type !== "private") return new Response("ok");
-  if (env.FEEDBACK) {
-    const k = "tg:upd:" + up.update_id;
-    if (await env.FEEDBACK.get(k)) return new Response("ok");
-    await env.FEEDBACK.put(k, "1", { expirationTtl: 3600 });
-  }
-  try {
-    await botReply(env, m);
-  } catch (e) {
-    if (env.FEEDBACK) await env.FEEDBACK.put("tg:err", new Date().toISOString() + " " + String(e && e.stack || e).slice(0, 800), { expirationTtl: 60 * 60 * 24 * 7 });
-    await tgApi(env, "sendMessage", { chat_id: m.chat.id, text: "Что-то сломалось при ответе 😕 Попробуй ещё раз через минуту." }).catch(() => {});
-  }
+  ctx.waitUntil(botSafe(env, m, up.update_id));
   return new Response("ok");
 }
-async function botReply(env, m) {
+async function botSafe(env, m, updateId) {
+  const dbg = (step) => env.FEEDBACK && env.FEEDBACK.put("tg:dbg", new Date().toISOString() + " " + step, { expirationTtl: 60 * 60 * 24 * 7 }).catch(() => {});
+  const fail = (text) => tgApi(env, "sendMessage", { chat_id: m.chat.id, text }).catch(() => {});
+  try {
+    if (env.FEEDBACK) {
+      const k = "tg:upd:" + updateId; // Telegram иногда присылает одно сообщение дважды
+      if (await env.FEEDBACK.get(k)) return;
+      await env.FEEDBACK.put(k, "1", { expirationTtl: 3600 });
+    }
+    const late = new Promise((r) => setTimeout(() => r("__late"), 25000));
+    const r = await Promise.race([botReply(env, m, dbg), late]);
+    if (r === "__late") {
+      await dbg("срок 25 с вышел");
+      await fail("ИИ сегодня отвечает медленно 🐢 Спроси ещё раз — обычно со второго раза быстрее.");
+    }
+  } catch (e) {
+    if (env.FEEDBACK) await env.FEEDBACK.put("tg:err", new Date().toISOString() + " " + String((e && e.stack) || e).slice(0, 800), { expirationTtl: 60 * 60 * 24 * 7 });
+    await fail("Что-то сломалось при ответе 😕 Попробуй ещё раз через минуту.");
+  }
+}
+async function botReply(env, m, dbg = () => {}) {
   const chat = m.chat.id, say = (text) => tgApi(env, "sendMessage", { chat_id: chat, text: String(text).slice(0, 4096), disable_web_page_preview: true });
   const text = String(m.text || m.caption || "").trim();
   const hist = "tg:chat:" + chat;
@@ -489,12 +501,12 @@ async function botReply(env, m) {
   typing();
   const tick = setInterval(typing, 4500); // «печатает…» гаснет через 5 секунд — обновляем, пока ИИ пишет
   try {
-    return await botAnswer(env, m, chat, say, text, hist, rk, used);
+    return await botAnswer(env, m, chat, say, text, hist, rk, used, dbg);
   } finally {
     clearInterval(tick);
   }
 }
-async function botAnswer(env, m, chat, say, text, hist, rk, used) {
+async function botAnswer(env, m, chat, say, text, hist, rk, used, dbg) {
   let past = [];
   try {
     past = (env.FEEDBACK && JSON.parse((await env.FEEDBACK.get(hist)) || "[]")) || [];
@@ -505,14 +517,19 @@ async function botAnswer(env, m, chat, say, text, hist, rk, used) {
   const images = m.photo ? [await tgPhoto(env, m.photo)].filter(Boolean) : [];
   const msgs = [{ role: "system", content: sys }].concat(past, [{ role: "user", content: q }]);
   logQuestion(env, "tg", [{ role: "user", content: q }]);
+  dbg("справочник: " + refs.length);
   const res = await answer(env, msgs, images, "tg:" + chat);
+  dbg("ИИ: " + res.headers.get("x-mh-provider"));
   const reply = await collect(res);
+  dbg("ответ: " + reply.length + " знаков");
   if (!reply) return say("ИИ сейчас перегружен — попробуй через пару минут.");
   if (env.FEEDBACK) {
     await env.FEEDBACK.put(rk, String(used + 1), { expirationTtl: 60 * 60 * 48 });
     await env.FEEDBACK.put(hist, JSON.stringify(past.concat([{ role: "user", content: q }, { role: "assistant", content: reply.slice(0, 1500) }]).slice(-8)), { expirationTtl: 60 * 60 * 6 });
   }
-  return say(reply);
+  const sent = await say(reply);
+  dbg("отправлено: " + (sent && sent.ok ? "да" : JSON.stringify(sent).slice(0, 200)));
+  return sent;
 }
 async function botSetup(env, origin) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TG_HOOK_SECRET) return { ok: false, error: "нужны TELEGRAM_BOT_TOKEN и TG_HOOK_SECRET" };
@@ -546,4 +563,19 @@ async function daily(env) {
   if (env.FEEDBACK) await env.FEEDBACK.put("health", JSON.stringify(health));
   if (!tg.ok) await tellOwner(env, "⚠️ Пост в канал не вышел: " + tg.error);
   return health;
+}
+
+async function botDry(env, q) {
+  const t0 = Date.now(), log = [];
+  try {
+    const refs = await botRefs(q);
+    log.push("refs " + refs.length + " за " + (Date.now() - t0) + " мс");
+    const res = await answer(env, [{ role: "system", content: BOT_RULES + "\n\nСправочник сайта по теме вопроса:\n" + refs.join("\n") }, { role: "user", content: q }], [], "dry");
+    log.push("ИИ " + res.headers.get("x-mh-provider") + " за " + (Date.now() - t0) + " мс");
+    const reply = await Promise.race([collect(res), new Promise((r) => setTimeout(() => r("__timeout"), 45000))]);
+    log.push((reply === "__timeout" ? "ТАЙМАУТ чтения ответа" : "ответ") + " за " + (Date.now() - t0) + " мс");
+    return { ok: !!reply, log, refs, reply };
+  } catch (e) {
+    return { ok: false, log, error: String(e && e.stack || e) };
+  }
 }
