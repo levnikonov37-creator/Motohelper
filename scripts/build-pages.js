@@ -530,18 +530,28 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
   files.set("tg/posts.json", JSON.stringify({ _: "Собрано scripts/build-pages.js из tg/manual.json и базы моторов — правь tg/manual.json", channel: manual.channel, posts }, null, 1) + "\n");
 }
 
-/* Telegram-бот: tg/bot-index.json — короткий справочник для ответов в личке бота. Сервер ищет в нём модели,
-   моторы, инструкции и поломки по словам вопроса и даёт ИИ точные цифры и ссылки на страницы сайта. */
+/* Telegram-бот: справочник для ответов в личке, разбитый на мелкие файлы tg/idx/<первые 2 знака>.json — у сервера на
+   бесплатном тарифе 10 мс процессора на запрос, поэтому он читает только файлы для слов вопроса.
+   В файле: слово латиницей → [[вес, номер строки]]; строки — по 100 в tg/idx/l<номер/100>.json;
+   инструкции и поломки — tg/idx/g.json с основами слов. */
 {
   const ok = (v) => v && v !== "—";
   const facts = (e) => [e.code + (e.cc ? " " + Math.round(e.cc) + " см³" : "") + (e.hp ? " " + e.hp + " л.с." : ""), ok(e.oil) ? "масло " + e.oil + (ok(e.oilVol) ? " " + e.oilVol : "") : "", ok(e.spark) ? "свеча " + e.spark + (ok(e.gap) ? " зазор " + e.gap : "") : "", ok(e.valveIn) ? "клапаны впуск " + e.valveIn + " выпуск " + (e.valveEx || "—") : ""].filter(Boolean).join("; ");
-  // модель: [название, адрес без m/, номер мотора в e]; мотор: [код, адрес без m/motor/, цифры]
-  const eIdx = {};
-  engIds.forEach((id, i) => (eIdx[id] = i));
-  const m = BIKES.map((b) => [b.brand + " " + b.name, bikeSlug.get(b), eIdx[b.versions[0].engine]]);
-  const e = engIds.map((id) => [ENGINES[id].code, engSlug[id], facts(ENGINES[id])]);
-  const g = GUIDES.map((x) => [x.title, "remont/" + x.id]).concat(DIAG.map((x) => [x.title, "polomka/" + x.id]));
-  files.set("tg/bot-index.json", JSON.stringify({ _: "Собрано scripts/build-pages.js — справочник для Telegram-бота", m, e, g }) + "\n");
+  // те же правила, что в worker/motohelper-ai.js (latTokens, tokW)
+  const LAT = { а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya" };
+  const latTokens = (x) => { const w = String(x).toLowerCase().split("").map((c) => (c in LAT ? LAT[c] : c)).join("").match(/[a-z0-9]+/g) || []; return w.concat(w.slice(1).map((y, i) => w[i] + y)); };
+  const tokW = (t) => (/\d/.test(t) && /[a-z]/.test(t) ? (t.length > 2 ? 3 : 2) : /^\d+$/.test(t) ? 1 : t.length >= 4 ? 1 : 0);
+  const inv = {}, lines = [];
+  const add = (name, line) => { const id = lines.push(line) - 1; new Set(latTokens(name)).forEach((t) => { const w = tokW(t); if (w) (inv[t] = inv[t] || []).push([w, id]); }); };
+  BIKES.forEach((b) => add(b.brand + " " + b.name, b.brand + " " + b.name + ": мотор " + facts(ENGINES[b.versions[0].engine]) + " — " + SITE + "m/" + bikeSlug.get(b) + "/"));
+  engIds.forEach((id) => add(ENGINES[id].code, "Мотор " + facts(ENGINES[id]) + " — " + SITE + "m/motor/" + engSlug[id] + "/"));
+  const shards = {};
+  Object.keys(inv).sort().forEach((t) => { if (inv[t].length > 40) return; const c = t.slice(0, 2); (shards[c] = shards[c] || {})[t] = inv[t]; }); // слишком общие слова («250», «motoland») не ищем
+  Object.keys(shards).forEach((c) => files.set("tg/idx/" + c + ".json", JSON.stringify(shards[c]) + "\n"));
+  for (let i = 0; i * 100 < lines.length; i++) files.set("tg/idx/l" + i + ".json", JSON.stringify(lines.slice(i * 100, i * 100 + 100)) + "\n");
+  const stems = (x) => (String(x).toLowerCase().replace(/ё/g, "е").match(/[а-я]{4,}/g) || []).map((w) => w.slice(0, 5));
+  const g = GUIDES.map((x) => [x.title, SITE + "m/remont/" + x.id + "/"]).concat(DIAG.map((x) => [x.title, SITE + "m/polomka/" + x.id + "/"])).map((x) => [x[0] + " — " + x[1], [...new Set(stems(x[0]))]]);
+  files.set("tg/idx/g.json", JSON.stringify(g) + "\n");
 }
 
 files.set("m/m.css", CSS + "\n");

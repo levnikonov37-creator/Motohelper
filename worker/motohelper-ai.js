@@ -384,18 +384,10 @@ function logQuestion(env, src, messages) {
 }
 
 /* --- Telegram-бот: отвечает в личке как ИИ-механик, с цифрами и ссылками из справочника сайта --- */
-const BOT_INDEX = "https://motohelper.ru/tg/bot-index.json";
+const BOT_IDX = "https://motohelper.ru/tg/idx/";
 const BOT_DAILY = 100; // ответов в сутки одному человеку
-let BOT_IDX = null, BOT_IDX_T = 0;
-async function botIndex() {
-  if (!BOT_IDX || Date.now() - BOT_IDX_T > 6 * 3600e3) {
-    try {
-      const r = await fetch(BOT_INDEX, { cf: { cacheTtl: 3600 } });
-      if (r.ok) (BOT_IDX = await r.json()), (BOT_IDX_T = Date.now());
-    } catch (e) {}
-  }
-  return BOT_IDX;
-}
+// справочник лежит на сайте мелкими файлами (см. scripts/build-pages.js): читаем только нужные, кэш Cloudflare — час
+const idxFile = (name) => fetch(BOT_IDX + name + ".json", { cf: { cacheTtl: 3600, cacheEverything: true } }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 const LAT = { а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya" };
 // слова латиницей + склейки соседних («тт 250» → tt250), чтобы «тт250» нашло Motoland TT250
 const latTokens = (s) => {
@@ -405,16 +397,18 @@ const latTokens = (s) => {
 const tokW = (t) => (/\d/.test(t) && /[a-z]/.test(t) ? (t.length > 2 ? 3 : 2) : /^\d+$/.test(t) ? 1 : t.length >= 4 ? 1 : 0);
 const STOP = new Set("как что где когда почему зачем какой какая какое какие можно нужно надо есть если или для при без под над мотоцикл мотоцикла мотор мотора питбайк".split(" "));
 const ruStems = (s) => (String(s).toLowerCase().replace(/ё/g, "е").match(/[а-я]{4,}/g) || []).filter((w) => !STOP.has(w)).map((w) => w.slice(0, 5));
-function botRefs(idx, text) {
-  if (!idx) return [];
-  const q = new Set(latTokens(text)), out = [];
-  const top = (list, score, n, min) =>
-    list.map((x) => [score(x), x]).filter((p) => p[0] >= min).sort((a, b) => b[0] - a[0]).slice(0, n).map((p) => p[1]);
-  const sc = (name) => latTokens(name).reduce((a, t) => a + (q.has(t) ? tokW(t) : 0), 0);
-  top(idx.m, (x) => sc(x[0]), 3, 3).forEach((x) => { const e = idx.e[x[2]]; out.push(x[0] + ": мотор " + (e ? e[2] : "—") + " — https://motohelper.ru/m/" + x[1] + "/"); });
-  top(idx.e, (x) => sc(x[0]), 2, 3).forEach((x) => out.push("Мотор " + x[2] + " — https://motohelper.ru/m/motor/" + x[1] + "/"));
+async function botRefs(text) {
+  const toks = [...new Set(latTokens(text))].filter((t) => tokW(t) > 0).slice(0, 40);
+  const pre = [...new Set(toks.map((t) => t.slice(0, 2)))].slice(0, 12);
+  const [shards, guides] = await Promise.all([Promise.all(pre.map(idxFile)), idxFile("g")]);
+  const score = new Map();
+  shards.forEach((sh) => sh && toks.forEach((t) => (sh[t] || []).forEach(([w, id]) => score.set(id, (score.get(id) || 0) + w))));
+  const ids = [...score].filter((x) => x[1] >= 3).sort((a, b) => b[1] - a[1]).slice(0, 4).map((x) => x[0]);
+  const buckets = {};
+  await Promise.all([...new Set(ids.map((id) => Math.floor(id / 100)))].map(async (b) => (buckets[b] = (await idxFile("l" + b)) || [])));
+  const out = ids.map((id) => buckets[Math.floor(id / 100)][id % 100]).filter(Boolean);
   const st = new Set(ruStems(text));
-  top(idx.g, (x) => ruStems(x[0]).filter((w) => st.has(w)).length, 3, 1).forEach((x) => out.push(x[0] + " — https://motohelper.ru/m/" + x[1] + "/"));
+  (guides || []).map((g) => [g[1].filter((w) => st.has(w)).length, g[0]]).filter((x) => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3).forEach((x) => out.push(x[1]));
   return out;
 }
 const BOT_RULES = `Ты — ИИ-механик сайта MotoHelper (motohelper.ru) и отвечаешь в Telegram.
@@ -506,7 +500,7 @@ async function botAnswer(env, m, chat, say, text, hist, rk, used) {
     past = (env.FEEDBACK && JSON.parse((await env.FEEDBACK.get(hist)) || "[]")) || [];
   } catch (e) {}
   const q = text || "Что на фото и что с этим делать?";
-  const refs = botRefs(await botIndex(), past.filter((x) => x.role === "user").map((x) => x.content).concat(q).join(" "));
+  const refs = await botRefs(past.filter((x) => x.role === "user").map((x) => x.content).concat(q).join(" "));
   const sys = BOT_RULES + "\n\nСправочник сайта по теме вопроса:\n" + (refs.length ? refs.join("\n") : "(ничего не нашлось — отвечай в общем и предложи https://motohelper.ru/)");
   const images = m.photo ? [await tgPhoto(env, m.photo)].filter(Boolean) : [];
   const msgs = [{ role: "system", content: sys }].concat(past, [{ role: "user", content: q }]);
