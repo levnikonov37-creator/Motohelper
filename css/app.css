@@ -2167,7 +2167,7 @@ body::before { background:
   radial-gradient(80% 50% at 50% -10%, rgba(255,255,255,.07), transparent 70%) !important; }
 body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .07;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
-.space-bg, .fx-orb, .fx-horizon { opacity: .12 !important; filter: grayscale(1); }
+.space-bg, .fx-orb, .fx-horizon { opacity: .12 !important; }
 ::selection { background: #fff; color: #000; }
 
 /* никаких цветных свечений: только чёткие тени */
@@ -2497,12 +2497,13 @@ code { background: #141414 !important; color: #fff; }
 .tab.on:not(.tab-ai)::before, .hero-dot, .panel h2::before, .page h2::before { background: var(--holo) !important; }
 .hero-dot { box-shadow: 0 0 0 3px rgba(var(--hot-rgb),.22) !important; }
 .grad, .main .grad { background: var(--holo) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; -webkit-text-fill-color: transparent !important; -webkit-text-stroke: 0 !important; }
-/* перелив: медленно гоняем градиент только на главной кнопке и надписи в шапке (не на каждой кнопке — бережём батарею)
-   (двигаем через переменную: старые слои держат background-position с !important, а его анимация не перебивает) */
-@property --holo-x { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
-.hero .btn.primary, .grad, .main .grad { background-size: 220% 100% !important; background-position: var(--holo-x) 50% !important; animation: mh-holo 7s ease-in-out infinite alternate !important; }
-@keyframes mh-holo { from { --holo-x: 0%; } to { --holo-x: 100%; } }
-@media (prefers-reduced-motion: reduce) { .hero .btn.primary, .grad, .main .grad { animation: none !important; } }
+/* перелив на главной кнопке: градиент шире кнопки лежит под текстом и медленно сдвигается.
+   Двигаем transform — его считает видеокарта: ни пересчёта стилей, ни перерисовки на каждом кадре
+   (анимация background-position грузила слабый телефон примерно на треть даже в простое). */
+.hero .btn.primary { position: relative; isolation: isolate; overflow: hidden; background: none !important; }
+.hero .btn.primary::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 220%; z-index: -1; pointer-events: none; background: var(--holo); animation: mh-holo 7s ease-in-out infinite alternate; will-change: transform; }
+@keyframes mh-holo { from { transform: translateX(0); } to { transform: translateX(-54.5%); } }
+@media (prefers-reduced-motion: reduce) { .hero .btn.primary::before { animation: none; } }
 .meter-bar .now, .g-progress span, .gm-dots button.cur, .intro-bar span, .cause-bar span, .sg-bar span, .pbar span, .cbar span, .start-bar span { background: var(--holo) !important; }
 .meter-bar .was { background: rgba(var(--hot2-rgb),.28) !important; }
 .tc-gain, .tz-gain, .proj-hp .now, .proj-speed .up, .tc-speed.up, .tz-speed.up { color: var(--good) !important; }
@@ -2575,3 +2576,7 @@ code { background: #141414 !important; color: #fff; }
 .ai-page .msg.assistant .bubble { position: relative; border-left: 1px solid var(--line); padding-left: 16px; }
 .ai-page .msg.assistant .bubble::before { content: ""; position: absolute; left: -1px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--holo-v); }
 .ai-page .msg-actions .chip:not(.eng) { border-color: transparent !important; background: none !important; color: #8A8A8A; padding-left: 2px; }
+
+/* ===================== v64: быстрее отрисовка =====================
+   Тень у переливающейся надписи перерисовывалась каждый кадр — на чёрном фоне её не видно, убрана. */
+.grad, .main .grad { filter: none !important; }

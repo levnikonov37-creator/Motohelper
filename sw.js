@@ -1,20 +1,35 @@
-/* MotoHelper — работа без интернета.
-   Онлайн: всегда свежая версия с сервера (и она же сохраняется в кэш).
-   Без сети: сайт открывается из кэша. ИИ-механику интернет нужен всегда.
-   При изменении списка файлов увеличь VERSION. */
-const VERSION = "mh-v24";
-const CORE = [
-  "./", "index.html", "manifest.webmanifest",
-  "css/app.css", "js/data.js", "js/bike-art.js", "js/app.js", "js/motion.js", "js/engine-worklet.js",
-  "vendor/react.production.min.js", "vendor/react-dom.production.min.js",
-  "img/topo.svg", "img/icon-192.png", "img/icon-512.png",
+/* MotoHelper — работа без интернета и быстрый повторный заход.
+   Файлы с меткой версии (?v=хэш — их ставит scripts/build-assets.js) не меняются: берём из памяти телефона,
+   в сеть идём, только если файла там нет. Новая версия сайта = новые метки в index.html.
+   Страница и прочие файлы: сначала сеть (всегда свежая версия), без сети — кэш; если сеть есть, но тянет
+   страницу дольше 4 с, показываем сохранённую копию, а свежую кладём в кэш на следующий раз.
+   ИИ-механику интернет нужен всегда. */
+// --- сборка (scripts/build-assets.js) пишет эти строки сама, руками не править ---
+const VERSION = "mh-ede81bcc4b";
+const BUILT = [
+  "css/app.min.css?v=d867201c8c",
+  "js/data.min.js?v=8546b725fa",
+  "js/bike-art.min.js?v=8ca6216c0f",
+  "js/app.min.js?v=48d74b6710",
+  "js/motion.min.js?v=ad93390c5d",
+  "vendor/react.production.min.js?v=4b4969fa4e",
+  "vendor/react-dom.production.min.js?v=21758ed084",
 ];
+// --- конец сборки ---
+const CORE = [
+  "./", "index.html", "manifest.webmanifest", "js/engine-worklet.js",
+  "img/topo.svg", "img/icon-192.png", "img/icon-512.png",
+].concat(BUILT);
 // 3D-модель мотора: большая, кладём в кэш фоном, чтобы и она работала без сети
 const LATER = ["vendor/three.min.js"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
-    caches.open(VERSION).then((c) => c.addAll(CORE).then(() => c.addAll(LATER).catch(() => {})))
+    caches.open(VERSION).then((c) => Promise.all(CORE.map((u) =>
+      // файл той же версии уже лежит в старом кэше — переносим, не качая заново;
+      // страницу и файлы без метки — мимо HTTP-кэша браузера, чтобы не сохранить устаревшую копию
+      /\?v=/.test(u) ? caches.match(u).then((hit) => (hit ? c.put(u, hit) : c.add(u))) : c.add(new Request(u, { cache: "reload" }))
+    )).then(() => c.addAll(LATER).catch(() => {})))
       .then(() => self.skipWaiting())
   );
 });
@@ -26,6 +41,14 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+function keep(req, res) {
+  if (res.ok) {
+    const copy = res.clone();
+    return caches.open(VERSION).then((c) => c.put(req, copy)).then(() => res, () => res);
+  }
+  return Promise.resolve(res);
+}
+
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return; // запросы к ИИ (POST) — мимо кэша
@@ -33,25 +56,25 @@ self.addEventListener("fetch", (e) => {
   const same = url.origin === self.location.origin;
   const font = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
   if (!same && !font) return;
-  if (font) {
-    // шрифты не меняются — сначала кэш
-    e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-      const copy = res.clone();
-      caches.open(VERSION).then((c) => c.put(req, copy));
-      return res;
-    })));
+  if (font || url.searchParams.has("v")) {
+    // шрифты и файлы с меткой версии не меняются — сначала кэш
+    e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => keep(req, res))));
     return;
   }
   // свои файлы — сначала сеть, без сети — кэш. no-cache: браузер не берёт свою копию
   // (GitHub Pages разрешает хранить её 10 минут), а сверяется с сервером — обновления видны сразу
-  const fresh = req.mode === "navigate" ? fetch(req.url, { cache: "no-cache", credentials: "same-origin" }) : fetch(req, { cache: "no-cache" });
-  e.respondWith(
-    fresh.then((res) => {
-      if (res.ok) {
-        const copy = res.clone();
-        caches.open(VERSION).then((c) => c.put(req, copy));
-      }
-      return res;
-    }).catch(() => caches.match(req, { ignoreSearch: true }).then((hit) => hit || (req.mode === "navigate" ? caches.match("index.html") : Response.error())))
-  );
+  const nav = req.mode === "navigate";
+  const net = (nav ? fetch(req.url, { cache: "no-cache", credentials: "same-origin" }) : fetch(req, { cache: "no-cache" })).then((res) => keep(req, res));
+  const saved = () => caches.match(req, { ignoreSearch: true }).then((hit) => hit || (nav ? caches.match("index.html") : undefined));
+  e.waitUntil(net.catch(() => {})); // свежая копия ляжет в кэш, даже если ответили сохранённой
+  if (!nav) {
+    e.respondWith(net.catch(() => saved().then((hit) => hit || Response.error())));
+    return;
+  }
+  e.respondWith(new Promise((resolve) => {
+    let done = false;
+    const give = (res) => { if (!done && res) { done = true; resolve(res); } };
+    const slow = setTimeout(() => saved().then(give), 4000);
+    net.then((res) => { clearTimeout(slow); give(res); }, () => { clearTimeout(slow); saved().then((hit) => give(hit || Response.error())); });
+  }));
 });

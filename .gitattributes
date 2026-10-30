@@ -1,0 +1,3 @@
+# сжатые копии собирает scripts/build-assets.js — на GitHub сворачиваем их в диффах
+js/*.min.js linguist-generated=true
+css/*.min.css linguist-generated=true

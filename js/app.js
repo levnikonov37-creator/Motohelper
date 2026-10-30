@@ -67,11 +67,21 @@ function bfYears(y) {
   for (var i = a; i <= b && i - a < 60; i++) out.push(i);
   return out.join(" ");
 }
+/* один форматтер на всё: создавать Intl.NumberFormat на каждую цену дорого (в длинных списках тормозит) */
+let NUM_FMT = null;
+function numFmt() {
+  return NUM_FMT || (NUM_FMT = new Intl.NumberFormat("ru-RU"));
+}
+/* «30.10.2026» — как toLocaleDateString("ru-RU"), но без запуска Intl при первой отрисовке */
+function ruDate(d) {
+  const p = n => (n < 10 ? "0" : "") + n;
+  return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear();
+}
 function rub(v) {
-  return new Intl.NumberFormat("ru-RU").format(Math.round(v || 0)) + " ₽";
+  return numFmt().format(Math.round(v || 0)) + " ₽";
 }
 function num(v) {
-  return new Intl.NumberFormat("ru-RU").format(Math.round(v || 0));
+  return numFmt().format(Math.round(v || 0));
 }
 function sub(text, spec) {
   if (!text) return "";
@@ -13577,7 +13587,7 @@ function CatalogCard() {
 function PreRide({
   eng
 }) {
-  const today = new Date().toLocaleDateString("ru-RU");
+  const today = ruDate(new Date());
   const [st, setSt] = useState(() => {
     const s = load("preride", null);
     return s && s.d === today ? s : {
