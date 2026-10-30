@@ -19,7 +19,11 @@
 
 const DEEPSEEK_MODEL = "deepseek-flash";
 // Gemini: по очереди — старые модели Google снимает, а свежие бывают перегружены (503)
-const GEMINI_MODELS = ["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.5-flash", "gemini-flash-lite-latest"];
+// (на бесплатном ключе новые модели часто упираются в лимит 429 — быстрые и доступные стоят первыми;
+//  проверить, как отвечает каждая: <адрес сервера>/?test=models)
+const GEMINI_MODELS = ["gemini-3.5-flash", "gemini-flash-lite-latest", "gemini-3.8-flash", "gemini-flash-latest"];
+// модель, которая отказала (лимит, ошибка, молчание), пропускаем 10 минут — не ждём её на каждом вопросе
+const GEM_BAD = new Map();
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 // встроенный ИИ Cloudflare: пробуем по очереди — если модель убрали или она перегружена, берём следующую
 const CF_MODELS = ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-4-scout-17b-16e-instruct", "@cf/meta/llama-3.1-8b-instruct-fast", "@cf/meta/llama-3.1-8b-instruct"];
@@ -57,6 +61,8 @@ export default {
       // список сообщений о неточностях: открой в браузере <адрес сервера>/?feedback=1&token=<FEEDBACK_TOKEN>
       if (u.searchParams.get("feedback")) return listFeedback(env, u.searchParams.get("token"));
       // самопроверка: <адрес сервера>/?test=1 — какой ИИ отвечает и какие ошибки у остальных (без ключей)
+      // ?test=models — сколько отвечает каждая модель Gemini (чтобы первой в списке стояла быстрая)
+      if (u.searchParams.get("test") === "models") return json(await geminiTimes(env));
       if (u.searchParams.get("test")) return selfTest(env);
       // отзывы владельцев модели: ?reviews=<адрес модели>
       if (u.searchParams.get("reviews")) return listReviews(env, u.searchParams.get("reviews"));
@@ -203,7 +209,8 @@ async function gemini(env, messages, images) {
   // Gemini временами «зависает» на десятки секунд: ждём начала ответа не дольше 10 с на модель и 16 с всего (бот укладывается в свои 25 с),
   // потом пробуем следующую модель, а за ней — встроенный ИИ Cloudflare (см. answer)
   const until = Date.now() + 16000;
-  for (const model of GEMINI_MODELS) {
+  const fresh = GEMINI_MODELS.filter((m) => !(GEM_BAD.get(m) > Date.now()));
+  for (const model of fresh.length ? fresh : GEMINI_MODELS) {
     const left = Math.min(10000, until - Date.now());
     if (left < 1500) { err += "время вышло; "; res = null; break; }
     const ac = new AbortController(), timer = setTimeout(() => ac.abort(), left);
@@ -217,11 +224,13 @@ async function gemini(env, messages, images) {
     } catch (e) {
       clearTimeout(timer);
       err += model + " не ответил за " + Math.round(left / 1000) + " с; ";
+      GEM_BAD.set(model, Date.now() + 600000);
       res = null;
       continue;
     }
     clearTimeout(timer);
     if (res.ok && res.body) break;
+    GEM_BAD.set(model, Date.now() + 600000);
     err += model + " " + res.status + " " + (await res.text()).slice(0, 120) + "; ";
     res = null;
     // неверный ключ или регион не поддерживается — другие модели не помогут
@@ -815,4 +824,22 @@ async function webmasterStats(env) {
   const RU = { FATAL: "фатальные", CRITICAL: "критичные", POSSIBLE_PROBLEM: "возможные", RECOMMENDATION: "рекомендации" };
   const problems = Object.keys(pr).filter((k) => pr[k]).map((k) => (RU[k] || k.toLowerCase()) + " — " + pr[k]).join(", ");
   return { searchable: sm.searchable_pages_count || 0, excluded: sm.excluded_pages_count || 0, sqi: sm.sqi, problems };
+}
+
+async function geminiTimes(env) {
+  if (!env.GEMINI_API_KEY) return { ok: false, error: "нет GEMINI_API_KEY" };
+  const body = JSON.stringify({ contents: [{ role: "user", parts: [{ text: "Ответь одним словом по-русски: привет" }] }], generationConfig: { maxOutputTokens: 20 } });
+  const out = await Promise.all(GEMINI_MODELS.map(async (model) => {
+    const t = Date.now(), ac = new AbortController(), timer = setTimeout(() => ac.abort(), 20000);
+    try {
+      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY }, body, signal: ac.signal });
+      await r.text();
+      return { model, status: r.status, ms: Date.now() - t };
+    } catch (e) {
+      return { model, status: "timeout", ms: Date.now() - t };
+    } finally {
+      clearTimeout(timer);
+    }
+  }));
+  return { ok: true, order: GEMINI_MODELS, times: out };
 }
