@@ -12,13 +12,18 @@
 //   привязка AI (Settings → Bindings → Workers AI, имя AI) — необязательно, последний запасной вариант.
 //   TELEGRAM_BOT_TOKEN — ключ бота (@BotFather), бот — админ канала: тогда сервер ведёт Telegram-канал по tg/posts.json;
 //   YANDEX_METRIKA_TOKEN — OAuth-ключ Метрики: по понедельникам отчёт о посещаемости владельцу (тому, кто написал боту /start).
+//   YANDEX_WEBMASTER_TOKEN — необязательно, OAuth-ключ Вебмастера: в отчёте — сколько страниц в поиске Яндекса.
 //   TG_HOOK_SECRET — любой пароль: с ним бот отвечает в личке как ИИ-механик (Telegram шлёт сообщения на <адрес>/tg-hook).
 //     Подключить один раз: открыть <адрес сервера>/?tg=setup.
 // Сайт сам узнаёт, что фото работают: GET на адрес сервера отвечает {"images": true}.
 
 const DEEPSEEK_MODEL = "deepseek-flash";
 // Gemini: по очереди — старые модели Google снимает, а свежие бывают перегружены (503)
-const GEMINI_MODELS = ["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.5-flash", "gemini-flash-lite-latest"];
+// (на бесплатном ключе новые модели часто упираются в лимит 429 — быстрые и доступные стоят первыми;
+//  проверить, как отвечает каждая: <адрес сервера>/?test=models)
+const GEMINI_MODELS = ["gemini-3.5-flash", "gemini-flash-lite-latest", "gemini-3.8-flash", "gemini-flash-latest"];
+// модель, которая отказала (лимит, ошибка, молчание), пропускаем 10 минут — не ждём её на каждом вопросе
+const GEM_BAD = new Map();
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 // встроенный ИИ Cloudflare: пробуем по очереди — если модель убрали или она перегружена, берём следующую
 const CF_MODELS = ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-4-scout-17b-16e-instruct", "@cf/meta/llama-3.1-8b-instruct-fast", "@cf/meta/llama-3.1-8b-instruct"];
@@ -56,7 +61,11 @@ export default {
       // список сообщений о неточностях: открой в браузере <адрес сервера>/?feedback=1&token=<FEEDBACK_TOKEN>
       if (u.searchParams.get("feedback")) return listFeedback(env, u.searchParams.get("token"));
       // самопроверка: <адрес сервера>/?test=1 — какой ИИ отвечает и какие ошибки у остальных (без ключей)
+      // ?test=models — сколько отвечает каждая модель Gemini (чтобы первой в списке стояла быстрая)
+      if (u.searchParams.get("test") === "models") return json(await geminiTimes(env));
       if (u.searchParams.get("test")) return selfTest(env);
+      // отзывы владельцев модели: ?reviews=<адрес модели>
+      if (u.searchParams.get("reviews")) return listReviews(env, u.searchParams.get("reviews"));
       // Telegram-канал: ?tg=status — что выйдет следующим; ?tg=run — опубликовать пост на сегодня, если ещё не вышел
       if (u.searchParams.get("tg") === "run") return json(await tgRun(env));
       // отчёт уходит только владельцу бота, так что ручной запуск безопасен
@@ -76,6 +85,9 @@ export default {
       return json({ error: "bad_json" }, 400);
     }
     if (body.feedback) return saveFeedback(env, body.feedback);
+    // «Спроси механика» со страниц каталога: вопрос + о чём страница; подсказки и цифры — как у бота
+    if (body.ask) return pageAsk(env, ctx, body, request.headers.get("CF-Connecting-IP") || "?");
+    if (body.review) return saveReview(env, body.review, request.headers.get("CF-Connecting-IP") || "?");
     const messages = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
     const images = Array.isArray(body.images) ? body.images.slice(0, 2) : [];
     if (!messages.length) return json({ error: "no_messages" }, 400);
@@ -194,13 +206,31 @@ async function gemini(env, messages, images) {
     generationConfig: { maxOutputTokens: 4096, temperature: 0.4 },
   });
   let res, err = "";
-  for (const model of GEMINI_MODELS) {
-    res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":streamGenerateContent?alt=sse", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-      body,
-    });
+  // Gemini временами «зависает» на десятки секунд: ждём начала ответа не дольше 10 с на модель и 16 с всего (бот укладывается в свои 25 с),
+  // потом пробуем следующую модель, а за ней — встроенный ИИ Cloudflare (см. answer)
+  const until = Date.now() + 16000;
+  const fresh = GEMINI_MODELS.filter((m) => !(GEM_BAD.get(m) > Date.now()));
+  for (const model of fresh.length ? fresh : GEMINI_MODELS) {
+    const left = Math.min(10000, until - Date.now());
+    if (left < 1500) { err += "время вышло; "; res = null; break; }
+    const ac = new AbortController(), timer = setTimeout(() => ac.abort(), left);
+    try {
+      res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":streamGenerateContent?alt=sse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+        body,
+        signal: ac.signal,
+      });
+    } catch (e) {
+      clearTimeout(timer);
+      err += model + " не ответил за " + Math.round(left / 1000) + " с; ";
+      GEM_BAD.set(model, Date.now() + 600000);
+      res = null;
+      continue;
+    }
+    clearTimeout(timer);
     if (res.ok && res.body) break;
+    GEM_BAD.set(model, Date.now() + 600000);
     err += model + " " + res.status + " " + (await res.text()).slice(0, 120) + "; ";
     res = null;
     // неверный ключ или регион не поддерживается — другие модели не помогут
@@ -349,6 +379,7 @@ async function weeklyReport(env) {
     const delta = (a, b) => (!b ? "" : " (" + (a >= b ? "+" : "") + Math.round(((a - b) / b) * 100) + "% к прошлой неделе)");
     const min = Math.floor((t[3] || 0) / 60), sec = Math.round((t[3] || 0) % 60);
     const qs = await questionStats(env).catch(() => null);
+    const wm = await webmasterStats(env).catch(() => null);
     let subs = null;
     try {
       const posts = await fetch(TG_POSTS).then((r) => r.json());
@@ -363,6 +394,7 @@ async function weeklyReport(env) {
       "📄 Просмотров страниц: " + n(t[2]),
       "⏱ В среднем на сайте: " + min + " мин " + sec + " с",
       subs != null ? "📣 Подписчиков канала: " + n(subs) : "",
+      wm ? "🔎 В поиске Яндекса: " + n(wm.searchable) + " страниц" + (wm.excluded ? " (исключено " + n(wm.excluded) + ")" : "") + (wm.sqi != null ? ", ИКС " + n(wm.sqi) : "") + (wm.problems ? "\n⚠️ Проблемы сайта в Вебмастере: " + wm.problems : "") : "",
       qs ? "🤖 Вопросов ИИ-механику: " + n(qs.total) + " (сайт " + n(qs.site) + ", Telegram " + n(qs.tg) + ")" + (qs.top.length ? "\nО чём спрашивали: " + qs.top.join(", ") : "") : "",
       "",
       (src.data || []).length ? "Откуда пришли:\n" + src.data.map((d) => "• " + d.dimensions[0].name + " — " + n(d.metrics[0])).join("\n") : "",
@@ -459,11 +491,21 @@ async function botHook(request, env, ctx) {
   } catch (e) {
     return new Response("ok");
   }
+  // «@motohelper_post_bot масло tt250» в любом чате — карточки из справочника, без ИИ (ответ нужен за секунды)
+  if (up.inline_query) {
+    await botInline(env, up.inline_query).catch(() => {});
+    return new Response("ok");
+  }
   const m = up.message;
-  // только личка: в канале и группах бот молчит. Telegram отвечаем сразу, а ответ ИИ готовим в фоне: если держать
-  // запрос, Telegram может оборвать соединение, и Cloudflare остановит работу. В фоне есть ~30 с — ставим срок 25 с.
-  if (!m || !m.chat || m.chat.type !== "private") return new Response("ok");
-  ctx.waitUntil(botSafe(env, m, up.update_id));
+  if (!m || !m.chat) return new Response("ok");
+  // Telegram отвечаем сразу, а ответ ИИ готовим в фоне: если держать запрос, Telegram может оборвать соединение,
+  // и Cloudflare остановит работу. В фоне есть ~30 с — ставим срок 25 с.
+  if (m.chat.type === "private") ctx.waitUntil(botSafe(env, m, up.update_id));
+  else if (m.chat.type === "group" || m.chat.type === "supergroup") {
+    // в группе бот отвечает только когда к нему обращаются: /ask, @упоминание или ответ на его сообщение
+    const q = await groupQuestion(env, m);
+    if (q) ctx.waitUntil(botSafe(env, Object.assign({}, m, { text: q, caption: undefined }), up.update_id));
+  }
   return new Response("ok");
 }
 const SEEN = new Set();
@@ -487,38 +529,44 @@ async function botSafe(env, m, updateId) {
   }
 }
 async function botReply(env, m, dbg = () => {}) {
-  const chat = m.chat.id, say = (text) => tgApi(env, "sendMessage", { chat_id: chat, text: String(text).slice(0, 4096), disable_web_page_preview: true });
+  const chat = m.chat.id, group = m.chat.type !== "private";
+  // в группе отвечаем ответом на сообщение спросившего, чтобы было понятно кому
+  const to = group ? { reply_to_message_id: m.message_id, allow_sending_without_reply: true } : {};
+  const say = (text) => tgApi(env, "sendMessage", Object.assign({ chat_id: chat, text: String(text).slice(0, 4096), disable_web_page_preview: true }, to));
   const text = String(m.text || m.caption || "").trim();
+  if (group && text === "__hello") return say(GROUP_HELLO);
   // всё о собеседнике — в одной записи KV (на бесплатном тарифе 1000 записей в сутки):
-  // d — день, n — ответов за день, t — время последнего ответа, h — последние реплики (разговор забывается через 6 часов)
-  const key = "tg:u:" + chat, day = mskDay();
+  // d — день, n — ответов за день, t — время последнего ответа, h — последние реплики (разговор забывается через 6 часов).
+  // У группы — общий счётчик, а история не хранится: контекст — сообщение бота, на которое ответили
+  const key = (group ? "tg:g:" : "tg:u:") + chat, day = mskDay();
   let st = null;
   try {
     st = env.FEEDBACK && JSON.parse((await env.FEEDBACK.get(key)) || "null");
   } catch (e) {}
   st = st || { d: day, n: 0, t: 0, h: [] };
   if (st.d !== day) (st.d = day), (st.n = 0);
-  if (Date.now() - st.t > 6 * 3600e3) st.h = [];
-  if (/^\/start/.test(text)) {
+  if (Date.now() - st.t > 6 * 3600e3 || group) st.h = [];
+  if (group && m.reply_to_message && m.reply_to_message.from && m.reply_to_message.from.is_bot && m.reply_to_message.text) st.h = [{ role: "assistant", content: m.reply_to_message.text.slice(0, 1500) }];
+  if (!group && /^\/start/.test(text)) {
     if (env.FEEDBACK && !(await env.FEEDBACK.get("tg:owner"))) await env.FEEDBACK.put("tg:owner", String(chat));
-    return say("Привет! Я ИИ-механик MotoHelper 🏍\n\nНапиши, что случилось и какой у тебя мотоцикл — например: «TT250 не заводится на холодную». Можно прислать фото детали или поломки.\n\nНовый разговор — /new\nСайт: https://motohelper.ru/");
+    return say("Привет! Я ИИ-механик MotoHelper 🏍\n\nНапиши, что случилось и какой у тебя мотоцикл — например: «TT250 не заводится на холодную». Можно прислать фото детали или поломки.\n\nНовый разговор — /new\n\n💬 Добавь меня в чат мотоциклистов — там спрашивай через /ask.\n🔎 В любом чате набери @motohelper_post_bot и модель (например, tt250) — пришлю карточку с маслом, свечой и зазорами.\n\nСайт: https://motohelper.ru/");
   }
   if (/^\/new/.test(text)) {
     if (env.FEEDBACK && st.h.length) await env.FEEDBACK.put(key, JSON.stringify(Object.assign(st, { h: [] })), { expirationTtl: 60 * 60 * 48 });
     return say("Начнём заново. Какой мотоцикл и что с ним?");
   }
   if (!text && !m.photo) return say("Я понимаю текст и фото. Опиши поломку словами 🙂");
-  if (st.n >= BOT_DAILY) return say("На сегодня лимит ответов исчерпан — приходи завтра. Пока можно поискать на сайте: https://motohelper.ru/");
+  if (st.n >= (group ? GROUP_DAILY : BOT_DAILY)) return say("На сегодня лимит ответов исчерпан — приходи завтра. Пока можно поискать на сайте: https://motohelper.ru/");
   const typing = () => tgApi(env, "sendChatAction", { chat_id: chat, action: "typing" }).catch(() => {});
   typing();
   const tick = setInterval(typing, 4500); // «печатает…» гаснет через 5 секунд — обновляем, пока ИИ пишет
   try {
-    return await botAnswer(env, m, chat, say, text, key, st, dbg);
+    return await botAnswer(env, m, chat, say, text, key, st, dbg, to);
   } finally {
     clearInterval(tick);
   }
 }
-async function botAnswer(env, m, chat, say, text, key, st, dbg) {
+async function botAnswer(env, m, chat, say, text, key, st, dbg, to) {
   const past = st.h;
   const q = text || "Что на фото и что с этим делать?";
   const refs = await botRefs(past.filter((x) => x.role === "user").map((x) => x.content).concat(q).join(" "));
@@ -536,15 +584,16 @@ async function botAnswer(env, m, chat, say, text, key, st, dbg) {
   const shop = await shopLine(q, refs);
   const esc = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   // ссылки на магазины — короткими словами (HTML), а не длинными адресами; если Telegram не принял HTML — шлём текстом
-  let sent = shop ? await tgApi(env, "sendMessage", { chat_id: chat, text: (esc(reply) + "\n\n" + shop).slice(0, 4096), parse_mode: "HTML", disable_web_page_preview: true }) : null;
+  let sent = shop ? await tgApi(env, "sendMessage", Object.assign({ chat_id: chat, text: (esc(reply) + "\n\n" + shop).slice(0, 4096), parse_mode: "HTML", disable_web_page_preview: true }, to)) : null;
   if (!sent || !sent.ok) sent = await say(reply);
   if (!sent || !sent.ok) dbg("Telegram не принял ответ: " + JSON.stringify(sent).slice(0, 200));
   return sent;
 }
 async function botSetup(env, origin) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TG_HOOK_SECRET) return { ok: false, error: "нужны TELEGRAM_BOT_TOKEN и TG_HOOK_SECRET" };
-  const hook = await tgApi(env, "setWebhook", { url: origin + "/tg-hook", secret_token: env.TG_HOOK_SECRET, allowed_updates: ["message"], drop_pending_updates: true });
+  const hook = await tgApi(env, "setWebhook", { url: origin + "/tg-hook", secret_token: env.TG_HOOK_SECRET, allowed_updates: ["message", "inline_query"], drop_pending_updates: true });
   await tgApi(env, "setMyCommands", { commands: [{ command: "new", description: "Новый разговор" }, { command: "start", description: "Как пользоваться" }] });
+  await tgApi(env, "setMyCommands", { scope: { type: "all_group_chats" }, commands: [{ command: "ask", description: "Спросить механика: /ask TT250 не заводится" }] });
   await tgApi(env, "setMyName", { name: "MotoHelper — ИИ-механик" });
   await tgApi(env, "setMyShortDescription", { short_description: "ИИ-механик: поломки, ТО и ремонт мотоциклов и питбайков. motohelper.ru" });
   await tgApi(env, "setMyDescription", { description: "Опиши поломку и модель — ИИ-механик MotoHelper подскажет, что проверить, и даст цифры: масло, свечи, зазоры клапанов. Можно прислать фото." });
@@ -635,4 +684,162 @@ async function questionStats(env) {
   const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]).slice(0, 5).map((k) => k + " — " + cnt[k]);
   const tg = vals.filter((v) => v.src === "tg").length;
   return { total: keys.length, tg: Math.round((tg / (vals.length || 1)) * keys.length), site: keys.length - Math.round((tg / (vals.length || 1)) * keys.length), top };
+}
+
+/* --- Бот в группах и чатах мотоциклистов --- */
+const GROUP_DAILY = 300; // ответов в сутки на одну группу
+const GROUP_HELLO = "Привет, я ИИ-механик MotoHelper 🏍\n\nСпроси меня прямо здесь:\n/ask TT250 не заводится на холодную\n\nИли ответь на моё сообщение — продолжу разговор. Знаю 2 700 моделей и 970 моторов: масло, свечи, зазоры, частые поломки.";
+let BOT_ME = null;
+async function botMe(env) {
+  if (!BOT_ME) {
+    const r = await tgApi(env, "getMe", {}).catch(() => null);
+    BOT_ME = (r && r.result && r.result.username) || "motohelper_post_bot";
+  }
+  return BOT_ME;
+}
+async function groupQuestion(env, m) {
+  const me = (await botMe(env)).toLowerCase();
+  const text = String(m.text || m.caption || "").trim();
+  // бота добавили в группу — коротко рассказываем, как спрашивать
+  if ((m.new_chat_members || []).some((u) => u.is_bot && String(u.username).toLowerCase() === me)) return "__hello";
+  const cmd = /^\/(\w+)(@(\w+))?\s*([\s\S]*)$/.exec(text);
+  if (cmd) {
+    if (cmd[3] && cmd[3].toLowerCase() !== me) return null; // команда другому боту
+    if (cmd[1] === "start" || cmd[1] === "help") return "__hello";
+    if (cmd[1] !== "ask") return null;
+    // «/ask» в ответ на чужой вопрос — отвечаем на него
+    return cmd[4].trim() || (m.reply_to_message && (m.reply_to_message.text || m.reply_to_message.caption)) || "__hello";
+  }
+  const re = new RegExp("@" + me + "\\b", "i");
+  if (re.test(text)) return text.replace(re, "").trim() || "__hello";
+  const r = m.reply_to_message;
+  if (r && r.from && r.from.is_bot && String(r.from.username).toLowerCase() === me && text) return text;
+  return null;
+}
+
+/* --- Встроенный режим: карточки моделей и моторов прямо в любом чате --- */
+async function botInline(env, iq) {
+  const q = String(iq.query || "").trim();
+  const results = [];
+  if (q.length >= 2) {
+    const refs = await botRefs(q), me = await botMe(env);
+    refs.slice(0, 8).forEach((line, i) => {
+      const m = /^(.+?) — (https:\/\/motohelper\.ru\/\S+)$/.exec(line);
+      if (!m) return;
+      const head = m[1], url = m[2];
+      const title = head.split(":")[0].replace(/^Мотор /, "Мотор ");
+      const facts = head.indexOf(":") > 0 ? head.slice(head.indexOf(":") + 1).trim() : head;
+      results.push({
+        type: "article",
+        id: String(i) + "-" + url.length,
+        title: title.slice(0, 64),
+        description: facts.slice(0, 200),
+        url,
+        input_message_content: { message_text: ("🏍 " + head.replace(/; /g, "\n• ").replace(": мотор ", "\n• мотор ") + "\n\nПодробно: " + url + "\nСпросить механика: @" + me).slice(0, 4000), disable_web_page_preview: true },
+      });
+    });
+  }
+  const res = { inline_query_id: iq.id, results, cache_time: 3600, is_personal: false };
+  if (!results.length) res.button = { text: "Спросить ИИ-механика в личке", start_parameter: "inline" };
+  return tgApi(env, "answerInlineQuery", res);
+}
+
+/* --- «Спроси механика» на страницах каталога (m/…): короткий ответ потоком, как в приложении --- */
+const ASK_IP = new Map(); // вопросов в сутки с одного адреса — в памяти сервера, примерно
+async function pageAsk(env, ctx, body, ip) {
+  const q = String(body.ask || "").trim().slice(0, 600), about = String(body.ctx || "").trim().slice(0, 160);
+  if (q.length < 3) return json({ error: "empty" }, 400);
+  const k = mskDay() + "|" + ip, n = (ASK_IP.get(k) || 0) + 1;
+  if (ASK_IP.size > 20000) ASK_IP.clear();
+  ASK_IP.set(k, n);
+  if (n > 30) return json({ error: "rate_limited" }, 429);
+  const refs = await botRefs(about + " " + q);
+  const rules = BOT_RULES.replace("и отвечаешь в Telegram", "и отвечаешь на странице сайта");
+  const sys = rules + (about ? "\n\nЧеловек читает страницу: " + about + ". Если в вопросе нет другой модели — отвечай про неё." : "") + "\n\nСправочник сайта по теме вопроса:\n" + (refs.length ? refs.join("\n") : "(ничего не нашлось — отвечай в общем)");
+  ctx.waitUntil(Promise.resolve(logQuestion(env, "page", [{ role: "user", content: (about ? "[" + about + "] " : "") + q }])));
+  return answer(env, [{ role: "system", content: sys }, { role: "user", content: q }], [], ip);
+}
+
+/* --- Отзывы владельцев на страницах моделей ---
+   Все одобренные отзывы модели — в одной записи KV «rv:<адрес модели>» (показ страницы = одно чтение, без list —
+   на бесплатном тарифе list ограничен 1000 в сутки). «rv:index» — список моделей с отзывами (для еженедельной
+   выгрузки в HTML страниц). Модерация: явный мусор отсекаем правилами, остальное проверяет ИИ. */
+const RV_IP = new Map();
+const rvSlug = (x) => (/^[a-z0-9-]{2,80}$/.test(String(x || "")) ? String(x) : null);
+async function listReviews(env, slug) {
+  slug = rvSlug(slug);
+  if (!slug || !env.FEEDBACK) return json({ ok: false, items: [] });
+  let items = [];
+  try {
+    items = JSON.parse((await env.FEEDBACK.get("rv:" + slug)) || "[]");
+  } catch (e) {}
+  return new Response(JSON.stringify({ ok: true, items }), { headers: { ...CORS, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=300" } });
+}
+async function saveReview(env, r, ip) {
+  const slug = rvSlug(r.slug);
+  if (!slug || !env.FEEDBACK) return json({ ok: false, error: "bad" }, 400);
+  const clean = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
+  const item = { t: new Date().toISOString().slice(0, 10), name: clean(r.name, 40) || "Владелец", km: clean(r.km, 20), text: clean(r.text, 1500) };
+  if (item.text.length < 30) return json({ ok: false, error: "short" }, 400);
+  const k = mskDay() + "|" + ip, n = (RV_IP.get(k) || 0) + 1;
+  if (RV_IP.size > 20000) RV_IP.clear();
+  RV_IP.set(k, n);
+  if (n > 5) return json({ ok: false, error: "rate_limited" }, 429);
+  // ссылки, контакты и явный мат — сразу нет
+  const all = item.name + " " + item.km + " " + item.text;
+  if (/https?:|www\.|\.ru\b|\.com\b|@\w|t\.me|\+?\d[\d\s()-]{9,}\d|х[уy][йияеё]|п[иі]зд|еба[нл]|бля|сук[аи](?![а-яё])/i.test(all)) return json({ ok: true, published: false });
+  let verdict = "";
+  try {
+    const res = await answer(env, [{ role: "system", content: "Ты модератор отзывов на сайте-справочнике по мотоциклам. Отзыв к модели «" + clean(r.model, 80) + "». Ответь строго одним словом: OK — если это осмысленный отзыв владельца (опыт езды, поломки, обслуживание, впечатления), без оскорблений, мата, рекламы, контактов и политики; NO — во всех остальных случаях." }, { role: "user", content: item.text }], [], "rv", true);
+    verdict = (await collect(res)).toUpperCase();
+  } catch (e) {}
+  if (verdict.indexOf("OK") !== 0) return json({ ok: true, published: false });
+  let items = [];
+  try {
+    items = JSON.parse((await env.FEEDBACK.get("rv:" + slug)) || "[]");
+  } catch (e) {}
+  items.unshift(item);
+  await env.FEEDBACK.put("rv:" + slug, JSON.stringify(items.slice(0, 50)));
+  if (items.length === 1) {
+    let idx = [];
+    try {
+      idx = JSON.parse((await env.FEEDBACK.get("rv:index")) || "[]");
+    } catch (e) {}
+    if (idx.indexOf(slug) < 0) await env.FEEDBACK.put("rv:index", JSON.stringify(idx.concat(slug)));
+  }
+  return json({ ok: true, published: true, item });
+}
+
+/* --- Яндекс.Вебмастер: сколько страниц в поиске (для понедельничного отчёта) --- */
+async function webmasterStats(env) {
+  if (!env.YANDEX_WEBMASTER_TOKEN) return null;
+  const api = (p) => fetch("https://api.webmaster.yandex.net/v4" + p, { headers: { Authorization: "OAuth " + env.YANDEX_WEBMASTER_TOKEN } }).then((r) => r.json());
+  const me = await api("/user");
+  if (!me.user_id) return null;
+  const hosts = await api("/user/" + me.user_id + "/hosts");
+  const h = (hosts.hosts || []).find((x) => /motohelper\.ru/.test(x.ascii_host_url || x.host_id || ""));
+  if (!h) return null;
+  const sm = await api("/user/" + me.user_id + "/hosts/" + encodeURIComponent(h.host_id) + "/summary");
+  const pr = sm.site_problems || {};
+  const RU = { FATAL: "фатальные", CRITICAL: "критичные", POSSIBLE_PROBLEM: "возможные", RECOMMENDATION: "рекомендации" };
+  const problems = Object.keys(pr).filter((k) => pr[k]).map((k) => (RU[k] || k.toLowerCase()) + " — " + pr[k]).join(", ");
+  return { searchable: sm.searchable_pages_count || 0, excluded: sm.excluded_pages_count || 0, sqi: sm.sqi, problems };
+}
+
+async function geminiTimes(env) {
+  if (!env.GEMINI_API_KEY) return { ok: false, error: "нет GEMINI_API_KEY" };
+  const body = JSON.stringify({ contents: [{ role: "user", parts: [{ text: "Ответь одним словом по-русски: привет" }] }], generationConfig: { maxOutputTokens: 20 } });
+  const out = await Promise.all(GEMINI_MODELS.map(async (model) => {
+    const t = Date.now(), ac = new AbortController(), timer = setTimeout(() => ac.abort(), 20000);
+    try {
+      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY }, body, signal: ac.signal });
+      await r.text();
+      return { model, status: r.status, ms: Date.now() - t };
+    } catch (e) {
+      return { model, status: "timeout", ms: Date.now() - t };
+    } finally {
+      clearTimeout(timer);
+    }
+  }));
+  return { ok: true, order: GEMINI_MODELS, times: out };
 }
