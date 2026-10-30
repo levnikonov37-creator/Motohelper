@@ -15274,12 +15274,44 @@ function SpecsView({
 function tuneStockInstalled(id, carb) {
   return id === "pwk" && /PWK3|Racing 34|PE34|FCR/i.test(carb) || id === "pe30" && /PE30/i.test(carb) || id === "pwk28" && /PWK28|PE26|PZ26/i.test(carb);
 }
-function tuneGain(items) {
-  const p = items.reduce((s, t) => s + t.power, 0);
-  return Math.round(p * (items.filter(t => t.power > 0).length > 1 ? 0.8 : 1));
+/* Прибавка мощности от набора доработок, % к заводской (оценка на коленвале). Не простая сумма:
+   - свап — мощность нового мотора из базы, остальное считается от неё;
+   - расточка (бигбор) — множитель;
+   - «дыхание» (фильтр, выпуск, карбюратор, распредвал, каналы, резонатор…) упирается в одно и то же место,
+     доли складываются как 1 − Π(1 − p) и ещё ×0.85;
+   - без подбора смеси (жиклёры на карбюраторе, прошивка на инжекторе) от «дыхания» остаётся меньше половины,
+     от расточки — половина: мотор беднеет и греется. tuned = считать, что смесь подобрана (для карточек);
+   - электроника — небольшой довесок; CDI без ограничителя даёт обороты, а не силы (TUNE_RPM, speedFor). */
+const TUNE_SWAP = {
+  "swap-z190": "Z190",
+  "swap-pr300": "PR300"
+};
+const TUNE_BORE = ["bore300", "bore-nb350", "bore-z212", "bore-yx", "bore-cg"];
+const TUNE_ELEC = ["cdi", "cdi-prog", "ecu", "jp-ecu"];
+function tuneMixOk(items, eng) {
+  const has = id => items.some(t => t.id === id),
+    g = k => eng && eng.groups.indexOf(k) >= 0;
+  return g("efi") ? has("ecu") || has("jp-ecu") : g("carb") ? has("jets") || has("jp-jetkit") : true;
+}
+function tuneGain(items, eng, tuned) {
+  const p = items.filter(t => t.power > 0);
+  if (!p.length) return 0;
+  const mixOk = tuned || !eng || tuneMixOk(items, eng);
+  const sw = p.find(t => TUNE_SWAP[t.id]),
+    to = sw && ENGINES[TUNE_SWAP[sw.id]];
+  const base = sw ? to && eng ? to.hp / (eng.stockHp || eng.hp) : 1 + sw.power / 100 : 1;
+  let bore = 1,
+    breath = 1,
+    elec = 0;
+  p.forEach(t => {
+    if (TUNE_SWAP[t.id]) return;
+    if (TUNE_BORE.indexOf(t.id) >= 0) bore *= 1 + t.power / 100 * (mixOk ? 1 : 0.5);else if (TUNE_ELEC.indexOf(t.id) >= 0) elec += t.power / 100;else breath *= 1 - t.power / 100;
+  });
+  const br = (1 - breath) * 0.85 * (mixOk ? 1 : 0.4);
+  return Math.round((base * bore * (1 + br) * (1 + elec) - 1) * 100);
 }
 function tuneMeters(eng, items) {
-  const gain = tuneGain(items);
+  const gain = tuneGain(items, eng);
   return {
     hp: Math.round(eng.stockHp * (1 + gain / 100) * 10) / 10,
     gain: gain
@@ -15339,7 +15371,7 @@ function buildPlanRaw(eng, goals, budget, installedIds) {
     used.add(x.t.id);
     total += x.t.price;
   });
-  const gain = tuneGain(pick.map(p => p.t));
+  const gain = tuneGain(pick.map(p => p.t), eng, true);
   const need = [];
   const want = (id, why) => {
     const t = TUNING.find(x => x.id === id);
@@ -15368,7 +15400,7 @@ function Dyno({
   items
 }) {
   const pk = enginePeak(eng),
-    gain = tuneGain(items);
+    gain = tuneGain(items, eng);
   let shift = 0;
   items.forEach(t => {
     shift += {
@@ -15592,9 +15624,13 @@ function JetWeather({
 function Sprockets({
   eng,
   bike,
-  cu
+  cu,
+  items
 }) {
   const inst = TUNING.filter(t => eng.installed.indexOf(t.id) >= 0);
+  /* звёзды «сейчас» — что стоит на мотоцикле; мощность — с доработками из проекта, как в «Проекте» выше */
+  const all = items || inst,
+    withProject = all.length > inst.length && all.some(t => t.power > 0 || t.rpm);
   const base = speedFor(eng, bike, cu, inst);
   const [f1, setF1] = useState(base.front),
     [r1, setR1] = useState(base.rear),
@@ -15613,11 +15649,11 @@ function Sprockets({
   }, /*#__PURE__*/React.createElement("h2", null, "Вариатор"), /*#__PURE__*/React.createElement("p", {
     className: "muted"
   }, "У скутера передаточное меняет вариатор: тяжелее ролики — выше максималка, но вялее разгон; легче — наоборот. Жёстче пружина сцепления — подхват на более высоких оборотах."));
-  const s1 = speedFor(eng, bike, cu, inst, {
+  const s1 = speedFor(eng, bike, cu, all, {
       front: f1,
       rear: r1
     }),
-    s2 = speedFor(eng, bike, cu, inst, {
+    s2 = speedFor(eng, bike, cu, all, {
       front: f2,
       rear: r2
     });
@@ -15661,7 +15697,7 @@ function Sprockets({
     className: "panel sprockets"
   }, /*#__PURE__*/React.createElement("h2", null, "Звёзды: разгон или скорость"), /*#__PURE__*/React.createElement("div", {
     className: "spr-cur"
-  }, /*#__PURE__*/React.createElement("span", null, "Сейчас ", /*#__PURE__*/React.createElement("b", null, f1, "/", r1), " · передаточное ", k1.toFixed(2), cu.sprF ? "" : " · типовые для класса"), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("span", null, "Сейчас ", /*#__PURE__*/React.createElement("b", null, f1, "/", r1), " · передаточное ", k1.toFixed(2), cu.sprF ? "" : " · типовые для класса", withProject ? " · с доработками из проекта (≈ " + s1.hp + " л.с.)" : ""), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "link small",
     onClick: () => setEditCur(!editCur)
@@ -15767,6 +15803,7 @@ function TuneCatalog({
       stockI = !mine && tuneStockInstalled(t.id, eng.carb),
       isOpen = open === t.id,
       dv = ok ? speedDelta(t) : 0,
+      gp = t.power > 0 ? tuneGain([t], eng, true) : 0,
       q = tuneShopQuery(t, eng);
     return /*#__PURE__*/React.createElement("article", {
       key: t.id,
@@ -15778,9 +15815,9 @@ function TuneCatalog({
       className: "tz-top"
     }, /*#__PURE__*/React.createElement("span", {
       className: "tz-cat"
-    }, t.cat), t.power > 0 && /*#__PURE__*/React.createElement("span", {
+    }, t.cat), gp > 0 && /*#__PURE__*/React.createElement("span", {
       className: "tz-gain"
-    }, "+", t.power, "% \xB7 \u2248+", Math.round(eng.stockHp * t.power / 10) / 10, " \u043B.\u0441."), dv ? /*#__PURE__*/React.createElement("span", {
+    }, "+", gp, "% \xB7 \u2248+", Math.round(eng.stockHp * gp / 10) / 10, " \u043B.\u0441."), dv ? /*#__PURE__*/React.createElement("span", {
       className: "tz-speed " + (dv > 0 ? "up" : "down")
     }, dv > 0 ? "+" : "", dv, " \u043A\u043C/\u0447") : null, t.must && ok && !mine && /*#__PURE__*/React.createElement("span", {
       className: "tz-must"
@@ -15915,7 +15952,11 @@ function Tuning({
     wear = tuneWear(installedItems.concat(chosen));
   const baseSp = speedFor(eng, bike, cu, installedItems),
     afterSp = speedFor(eng, bike, cu, installedItems.concat(chosen));
-  const speedDelta = t => t.power > 0 || ["sp-tq", "sp-sp", "rear-sp"].indexOf(t.id) >= 0 ? speedFor(eng, bike, cu, installedItems.concat([t])).v - baseSp.v : 0;
+  const speedDelta = t => t.power > 0 || t.rpm || ["sp-tq", "sp-sp", "rear-sp"].indexOf(t.id) >= 0 ? speedFor(eng, bike, cu, installedItems.concat([t]), {
+    tuned: true
+  }).v - speedFor(eng, bike, cu, installedItems, {
+    tuned: true
+  }).v : 0;
   const parts = chosen.filter(t => !t.svc),
     svcs = chosen.filter(t => t.svc);
   const total = parts.reduce((s, t) => s + t.price, 0);
@@ -15925,7 +15966,8 @@ function Tuning({
   const isAir = eng.groups.indexOf("air") >= 0,
     isLiq = eng.groups.indexOf("liquid") >= 0,
     isCarb = eng.groups.indexOf("carb") >= 0;
-  const gainAll = tuneGain(installedItems.concat(chosen));
+  const gainAll = tuneGain(installedItems.concat(chosen), eng),
+    mixOk = tuneMixOk(installedItems.concat(chosen), eng);
   const warns = [];
   if (gainAll > 0 && isAir && !has("oilcool")) warns.push("Прирост без маслорадиатора — риск перегрева воздушника.");
   if (gainAll > 0 && isLiq && !has("fan") && eng.stroke !== "2T") warns.push("Добавь вентилятор: штатного охлаждения в грязи не хватает.");
@@ -16005,7 +16047,9 @@ function Tuning({
     className: "u"
   }, "\u043B.\u0441."), chosen.length > 0 && /*#__PURE__*/React.createElement("span", {
     className: "muted small"
-  }, "\u043E\u0446\u0435\u043D\u043A\u0430, +", after.gain - before.gain, "%")), /*#__PURE__*/React.createElement("div", {
+  }, "\u043E\u0446\u0435\u043D\u043A\u0430, +", after.gain - before.gain, "%")), chosen.some(t => t.power > 0) && /*#__PURE__*/React.createElement("p", {
+    className: "muted small proj-how"
+  }, "Оценка на коленвале, на колесе будет на 10–15% меньше. Прибавки не складываются напрямую: фильтр, выпуск, карбюратор и распредвал упираются в одно — считаем с поправкой.", !mixOk ? " Смесь не подобрана — поэтому прибавка урезана: без жиклёров (на инжекторе — без прошивки) мотор беднеет и греется, а не едет быстрее." : ""), /*#__PURE__*/React.createElement("div", {
     className: "proj-speed"
   }, /*#__PURE__*/React.createElement("span", null, "\u041C\u0430\u043A\u0441. \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C \u2248"), /*#__PURE__*/React.createElement("b", null, baseSp.v), chosen.length > 0 && afterSp.v !== baseSp.v && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     className: "arrow"
@@ -16060,7 +16104,8 @@ function Tuning({
   }, w))))), /*#__PURE__*/React.createElement(Sprockets, {
     eng: eng,
     bike: bike,
-    cu: cu
+    cu: cu,
+    items: installedItems.concat(chosen)
   }), /*#__PURE__*/React.createElement(JetWeather, {
     eng: eng
   }), /*#__PURE__*/React.createElement(TuneCatalog, {

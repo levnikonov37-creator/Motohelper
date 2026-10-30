@@ -2470,9 +2470,11 @@ function speedFor(eng, bike, cu, items, opt) {
     if (t.id === "sp-tq") f -= 1; if (t.id === "sp-sp") f += 1; if (t.id === "rear-sp") r += 2;
   });
   var rim = Number(cu.rim) || P.rim, circ = tireCirc(rim, rim === P.rim ? P.h : (rim <= 14 ? 85 : rim <= 17 ? 90 : 105));
-  var gain = typeof tuneGain === "function" ? tuneGain(items) : 0;
+  var gain = typeof tuneGain === "function" ? tuneGain(items, eng, opt.tuned) : 0;
   var hp = cu.hp && !opt.ignoreUserHp ? Number(cu.hp) : (eng.stockHp || eng.hp) * (1 + gain / 100);
   var red = (typeof enginePeak === "function" ? enginePeak(eng).red : 9000);
+  /* CDI без ограничителя, прошивка — выше отсечка (берём наибольшую прибавку) */
+  red += items.reduce(function (m, t) { return Math.max(m, t.rpm || 0); }, 0);
   /* скутер: вариатор, звёзд нет — topRatio мотора уже полное передаточное, колесо 10–13" */
   if (eng.cvt) { r = f = 1; if (!cu.rim) { rim = 12; circ = tireCirc(12, 75); } }
   var vGear = red / (topRatio(eng) * (r / f)) * circ * 60 / 1000;
@@ -10697,11 +10699,21 @@ var TUNE_SAVES = {
   radguard: "Радиатор цел после падения — мотор не закипит.",
   clutch: "Сцепление не буксует и не перегревает масло после прироста мощности."
 };
+/* ===== Тюнинг: прибавка мощности по одной доработке, % к заводской мощности (при правильной настройке смеси) =====
+   Пересмотрено вниз: жиклёры сами мощности не добавляют (без них не будет прибавки от остального), облегчённый
+   маховик даёт приёмистость, а не лошадиные силы; CDI без ограничителя — обороты (rpm), а не силы.
+   Как доработки складываются между собой — tuneGain в app.js. */
+var TUNE_POWER = { jets: 0, "flywheel-l": 0, cdi: 1, "cdi-prog": 2, bore300: 15, "bore-yx": 6, "bore-cg": 10, "bore-z212": 9,
+  full: 6, slip: 2, header: 2, filter: 3, pwk: 5, pwk28: 6, "jp-jetkit": 5, ecu: 4, "jp-ecu": 4 };
+/* на сколько поднимается отсечка, об/мин — важно, когда максималку ограничивают обороты */
+var TUNE_RPM = { cdi: 700, "cdi-prog": 500, ecu: 500, "jp-ecu": 500 };
 TUNING.forEach(function (t) {
   var w = TUNE_WEAR[t.id];
   if (w) { t.wear = [w[0], w[1]]; t.wearOf = w[2]; t.wearWhy = w[3]; }
   if (TUNE_RISK[t.id]) t.risk = TUNE_RISK[t.id];
   if (TUNE_SAVES[t.id]) t.saves = TUNE_SAVES[t.id];
+  if (t.id in TUNE_POWER) t.power = TUNE_POWER[t.id];
+  if (TUNE_RPM[t.id]) t.rpm = TUNE_RPM[t.id];
 });
 TUNING.forEach(function (t) {
   var p = TUNE_PRICES[t.id];
