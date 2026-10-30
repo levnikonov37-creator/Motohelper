@@ -175,7 +175,16 @@ fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.st
 function pump(){return rd.read().then(function(c){if(c.done){if(!txt)throw new Error("Пустой ответ — попробуй ещё раз.");return}buf+=dec.decode(c.value,{stream:true});var i;while((i=buf.indexOf("\\n"))>=0){var l=buf.slice(0,i).trim();buf=buf.slice(i+1);if(l.indexOf("data:")!==0)continue;try{var j=JSON.parse(l.slice(5));txt+=j.response||(j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content)||""}catch(x){}}show(txt.replace(/\\*\\*/g,"").replace(/^#+\\s*/gm,""));return pump()})}return pump()})
 .catch(function(err){out.textContent=err.message||"Не получилось — попробуй ещё раз."}).then(function(){btn.disabled=false;if(window.ym)try{ym(113844391,"reachGoal","page_ask")}catch(x){}})})})();`;
 
+/* Яндекс показывает ~70 знаков заголовка и ~160–200 описания: длинный заголовок теряет « | MotoHelper»,
+   длинное описание обрезается по последней запятой или точке до 220 знаков */
+// заголовок «основа + хвост»: самый длинный хвост, при котором влезает в 75 знаков; длинную основу режем по слову
+const pickTitle = (base, tails) => { const t = tails.map((x) => base + x).find((x) => x.length <= 75); if (t) return t;
+  let b = base.slice(0, 62).replace(/[\s,/:;–—-]+\S*$/, ""); if ((b.match(/\(/g) || []).length > (b.match(/\)/g) || []).length) b = b.replace(/[\s,/:;–—-]+$/, "") + ")"; return b + tails[tails.length - 1]; };
+const fitTitle = (t) => (t.length > 70 ? t.replace(/ \| MotoHelper$/, "") : t);
+const fitDesc = (d) => { if (d.length <= 220) return d; const cut = d.slice(0, 220), i = Math.max(cut.lastIndexOf(", "), cut.lastIndexOf(". "), cut.lastIndexOf("; ")); return (i > 120 ? cut.slice(0, i) : cut.replace(/\s+\S*$/, "")).replace(/[,;:\s—–-]+$/, "") + "."; };
 function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv }) {
+  title = fitTitle(title);
+  desc = fitDesc(desc);
   return `<!doctype html>
 <html lang="ru">
 <head>
@@ -333,7 +342,7 @@ ${faqHtml}
 ${rvBlock(slug, full, b.name)}
 ${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
   const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${e0.oil || "—"}${e0.oilVol ? " " + e0.oilVol : ""}, свеча ${e0.spark || "—"}, зазоры клапанов ${e0.valveIn || "—"} / ${e0.valveEx || "—"}. Слабые места и ремонт.`;
-  files.set("m/" + slug + "/index.html", page({ rv: true, ask: full + " (мотор " + e0.code + ")", title: `${full} — масло, свечи, зазоры клапанов, слабые места | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b, 0),
+  files.set("m/" + slug + "/index.html", page({ rv: true, ask: full + " (мотор " + e0.code + ")", title: pickTitle(full, [" — масло, свечи, зазоры клапанов, слабые места | MotoHelper", " — масло, свечи, зазоры клапанов, слабые места", " — масло, свечи, зазоры клапанов", ": масло, свечи, клапаны"]), desc, canon, crumbs, body, sticky: appLink(b, 0),
     ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: full, url: canon, inLanguage: "ru", description: desc },
       { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] }));
 });
@@ -384,9 +393,9 @@ ${aka.length ? `<div class="chips">${aka.slice(0, 8).map((x) => `<span class="ch
 <h2>Мотоциклы с мотором ${esc(e.code)}</h2><div class="grid models">${list.slice(0, 60).map((x) => modelCard(x, true)).join("")}</div>
 ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(d.title)}</a>`).join("")}</div>` : ""}
 ${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="chips">${gs.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>` : ""}`;
-  const desc = `Мотор ${engTitle(e)}${e.cc ? ", " + e.cc + " см³" : ""}: масло ${e.oil || "—"}${e.oilVol ? " " + e.oilVol : ""}, свеча ${e.spark || "—"}${e.gap ? " (зазор " + e.gap + ")" : ""}, клапаны ${e.valveIn || "—"} / ${e.valveEx || "—"}. На каких мотоциклах стоит, слабые места, ремонт.`;
+  const desc = `Мотор ${dupCode[e.code] > 1 && e.name ? e.name : engTitle(e)}${e.cc ? ", " + e.cc + " см³" : ""}: масло ${e.oil || "—"}${e.oilVol ? " " + e.oilVol : ""}, свеча ${e.spark || "—"}${e.gap ? " (зазор " + e.gap + ")" : ""}, клапаны ${e.valveIn || "—"} / ${e.valveEx || "—"}. На каких мотоциклах стоит, слабые места, ремонт.`;
   const tName = dupCode[e.code] > 1 && e.name && e.name !== e.code ? e.name : e.code;
-  files.set("m/motor/" + slug + "/index.html", page({ ask: "мотор " + tName, title: `${tName} — масло и объём, свеча, зазоры клапанов | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b0, 0),
+  files.set("m/motor/" + slug + "/index.html", page({ ask: "мотор " + tName, title: pickTitle(tName, [" — масло и объём, свеча, зазоры клапанов | MotoHelper", " — масло, свеча, зазоры клапанов", ": масло, свеча, клапаны"]), desc, canon, crumbs, body, sticky: appLink(b0, 0),
     ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: "Мотор " + e.code, url: canon, inLanguage: "ru", description: desc }] }));
 });
 {
@@ -418,7 +427,7 @@ ${vt.html}
   const desc = (g.title + ": " + plain.slice(0, 3).join(" ")).slice(0, 230).replace(/\s+\S*$/, "") + "…";
   const ld = { "@context": "https://schema.org", "@type": "HowTo", name: g.title, inLanguage: "ru", url: canon, step: plain.map((t, i) => ({ "@type": "HowToStep", position: i + 1, text: t })) };
   if (g.tools && g.tools.length) ld.tool = g.tools.map((t) => ({ "@type": "HowToTool", name: t }));
-  files.set("m/remont/" + g.id + "/index.html", page({ ask: "инструкция «" + g.title + "»", title: `${g.title} на мотоцикле и питбайке — пошагово | MotoHelper`, desc, canon, crumbs, body, sticky: "/#g=" + g.id, ld: [crumbLd(crumbs), ld] }));
+  files.set("m/remont/" + g.id + "/index.html", page({ ask: "инструкция «" + g.title + "»", title: pickTitle(g.title, [" на мотоцикле и питбайке — пошагово | MotoHelper", " на мотоцикле и питбайке — пошагово", " — пошагово", ""]), desc, canon, crumbs, body, sticky: "/#g=" + g.id, ld: [crumbLd(crumbs), ld] }));
 });
 {
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Инструкции", null]];
