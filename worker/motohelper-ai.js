@@ -200,12 +200,27 @@ async function gemini(env, messages, images) {
     generationConfig: { maxOutputTokens: 4096, temperature: 0.4 },
   });
   let res, err = "";
+  // Gemini временами «зависает» на десятки секунд: ждём начала ответа не дольше 10 с на модель и 16 с всего (бот укладывается в свои 25 с),
+  // потом пробуем следующую модель, а за ней — встроенный ИИ Cloudflare (см. answer)
+  const until = Date.now() + 16000;
   for (const model of GEMINI_MODELS) {
-    res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":streamGenerateContent?alt=sse", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-      body,
-    });
+    const left = Math.min(10000, until - Date.now());
+    if (left < 1500) { err += "время вышло; "; res = null; break; }
+    const ac = new AbortController(), timer = setTimeout(() => ac.abort(), left);
+    try {
+      res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":streamGenerateContent?alt=sse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+        body,
+        signal: ac.signal,
+      });
+    } catch (e) {
+      clearTimeout(timer);
+      err += model + " не ответил за " + Math.round(left / 1000) + " с; ";
+      res = null;
+      continue;
+    }
+    clearTimeout(timer);
     if (res.ok && res.body) break;
     err += model + " " + res.status + " " + (await res.text()).slice(0, 120) + "; ";
     res = null;
