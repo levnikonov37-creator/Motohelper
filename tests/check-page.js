@@ -138,7 +138,8 @@ const server = http.createServer((req, res) => {
     if ((await page.locator(".tz-card").count()) < 5) errors.push("Тюнинг: в каталоге меньше 5 карточек");
     const tzPrice = await page.locator(".tz-price b").first().innerText().catch(() => "");
     if (!/\d\s?\d{3}–\d[\d\s]*₽|своими руками/.test(tzPrice)) errors.push("Тюнинг: цена не диапазоном: «" + tzPrice + "»");
-    // звёзды: «−» у передней звезды — тяга на колесе растёт
+    // звёзды (свёрнуты): открыть, «−» у передней звезды — тяга на колесе растёт
+    await page.locator(".fold-head", { hasText: "Звёзды" }).click();
     await page.locator(".sprockets .spr-steps").last().locator("button", { hasText: "−" }).first().click();
     const sprRes = await page.locator(".sprockets .spr-res").innerText().catch(() => "");
     if (!/\+\d/.test(sprRes)) errors.push("Звёзды: после «−1 спереди» нет прироста тяги: " + sprRes.replace(/\n/g, " "));
