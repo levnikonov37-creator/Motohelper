@@ -18,10 +18,14 @@
 // Сайт сам узнаёт, что фото работают: GET на адрес сервера отвечает {"images": true}.
 
 const DEEPSEEK_MODEL = "deepseek-flash";
-// Gemini: по очереди — старые модели Google снимает, а свежие бывают перегружены (503)
-// (на бесплатном ключе новые модели часто упираются в лимит 429 — быстрые и доступные стоят первыми;
-//  проверить, как отвечает каждая: <адрес сервера>/?test=models)
-const GEMINI_MODELS = ["gemini-3.5-flash", "gemini-flash-lite-latest", "gemini-3.8-flash", "gemini-flash-latest"];
+// Gemini: по очереди — у каждой модели свой бесплатный дневной лимит (429), свежие бывают перегружены (503).
+// Сначала полноценные flash, за ними облегчённые lite. «Раздумья» (thinking) минимальные: без них первые слова
+// приходят через ~1 с, а не через 8–12; на вопросы механику качество то же.
+// Проверить, как отвечает каждая: <адрес сервера>/?test=models; список моделей ключа и пробный вопрос — ?test=models&list=1 / &try=… (с DEBUG_TOKEN)
+const GEMINI_MODELS = ["gemini-3.5-flash", "gemini-3-flash-preview", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-lite-latest"];
+// уровень раздумий по моделям (не все понимают «minimal»: такой модели — её минимальный уровень или ничего)
+const GEMINI_THINK = { "gemini-3.6-flash": "low" };
+const thinkFor = (model) => (model in GEMINI_THINK ? GEMINI_THINK[model] : "minimal");
 // модель, которая отказала (лимит, ошибка, молчание), пропускаем 10 минут — не ждём её на каждом вопросе
 const GEM_BAD = new Map();
 const GROQ_MODEL = "llama-3.3-70b-versatile";
@@ -47,9 +51,9 @@ const sse = (body, provider) =>
 
 export default {
   // раз в день (Cloudflare → Triggers → Cron, 15:00 UTC = 18:00 МСК) — очередной пост в Telegram-канал
-  // и по понедельникам в 06:00 UTC (09:00 МСК) — отчёт о посещаемости владельцу
+  // и каждое утро в 06:00 UTC (09:00 МСК) — отчёт за вчера владельцу
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(event.cron === "0 6 * * 1" ? weeklyReport(env) : daily(env));
+    ctx.waitUntil(event.cron === "0 6 * * *" ? dailyReport(env) : daily(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -62,6 +66,8 @@ export default {
       if (u.searchParams.get("feedback")) return listFeedback(env, u.searchParams.get("token"));
       // самопроверка: <адрес сервера>/?test=1 — какой ИИ отвечает и какие ошибки у остальных (без ключей)
       // ?test=models — сколько отвечает каждая модель Gemini (чтобы первой в списке стояла быстрая)
+      // с DEBUG_TOKEN: &list=1 — какие модели есть у ключа; &try=a,b&think=low — пробный вопрос механику каждой модели
+      if (u.searchParams.get("test") === "models" && env.DEBUG_TOKEN && u.searchParams.get("token") === env.DEBUG_TOKEN && (u.searchParams.get("list") || u.searchParams.get("try"))) return json(await geminiProbe(env, u.searchParams));
       if (u.searchParams.get("test") === "models") return json(await geminiTimes(env));
       if (u.searchParams.get("test")) return selfTest(env);
       // отзывы владельцев модели: ?reviews=<адрес модели>
@@ -69,7 +75,8 @@ export default {
       // Telegram-канал: ?tg=status — что выйдет следующим; ?tg=run — опубликовать пост на сегодня, если ещё не вышел
       if (u.searchParams.get("tg") === "run") return json(await tgRun(env));
       // отчёт уходит только владельцу бота, так что ручной запуск безопасен
-      if (u.searchParams.get("tg") === "report") return json(await weeklyReport(env));
+      // &dry=1&token=<DEBUG_TOKEN> — показать текст отчёта, не отправляя
+      if (u.searchParams.get("tg") === "report") return json(await dailyReport(env, !!(u.searchParams.get("dry") && env.DEBUG_TOKEN && u.searchParams.get("token") === env.DEBUG_TOKEN)));
       if (u.searchParams.get("tg") === "setup") return json(await botSetup(env, u.origin));
       // проверка бота без Telegram: ?tg=dry&q=вопрос&token=<DEBUG_TOKEN>
       if (u.searchParams.get("tg") === "dry" && env.DEBUG_TOKEN && u.searchParams.get("token") === env.DEBUG_TOKEN) return json(await botDry(env, u.searchParams.get("q") || "TT250 не заводится"));
@@ -200,10 +207,10 @@ async function gemini(env, messages, images) {
       if (m) contents[last].parts.push({ inline_data: { mime_type: m[1], data: m[2] } });
     });
   }
-  const body = JSON.stringify({
+  const bodyFor = (model) => JSON.stringify({
     systemInstruction: system ? { parts: [{ text: system }] } : undefined,
     contents,
-    generationConfig: { maxOutputTokens: 4096, temperature: 0.4 },
+    generationConfig: Object.assign({ maxOutputTokens: 4096, temperature: 0.4 }, thinkFor(model) ? { thinkingConfig: { thinkingLevel: thinkFor(model) } } : {}),
   });
   let res, err = "";
   // Gemini временами «зависает» на десятки секунд: ждём начала ответа не дольше 10 с на модель и 16 с всего (бот укладывается в свои 25 с),
@@ -218,7 +225,7 @@ async function gemini(env, messages, images) {
       res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":streamGenerateContent?alt=sse", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-        body,
+        body: bodyFor(model),
         signal: ac.signal,
       });
     } catch (e) {
@@ -233,8 +240,8 @@ async function gemini(env, messages, images) {
     GEM_BAD.set(model, Date.now() + 600000);
     err += model + " " + res.status + " " + (await res.text()).slice(0, 120) + "; ";
     res = null;
-    // неверный ключ или регион не поддерживается — другие модели не помогут
-    if (err.indexOf(" 400 ") >= 0 || err.indexOf(" 403 ") >= 0) break;
+    // неверный ключ или регион не поддерживается — другие модели не помогут (а 400 из-за настроек одной модели — пробуем следующую)
+    if (err.indexOf(" 403 ") >= 0 || /API key/i.test(err)) break;
   }
   if (!res) throw new Error(err);
   // ответ Gemini → строки «data: {"response": "..."}», которые понимает сайт
@@ -361,25 +368,34 @@ async function metrika(env, q) {
   if (!r.ok) throw new Error("Метрика " + r.status + ": " + (j.message || "").slice(0, 150));
   return j;
 }
-async function weeklyReport(env) {
+/* утренний отчёт владельцу (в личку боту): вчерашний день из Метрики, канал, поиск, вопросы ИИ, здоровье сервера */
+async function dailyReport(env, dry) {
   try {
     if (!env.TELEGRAM_BOT_TOKEN) return { ok: false, error: "нет TELEGRAM_BOT_TOKEN" };
     if (!env.YANDEX_METRIKA_TOKEN) return { ok: false, error: "нет YANDEX_METRIKA_TOKEN" };
     const chat = await ownerChat(env);
     if (!chat) return { ok: false, error: "владелец не найден — напиши боту /start" };
     const M = "metrics=ym:s:visits,ym:s:users,ym:s:pageviews,ym:s:avgVisitDurationSeconds";
-    const [cur, prev, src, pages] = await Promise.all([
-      metrika(env, M + "&date1=7daysAgo&date2=yesterday"),
-      metrika(env, M + "&date1=14daysAgo&date2=8daysAgo"),
-      metrika(env, "metrics=ym:s:visits&dimensions=ym:s:lastTrafficSource&sort=-ym:s:visits&limit=5&date1=7daysAgo&date2=yesterday"),
-      metrika(env, "metrics=ym:pv:pageviews&dimensions=ym:pv:URLPath&sort=-ym:pv:pageviews&limit=5&date1=7daysAgo&date2=yesterday"),
+    const [cur, prev, week, src, pages] = await Promise.all([
+      metrika(env, M + "&date1=yesterday&date2=yesterday"),
+      metrika(env, M + "&date1=2daysAgo&date2=2daysAgo"),
+      metrika(env, "metrics=ym:s:users,ym:s:visits&date1=7daysAgo&date2=yesterday"),
+      metrika(env, "metrics=ym:s:visits&dimensions=ym:s:lastTrafficSource&sort=-ym:s:visits&limit=5&date1=yesterday&date2=yesterday"),
+      metrika(env, "metrics=ym:pv:pageviews&dimensions=ym:pv:URLPath&sort=-ym:pv:pageviews&limit=5&date1=yesterday&date2=yesterday"),
     ]);
-    const t = cur.totals || [0, 0, 0, 0], p = prev.totals || [0, 0, 0, 0];
+    const t = cur.totals || [0, 0, 0, 0], p = prev.totals || [0, 0, 0, 0], w = week.totals || [0, 0];
     const n = (x) => Math.round(x || 0).toLocaleString("ru-RU");
-    const delta = (a, b) => (!b ? "" : " (" + (a >= b ? "+" : "") + Math.round(((a - b) / b) * 100) + "% к прошлой неделе)");
+    const delta = (a, b) => (!b ? "" : " (" + (a >= b ? "+" : "") + Math.round(((a - b) / b) * 100) + "% к позавчера)");
     const min = Math.floor((t[3] || 0) / 60), sec = Math.round((t[3] || 0) % 60);
-    const qs = await questionStats(env).catch(() => null);
+    const day = new Date(Date.now() + 3 * 3600e3 - 864e5).toISOString().slice(5, 10).split("-").reverse().join(".");
+    // вчера по Москве: с 00:00 до 00:00 (полночь МСК = 21:00 UTC)
+    const mskMidnight = new Date(Date.parse(mskDay() + "T00:00:00Z") - 3 * 3600e3).toISOString();
+    const qs = await questionStats(env, 1, mskMidnight).catch(() => null);
     const wm = await webmasterStats(env).catch(() => null);
+    let health = null;
+    try {
+      health = env.FEEDBACK && JSON.parse((await env.FEEDBACK.get("health")) || "null");
+    } catch (e) {}
     let subs = null;
     try {
       const posts = await fetch(TG_POSTS).then((r) => r.json());
@@ -387,20 +403,22 @@ async function weeklyReport(env) {
       if (c.ok) subs = c.result;
     } catch (e) {}
     const lines = [
-      "📊 MotoHelper за неделю",
+      "📊 MotoHelper за вчера, " + day,
       "",
       "👤 Посетителей: " + n(t[1]) + delta(t[1], p[1]),
-      "🔁 Визитов: " + n(t[0]) + delta(t[0], p[0]),
-      "📄 Просмотров страниц: " + n(t[2]),
+      "🔁 Визитов: " + n(t[0]) + " · 📄 просмотров: " + n(t[2]),
       "⏱ В среднем на сайте: " + min + " мин " + sec + " с",
+      "📅 За 7 дней: " + n(w[0]) + " посетителей, " + n(w[1]) + " визитов",
       subs != null ? "📣 Подписчиков канала: " + n(subs) : "",
       wm ? "🔎 В поиске Яндекса: " + n(wm.searchable) + " страниц" + (wm.excluded ? " (исключено " + n(wm.excluded) + ")" : "") + (wm.sqi != null ? ", ИКС " + n(wm.sqi) : "") + (wm.problems ? "\n⚠️ Проблемы сайта в Вебмастере: " + wm.problems : "") : "",
-      qs ? "🤖 Вопросов ИИ-механику: " + n(qs.total) + " (сайт " + n(qs.site) + ", Telegram " + n(qs.tg) + ")" + (qs.top.length ? "\nО чём спрашивали: " + qs.top.join(", ") : "") : "",
+      qs ? "🤖 Вопросов ИИ-механику: " + n(qs.total) + (qs.tg ? " (сайт " + n(qs.site) + ", Telegram " + n(qs.tg) + ")" : "") + (qs.top.length ? "\nО чём спрашивали: " + qs.top.join(", ") : "") : "",
+      health ? (health.ai && health.ai.ok ? "✅ ИИ-механик работает" : "⚠️ ИИ-механик не ответил на проверке: " + ((health.ai && health.ai.error) || "?").slice(0, 120)) + (health.tg && !health.tg.ok ? "\n⚠️ Пост в канал не вышел: " + health.tg.error : "") : "",
       "",
       (src.data || []).length ? "Откуда пришли:\n" + src.data.map((d) => "• " + d.dimensions[0].name + " — " + n(d.metrics[0])).join("\n") : "",
       "",
       (pages.data || []).length ? "Что смотрели:\n" + pages.data.map((d) => "• " + (d.dimensions[0].name || "/") + " — " + n(d.metrics[0])).join("\n") : "",
     ].filter((x, i, a) => x !== "" || (a[i - 1] !== "" && i < a.length - 1)).join("\n").trim();
+    if (dry) return { ok: true, sent: false, text: lines };
     const r = await tgApi(env, "sendMessage", { chat_id: chat, text: lines, disable_web_page_preview: true });
     return r.ok ? { ok: true, sent: true } : { ok: false, error: "telegram: " + r.description };
   } catch (e) {
@@ -669,13 +687,14 @@ async function shopLine(q, refs) {
 const TOPICS = [["не заводится", /не завод|не запуск/], ["глохнет", /глохн|глохет/], ["клапаны", /клапан/], ["масло", /масл/], ["свечи", /свеч/], ["карбюратор и жиклёры", /карб|жикл/],
   ["цепь и звёзды", /цеп|звезд/], ["дым", /дым/], ["перегрев", /гре[её]тся|перегр|кипит/], ["стук и шумы", /стук|шум|гремит/], ["тормоза", /тормоз|колодк/], ["электрика", /аккум|зарядк|провод|реле|генератор|катушк|искр/],
   ["сцепление", /сцеплен/], ["тюнинг", /тюнинг|прямоток|мощност|инжектор/], ["выбор мотоцикла", /какой (выбрать|купить)|что (выбрать|купить)|посовет/]];
-async function questionStats(env) {
+/* вопросы ИИ-механику: за последние days суток или, если задан until, — за days суток до until (ISO) */
+async function questionStats(env, days, until) {
   if (!env.FEEDBACK) return null;
-  const since = new Date(Date.now() - 7 * 864e5).toISOString();
+  const since = new Date((until ? Date.parse(until) : Date.now()) - (days || 7) * 864e5).toISOString();
   let keys = [], cursor;
   do {
     const r = await env.FEEDBACK.list({ prefix: "q:", cursor, limit: 1000 });
-    keys = keys.concat(r.keys.map((k) => k.name).filter((k) => k.slice(2) >= since));
+    keys = keys.concat(r.keys.map((k) => k.name).filter((k) => k.slice(2) >= since && (!until || k.slice(2) < until)));
     cursor = r.list_complete ? null : r.cursor;
   } while (cursor && keys.length < 5000);
   const vals = await Promise.all(keys.slice(-300).map(async (k) => { try { return JSON.parse((await env.FEEDBACK.get(k)) || "{}"); } catch (e) { return {}; } }));
@@ -824,6 +843,46 @@ async function webmasterStats(env) {
   const RU = { FATAL: "фатальные", CRITICAL: "критичные", POSSIBLE_PROBLEM: "возможные", RECOMMENDATION: "рекомендации" };
   const problems = Object.keys(pr).filter((k) => pr[k]).map((k) => (RU[k] || k.toLowerCase()) + " — " + pr[k]).join(", ");
   return { searchable: sm.searchable_pages_count || 0, excluded: sm.excluded_pages_count || 0, sqi: sm.sqi, problems };
+}
+
+/* диагностика моделей Gemini (только с DEBUG_TOKEN): список моделей ключа или пробный вопрос с замером
+   времени до первых слов и до конца ответа */
+async function geminiProbe(env, q) {
+  if (!env.GEMINI_API_KEY) return { ok: false, error: "нет GEMINI_API_KEY" };
+  const H = { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY };
+  if (q.get("list")) {
+    const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=300", { headers: H });
+    const j = await r.json();
+    return { ok: r.ok, models: (j.models || []).filter((m) => (m.supportedGenerationMethods || []).indexOf("generateContent") >= 0).map((m) => m.name.replace("models/", "") + (m.thinking ? " [think]" : "") + " in:" + m.inputTokenLimit) };
+  }
+  const think = q.get("think"), sys = q.get("sys") || "Ты — опытный моторист. Отвечай по-русски, коротко и по делу, списком шагов.";
+  const ask = q.get("q") || "Kayo T2 250, мотор ZS172FMM (карбюратор PZ30). Глохнет на холодную, прогретый работает нормально. Что проверить по порядку?";
+  const gen = { maxOutputTokens: 2048, temperature: 0.4 };
+  if (think === "0") gen.thinkingConfig = { thinkingBudget: 0 };
+  else if (think) gen.thinkingConfig = { thinkingLevel: think };
+  const body = JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents: [{ role: "user", parts: [{ text: ask }] }], generationConfig: gen });
+  const out = await Promise.all(q.get("try").split(",").slice(0, 6).map(async (model) => {
+    const t = Date.now(), ac = new AbortController(), timer = setTimeout(() => ac.abort(), 40000);
+    try {
+      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":streamGenerateContent?alt=sse", { method: "POST", headers: H, body, signal: ac.signal });
+      if (!r.ok || !r.body) return { model, status: r.status, ms: Date.now() - t, err: (await r.text()).slice(0, 200) };
+      const rd = r.body.getReader(), dec = new TextDecoder();
+      let first = 0, raw = "";
+      for (;;) {
+        const { done, value } = await rd.read();
+        if (done) break;
+        raw += dec.decode(value, { stream: true });
+        if (!first && /"text"/.test(raw)) first = Date.now() - t;
+      }
+      const text = raw.split("\n").filter((l) => l.indexOf("data:") === 0).map((l) => { try { const j = JSON.parse(l.slice(5)); return ((j.candidates || [])[0] || {}).content.parts.map((p) => (p.thought ? "" : p.text || "")).join(""); } catch (e) { return ""; } }).join("");
+      return { model, status: 200, first, ms: Date.now() - t, len: text.length, text: text.slice(0, +q.get("n") || 600) };
+    } catch (e) {
+      return { model, status: "timeout", ms: Date.now() - t };
+    } finally {
+      clearTimeout(timer);
+    }
+  }));
+  return { ok: true, think: think || "по умолчанию", out };
 }
 
 async function geminiTimes(env) {

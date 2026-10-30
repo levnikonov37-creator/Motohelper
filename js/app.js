@@ -11564,7 +11564,7 @@ function App() {
     } catch (e) {}
   }
   /* пришёл по прямой ссылке (со страниц поиска: инструкция, проверка, модель) — сразу к делу, без приветствия */
-  const [onb, setOnb] = useState(() => firstVisit.current && !load("onboarded", false) && !/(^|[#&])(g|d|bike)=/.test(location.hash || "") ? 0 : null);
+  const [onb, setOnb] = useState(() => firstVisit.current && !load("onboarded", false) && !/(^|[#&])(g|d|bike|ai)=/.test(location.hash || "") ? 0 : null);
   useEffect(() => {
     const h = e => {
       const b = e.target.closest && e.target.closest(".tabs button, .view-toggle button, .seg button, .tags .chip");
@@ -11591,7 +11591,7 @@ function App() {
       return false;
     }
   });
-  const [page, setPage] = useState(() => guideFromHash() || diagFromHash() ? "repair" : "home");
+  const [page, setPage] = useState(() => guideFromHash() || diagFromHash() ? "repair" : aiFromHash() ? "ai" : "home");
   const [bikeTab, setBikeTab] = useState("overview");
   const [rv, setRv] = useState(() => guideFromHash() ? "guide:" + guideFromHash() : diagFromHash() ? "tree:" + diagFromHash() : "hub");
   const [partsQ, setPartsQ] = useState(null);
@@ -11625,6 +11625,8 @@ function App() {
       });else if (d) navTo({
         page: "repair",
         rv: "tree:" + d
+      });else if (aiFromHash()) navTo({
+        page: "ai"
       });
     };
     window.addEventListener("hashchange", h);
@@ -15708,7 +15710,8 @@ const TUNE_CAT_COLOR = {
 /* запрос в магазин: деталь для мотора ищем с кодом мотора («Бигбор 350 174MN-5»), остальное — «… мото» */
 function tuneShopQuery(t, eng) {
   const base = t.title.replace(/\s*\(.*?\)/g, "").replace(/\s+для\s+.*$/i, "").trim();
-  return ["Двигатель", "Впуск", "Выпуск", "Электроника", "Охлаждение"].indexOf(t.cat) >= 0 ? base + " " + eng.code.replace(/^ZS\s*/, "") : base + " мото";
+  /* generic — деталь не зависит от мотора (фильтр, термолента): искать без кода мотора */
+  return !t.generic && ["Двигатель", "Впуск", "Выпуск", "Электроника", "Охлаждение"].indexOf(t.cat) >= 0 ? base + " " + eng.code.replace(/^ZS\s*/, "") : base + " мото";
 }
 /* Каталог доработок: вкладки по категориям, компактные карточки с приростом, ценой детали и ссылками на магазины */
 function TuneCatalog({
@@ -16167,7 +16170,7 @@ function aiCatalog(eng, max) {
   const rest = list.filter(p => own.indexOf(p) < 0);
   return own.concat(rest).slice(0, max || 220).map(p => p.id + "|" + p.name + "|" + p.price).join("\n");
 }
-const AI_RULES = "Ты — ИИ-механик в приложении MotoHelper. Помогаешь владельцам мотоциклов, питбайков и мопедов (от китайских эндуро до японских и европейских моделей) с диагностикой и ремонтом. Отвечай по-русски, по делу, простым гаражным языком, без воды.\n" + "Правила:\n" + "1. Опирайся на карточку мотоцикла ниже: там характеристики именно этого экземпляра с изменениями владельца. Если нужного числа нет — так и скажи и дай типовой диапазон с пометкой «сверь с мануалом».\n" + "2. Диагностику веди от простого и дешёвого к сложному. Если данных мало — задай 1–2 уточняющих вопроса и остановись.\n" + "3. Для ремонта: пронумерованные шаги, нужный инструмент, на что обратить внимание.\n" + "4. Безопасность: если неисправность угрожает безопасности (тормоза, течь бензина, заклинивание), прямо скажи не ездить. Сложные работы (расточка, коленвал, сварка рамы) — советуй сервис.\n" + "5. Если советуешь деталь из каталога ниже, ставь метку [[p:ID]] сразу после названия, например «ремкомплект карбюратора [[p:rk-pe30]]». Используй только ID из каталога, не выдумывай.\n" + "6. Форматирование: короткие абзацы, списки через «- » или «1. », важное выделяй **жирным**. Без таблиц и без заголовков крупнее «### ».\n" + "7. Ответ обычно до 250 слов, если пользователь не просит подробнее.\n" + "8. Если ниже есть раздел «ИЗ БАЗЫ MOTOHELPER» — опирайся на него в первую очередь и бери цифры оттуда. Если ответ основан на инструкции или проверке оттуда, закончи строкой «Подробно: <ссылка на страницу>».";
+const AI_RULES = "Ты — ИИ-механик в приложении MotoHelper. Помогаешь владельцам мотоциклов, питбайков и мопедов (от китайских эндуро до японских и европейских моделей) с диагностикой и ремонтом. Отвечай по-русски, по делу, простым гаражным языком, без воды. Начинай сразу с сути — без приветствий и вступлений вроде «Привет» или «Отличный вопрос».\n" + "Правила:\n" + "1. Опирайся на карточку мотоцикла ниже: там характеристики именно этого экземпляра с изменениями владельца. Если нужного числа нет — так и скажи и дай типовой диапазон с пометкой «сверь с мануалом».\n" + "2. Диагностику веди от простого и дешёвого к сложному. Если данных мало — задай 1–2 уточняющих вопроса и остановись.\n" + "3. Для ремонта: пронумерованные шаги, нужный инструмент, на что обратить внимание.\n" + "4. Безопасность: если неисправность угрожает безопасности (тормоза, течь бензина, заклинивание), прямо скажи не ездить. Сложные работы (расточка, коленвал, сварка рамы) — советуй сервис.\n" + "5. Если советуешь купить или заменить деталь из каталога ниже, ставь метку [[p:ID]] сразу после её названия, например «замени ремкомплект карбюратора [[p:rk-pe30]]» — под ответом появится кнопка «в корзину». Не больше 3 меток на ответ и только для того, что действительно нужно купить (не для деталей, которые просто упоминаешь). Используй только ID из каталога, не выдумывай.\n" + "6. Форматирование: короткие абзацы, списки через «- » или «1. », важное выделяй **жирным**. Без таблиц и без заголовков крупнее «### ».\n" + "7. Ответ обычно до 250 слов, если пользователь не просит подробнее.\n" + "8. Если ниже есть раздел «ИЗ БАЗЫ MOTOHELPER» — опирайся на него в первую очередь и бери цифры оттуда. Если ответ основан на инструкции или проверке оттуда, закончи строкой «Подробно: <ссылка на страницу>».\n" + "9. Ты — основной механик MotoHelper: не отправляй человека в Telegram-бота, чаты или к другим ИИ.";
 
 /* ===== Мини-markdown ===== */
 function Inline({
@@ -16202,22 +16205,10 @@ function Inline({
     }, tok.slice(2, -2)));else if (tok.startsWith("`")) out.push(/*#__PURE__*/React.createElement("code", {
       key: k++
     }, tok.slice(1, -1)));else {
-      const p = partById(tok.slice(4, -2));
-      if (p) {
-        const inC = cartIds.indexOf(p.id) >= 0;
-        out.push(/*#__PURE__*/React.createElement("button", {
-          key: k++,
-          className: "part-tag" + (inC ? " in" : ""),
-          onClick: () => onPart(p),
-          title: inC ? "Уже в корзине" : "Добавить в корзину"
-        }, inC ? /*#__PURE__*/React.createElement(Icon, {
-          n: "check",
-          s: 13
-        }) : /*#__PURE__*/React.createElement(Icon, {
-          n: "plus",
-          s: 13
-        }), rub(p.price)));
-      }
+      /* метка детали [[p:ID]]: в тексте не показываем (детали — отдельной строкой под ответом, см. Md),
+         убираем и пробел перед ней, чтобы не было «свечу .» */
+      const prev = out[out.length - 1];
+      if (typeof prev === "string") out[out.length - 1] = prev.replace(/\s+$/, "");
     }
     last = m.index + tok.length;
   }
@@ -16321,6 +16312,8 @@ function Md({
     onPart: onPart,
     cartIds: cartIds
   });
+  /* детали, которые механик советует купить, — одной строкой под ответом */
+  const parts = onPart ? Array.from(new Set((text.match(/\[\[p:[\w-]+\]\]/g) || []).map(x => x.slice(4, -2)))).map(partById).filter(Boolean).slice(0, 6) : [];
   return /*#__PURE__*/React.createElement("div", {
     className: "md"
   }, blocks.map((b, i) => b.t === "h" ? /*#__PURE__*/React.createElement("h4", {
@@ -16343,7 +16336,20 @@ function Md({
     key: i
   }, b.v.map((x, j) => /*#__PURE__*/React.createElement("li", {
     key: j
-  }, I(x))))));
+  }, I(x))))), parts.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "md-parts"
+  }, parts.map(p => {
+    const inC = cartIds.indexOf(p.id) >= 0;
+    return /*#__PURE__*/React.createElement("button", {
+      key: p.id,
+      className: "part-tag" + (inC ? " in" : ""),
+      onClick: () => onPart(p),
+      title: inC ? "Уже в корзине" : "Добавить в корзину"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      n: inC ? "check" : "plus",
+      s: 13
+    }), /*#__PURE__*/React.createElement("span", null, p.name), /*#__PURE__*/React.createElement("b", null, rub(p.price)));
+  })));
 }
 function AreaPanel({
   area,
@@ -16882,6 +16888,10 @@ function diagFromHash() {
     return null;
   }
 }
+/* «…/#bike=…&ai=1» — сразу открыть ИИ-механика (ссылки со страниц каталога) */
+function aiFromHash() {
+  return /(^|[#&])ai=1(&|$)/.test(String(location.hash || ""));
+}
 function guideFromHash() {
   try {
     const g = new URLSearchParams(String(location.hash || "").replace(/^#/, "")).get("g");
@@ -17294,11 +17304,11 @@ function AiChat({
     }
   }, "\u041D\u043E\u0432\u044B\u0439 \u0447\u0430\u0442"), /*#__PURE__*/React.createElement("a", {
     className: "ai-tgbtn",
-    href: "https://t.me/motohelper_post_bot",
+    href: "https://t.me/motohelperru",
     target: "_blank",
     rel: "noopener",
-    title: "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A \u0432 Telegram",
-    "aria-label": "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A \u0432 Telegram"
+    title: "\u041A\u0430\u043D\u0430\u043B MotoHelper \u0432 Telegram",
+    "aria-label": "\u041A\u0430\u043D\u0430\u043B MotoHelper \u0432 Telegram"
   }, /*#__PURE__*/React.createElement("svg", {
     width: 18,
     height: 18,
