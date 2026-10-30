@@ -131,7 +131,6 @@ const server = http.createServer((req, res) => {
     await page.locator(".view-toggle button", { hasText: "Схема" }).first().click();
     console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
 
-    // Ввод чисел с клавиатуры: стёр поле и набрал заново — без лишнего «0» впереди, дроби с запятой
     await page.getByRole("button", { name: "Мотоцикл" }).last().click();
     await page.getByRole("tab", { name: "Тюнинг" }).click();
     // каталог тюнинга открыт сразу, цены — диапазоном за деталь («1 500–3 500 ₽»)
@@ -139,11 +138,12 @@ const server = http.createServer((req, res) => {
     if ((await page.locator(".tz-card").count()) < 5) errors.push("Тюнинг: в каталоге меньше 5 карточек");
     const tzPrice = await page.locator(".tz-price b").first().innerText().catch(() => "");
     if (!/\d\s?\d{3}–\d[\d\s]*₽|своими руками/.test(tzPrice)) errors.push("Тюнинг: цена не диапазоном: «" + tzPrice + "»");
-    const spr = page.locator(".sprockets input").first();
-    await spr.fill("");
-    await spr.pressSequentially("12");
-    const sprVal = await spr.inputValue();
-    if (sprVal !== "12") errors.push(`Калькулятор звёзд: набрал «12», в поле «${sprVal}»`);
+    // звёзды: «−» у передней звезды — тяга на колесе растёт
+    await page.locator(".sprockets .spr-steps").last().locator("button", { hasText: "−" }).first().click();
+    const sprRes = await page.locator(".sprockets .spr-res").innerText().catch(() => "");
+    if (!/\+\d/.test(sprRes)) errors.push("Звёзды: после «−1 спереди» нет прироста тяги: " + sprRes.replace(/\n/g, " "));
+    // у доработок нет выдуманных «звёзд»-рейтингов
+    if (await page.locator(".tz-meta", { hasText: "★" }).count()) errors.push("Тюнинг: на карточках остались звёзды-рейтинги");
     await page.getByRole("tab", { name: "Обзор" }).click();
 
     // Весь ремонт в одном разделе; кнопка «Назад» браузера возвращает на прошлый экран, а не уходит с сайта
