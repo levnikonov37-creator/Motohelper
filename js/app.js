@@ -17251,26 +17251,21 @@ function AiChat({
     setTimeout(() => send(lastUser.text), 0);
   }
   const efi = eng.groups.indexOf("efi") >= 0;
-  const sugg = ["Глохнет на холодную — с чего начать?", eng.stroke === "4T" ? "Как отрегулировать клапаны на моём моторе?" : "Как понять, что пора менять поршень?", efi ? "Горит лампа Check Engine — что проверить в первую очередь?" : "Какой главный жиклёр поставить после прямотока и фильтра нулевого?", "Какие слабые места у " + eng.code + " и как их предупредить?", "Что проверить перед дальней поездкой по лесу?"].concat(ai.images ? ["Посмотри фото свечи и скажи, что со смесью"] : []);
+  /* подсказки: [короткая надпись на кнопке, вопрос, который уйдёт механику] */
+  const sugg = [["Глохнет на холодную", "Глохнет на холодную — с чего начать?"], eng.stroke === "4T" ? ["Регулировка клапанов", "Как отрегулировать клапаны на моём моторе?"] : ["Когда менять поршень", "Как понять, что пора менять поршень?"], efi ? ["Горит Check Engine", "Горит лампа Check Engine — что проверить в первую очередь?"] : ["Жиклёр после прямотока", "Какой главный жиклёр поставить после прямотока и фильтра нулевого?"], ["Слабые места " + eng.code, "Какие слабые места у " + eng.code + " и как их предупредить?"]].concat(ai.images ? [["Фото свечи", "Посмотри фото свечи и скажи, что со смесью"]] : []);
   return /*#__PURE__*/React.createElement("section", {
     className: "page ai-page"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "ai-head"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "ai-title"
+    className: "ai-bar"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "ai-logo"
+    className: "ai-ava",
+    "aria-hidden": "true"
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "ai",
-    s: 26
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A"), /*#__PURE__*/React.createElement("p", null, "\u0417\u043D\u0430\u0435\u0442 \u0442\u0432\u043E\u0439 ", bike.brand, " ", bike.name, ": ", eng.code, ", ", efi ? "инжектор" : eng.carb, eng.installed.length ? ", доработки" : "", "."), /*#__PURE__*/React.createElement("a", {
-    className: "ai-tg",
-    href: "https://t.me/motohelper_post_bot",
-    target: "_blank",
-    rel: "noopener"
-  }, "\u041C\u0435\u0445\u0430\u043D\u0438\u043A \u0435\u0441\u0442\u044C \u0438 \u0432 Telegram \u2192"))), ready && /*#__PURE__*/React.createElement("div", {
-    className: "ai-tools"
-  }, ai.provider === "claude" && /*#__PURE__*/React.createElement("div", {
+    s: 18
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "ai-who"
+  }, /*#__PURE__*/React.createElement("h1", null, "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A"), /*#__PURE__*/React.createElement("span", null, bike.brand, " ", bike.name, " \xB7 ", eng.code)), ready && ai.provider === "claude" && /*#__PURE__*/React.createElement("div", {
     className: "seg sm",
     role: "group",
     "aria-label": "\u0420\u0435\u0436\u0438\u043C \u043E\u0442\u0432\u0435\u0442\u0430"
@@ -17280,14 +17275,29 @@ function AiChat({
   }, "\u041F\u043E\u0434\u0440\u043E\u0431\u043D\u043E"), /*#__PURE__*/React.createElement("button", {
     className: tier === "quick" ? "on" : "",
     onClick: () => setTier("quick")
-  }, "\u0411\u044B\u0441\u0442\u0440\u043E")), chat.length > 0 && /*#__PURE__*/React.createElement("button", {
-    className: "btn sm ghost",
+  }, "\u0411\u044B\u0441\u0442\u0440\u043E")), ready && chat.length > 0 && /*#__PURE__*/React.createElement("button", {
+    className: "btn sm ghost ai-new",
     onClick: () => {
       if (ctl.current) ctl.current.abort();
       setChat([]);
       setErr("");
     }
-  }, "\u041D\u043E\u0432\u044B\u0439 \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440"))), ai.state === "checking" && /*#__PURE__*/React.createElement("div", {
+  }, "\u041D\u043E\u0432\u044B\u0439 \u0447\u0430\u0442"), /*#__PURE__*/React.createElement("a", {
+    className: "ai-tgbtn",
+    href: "https://t.me/motohelper_post_bot",
+    target: "_blank",
+    rel: "noopener",
+    title: "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A \u0432 Telegram",
+    "aria-label": "\u0418\u0418-\u043C\u0435\u0445\u0430\u043D\u0438\u043A \u0432 Telegram"
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: 18,
+    height: 18,
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.8-3.6-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.5 13.1 1.8 11.6c-1-.3-1-1 .2-1.5L20.6 3c.9-.3 1.6.2 1.3 1.3z"
+  })))), ai.state === "checking" && /*#__PURE__*/React.createElement("div", {
     className: "panel"
   }, /*#__PURE__*/React.createElement("p", {
     className: "muted"
@@ -17310,26 +17320,22 @@ function AiChat({
     ref: listRef
   }, chat.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "chat-empty"
-  }, /*#__PURE__*/React.createElement("p", null, "\u041E\u043F\u0438\u0448\u0438, \u0447\u0442\u043E \u043F\u0440\u043E\u0438\u0441\u0445\u043E\u0434\u0438\u0442 \u0441 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u043E\u043C \u2014 \u043A\u0430\u043A \u043C\u0435\u0445\u0430\u043D\u0438\u043A\u0443 \u0432 \u0433\u0430\u0440\u0430\u0436\u0435: \u043A\u043E\u0433\u0434\u0430 \u043D\u0430\u0447\u0430\u043B\u043E\u0441\u044C, \u043F\u0440\u0438 \u043A\u0430\u043A\u0438\u0445 \u0443\u0441\u043B\u043E\u0432\u0438\u044F\u0445, \u0447\u0442\u043E \u0443\u0436\u0435 \u043C\u0435\u043D\u044F\u043B. \u042F \u0443\u0447\u0442\u0443 \u0445\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A\u0438 \u0438\u0437 \xAB\u041C\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\xBB."), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "ai-hello"
+  }, "\u0427\u0442\u043E \u0441\u043B\u0443\u0447\u0438\u043B\u043E\u0441\u044C \u0441 ", bike.name, "?"), /*#__PURE__*/React.createElement("div", {
     className: "sugg"
   }, sugg.map(sg => /*#__PURE__*/React.createElement("button", {
-    key: sg,
+    key: sg[0],
     className: "chip",
-    onClick: () => sg.indexOf("фото") >= 0 ? fileRef.current && fileRef.current.click() : send(sg)
-  }, sg))), /*#__PURE__*/React.createElement("div", {
-    className: "ai-engcard"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Не знаешь, какой у тебя мотор?"), /*#__PURE__*/React.createElement("span", null, "Код выбит на картере слева под цилиндром: ZS174MN-5, 172FMM, 1P60FMK. Введи даже только цифры — «174» — и я покажу подходящие моторы и модели.")), /*#__PURE__*/React.createElement("div", {
-    className: "row-gap"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => openEnginePicker()
-  }, "Найти мотор по коду"), ai.images && /*#__PURE__*/React.createElement("button", {
-    className: "btn ghost",
     onClick: () => {
-      setInput("Прочитай маркировку мотора на фото и скажи, что это за мотор и на каких мотоциклах он стоит.");
-      fileRef.current && fileRef.current.click();
+      if (sg[1].indexOf("фото") < 0) return send(sg[1]);
+      setInput(sg[1]);
+      if (fileRef.current) fileRef.current.click();
     }
-  }, "Сфоткать маркировку")))), chat.map((m, i) => /*#__PURE__*/React.createElement("div", {
+  }, sg[0]))), /*#__PURE__*/React.createElement("button", {
+    className: "link ai-findeng",
+    onClick: () => openEnginePicker()
+  }, "\u041D\u0435 \u0437\u043D\u0430\u0435\u0448\u044C \u0441\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0440? \u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u043A\u043E\u0434\u0443 \u043D\u0430 \u043A\u0430\u0440\u0442\u0435\u0440\u0435")), chat.map((m, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     className: "msg " + m.role
   }, m.role === "user" ? /*#__PURE__*/React.createElement("div", {
@@ -17404,7 +17410,7 @@ function AiChat({
     ref: taRef,
     rows: "1",
     value: input,
-    placeholder: "\u041E\u043F\u0438\u0448\u0438 \u043F\u0440\u043E\u0431\u043B\u0435\u043C\u0443: \u0447\u0442\u043E, \u043A\u043E\u0433\u0434\u0430, \u043F\u0440\u0438 \u043A\u0430\u043A\u0438\u0445 \u0443\u0441\u043B\u043E\u0432\u0438\u044F\u0445",
+    placeholder: "\u041E\u043F\u0438\u0448\u0438, \u0447\u0442\u043E \u0441\u043B\u0443\u0447\u0438\u043B\u043E\u0441\u044C",
     onChange: e => setInput(e.target.value),
     onKeyDown: e => {
       if (e.key === "Enter" && !e.shiftKey && window.matchMedia("(min-width: 760px)").matches) {

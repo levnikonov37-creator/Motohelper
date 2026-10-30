@@ -2486,6 +2486,7 @@ code { background: #141414 !important; color: #fff; }
 :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
   /* фирменный цвет: сменить цвет сайта = поменять эти строки (и такие же в scripts/build-pages.js для страниц каталога) */
   --holo: linear-gradient(100deg, #3AF2CF 0%, #4E95FF 35%, #9B6BFF 65%, #FF6FD0 100%);
+  --holo-v: linear-gradient(180deg, #3AF2CF 0%, #4E95FF 35%, #9B6BFF 65%, #FF6FD0 100%);
   --hot-rgb: 143, 132, 255; --hot2-rgb: 78, 149, 255; --hot-ink: #06060F;
   --hot: rgb(var(--hot-rgb)); --hot2: rgb(var(--hot2-rgb)); --good: #34D399; --bad: #F87171; --acc-rgb: var(--hot-rgb); --acc2-rgb: var(--hot2-rgb); }
 .btn.primary, .hero .btn.primary, .btn.ai-btn.primary, .btn.primary:hover, .btn.primary:active { background: var(--holo) !important; color: var(--hot-ink) !important; border-color: transparent !important; }
@@ -2552,3 +2553,25 @@ code { background: #141414 !important; color: #fff; }
 .tz-more { display: block; width: 100%; margin-top: 8px; }
 .tz-nofit { display: block; margin: 12px 0 6px; }
 .project .total small { display: block; font-weight: 500; }
+
+/* ===================== v63: ИИ-механик компактнее =====================
+   Вместо большой шапки и простыней текста — одна строка (кто и про какой мотоцикл), короткие подсказки
+   плиткой 2×2 и ссылка на поиск мотора по коду. Telegram — иконкой в строке. */
+.ai-bar { display: flex; align-items: center; gap: 10px; padding: 2px 0 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.ai-ava { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: var(--holo); color: var(--hot-ink); }
+.ai-who { flex: 1; min-width: 0; }
+.ai-page .ai-who h1 { margin: 0; font: italic 700 19px/1.1 var(--cond); text-transform: uppercase; letter-spacing: .02em; color: #fff; }
+.ai-who span { display: block; margin-top: 2px; color: #8A8A8A; font: 500 13px/1.2 var(--cond); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-bar .ai-new { flex: none; min-height: 38px !important; padding: 6px 12px !important; }
+.ai-tgbtn { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,.16); color: #fff; }
+.ai-tgbtn:hover { border-color: #fff; }
+.ai-page .chat-empty { max-width: 560px; padding-top: 22px; }
+.ai-page .ai-hello { margin: 0 0 12px; font: 700 22px/1.2 var(--cond); color: #fff; }
+.ai-page .chat-empty .sugg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
+.ai-page .chat-empty .sugg .chip { height: auto !important; min-height: 50px; padding: 10px 12px !important; border-radius: 12px !important; justify-content: flex-start; text-align: left; white-space: normal; font: 600 14px/1.25 var(--cond); }
+.ai-page .ai-findeng { display: inline-block; margin-top: 14px; color: #8A8A8A; font-size: 14px; text-align: left; }
+.ai-page .send:not(.stop) { background: var(--holo); color: var(--hot-ink); }
+.ai-page .send:disabled { opacity: .35; }
+.ai-page .msg.assistant .bubble { position: relative; border-left: 1px solid var(--line); padding-left: 16px; }
+.ai-page .msg.assistant .bubble::before { content: ""; position: absolute; left: -1px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--holo-v); }
+.ai-page .msg-actions .chip:not(.eng) { border-color: transparent !important; background: none !important; color: #8A8A8A; padding-left: 2px; }
