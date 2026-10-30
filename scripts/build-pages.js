@@ -114,6 +114,9 @@ a{color:#fff}
 .ask{margin:26px 0 8px;padding:14px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:#0B0B0B}.ask h2{margin-top:0}.ask form{display:flex;gap:8px;align-items:flex-end}
 .ask textarea{flex:1;min-height:46px;resize:vertical;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:15px var(--body)}.ask textarea:focus{outline:none;border-color:#fff}
 .ask button{padding:12px 16px;border:0;border-radius:8px;background:#fff;color:#000;font:600 15px var(--cond);cursor:pointer}.ask button:disabled{opacity:.5}
+.rv{margin:26px 0 8px}.rv-item{padding:12px 14px;margin:0 0 8px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.rv-item p{margin:6px 0 0;white-space:pre-wrap}.rv-head{font:500 14px var(--cond);color:var(--muted)}.rv-head b{color:var(--ink)}
+.rv-add summary{cursor:pointer;display:inline-block;padding:10px 14px;border:1px solid rgba(255,255,255,.3);border-radius:8px;font:600 15px var(--cond)}.rv-add form{display:grid;gap:8px;margin-top:10px}.rv-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rv input,.rv textarea{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:15px var(--body);min-width:0}.rv textarea{resize:vertical}.rv button{justify-self:start;padding:12px 16px;border:0;border-radius:8px;background:#fff;color:#000;font:600 15px var(--cond);cursor:pointer}.rv button:disabled{opacity:.5}
 .ask-out{display:none;white-space:pre-wrap;margin-top:12px;padding:12px;border-left:2px solid #fff;background:#111;font-size:15px;line-height:1.5}.ask-out.on{display:block}.ask .note{margin:10px 0 0}.steps .opts{margin:8px 0 0;padding-left:18px;display:grid;gap:6px}.steps .opts li{padding:0;border:0;background:none;font-size:15px}.steps .opts li::before{content:none}
 .ph{color:#fff;font-weight:600;border-bottom:1px dashed rgba(255,255,255,.5)}
 .tblw{overflow-x:auto;margin:0 0 8px;border:1px solid rgba(255,255,255,.14);border-radius:4px}.tbl{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
@@ -147,6 +150,22 @@ const AD = RSYA_ID ? `<div class="ad" id="yandex_rtb_${RSYA_ID}"></div><script>w
 const METRIKA = `<!-- Yandex.Metrika counter --><script>(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=113844391","ym");ym(113844391,"init",{webvisor:true,clickmap:true,referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true,trackHash:false});</script><noscript><div><img src="https://mc.yandex.ru/watch/113844391" style="position:absolute;left:-9999px" alt="" /></div></noscript><!-- /Yandex.Metrika counter -->`;
 /* «Спроси механика» на странице: вопрос уходит на сервер ИИ (адрес — из ai-config.json) вместе с темой страницы,
    ответ печатается потоком. Скрипт — m/ask.js (ниже), общий для всех страниц, кэшируется браузером. */
+/* Отзывы владельцев: одобренные хранятся на сервере ИИ (?reviews=<адрес модели>) и подгружаются скриптом m/rv.js;
+   раз в неделю задача по расписанию выгружает их в reviews.json — тогда они попадают прямо в HTML (их видит поиск). */
+const REVIEWS = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, "reviews.json"), "utf8")); } catch (e) { return {}; } })();
+const rvItem = (x) => `<div class="rv-item"><div class="rv-head"><b>${esc(x.name || "Владелец")}</b>${x.km ? ` · пробег ${esc(x.km)}` : ""}${x.t ? ` · ${esc(String(x.t).slice(0, 7).split("-").reverse().join("."))}` : ""}</div><p>${esc(x.text)}</p></div>`;
+const rvBlock = (slug, model, short) => { const items = REVIEWS[slug] || [];
+  return `<section class="rv" data-slug="${slug}" data-model="${esc(model)}"><h2>Отзывы владельцев ${esc(short)}</h2><div class="rv-list">${items.map(rvItem).join("") || `<p class="note rv-empty">Пока нет отзывов. Ездишь на ${esc(short)}? Расскажи, что ломалось и на каком пробеге — это поможет другим.</p>`}</div>
+<details class="rv-add"><summary>Написать отзыв</summary><form><div class="rv-row"><input name="name" maxlength="40" placeholder="Имя (необязательно)" /><input name="km" maxlength="20" placeholder="Пробег" /></div><textarea name="text" rows="4" minlength="30" maxlength="1500" required placeholder="Что нравится, что ломалось и на каком пробеге, какое масло и запчасти ставил"></textarea><button type="submit">Отправить</button><p class="rv-msg note"></p></form></details></section>`; };
+const RV_JS = `(function(){var box=document.querySelector(".rv");if(!box)return;var list=box.querySelector(".rv-list"),f=box.querySelector("form"),msg=box.querySelector(".rv-msg"),ep=null;
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function item(x){var d=el("div","rv-item"),h=el("div","rv-head"),b=el("b",null,x.name||"Владелец");h.appendChild(b);var extra=(x.km?" · пробег "+x.km:"")+(x.t?" · "+String(x.t).slice(0,7).split("-").reverse().join("."):"");if(extra)h.appendChild(document.createTextNode(extra));d.appendChild(h);d.appendChild(el("p",null,x.text));return d}
+function render(items){if(!items||!items.length)return;list.textContent="";items.forEach(function(x){list.appendChild(item(x))})}
+fetch("/ai-config.json").then(function(r){return r.json()}).then(function(j){ep=j.endpoint;return fetch(ep+"/?reviews="+encodeURIComponent(box.dataset.slug))}).then(function(r){return r.json()}).then(function(j){render(j.items)}).catch(function(){});
+f.addEventListener("submit",function(e){e.preventDefault();if(!ep)return;var b=f.querySelector("button");b.disabled=true;msg.textContent="Проверяю отзыв…";
+fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({review:{slug:box.dataset.slug,model:box.dataset.model,name:f.elements.name.value,km:f.elements.km.value,text:f.elements.text.value}})}).then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})}).then(function(o){
+if(o.j.published){var e=list.querySelector(".rv-empty");if(e)e.remove();list.insertBefore(item(o.j.item),list.firstChild);f.reset();msg.textContent="Спасибо! Отзыв опубликован.";if(window.ym)try{ym(113844391,"reachGoal","review")}catch(x){}}
+else msg.textContent=o.s===429?"Сегодня больше отзывов отправить нельзя.":o.j.error==="short"?"Напиши чуть подробнее — хотя бы пару предложений.":"Спасибо! Отзыв не прошёл автоматическую проверку: без ссылок, контактов и мата, пожалуйста."}).catch(function(){msg.textContent="Не получилось отправить — попробуй позже."}).then(function(){b.disabled=false})})})();`;
 const askBlock = (about) => `<section class="ask" data-ctx="${esc(about)}"><h2>Спроси механика</h2><form><textarea name="q" rows="2" maxlength="600" placeholder="Например: не заводится на холодную — что проверить?" required></textarea><button type="submit">Спросить</button></form><div class="ask-out" aria-live="polite"></div><p class="note">Отвечает ИИ по базе MotoHelper — сверяйся с мануалом. Удобнее в Telegram: <a href="https://t.me/motohelper_post_bot">@motohelper_post_bot</a>.</p></section>`;
 const ASK_JS = `(function(){var box=document.querySelector(".ask");if(!box)return;var f=box.querySelector("form"),out=box.querySelector(".ask-out"),btn=f.querySelector("button"),ep=null;
 fetch("/ai-config.json").then(function(r){return r.json()}).then(function(j){ep=j.endpoint}).catch(function(){});
@@ -156,7 +175,7 @@ fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.st
 function pump(){return rd.read().then(function(c){if(c.done){if(!txt)throw new Error("Пустой ответ — попробуй ещё раз.");return}buf+=dec.decode(c.value,{stream:true});var i;while((i=buf.indexOf("\\n"))>=0){var l=buf.slice(0,i).trim();buf=buf.slice(i+1);if(l.indexOf("data:")!==0)continue;try{var j=JSON.parse(l.slice(5));txt+=j.response||(j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content)||""}catch(x){}}show(txt.replace(/\\*\\*/g,"").replace(/^#+\\s*/gm,""));return pump()})}return pump()})
 .catch(function(err){out.textContent=err.message||"Не получилось — попробуй ещё раз."}).then(function(){btn.disabled=false;if(window.ym)try{ym(113844391,"reachGoal","page_ask")}catch(x){}})})})();`;
 
-function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask }) {
+function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv }) {
   return `<!doctype html>
 <html lang="ru">
 <head>
@@ -192,6 +211,7 @@ ${AD}
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}
 ${js ? `<script>${js}</script>` : ""}
 ${ask ? `<script src="/m/ask.js" defer></script>` : ""}
+${rv ? `<script src="/m/rv.js" defer></script>` : ""}
 ${METRIKA}
 </body>
 </html>
@@ -310,9 +330,10 @@ ${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span
 ${vers}
 ${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>` : ""}
 ${faqHtml}
+${rvBlock(slug, full, b.name)}
 ${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
   const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${e0.oil || "—"}${e0.oilVol ? " " + e0.oilVol : ""}, свеча ${e0.spark || "—"}, зазоры клапанов ${e0.valveIn || "—"} / ${e0.valveEx || "—"}. Слабые места и ремонт.`;
-  files.set("m/" + slug + "/index.html", page({ ask: full + " (мотор " + e0.code + ")", title: `${full} — масло, свечи, зазоры клапанов, слабые места | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b, 0),
+  files.set("m/" + slug + "/index.html", page({ rv: true, ask: full + " (мотор " + e0.code + ")", title: `${full} — масло, свечи, зазоры клапанов, слабые места | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b, 0),
     ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: full, url: canon, inLanguage: "ru", description: desc },
       { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] }));
 });
@@ -628,6 +649,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 
 files.set("m/m.css", CSS + "\n");
 files.set("m/ask.js", ASK_JS + "\n");
+files.set("m/rv.js", RV_JS + "\n");
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),

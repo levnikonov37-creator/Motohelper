@@ -57,6 +57,8 @@ export default {
       if (u.searchParams.get("feedback")) return listFeedback(env, u.searchParams.get("token"));
       // самопроверка: <адрес сервера>/?test=1 — какой ИИ отвечает и какие ошибки у остальных (без ключей)
       if (u.searchParams.get("test")) return selfTest(env);
+      // отзывы владельцев модели: ?reviews=<адрес модели>
+      if (u.searchParams.get("reviews")) return listReviews(env, u.searchParams.get("reviews"));
       // Telegram-канал: ?tg=status — что выйдет следующим; ?tg=run — опубликовать пост на сегодня, если ещё не вышел
       if (u.searchParams.get("tg") === "run") return json(await tgRun(env));
       // отчёт уходит только владельцу бота, так что ручной запуск безопасен
@@ -78,6 +80,7 @@ export default {
     if (body.feedback) return saveFeedback(env, body.feedback);
     // «Спроси механика» со страниц каталога: вопрос + о чём страница; подсказки и цифры — как у бота
     if (body.ask) return pageAsk(env, ctx, body, request.headers.get("CF-Connecting-IP") || "?");
+    if (body.review) return saveReview(env, body.review, request.headers.get("CF-Connecting-IP") || "?");
     const messages = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
     const images = Array.isArray(body.images) ? body.images.slice(0, 2) : [];
     if (!messages.length) return json({ error: "no_messages" }, 400);
@@ -728,4 +731,54 @@ async function pageAsk(env, ctx, body, ip) {
   const sys = rules + (about ? "\n\nЧеловек читает страницу: " + about + ". Если в вопросе нет другой модели — отвечай про неё." : "") + "\n\nСправочник сайта по теме вопроса:\n" + (refs.length ? refs.join("\n") : "(ничего не нашлось — отвечай в общем)");
   ctx.waitUntil(Promise.resolve(logQuestion(env, "page", [{ role: "user", content: (about ? "[" + about + "] " : "") + q }])));
   return answer(env, [{ role: "system", content: sys }, { role: "user", content: q }], [], ip);
+}
+
+/* --- Отзывы владельцев на страницах моделей ---
+   Все одобренные отзывы модели — в одной записи KV «rv:<адрес модели>» (показ страницы = одно чтение, без list —
+   на бесплатном тарифе list ограничен 1000 в сутки). «rv:index» — список моделей с отзывами (для еженедельной
+   выгрузки в HTML страниц). Модерация: явный мусор отсекаем правилами, остальное проверяет ИИ. */
+const RV_IP = new Map();
+const rvSlug = (x) => (/^[a-z0-9-]{2,80}$/.test(String(x || "")) ? String(x) : null);
+async function listReviews(env, slug) {
+  slug = rvSlug(slug);
+  if (!slug || !env.FEEDBACK) return json({ ok: false, items: [] });
+  let items = [];
+  try {
+    items = JSON.parse((await env.FEEDBACK.get("rv:" + slug)) || "[]");
+  } catch (e) {}
+  return new Response(JSON.stringify({ ok: true, items }), { headers: { ...CORS, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=300" } });
+}
+async function saveReview(env, r, ip) {
+  const slug = rvSlug(r.slug);
+  if (!slug || !env.FEEDBACK) return json({ ok: false, error: "bad" }, 400);
+  const clean = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
+  const item = { t: new Date().toISOString().slice(0, 10), name: clean(r.name, 40) || "Владелец", km: clean(r.km, 20), text: clean(r.text, 1500) };
+  if (item.text.length < 30) return json({ ok: false, error: "short" }, 400);
+  const k = mskDay() + "|" + ip, n = (RV_IP.get(k) || 0) + 1;
+  if (RV_IP.size > 20000) RV_IP.clear();
+  RV_IP.set(k, n);
+  if (n > 5) return json({ ok: false, error: "rate_limited" }, 429);
+  // ссылки, контакты и явный мат — сразу нет
+  const all = item.name + " " + item.km + " " + item.text;
+  if (/https?:|www\.|\.ru\b|\.com\b|@\w|t\.me|\+?\d[\d\s()-]{9,}\d|х[уy][йияеё]|п[иі]зд|еба[нл]|бля|сук[аи](?![а-яё])/i.test(all)) return json({ ok: true, published: false });
+  let verdict = "";
+  try {
+    const res = await answer(env, [{ role: "system", content: "Ты модератор отзывов на сайте-справочнике по мотоциклам. Отзыв к модели «" + clean(r.model, 80) + "». Ответь строго одним словом: OK — если это осмысленный отзыв владельца (опыт езды, поломки, обслуживание, впечатления), без оскорблений, мата, рекламы, контактов и политики; NO — во всех остальных случаях." }, { role: "user", content: item.text }], [], "rv", true);
+    verdict = (await collect(res)).toUpperCase();
+  } catch (e) {}
+  if (verdict.indexOf("OK") !== 0) return json({ ok: true, published: false });
+  let items = [];
+  try {
+    items = JSON.parse((await env.FEEDBACK.get("rv:" + slug)) || "[]");
+  } catch (e) {}
+  items.unshift(item);
+  await env.FEEDBACK.put("rv:" + slug, JSON.stringify(items.slice(0, 50)));
+  if (items.length === 1) {
+    let idx = [];
+    try {
+      idx = JSON.parse((await env.FEEDBACK.get("rv:index")) || "[]");
+    } catch (e) {}
+    if (idx.indexOf(slug) < 0) await env.FEEDBACK.put("rv:index", JSON.stringify(idx.concat(slug)));
+  }
+  return json({ ok: true, published: true, item });
 }
