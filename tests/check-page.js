@@ -134,6 +134,11 @@ const server = http.createServer((req, res) => {
     // Ввод чисел с клавиатуры: стёр поле и набрал заново — без лишнего «0» впереди, дроби с запятой
     await page.getByRole("button", { name: "Мотоцикл" }).last().click();
     await page.getByRole("tab", { name: "Тюнинг" }).click();
+    // каталог тюнинга открыт сразу, цены — диапазоном за деталь («1 500–3 500 ₽»)
+    await page.locator(".tz-card").first().waitFor({ timeout: 5000 }).catch(() => {});
+    if ((await page.locator(".tz-card").count()) < 5) errors.push("Тюнинг: в каталоге меньше 5 карточек");
+    const tzPrice = await page.locator(".tz-price b").first().innerText().catch(() => "");
+    if (!/\d\s?\d{3}–\d[\d\s]*₽|своими руками/.test(tzPrice)) errors.push("Тюнинг: цена не диапазоном: «" + tzPrice + "»");
     const spr = page.locator(".sprockets input").first();
     await spr.fill("");
     await spr.pressSequentially("12");

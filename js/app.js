@@ -15673,6 +15673,183 @@ function TopSpeed({
     onClick: onEdit
   }, "\u0443\u043A\u0430\u0436\u0438 \u0441\u0432\u043E\u0438"))));
 }
+/* Цена доработки: деталь «от–до» (без установки), работа мастера — отдельно, «своими руками» — без денег */
+function tunePrice(t) {
+  if (t.hi === 0) return "своими руками";
+  if (t.lo == null) return rub(t.price);
+  return (t.lo === t.hi ? "" : num(t.lo) + "–") + rub(t.hi);
+}
+/* цвет категории — метка на карточке и вкладка каталога */
+const TUNE_CAT_COLOR = {
+  "Впуск": "#38BDF8",
+  "Выпуск": "#FB923C",
+  "Двигатель": "#F87171",
+  "Электроника": "#A78BFA",
+  "Электрика": "#FACC15",
+  "Охлаждение": "#22D3EE",
+  "Трансмиссия": "#FBBF24",
+  "Подвеска": "#34D399",
+  "Тормоза": "#FB7185",
+  "Колёса": "#A3E635",
+  "Защита": "#94A3B8",
+  "Управление": "#60A5FA",
+  "Рама": "#C084FC"
+};
+/* запрос в магазин: деталь для мотора ищем с кодом мотора («Бигбор 350 174MN-5»), остальное — «… мото» */
+function tuneShopQuery(t, eng) {
+  const base = t.title.replace(/\s*\(.*?\)/g, "").replace(/\s+для\s+.*$/i, "").trim();
+  return ["Двигатель", "Впуск", "Выпуск", "Электроника", "Охлаждение"].indexOf(t.cat) >= 0 ? base + " " + eng.code.replace(/^ZS\s*/, "") : base + " мото";
+}
+/* Каталог доработок: вкладки по категориям, компактные карточки с приростом, ценой детали и ссылками на магазины */
+function TuneCatalog({
+  eng,
+  project,
+  toggleProject,
+  toggleInstalled,
+  go,
+  speedDelta
+}) {
+  const [cat, setCat] = useState("all");
+  const [sort, setSort] = useState("stage");
+  const [open, setOpen] = useState(null);
+  const [showNo, setShowNo] = useState(false);
+  const [more, setMore] = useState(false);
+  const all = TUNING.map(t => Object.assign({
+    t: t
+  }, tuningFor(t, eng)));
+  const fit = all.filter(r => r.ok),
+    no = all.filter(r => !r.ok);
+  const cats = ["all", "power"].concat(Array.from(new Set(fit.map(r => r.t.cat))));
+  const inCat = r => cat === "all" || (cat === "power" ? r.t.power > 0 : r.t.cat === cat);
+  const sorter = (a, b) => sort === "power" ? b.t.power - a.t.power : sort === "price" ? a.t.price - b.t.price : sort === "rating" ? b.t.rating - a.t.rating : a.t.stage - b.t.stage || (b.t.must ? 1 : 0) - (a.t.must ? 1 : 0) || b.t.power - a.t.power;
+  const list = fit.filter(inCat).sort(sorter),
+    noList = no.filter(inCat);
+  const shown = more || cat !== "all" ? list : list.slice(0, 12);
+  const card = ({
+    t,
+    ok,
+    deny,
+    note
+  }) => {
+    const inP = project.indexOf(t.id) >= 0,
+      mine = eng.installed.indexOf(t.id) >= 0,
+      stockI = !mine && tuneStockInstalled(t.id, eng.carb),
+      isOpen = open === t.id,
+      dv = ok ? speedDelta(t) : 0,
+      q = tuneShopQuery(t, eng);
+    return /*#__PURE__*/React.createElement("article", {
+      key: t.id,
+      className: "tz-card" + (ok ? "" : " no") + (inP ? " in" : "") + (mine || stockI ? " owned" : "") + (t.must && ok && !mine ? " must" : ""),
+      style: {
+        "--c": TUNE_CAT_COLOR[t.cat] || "#9CA3AF"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "tz-top"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "tz-cat"
+    }, t.cat), t.power > 0 && /*#__PURE__*/React.createElement("span", {
+      className: "tz-gain"
+    }, "+", t.power, "% \xB7 \u2248+", Math.round(eng.stockHp * t.power / 10) / 10, " \u043B.\u0441."), dv ? /*#__PURE__*/React.createElement("span", {
+      className: "tz-speed " + (dv > 0 ? "up" : "down")
+    }, dv > 0 ? "+" : "", dv, " \u043A\u043C/\u0447") : null, t.must && ok && !mine && /*#__PURE__*/React.createElement("span", {
+      className: "tz-must"
+    }, "\u043D\u0443\u0436\u043D\u043E \u043F\u0440\u0438 \u0442\u044E\u043D\u0438\u043D\u0433\u0435")), /*#__PURE__*/React.createElement("div", {
+      className: "tz-head"
+    }, /*#__PURE__*/React.createElement("h3", null, t.title), /*#__PURE__*/React.createElement("div", {
+      className: "tz-price"
+    }, /*#__PURE__*/React.createElement("b", null, tunePrice(t)), /*#__PURE__*/React.createElement("small", null, t.svc ? "работа мастера" : t.hi === 0 ? "без затрат" : "деталь"))), /*#__PURE__*/React.createElement("p", {
+      className: "tz-body" + (isOpen ? " open" : "")
+    }, t.body), isOpen && note && ok && /*#__PURE__*/React.createElement("p", {
+      className: "tc-note"
+    }, /*#__PURE__*/React.createElement("b", null, "\u0414\u043B\u044F ", eng.code, ":"), " ", note), !ok && /*#__PURE__*/React.createElement("p", {
+      className: "tc-deny"
+    }, deny), (mine || stockI) && /*#__PURE__*/React.createElement("p", {
+      className: "tc-own"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      n: "check",
+      s: 16
+    }), mine ? "Уже стоит на твоём мотоцикле" : "Уже стоит: " + eng.carb), isOpen && ok && !t.svc && t.hi > 0 && /*#__PURE__*/React.createElement("div", {
+      className: "tz-shops"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "muted small"
+    }, "\u0413\u0434\u0435 \u043A\u0443\u043F\u0438\u0442\u044C:"), SHOPS.slice(0, 3).map(sh => /*#__PURE__*/React.createElement("a", {
+      key: sh[0],
+      className: "chip",
+      href: shopHref(sh, q),
+      target: "_blank",
+      rel: "noopener sponsored"
+    }, sh[0]))), isOpen && ok && TUNE_GUIDE[t.id] && guidesFor(eng).find(g => g.id === TUNE_GUIDE[t.id]) && /*#__PURE__*/React.createElement("button", {
+      className: "link small",
+      onClick: () => go("repair", TUNE_GUIDE[t.id])
+    }, "\u041A\u0430\u043A \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u2192"), /*#__PURE__*/React.createElement("div", {
+      className: "tz-foot"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "tz-meta"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "tz-dot d-" + t.diff
+    }), t.diff, " \xB7 \u2605 ", t.rating.toFixed(1)), /*#__PURE__*/React.createElement("button", {
+      className: "link small",
+      "aria-expanded": isOpen,
+      onClick: () => setOpen(isOpen ? null : t.id)
+    }, isOpen ? "Свернуть" : "Подробнее"), ok && !mine && !stockI && /*#__PURE__*/React.createElement("button", {
+      className: "btn sm" + (inP ? "" : " primary"),
+      onClick: () => toggleProject(t)
+    }, inP ? "Убрать" : "В проект")), isOpen && ok && !stockI && /*#__PURE__*/React.createElement("button", {
+      className: "link small",
+      onClick: () => toggleInstalled(t.id)
+    }, mine ? "Не стоит" : "Уже стоит у меня"));
+  };
+  return /*#__PURE__*/React.createElement("section", {
+    className: "tz"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "list-head"
+  }, /*#__PURE__*/React.createElement("h2", null, "\u0414\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u0434\u043B\u044F ", eng.code), /*#__PURE__*/React.createElement("label", {
+    className: "sel"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: sort,
+    "aria-label": "\u041F\u043E\u0440\u044F\u0434\u043E\u043A",
+    onChange: e => setSort(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "stage"
+  }, "\u043F\u043E \u044D\u0442\u0430\u043F\u0430\u043C"), /*#__PURE__*/React.createElement("option", {
+    value: "power"
+  }, "\u043F\u043E \u043F\u0440\u0438\u0440\u043E\u0441\u0442\u0443"), /*#__PURE__*/React.createElement("option", {
+    value: "price"
+  }, "\u0441\u043D\u0430\u0447\u0430\u043B\u0430 \u0434\u0435\u0448\u0451\u0432\u044B\u0435"), /*#__PURE__*/React.createElement("option", {
+    value: "rating"
+  }, "\u043F\u043E \u043E\u0442\u0437\u044B\u0432\u0430\u043C")))), /*#__PURE__*/React.createElement("p", {
+    className: "muted small tz-note"
+  }, "\u0426\u0435\u043D\u044B \u2014 \u0437\u0430 \u0441\u0430\u043C\u0443 \u0434\u0435\u0442\u0430\u043B\u044C \u0431\u0435\u0437 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438, \u043F\u043E \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u0430\u043C \u0434\u043B\u044F \u043A\u0438\u0442\u0430\u0439\u0441\u043A\u043E\u0439 \u0442\u0435\u0445\u043D\u0438\u043A\u0438. \u0411\u0440\u0435\u043D\u0434\u043E\u0432\u044B\u0435 \u0434\u0435\u0442\u0430\u043B\u0438 \u0434\u043E\u0440\u043E\u0436\u0435."), /*#__PURE__*/React.createElement("div", {
+    className: "tz-tabs",
+    role: "tablist",
+    "aria-label": "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u0438"
+  }, cats.map(c => {
+    const n = c === "all" ? fit.length : fit.filter(r => c === "power" ? r.t.power > 0 : r.t.cat === c).length;
+    return /*#__PURE__*/React.createElement("button", {
+      key: c,
+      role: "tab",
+      "aria-selected": cat === c,
+      className: "tz-tab" + (cat === c ? " on" : ""),
+      style: {
+        "--c": c === "all" ? "#FFFFFF" : c === "power" ? "#FF7A1A" : TUNE_CAT_COLOR[c] || "#9CA3AF"
+      },
+      onClick: () => {
+        setCat(c);
+        setOpen(null);
+      }
+    }, c === "all" ? "Все" : c === "power" ? "Мощность" : c, /*#__PURE__*/React.createElement("small", null, n));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "tz-list"
+  }, shown.map(card)), shown.length < list.length && /*#__PURE__*/React.createElement("button", {
+    className: "btn tz-more",
+    onClick: () => setMore(true)
+  }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 ", list.length - shown.length), noList.length > 0 && /*#__PURE__*/React.createElement("button", {
+    className: "link small tz-nofit",
+    onClick: () => setShowNo(!showNo)
+  }, showNo ? "Скрыть неподходящие" : "Не подходят к " + eng.code + ": " + noList.length), showNo && /*#__PURE__*/React.createElement("div", {
+    className: "tz-list"
+  }, noList.map(card)));
+}
 function Tuning({
   eng,
   bike,
@@ -15686,10 +15863,6 @@ function Tuning({
 }) {
   const [goals, setGoals] = useState(["power"]);
   const [budget, setBudget] = useState(30000);
-  const [stage, setStage] = useState(0);
-  const [onlyFit, setOnlyFit] = useState(true);
-  const [sort, setSort] = useState("stage");
-  const [showList, setShowList] = useState(false);
   const installedItems = TUNING.filter(t => eng.installed.indexOf(t.id) >= 0);
   const chosen = TUNING.filter(t => project.indexOf(t.id) >= 0);
   const plan = buildPlan(eng, goals, budget, eng.installed);
@@ -15699,7 +15872,11 @@ function Tuning({
   const baseSp = speedFor(eng, bike, cu, installedItems),
     afterSp = speedFor(eng, bike, cu, installedItems.concat(chosen));
   const speedDelta = t => t.power > 0 || ["sp-tq", "sp-sp", "rear-sp"].indexOf(t.id) >= 0 ? speedFor(eng, bike, cu, installedItems.concat([t])).v - baseSp.v : 0;
-  const total = chosen.reduce((s, t) => s + t.price, 0);
+  const parts = chosen.filter(t => !t.svc),
+    svcs = chosen.filter(t => t.svc);
+  const total = parts.reduce((s, t) => s + t.price, 0);
+  const totLo = parts.reduce((s, t) => s + (t.lo != null ? t.lo : t.price), 0),
+    totHi = parts.reduce((s, t) => s + (t.hi != null ? t.hi : t.price), 0);
   const has = id => project.indexOf(id) >= 0 || eng.installed.indexOf(id) >= 0 || tuneStockInstalled(id, eng.carb);
   const isAir = eng.groups.indexOf("air") >= 0,
     isLiq = eng.groups.indexOf("liquid") >= 0,
@@ -15712,10 +15889,6 @@ function Tuning({
   if (gainAll >= 12 && eng.groups.indexOf("big") >= 0 && !has("clutch")) warns.push("Суммарный прирост от 12% — сцепление начнёт буксовать, нужны усиленные пружины.");
   if (eng.groups.indexOf("efi") >= 0 && chosen.some(t => ["filter", "full", "slip"].indexOf(t.id) >= 0) && !has("ecu")) warns.push("На инжекторе изменения впуска и выпуска без прошивки ЭБУ дают бедную смесь.");
   const tg = id => setGoals(goals.indexOf(id) >= 0 ? goals.filter(x => x !== id) : goals.concat([id]));
-  let list = TUNING.map(t => Object.assign({
-    t: t
-  }, tuningFor(t, eng))).filter(r => (!onlyFit || r.ok) && (!stage || r.t.stage === stage));
-  list = list.sort((a, b) => sort === "power" ? b.t.power - a.t.power : sort === "price" ? a.t.price - b.t.price : sort === "rating" ? b.t.rating - a.t.rating : a.t.stage - b.t.stage || (b.t.must ? 1 : 0) - (a.t.must ? 1 : 0));
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "tune-builder panel"
   }, /*#__PURE__*/React.createElement("h2", null, "\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u043F\u043E\u0434 \u0446\u0435\u043B\u044C"), null, /*#__PURE__*/React.createElement("div", {
@@ -15753,7 +15926,7 @@ function Tuning({
     className: "muted small"
   }, p.why.join(", "), p.t.power > 0 ? " · +" + p.t.power + "%" : "")), /*#__PURE__*/React.createElement("span", {
     className: "price"
-  }, rub(p.t.price))))), /*#__PURE__*/React.createElement("div", {
+  }, tunePrice(p.t))))), /*#__PURE__*/React.createElement("div", {
     className: "total"
   }, /*#__PURE__*/React.createElement("span", null, "\u041D\u0430\u0431\u043E\u0440 \u043D\u0430 ", /*#__PURE__*/React.createElement("b", {
     className: "nowrap"
@@ -15825,7 +15998,7 @@ function Tuning({
     className: "pl-r"
   }, /*#__PURE__*/React.createElement("span", {
     className: "price"
-  }, rub(t.price)), /*#__PURE__*/React.createElement("button", {
+  }, tunePrice(t)), /*#__PURE__*/React.createElement("button", {
     className: "mini",
     "aria-label": "\u0423\u0431\u0440\u0430\u0442\u044C",
     onClick: () => toggleProject(t)
@@ -15834,7 +16007,11 @@ function Tuning({
     s: 14
   })))))), /*#__PURE__*/React.createElement("div", {
     className: "total"
-  }, /*#__PURE__*/React.createElement("span", null, "\u0418\u0442\u043E\u0433\u043E \u043F\u043E \u0434\u0435\u0442\u0430\u043B\u044F\u043C"), /*#__PURE__*/React.createElement("b", null, rub(total))), warns.length > 0 && /*#__PURE__*/React.createElement("ul", {
+  }, /*#__PURE__*/React.createElement("span", null, "\u0414\u0435\u0442\u0430\u043B\u0438 \u2248 ", /*#__PURE__*/React.createElement("b", null, rub(total)), /*#__PURE__*/React.createElement("small", {
+    className: "muted"
+  }, " ", totLo === totHi ? "" : num(totLo) + "–" + rub(totHi), " \u0431\u0435\u0437 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438"))), svcs.length > 0 && /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, "+ \u0440\u0430\u0431\u043E\u0442\u0430 \u043C\u0430\u0441\u0442\u0435\u0440\u0430: ", svcs.map(t => t.title.replace(/\s*\(.*?\)/g, "")).join(", "), " \u2248 ", rub(svcs.reduce((s, t) => s + t.price, 0))), warns.length > 0 && /*#__PURE__*/React.createElement("ul", {
     className: "warns"
   }, warns.map((w, i) => /*#__PURE__*/React.createElement("li", {
     key: i
@@ -15844,102 +16021,14 @@ function Tuning({
     cu: cu
   }), /*#__PURE__*/React.createElement(JetWeather, {
     eng: eng
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "list-head"
-  }, /*#__PURE__*/React.createElement("h2", null, "\u0412\u0441\u0435 \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u0434\u043B\u044F ", eng.code), /*#__PURE__*/React.createElement("button", {
-    className: "btn sm",
-    onClick: () => setShowList(!showList)
-  }, showList ? "Свернуть" : "Показать " + list.length)), showList && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: "seg wrap",
-    role: "group",
-    "aria-label": "\u042D\u0442\u0430\u043F"
-  }, [[0, "Все"], [1, "Без вскрытия"], [2, "Впуск и выпуск"], [3, "Мотор"]].map(s => /*#__PURE__*/React.createElement("button", {
-    key: s[0],
-    className: stage === s[0] ? "on" : "",
-    onClick: () => setStage(s[0])
-  }, s[1]))), /*#__PURE__*/React.createElement("div", {
-    className: "row-gap toolbar"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "check"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: onlyFit,
-    onChange: e => setOnlyFit(e.target.checked)
-  }), " \u0422\u043E\u043B\u044C\u043A\u043E \u043F\u043E\u0434\u0445\u043E\u0434\u044F\u0449\u0438\u0435"), /*#__PURE__*/React.createElement("label", {
-    className: "sel"
-  }, "\u041F\u043E\u0440\u044F\u0434\u043E\u043A", /*#__PURE__*/React.createElement("select", {
-    value: sort,
-    onChange: e => setSort(e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "stage"
-  }, "\u043F\u043E \u044D\u0442\u0430\u043F\u0430\u043C"), /*#__PURE__*/React.createElement("option", {
-    value: "power"
-  }, "\u043F\u043E \u043F\u0440\u0438\u0440\u043E\u0441\u0442\u0443"), /*#__PURE__*/React.createElement("option", {
-    value: "price"
-  }, "\u043F\u043E \u0446\u0435\u043D\u0435"), /*#__PURE__*/React.createElement("option", {
-    value: "rating"
-  }, "\u043F\u043E \u043E\u0442\u0437\u044B\u0432\u0430\u043C")))), /*#__PURE__*/React.createElement("div", {
-    className: "tlist"
-  }, list.map(({
-    t,
-    ok,
-    deny,
-    note
-  }) => {
-    const inP = project.indexOf(t.id) >= 0,
-      mine = eng.installed.indexOf(t.id) >= 0,
-      stockI = !mine && tuneStockInstalled(t.id, eng.carb);
-    return /*#__PURE__*/React.createElement("article", {
-      key: t.id,
-      className: "tcard" + (ok ? "" : " no") + (inP ? " in" : "") + (mine || stockI ? " owned" : "") + (t.must && ok && !mine ? " must" : "")
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "tc-main"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "tc-top"
-    }, /*#__PURE__*/React.createElement("span", null, t.cat), /*#__PURE__*/React.createElement("span", {
-      className: "tc-stage"
-    }, "\u044D\u0442\u0430\u043F ", t.stage), t.must && ok && !mine && /*#__PURE__*/React.createElement("span", {
-      className: "tc-must"
-    }, "\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E \u043F\u0440\u0438 \u0442\u044E\u043D\u0438\u043D\u0433\u0435")), /*#__PURE__*/React.createElement("h3", null, t.title), /*#__PURE__*/React.createElement("p", null, t.body), note && ok && /*#__PURE__*/React.createElement("p", {
-      className: "tc-note"
-    }, /*#__PURE__*/React.createElement("b", null, "\u0414\u043B\u044F ", eng.code, ":"), " ", note), !ok && /*#__PURE__*/React.createElement("p", {
-      className: "tc-deny"
-    }, deny), mine && /*#__PURE__*/React.createElement("p", {
-      className: "tc-own"
-    }, /*#__PURE__*/React.createElement(Icon, {
-      n: "check",
-      s: 16
-    }), "\u0423\u0436\u0435 \u0441\u0442\u043E\u0438\u0442 \u043D\u0430 \u0442\u0432\u043E\u0451\u043C \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u0435"), stockI && /*#__PURE__*/React.createElement("p", {
-      className: "tc-own"
-    }, /*#__PURE__*/React.createElement(Icon, {
-      n: "check",
-      s: 16
-    }), "\u0423\u0436\u0435 \u0441\u0442\u043E\u0438\u0442: ", eng.carb)), /*#__PURE__*/React.createElement("div", {
-      className: "tc-side"
-    }, t.power > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "tc-gain"
-    }, "+", t.power, "%", /*#__PURE__*/React.createElement("small", null, "\u2248 +", Math.round(eng.stockHp * t.power / 10) / 10, " \u043B.\u0441.")), ok && (() => {
-      const dv = speedDelta(t);
-      return dv ? /*#__PURE__*/React.createElement("div", {
-        className: "tc-speed " + (dv > 0 ? "up" : "down")
-      }, dv > 0 ? "+" : "", dv, " \u043A\u043C/\u0447") : null;
-    })(), /*#__PURE__*/React.createElement("div", {
-      className: "tc-meta"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "diff d-" + t.diff
-    }, "\u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430: ", t.diff), /*#__PURE__*/React.createElement("span", null, "\u2605 ", t.rating.toFixed(1))), ok && TUNE_GUIDE[t.id] && guidesFor(eng).find(g => g.id === TUNE_GUIDE[t.id]) && /*#__PURE__*/React.createElement("button", {
-      className: "link small",
-      onClick: () => go("repair", TUNE_GUIDE[t.id])
-    }, "\u041A\u0430\u043A \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C"), /*#__PURE__*/React.createElement("div", {
-      className: "price"
-    }, rub(t.price)), ok && !mine && !stockI && /*#__PURE__*/React.createElement("button", {
-      className: "btn" + (inP ? "" : " primary"),
-      onClick: () => toggleProject(t)
-    }, inP ? "Убрать" : "В проект"), ok && !stockI && /*#__PURE__*/React.createElement("button", {
-      className: "link small",
-      onClick: () => toggleInstalled(t.id)
-    }, mine ? "Не стоит" : "Уже стоит у меня")));
-  }))));
+  }), /*#__PURE__*/React.createElement(TuneCatalog, {
+    eng: eng,
+    project: project,
+    toggleProject: toggleProject,
+    toggleInstalled: toggleInstalled,
+    go: go,
+    speedDelta: speedDelta
+  }));
 }
 
 /* ===== Запчасти ===== */

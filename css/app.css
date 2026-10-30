@@ -2478,3 +2478,68 @@ code { background: #141414 !important; color: #fff; }
   .install-card p { font-size: 13px !important; margin: 2px 0 8px !important; }
 }
 .ai-tg { display: inline-block; margin-top: 4px; font-size: 13px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ===================== v62: немного цвета =====================
+   Чёрно-белый стиль остаётся, цвет — точечно: фирменный оранжевый на главных кнопках, активном пункте меню,
+   точке в шапке и шкалах; зелёный — прирост, красный — потери. В тюнинге у каждой категории свой цвет (--c). */
+:root, :root:not([data-theme="light"]), :root[data-theme="dark"] { --hot: #FF7A1A; --hot2: #FFA24D; --hot-ink: #160900; --good: #34D399; --bad: #F87171; --acc-rgb: 255, 122, 26; --acc2-rgb: 255, 162, 77; }
+.btn.primary, .hero .btn.primary, .btn.ai-btn.primary { background: linear-gradient(180deg, var(--hot2), var(--hot)) !important; color: var(--hot-ink) !important; border-color: transparent !important; }
+.btn.primary .ico, .btn.primary svg { color: var(--hot-ink) !important; }
+.btn.primary:hover { background: var(--hot2) !important; }
+.btn.primary:active { background: #E5650C !important; color: var(--hot-ink) !important; }
+.btn.primary:active .ico, .btn.primary:active svg { color: var(--hot-ink) !important; }
+.tab.on, .tab.on .tab-ico svg { color: var(--hot) !important; }
+.tab.on:not(.tab-ai)::before { background: var(--hot) !important; }
+.hero-dot { background: var(--hot) !important; box-shadow: 0 0 0 3px rgba(255,122,26,.22) !important; }
+.grad, .main .grad { -webkit-text-stroke-color: var(--hot2) !important; }
+.meter-bar .now, .g-progress span, .gm-dots button.cur, .intro-bar span, .cause-bar span, .sg-bar span, .pbar span, .cbar span, .start-bar span { background: linear-gradient(90deg, var(--hot), var(--hot2)) !important; }
+.meter-bar .was { background: rgba(255,162,77,.28) !important; }
+.tc-gain, .tz-gain, .proj-hp .now, .proj-speed .up, .tc-speed.up, .tz-speed.up { color: var(--good) !important; }
+.tc-speed.down, .tz-speed.down, .proj-speed .down { color: var(--bad) !important; }
+.panel h2::before, .page h2::before { background: var(--hot) !important; }
+.warns li { border-left-color: #FBBF24 !important; }
+::selection { background: var(--hot); color: #000; }
+
+/* --- тюнинг: каталог --- */
+.tz { margin-top: 18px; }
+.tz .list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tz .list-head select { padding: 7px 10px; border-radius: 8px; background: #0A0A0A; color: #fff; border: 1px solid var(--m-line2); font: 500 14px var(--cond); }
+.tz-note { margin: 4px 0 10px; }
+.tz-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.tz-tabs::-webkit-scrollbar { display: none; }
+.tz-tab { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.16); background: #0A0A0A; color: #E6E6E6; font: 600 14px var(--cond); cursor: pointer; }
+.tz-tab::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.tz-tab small { color: #8A8A8A; font-weight: 500; }
+.tz-tab.on { background: color-mix(in srgb, var(--c) 18%, #0A0A0A); border-color: var(--c); color: #fff; }
+.tz-tab.on small { color: var(--c); }
+.tz-list { display: grid; gap: 8px; }
+@media (min-width: 760px) { .tz-list { grid-template-columns: 1fr 1fr; } }
+.tz-card { position: relative; padding: 12px 12px 10px 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; background: #0B0B0B; overflow: hidden; }
+.tz-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--c); opacity: .9; }
+.tz-card.in { border-color: var(--hot); background: linear-gradient(180deg, rgba(255,122,26,.08), #0B0B0B 60%); }
+.tz-card.owned { opacity: .78; }
+.tz-card.no { opacity: .55; }
+.tz-card.must { border-style: dashed; border-color: rgba(251,191,36,.6); }
+.tz-top { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; font: 600 12px var(--cond); }
+.tz-cat { color: var(--c); text-transform: uppercase; letter-spacing: .06em; }
+.tz-gain { padding: 1px 7px; border-radius: 999px; background: rgba(52,211,153,.12); }
+.tz-speed { padding: 1px 7px; border-radius: 999px; background: rgba(255,255,255,.06); }
+.tz-must { padding: 1px 7px; border-radius: 999px; background: rgba(251,191,36,.14); color: #FBBF24; }
+.tz-head { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+.tz-head h3 { margin: 0; font: 600 16px/1.25 var(--cond); letter-spacing: .01em; text-transform: none; font-style: normal; }
+.tz-price { flex: none; text-align: right; }
+.tz-price b { display: block; font: 600 15px var(--cond); color: #fff; white-space: nowrap; }
+.tz-price small { display: block; font: 500 11px var(--cond); color: #8A8A8A; }
+.tz-body { margin: 6px 0 0; color: #A8A8A8; font-size: 14px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tz-body.open { display: block; -webkit-line-clamp: unset; }
+.tz-card .tc-note, .tz-card .tc-deny, .tz-card .tc-own { margin: 8px 0 0; font-size: 14px; }
+.tz-shops { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+.tz-shops .chip { min-height: 32px !important; padding: 4px 12px !important; }
+.tz-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.tz-meta { margin-right: auto; color: #8A8A8A; font: 500 13px var(--cond); display: inline-flex; align-items: center; gap: 6px; }
+.tz-meta .tz-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: #34D399; }
+.tz-meta .tz-dot.d-средне { background: #FBBF24; } .tz-meta .tz-dot.d-сложно { background: #F87171; }
+.tz-foot .btn.sm { min-height: 34px !important; padding: 6px 14px !important; }
+.tz-more { display: block; width: 100%; margin-top: 8px; }
+.tz-nofit { display: block; margin: 12px 0 6px; }
+.project .total small { display: block; font-weight: 500; }
