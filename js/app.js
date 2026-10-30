@@ -15329,7 +15329,8 @@ function tuneWear(items) {
     saves: items.filter(t => t.saves)
   };
 }
-const wearTxt = t => "ресурс −" + (t.wear[0] === t.wear[1] ? t.wear[1] : (t.wear[0] || 0) + "–" + t.wear[1]) + "%";
+const wearRange = (lo, hi) => (lo ? "−" + (lo === hi ? hi : lo + "–" + hi) : "до −" + hi) + "%";
+const wearTxt = t => "ресурс " + wearRange(t.wear[0], t.wear[1]);
 function buildPlan(eng, goals, budget, installedIds) {
   const first = buildPlanRaw(eng, goals, budget, installedIds);
   if (first.total <= budget) return first;
@@ -15574,9 +15575,7 @@ function JetWeather({
   }, /*#__PURE__*/React.createElement("b", null, x[1]), /*#__PURE__*/React.createElement("span", null, x[2]))));
   return /*#__PURE__*/React.createElement("div", {
     className: "panel jetw"
-  }, /*#__PURE__*/React.createElement("h2", null, "Жиклёры под погоду и местность"), /*#__PURE__*/React.createElement("p", {
-    className: "muted"
-  }, "Заводские жиклёры ", eng.code, " — под тёплую погоду на равнине. В горах и в жару смесь богаче, в мороз — беднее. Где катаешься?"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h2", null, "Жиклёры под погоду и местность"), /*#__PURE__*/React.createElement("div", {
     className: "jw-q"
   }, "Где катаешься"), chips(JW_ALT, alt, setA), /*#__PURE__*/React.createElement("div", {
     className: "jw-q"
@@ -15617,7 +15616,7 @@ function JetWeather({
     className: "jw-side"
   }, np > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Холостой жиклёр"), /*#__PURE__*/React.createElement("b", null, np, " ", /*#__PURE__*/React.createElement("small", null, "с завода ", eng.jetPilot))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Игла"), /*#__PURE__*/React.createElement("b", null, needle)))), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, Math.abs(d) < 1 ? "Воздух как в расчёте завода. " : "Воздух " + (d < 0 ? "реже" : "плотнее") + " на " + Math.abs(d).toFixed(0) + "%, чем тёплым днём у моря. ", "Это стартовая точка: окончательно подбирай по цвету свечи после проезда на полном газу (светло-коричневая — норма)."));
+  }, Math.abs(d) < 1 ? "Воздух как в расчёте завода. " : "Воздух " + (d < 0 ? "реже" : "плотнее") + " на " + Math.abs(d).toFixed(0) + "%, чем тёплым днём у моря. ", "Дальше — по цвету свечи: светло-коричневая — норма."));
 }
 /* Звёзды: что даст другая пара звёзд — тяга на колесе, обороты мотора на трассе, максималка, цепь.
    Числа меняются кнопками −/+ (на телефоне это удобнее, чем вводить), рядом — готовые варианты. */
@@ -15692,12 +15691,12 @@ function Sprockets({
       setR2(r);
     }
   }, t);
-  const verdict = same ? "Поменяй звёзды кнопками или выбери вариант — покажу, что изменится." : tr > 0 ? "Резвее разгон, легче в подъёмах и в грязи — меньше работать сцеплением. Но на " + cruise + " км/ч мотор крутится " + num(rp2) + " об/мин вместо " + num(rp1) + ": на трассе шумнее, расход и износ чуть больше." + (s2.v < s1.v ? " Максималка ниже — упирается в обороты." : "") : "Спокойнее на трассе: на " + cruise + " км/ч — " + num(rp2) + " об/мин вместо " + num(rp1) + ", мотору легче. Разгон и подъёмы тяжелее, в лесу чаще придётся работать сцеплением." + (s2.v > s1.v ? " Максималка вырастет до ≈ " + s2.v + " км/ч." : " Максималка не вырастет: мотору не хватает мощности, чтобы раскрутиться на высшей.");
+  const verdict = same ? "" : tr > 0 ? "Резвее разгон и в подъёмах. На трассе мотор крутится выше: " + num(rp2) + " вместо " + num(rp1) + " об/мин на " + cruise + " км/ч." + (s2.v < s1.v ? " Максималка ниже." : "") : "Спокойнее на трассе: " + num(rp2) + " вместо " + num(rp1) + " об/мин на " + cruise + " км/ч. Разгон тяжелее." + (s2.v > s1.v ? " Максималка ≈ " + s2.v + " км/ч." : " Максималка не вырастет — не хватает мощности.");
   return /*#__PURE__*/React.createElement("div", {
     className: "panel sprockets"
   }, /*#__PURE__*/React.createElement("h2", null, "Звёзды: разгон или скорость"), /*#__PURE__*/React.createElement("div", {
     className: "spr-cur"
-  }, /*#__PURE__*/React.createElement("span", null, "Сейчас ", /*#__PURE__*/React.createElement("b", null, f1, "/", r1), " · передаточное ", k1.toFixed(2), cu.sprF ? "" : " · типовые для класса", withProject ? " · с доработками из проекта (≈ " + s1.hp + " л.с.)" : ""), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("span", null, "Сейчас ", /*#__PURE__*/React.createElement("b", null, f1, "/", r1), cu.sprF ? "" : " (типовые)", withProject ? " · с проектом ≈ " + s1.hp + " л.с." : ""), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "link small",
     onClick: () => setEditCur(!editCur)
@@ -15709,13 +15708,11 @@ function Sprockets({
     className: "spr-steps"
   }, step(f2, setF2, 9, 20, "Передняя"), step(r2, setR2, 30, 60, "Задняя")), /*#__PURE__*/React.createElement("div", {
     className: "spr-res"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Тяга на колесе"), /*#__PURE__*/React.createElement("b", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Тяга"), /*#__PURE__*/React.createElement("b", {
     className: tr > 0 ? "up" : tr < 0 ? "down" : ""
-  }, same ? "—" : (tr > 0 ? "+" : "") + tr + "%"), /*#__PURE__*/React.createElement("small", null, "разгон, подъёмы, грязь")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Обороты на ", cruise, " км/ч"), /*#__PURE__*/React.createElement("b", null, num(rp1), same ? "" : " → " + num(rp2)), /*#__PURE__*/React.createElement("small", null, "на высшей передаче")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Макс. скорость"), /*#__PURE__*/React.createElement("b", null, s1.v, same || s2.v === s1.v ? "" : " → " + s2.v, " км/ч"), /*#__PURE__*/React.createElement("small", null, "оценка ±10–15%")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Цепь"), /*#__PURE__*/React.createElement("b", null, same ? "—" : chain), /*#__PURE__*/React.createElement("small", null, "передаточное ", k2.toFixed(2)))), /*#__PURE__*/React.createElement("p", {
+  }, same ? "—" : (tr > 0 ? "+" : "") + tr + "%")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Обороты на ", cruise, " км/ч"), /*#__PURE__*/React.createElement("b", null, num(rp1), same ? "" : " → " + num(rp2))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Максималка"), /*#__PURE__*/React.createElement("b", null, s1.v, same || s2.v === s1.v ? "" : " → " + s2.v, " км/ч")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", null, "Цепь"), /*#__PURE__*/React.createElement("b", null, same ? "—" : chain))), verdict && /*#__PURE__*/React.createElement("p", {
     className: "spr-note"
-  }, verdict), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "1 зуб спереди ≈ 3 зуба сзади. Вытянутую цепь меняй вместе со звёздами — на старой новые звёзды быстро съедятся."));
+  }, verdict));
 }
 function TopSpeed({
   eng,
@@ -15899,7 +15896,7 @@ function TuneCatalog({
     value: "wear"
   }, "бережнее к мотору")))), /*#__PURE__*/React.createElement("p", {
     className: "muted small tz-note"
-  }, "\u0426\u0435\u043D\u044B \u2014 \u0437\u0430 \u0441\u0430\u043C\u0443 \u0434\u0435\u0442\u0430\u043B\u044C \u0431\u0435\u0437 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438, \u043F\u043E \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u0430\u043C \u0434\u043B\u044F \u043A\u0438\u0442\u0430\u0439\u0441\u043A\u043E\u0439 \u0442\u0435\u0445\u043D\u0438\u043A\u0438. \u0411\u0440\u0435\u043D\u0434\u043E\u0432\u044B\u0435 \u0434\u0435\u0442\u0430\u043B\u0438 \u0434\u043E\u0440\u043E\u0436\u0435."), /*#__PURE__*/React.createElement("div", {
+  }, "Цены — за деталь, без установки."), /*#__PURE__*/React.createElement("div", {
     className: "tz-tabs",
     role: "tablist",
     "aria-label": "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u0438"
@@ -15930,11 +15927,31 @@ function TuneCatalog({
     className: "tz-list"
   }, noList.map(card)));
 }
+/* Свёрнутый блок: заголовок и строка сути, содержимое — по нажатию (меньше текста на экране) */
+function Fold({
+  title,
+  sub,
+  children
+}) {
+  const [open, setOpen] = useState(false);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "panel fold" + (open ? " open" : "")
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "fold-head",
+    "aria-expanded": open,
+    onClick: () => setOpen(!open)
+  }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, title), sub && /*#__PURE__*/React.createElement("small", null, sub)), /*#__PURE__*/React.createElement("i", {
+    "aria-hidden": "true"
+  }, "▾")), open && /*#__PURE__*/React.createElement("div", {
+    className: "fold-body"
+  }, children));
+}
 function Tuning({
   eng,
   bike,
   cu,
-  project,
+  project: project0,
   setProject,
   toggleProject,
   toggleInstalled,
@@ -15944,9 +15961,9 @@ function Tuning({
   const [goals, setGoals] = useState(["power"]);
   const [budget, setBudget] = useState(30000);
   const installedItems = TUNING.filter(t => eng.installed.indexOf(t.id) >= 0);
-  const chosen = TUNING.filter(t => project.indexOf(t.id) >= 0);
+  const chosen = TUNING.filter(t => project0.indexOf(t.id) >= 0);
   const plan = buildPlan(eng, goals, budget, eng.installed);
-  const planAllIn = plan.pick.length > 0 && plan.pick.every(p => project.indexOf(p.t.id) >= 0);
+  const planAllIn = plan.pick.length > 0 && plan.pick.every(p => project0.indexOf(p.t.id) >= 0);
   const before = tuneMeters(eng, installedItems),
     after = tuneMeters(eng, installedItems.concat(chosen)),
     wear = tuneWear(installedItems.concat(chosen));
@@ -15962,24 +15979,83 @@ function Tuning({
   const total = parts.reduce((s, t) => s + t.price, 0);
   const totLo = parts.reduce((s, t) => s + (t.lo != null ? t.lo : t.price), 0),
     totHi = parts.reduce((s, t) => s + (t.hi != null ? t.hi : t.price), 0);
-  const has = id => project.indexOf(id) >= 0 || eng.installed.indexOf(id) >= 0 || tuneStockInstalled(id, eng.carb);
+  const has = id => project0.indexOf(id) >= 0 || eng.installed.indexOf(id) >= 0 || tuneStockInstalled(id, eng.carb);
   const isAir = eng.groups.indexOf("air") >= 0,
     isLiq = eng.groups.indexOf("liquid") >= 0,
     isCarb = eng.groups.indexOf("carb") >= 0;
   const gainAll = tuneGain(installedItems.concat(chosen), eng),
     mixOk = tuneMixOk(installedItems.concat(chosen), eng);
-  const warns = [];
-  if (gainAll > 0 && isAir && !has("oilcool")) warns.push("Прирост без маслорадиатора — риск перегрева воздушника.");
-  if (gainAll > 0 && isLiq && !has("fan") && eng.stroke !== "2T") warns.push("Добавь вентилятор: штатного охлаждения в грязи не хватает.");
-  if (isCarb && chosen.some(t => ["filter", "slip", "full", "pipe", "bore300", "bore-yx", "bore-cg", "cam", "pe30", "pwk", "pwk28"].indexOf(t.id) >= 0) && !has("jets")) warns.push("После впуска, выпуска или расточки нужна перенастройка смеси — добавь подбор жиклёров (сейчас главный " + eng.jetMain + ").");
-  if (gainAll >= 12 && eng.groups.indexOf("big") >= 0 && !has("clutch")) warns.push("Суммарный прирост от 12% — сцепление начнёт буксовать, нужны усиленные пружины.");
-  if (eng.groups.indexOf("efi") >= 0 && chosen.some(t => ["filter", "full", "slip"].indexOf(t.id) >= 0) && !has("ecu")) warns.push("На инжекторе изменения впуска и выпуска без прошивки ЭБУ дают бедную смесь.");
-  if (chosen.some(t => t.id === "filter")) warns.push(TUNE_RISK.filter);
-  if (wear.hi >= 25) warns.push("Ресурс заметно ниже штатного: масло меняй в 1,5–2 раза чаще, клапаны и свечу проверяй чаще, не держи мотор подолгу в отсечке.");
+  /* что нужно добавить к проекту: коротко и с кнопкой «Добавить» */
+  const BREATH = ["filter", "slip", "full", "header", "pipe", "bore300", "bore-nb350", "bore-z212", "bore-yx", "bore-cg", "cam", "porting", "pe30", "pwk", "pwk28"];
+  const fixes = [];
+  if (gainAll > 0 && isAir && !has("oilcool")) fixes.push(["Нужен маслорадиатор — иначе перегрев", "oilcool"]);
+  if (gainAll > 0 && isLiq && !has("fan") && eng.stroke !== "2T") fixes.push(["Нужен вентилятор радиатора", "fan"]);
+  if (isCarb && chosen.some(t => BREATH.indexOf(t.id) >= 0) && !has("jets")) fixes.push(["Нужен подбор жиклёров — без него прибавки почти нет", "jets"]);
+  if (gainAll >= 12 && eng.groups.indexOf("big") >= 0 && !has("clutch")) fixes.push(["Нужны усиленные пружины сцепления", "clutch"]);
+  if (eng.groups.indexOf("efi") >= 0 && chosen.some(t => ["filter", "full", "slip"].indexOf(t.id) >= 0) && !has("ecu")) fixes.push(["Нужна прошивка ЭБУ — иначе бедная смесь", "ecu"]);
+  if (chosen.some(t => t.id === "filter")) fixes.push(["Нулевик пропитывать и чистить после 2–3 пыльных выездов", null]);
+  if (wear.hi >= 25) fixes.push(["Масло менять в 1,5–2 раза чаще", null]);
+  const fixItem = id => {
+    const t = id && TUNING.find(x => x.id === id);
+    return t && tuningFor(t, eng).ok ? t : null;
+  };
   const tg = id => setGoals(goals.indexOf(id) >= 0 ? goals.filter(x => x !== id) : goals.concat([id]));
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: "tune-builder panel"
-  }, /*#__PURE__*/React.createElement("h2", null, "\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u043F\u043E\u0434 \u0446\u0435\u043B\u044C"), null, /*#__PURE__*/React.createElement("div", {
+  const stat = (label, val, sub, cls) => /*#__PURE__*/React.createElement("div", {
+    className: "pj-stat" + (cls ? " " + cls : "")
+  }, /*#__PURE__*/React.createElement("span", null, label), /*#__PURE__*/React.createElement("b", null, val), sub && /*#__PURE__*/React.createElement("small", null, sub));
+  const tags = t => [t.power > 0 && "+" + tuneGain([t], eng, true) + "%", t.wear && wearTxt(t), t.saves && !t.wear && "бережёт мотор"].filter(Boolean).join(" · ");
+  const project = chosen.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "project panel"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("h2", null, "Проект: ", cu.nick || bike.name), /*#__PURE__*/React.createElement("button", {
+    className: "link",
+    onClick: () => setProject([])
+  }, "Очистить")), /*#__PURE__*/React.createElement("div", {
+    className: "pj-stats"
+  }, stat("Мощность", before.hp + " → " + after.hp, "л.с., оценка", after.gain > before.gain ? "up" : ""), stat("Макс. скорость", baseSp.v + (afterSp.v !== baseSp.v ? " → " + afterSp.v : ""), "км/ч", afterSp.v > baseSp.v ? "up" : afterSp.v < baseSp.v ? "down" : ""), stat("Ресурс мотора", wear.hi > 0 ? wearRange(wear.lo, wear.hi) : "как с завода", wear.hi > 0 ? "раньше переборка" : wear.saves.length ? "и бережём его" : "", wear.hi > 0 ? "down" : "up"), stat("Детали", "≈ " + rub(total), totLo === totHi ? "без установки" : num(totLo) + "–" + num(totHi) + " ₽")), /*#__PURE__*/React.createElement("ul", {
+    className: "plist"
+  }, chosen.map(t => /*#__PURE__*/React.createElement("li", {
+    key: t.id
+  }, /*#__PURE__*/React.createElement("span", null, t.title.replace(/\s*\(.*?\)/g, ""), tags(t) && /*#__PURE__*/React.createElement("small", {
+    className: "pl-tags" + (t.wear ? " bad" : "")
+  }, tags(t))), /*#__PURE__*/React.createElement("span", {
+    className: "pl-r"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "price"
+  }, tunePrice(t)), /*#__PURE__*/React.createElement("button", {
+    className: "mini",
+    "aria-label": "Убрать",
+    onClick: () => toggleProject(t)
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "close",
+    s: 14
+  })))))), svcs.length > 0 && /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, "+ работа мастера ≈ ", rub(svcs.reduce((s, t) => s + t.price, 0))), fixes.length > 0 && /*#__PURE__*/React.createElement("ul", {
+    className: "pj-fix"
+  }, fixes.map(f => {
+    const it = fixItem(f[1]);
+    return /*#__PURE__*/React.createElement("li", {
+      key: f[0]
+    }, /*#__PURE__*/React.createElement("span", null, f[0]), it && /*#__PURE__*/React.createElement("button", {
+      className: "btn sm",
+      onClick: () => toggleProject(it)
+    }, "Добавить"));
+  })), /*#__PURE__*/React.createElement("details", {
+    className: "pj-how"
+  }, /*#__PURE__*/React.createElement("summary", null, "Как считаем"), /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, "Мощность — на коленвале, на колесе на 10–15% меньше. Фильтр, выпуск, карбюратор и распредвал упираются в одно, поэтому вместе дают меньше суммы. Без подбора жиклёров прибавка урезана. Ресурс — насколько раньше понадобится переборка при обычной езде и вовремя сделанном ТО."), /*#__PURE__*/React.createElement(Dyno, {
+    eng: eng,
+    items: installedItems.concat(chosen)
+  })));
+  return /*#__PURE__*/React.createElement(React.Fragment, null, project, chosen.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "muted small tz-hint"
+  }, "Жми «В проект» на доработках — посчитаю мощность, скорость, ресурс и цену."), /*#__PURE__*/React.createElement(Fold, {
+    title: "Подобрать набор под цель",
+    sub: "Выбери цель и бюджет — соберу список"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "tags"
   }, GOALS.map(g => /*#__PURE__*/React.createElement("button", {
     key: g.id,
@@ -15991,7 +16067,7 @@ function Tuning({
     s: 14
   }), g.t))), /*#__PURE__*/React.createElement("label", {
     className: "budget"
-  }, /*#__PURE__*/React.createElement("span", null, "\u0411\u044E\u0434\u0436\u0435\u0442: ", /*#__PURE__*/React.createElement("b", null, rub(budget))), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("span", null, "Бюджет: ", /*#__PURE__*/React.createElement("b", null, rub(budget))), /*#__PURE__*/React.createElement("input", {
     type: "range",
     min: "3000",
     max: "150000",
@@ -16000,117 +16076,49 @@ function Tuning({
     onChange: e => setBudget(Number(e.target.value))
   })), goals.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "\u0412\u044B\u0431\u0435\u0440\u0438 \u0445\u043E\u0442\u044F \u0431\u044B \u043E\u0434\u043D\u0443 \u0446\u0435\u043B\u044C.") : plan.pick.length === 0 ? /*#__PURE__*/React.createElement("p", {
+  }, "Выбери хотя бы одну цель.") : plan.pick.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "muted"
-  }, "\u0412 \u044D\u0442\u043E\u0442 \u0431\u044E\u0434\u0436\u0435\u0442 \u043D\u0438\u0447\u0435\u0433\u043E \u043F\u043E\u0434\u0445\u043E\u0434\u044F\u0449\u0435\u0433\u043E \u043D\u0435 \u043D\u0430\u0448\u043B\u043E\u0441\u044C \u2014 \u0443\u0432\u0435\u043B\u0438\u0447\u044C \u0431\u044E\u0434\u0436\u0435\u0442.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
+  }, "В этот бюджет ничего не подходит.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
     className: "plan"
   }, plan.pick.map(p => /*#__PURE__*/React.createElement("li", {
     key: p.t.id,
-    className: project.indexOf(p.t.id) >= 0 ? "in" : ""
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, project.indexOf(p.t.id) >= 0 && /*#__PURE__*/React.createElement(Icon, {
+    className: project0.indexOf(p.t.id) >= 0 ? "in" : ""
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, project0.indexOf(p.t.id) >= 0 && /*#__PURE__*/React.createElement(Icon, {
     n: "check",
     s: 14
-  }), " ", p.t.title), /*#__PURE__*/React.createElement("span", {
+  }), " ", p.t.title.replace(/\s*\(.*?\)/g, "")), tags(p.t) && /*#__PURE__*/React.createElement("span", {
     className: "muted small"
-  }, p.why.join(", "), p.t.power > 0 ? " · +" + p.t.power + "%" : "", p.t.wear ? " · " + wearTxt(p.t) : "")), /*#__PURE__*/React.createElement("span", {
+  }, tags(p.t))), /*#__PURE__*/React.createElement("span", {
     className: "price"
   }, tunePrice(p.t))))), /*#__PURE__*/React.createElement("div", {
     className: "total"
-  }, /*#__PURE__*/React.createElement("span", null, "\u041D\u0430\u0431\u043E\u0440 \u043D\u0430 ", /*#__PURE__*/React.createElement("b", {
+  }, /*#__PURE__*/React.createElement("span", null, "Набор ", /*#__PURE__*/React.createElement("b", {
     className: "nowrap"
   }, rub(plan.total))), /*#__PURE__*/React.createElement("button", {
     className: "btn primary sm",
     disabled: planAllIn,
     onClick: () => {
-      const add = plan.pick.filter(p => project.indexOf(p.t.id) < 0).length;
-      setProject(Array.from(new Set(project.concat(plan.pick.map(p => p.t.id)))));
+      const add = plan.pick.filter(p => project0.indexOf(p.t.id) < 0).length;
+      setProject(Array.from(new Set(project0.concat(plan.pick.map(p => p.t.id)))));
       for (let i = 0; i < add; i++) bumpStat("tune");
       flash("Набор добавлен в проект");
     }
-  }, planAllIn ? "Всё уже в проекте" : "Добавить всё в проект")))), /*#__PURE__*/React.createElement("div", {
-    className: "project"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "panel-head"
-  }, /*#__PURE__*/React.createElement("h2", null, "\u041F\u0440\u043E\u0435\u043A\u0442: ", cu.nick || bike.name), chosen.length > 0 && /*#__PURE__*/React.createElement("button", {
-    className: "link",
-    onClick: () => setProject([])
-  }, "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C")), /*#__PURE__*/React.createElement("div", {
-    className: "proj-hp"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: chosen.length ? "was" : "now-plain"
-  }, before.hp), chosen.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
-    className: "arrow",
-    "aria-hidden": "true"
-  }, "\u203A"), /*#__PURE__*/React.createElement("span", {
-    className: "now"
-  }, after.hp)), /*#__PURE__*/React.createElement("span", {
-    className: "u"
-  }, "\u043B.\u0441."), chosen.length > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "muted small"
-  }, "\u043E\u0446\u0435\u043D\u043A\u0430, +", after.gain - before.gain, "%")), chosen.some(t => t.power > 0) && /*#__PURE__*/React.createElement("p", {
-    className: "muted small proj-how"
-  }, "Оценка на коленвале, на колесе будет на 10–15% меньше. Прибавки не складываются напрямую: фильтр, выпуск, карбюратор и распредвал упираются в одно — считаем с поправкой.", !mixOk ? " Смесь не подобрана — поэтому прибавка урезана: без жиклёров (на инжекторе — без прошивки) мотор беднеет и греется, а не едет быстрее." : ""), /*#__PURE__*/React.createElement("div", {
-    className: "proj-speed"
-  }, /*#__PURE__*/React.createElement("span", null, "\u041C\u0430\u043A\u0441. \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C \u2248"), /*#__PURE__*/React.createElement("b", null, baseSp.v), chosen.length > 0 && afterSp.v !== baseSp.v && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
-    className: "arrow"
-  }, "\u203A"), /*#__PURE__*/React.createElement("b", {
-    className: afterSp.v > baseSp.v ? "up" : "down"
-  }, afterSp.v)), /*#__PURE__*/React.createElement("span", null, "\u043A\u043C/\u0447"), /*#__PURE__*/React.createElement("small", {
-    className: "muted"
-  }, afterSp.limit === "power" ? "не хватает мощности" : "упирается в предельные обороты")), /*#__PURE__*/React.createElement("div", {
-    className: "proj-wear" + (wear.hi > 0 ? " bad" : "")
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "pw-head"
-  }, /*#__PURE__*/React.createElement("span", null, "Ресурс мотора"), /*#__PURE__*/React.createElement("b", null, wear.hi > 0 ? "−" + (wear.lo === wear.hi ? wear.hi : wear.lo + "–" + wear.hi) + "%" : "не меняется")), wear.hi > 0 && /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "Оценка: насколько раньше понадобится переборка при обычной езде и вовремя сделанном ТО."), wear.items.length > 0 && /*#__PURE__*/React.createElement("ul", {
-    className: "pw-list"
-  }, wear.items.map(t => /*#__PURE__*/React.createElement("li", {
-    key: t.id
-  }, /*#__PURE__*/React.createElement("span", null, t.title.replace(/\s*\(.*?\)/g, "")), /*#__PURE__*/React.createElement("b", null, wearTxt(t).replace("ресурс ", ""))))), wear.saves.length > 0 && /*#__PURE__*/React.createElement("p", {
-    className: "pw-saves small"
-  }, "Бережёт мотор: ", wear.saves.map(t => t.title.replace(/\s*\(.*?\)/g, "")).join(", "))), /*#__PURE__*/React.createElement(Dyno, {
-    eng: eng,
-    items: installedItems.concat(chosen)
-  }), chosen.length === 0 ? /*#__PURE__*/React.createElement("p", {
-    className: "muted"
-  }, "\u0414\u043E\u0431\u0430\u0432\u044C \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u0438\u0437 \u043F\u043E\u0434\u0431\u043E\u0440\u0430 \u0432\u044B\u0448\u0435 \u0438\u043B\u0438 \u0438\u0437 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430 \u043D\u0438\u0436\u0435.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
-    className: "plist"
-  }, chosen.map(t => /*#__PURE__*/React.createElement("li", {
-    key: t.id
-  }, /*#__PURE__*/React.createElement("span", null, t.title, t.wear && /*#__PURE__*/React.createElement("small", {
-    className: "pl-wear"
-  }, wearTxt(t))), /*#__PURE__*/React.createElement("span", {
-    className: "pl-r"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "price"
-  }, tunePrice(t)), /*#__PURE__*/React.createElement("button", {
-    className: "mini",
-    "aria-label": "\u0423\u0431\u0440\u0430\u0442\u044C",
-    onClick: () => toggleProject(t)
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "close",
-    s: 14
-  })))))), /*#__PURE__*/React.createElement("div", {
-    className: "total"
-  }, /*#__PURE__*/React.createElement("span", null, "\u0414\u0435\u0442\u0430\u043B\u0438 \u2248 ", /*#__PURE__*/React.createElement("b", null, rub(total)), /*#__PURE__*/React.createElement("small", {
-    className: "muted"
-  }, " ", totLo === totHi ? "" : num(totLo) + "–" + rub(totHi), " \u0431\u0435\u0437 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438"))), svcs.length > 0 && /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "+ \u0440\u0430\u0431\u043E\u0442\u0430 \u043C\u0430\u0441\u0442\u0435\u0440\u0430: ", svcs.map(t => t.title.replace(/\s*\(.*?\)/g, "")).join(", "), " \u2248 ", rub(svcs.reduce((s, t) => s + t.price, 0))), warns.length > 0 && /*#__PURE__*/React.createElement("ul", {
-    className: "warns"
-  }, warns.map((w, i) => /*#__PURE__*/React.createElement("li", {
-    key: i
-  }, w))))), /*#__PURE__*/React.createElement(Sprockets, {
+  }, planAllIn ? "Всё уже в проекте" : "В проект")))), /*#__PURE__*/React.createElement(Fold, {
+    title: "Звёзды: разгон или скорость",
+    sub: "Что даст другая пара звёзд"
+  }, /*#__PURE__*/React.createElement(Sprockets, {
     eng: eng,
     bike: bike,
     cu: cu,
     items: installedItems.concat(chosen)
-  }), /*#__PURE__*/React.createElement(JetWeather, {
+  })), /*#__PURE__*/React.createElement(Fold, {
+    title: "Жиклёры под погоду и высоту",
+    sub: "С завода главный " + eng.jetMain
+  }, /*#__PURE__*/React.createElement(JetWeather, {
     eng: eng
-  }), /*#__PURE__*/React.createElement(TuneCatalog, {
+  })), /*#__PURE__*/React.createElement(TuneCatalog, {
     eng: eng,
-    project: project,
+    project: project0,
     toggleProject: toggleProject,
     toggleInstalled: toggleInstalled,
     go: go,

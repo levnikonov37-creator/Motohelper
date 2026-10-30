@@ -2635,3 +2635,34 @@ code { background: #141414 !important; color: #fff; }
 .tg-txt span { color: #9A9A9A; font-size: 13px; line-height: 1.3; }
 .tg-go { flex: none; padding: 7px 12px; border-radius: 999px; background: #fff; color: #000; font: 600 13px var(--cond); }
 .rail-tg { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ===================== v66: тюнинг — меньше слов =====================
+   Проект — плитками (мощность, скорость, ресурс, деньги) и коротким списком; подбор под цель, звёзды и жиклёры
+   свёрнуты в строки и открываются по нажатию. */
+.fold { padding: 0 !important; overflow: hidden; }
+.fold-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 0; background: none; color: #fff; text-align: left; cursor: pointer; }
+.fold-head > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fold-head b { font: italic 700 16px/1.2 var(--cond); text-transform: uppercase; letter-spacing: .02em; }
+.fold-head small { color: #8A8A8A; font-size: 13px; }
+.fold-head i { font-style: normal; font-size: 18px; color: #8A8A8A; transition: transform .2s; }
+.fold.open .fold-head i { transform: rotate(180deg); }
+.fold-body { padding: 0 16px 16px; }
+.fold-body > .panel { border: 0 !important; background: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+.fold-body > .panel > h2:first-child { display: none; }
+.pj-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 12px; }
+@media (min-width: 760px) { .pj-stats { grid-template-columns: repeat(4, 1fr); } }
+.pj-stat { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; background: #0E0E0E; border: 1px solid rgba(255,255,255,.1); }
+.pj-stat span { color: #8A8A8A; font: 600 12px var(--cond); text-transform: uppercase; letter-spacing: .04em; }
+.pj-stat b { font: 600 20px/1.15 var(--cond); color: #fff; }
+.pj-stat small { color: #777; font-size: 12px; }
+.pj-stat.up b { color: var(--good); }
+.pj-stat.down b { color: var(--bad); }
+.pl-tags { display: block; margin-top: 2px; color: #8A8A8A; font-size: 12px; }
+.pl-tags.bad { color: var(--bad); }
+.pj-fix { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
+.pj-fix li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(251,191,36,.08); border-left: 3px solid #FBBF24; font-size: 14px; }
+.pj-fix .btn.sm { flex: none; min-height: 32px !important; padding: 4px 12px !important; }
+.pj-how { margin-top: 10px; }
+.pj-how summary { cursor: pointer; color: #8A8A8A; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.pj-how p { margin: 6px 0 8px; }
+.tz-hint { margin: 4px 0 -4px; }
