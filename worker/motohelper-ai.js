@@ -76,6 +76,8 @@ export default {
       return json({ error: "bad_json" }, 400);
     }
     if (body.feedback) return saveFeedback(env, body.feedback);
+    // «Спроси механика» со страниц каталога: вопрос + о чём страница; подсказки и цифры — как у бота
+    if (body.ask) return pageAsk(env, ctx, body, request.headers.get("CF-Connecting-IP") || "?");
     const messages = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
     const images = Array.isArray(body.images) ? body.images.slice(0, 2) : [];
     if (!messages.length) return json({ error: "no_messages" }, 400);
@@ -710,4 +712,20 @@ async function botInline(env, iq) {
   const res = { inline_query_id: iq.id, results, cache_time: 3600, is_personal: false };
   if (!results.length) res.button = { text: "Спросить ИИ-механика в личке", start_parameter: "inline" };
   return tgApi(env, "answerInlineQuery", res);
+}
+
+/* --- «Спроси механика» на страницах каталога (m/…): короткий ответ потоком, как в приложении --- */
+const ASK_IP = new Map(); // вопросов в сутки с одного адреса — в памяти сервера, примерно
+async function pageAsk(env, ctx, body, ip) {
+  const q = String(body.ask || "").trim().slice(0, 600), about = String(body.ctx || "").trim().slice(0, 160);
+  if (q.length < 3) return json({ error: "empty" }, 400);
+  const k = mskDay() + "|" + ip, n = (ASK_IP.get(k) || 0) + 1;
+  if (ASK_IP.size > 20000) ASK_IP.clear();
+  ASK_IP.set(k, n);
+  if (n > 30) return json({ error: "rate_limited" }, 429);
+  const refs = await botRefs(about + " " + q);
+  const rules = BOT_RULES.replace("и отвечаешь в Telegram", "и отвечаешь на странице сайта");
+  const sys = rules + (about ? "\n\nЧеловек читает страницу: " + about + ". Если в вопросе нет другой модели — отвечай про неё." : "") + "\n\nСправочник сайта по теме вопроса:\n" + (refs.length ? refs.join("\n") : "(ничего не нашлось — отвечай в общем)");
+  ctx.waitUntil(Promise.resolve(logQuestion(env, "page", [{ role: "user", content: (about ? "[" + about + "] " : "") + q }])));
+  return answer(env, [{ role: "system", content: sys }, { role: "user", content: q }], [], ip);
 }

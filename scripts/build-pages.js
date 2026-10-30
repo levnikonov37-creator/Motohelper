@@ -110,7 +110,11 @@ a{color:#fff}
 .steps li::before{counter-increment:st;content:counter(st);position:absolute;left:12px;top:11px;width:26px;height:26px;display:grid;place-items:center;background:#fff;color:#000;font:400 14px var(--display);border-radius:3px}
 .steps .no{display:block;margin-top:8px;padding:8px 10px;border-left:2px solid #F43F5E;background:rgba(244,63,94,.07);font-size:15px}.steps .no b{display:block}
 .steps .hint{display:block;color:var(--muted);font-size:14px;margin-top:4px}
-.steps strong{font-weight:700;color:#fff}.steps .opts{margin:8px 0 0;padding-left:18px;display:grid;gap:6px}.steps .opts li{padding:0;border:0;background:none;font-size:15px}.steps .opts li::before{content:none}
+.steps strong{font-weight:700;color:#fff}
+.ask{margin:26px 0 8px;padding:14px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:#0B0B0B}.ask h2{margin-top:0}.ask form{display:flex;gap:8px;align-items:flex-end}
+.ask textarea{flex:1;min-height:46px;resize:vertical;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:15px var(--body)}.ask textarea:focus{outline:none;border-color:#fff}
+.ask button{padding:12px 16px;border:0;border-radius:8px;background:#fff;color:#000;font:600 15px var(--cond);cursor:pointer}.ask button:disabled{opacity:.5}
+.ask-out{display:none;white-space:pre-wrap;margin-top:12px;padding:12px;border-left:2px solid #fff;background:#111;font-size:15px;line-height:1.5}.ask-out.on{display:block}.ask .note{margin:10px 0 0}.steps .opts{margin:8px 0 0;padding-left:18px;display:grid;gap:6px}.steps .opts li{padding:0;border:0;background:none;font-size:15px}.steps .opts li::before{content:none}
 .ph{color:#fff;font-weight:600;border-bottom:1px dashed rgba(255,255,255,.5)}
 .tblw{overflow-x:auto;margin:0 0 8px;border:1px solid rgba(255,255,255,.14);border-radius:4px}.tbl{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
 .tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.1);text-align:left;vertical-align:top}.tbl th{font:600 12px var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:#0A0A0A}
@@ -141,7 +145,18 @@ const SITE_CFG = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT
 const RSYA_ID = SITE_CFG.rsya && /^R-A-[\d-]+$/.test(SITE_CFG.rsya.blockId || "") ? SITE_CFG.rsya.blockId : "";
 const AD = RSYA_ID ? `<div class="ad" id="yandex_rtb_${RSYA_ID}"></div><script>window.yaContextCb=window.yaContextCb||[]</script><script src="https://yandex.ru/ads/system/context.js" async></script><script>window.yaContextCb.push(function(){Ya.Context.AdvManager.render({blockId:"${RSYA_ID}",renderTo:"yandex_rtb_${RSYA_ID}"})})</script>` : "";
 const METRIKA = `<!-- Yandex.Metrika counter --><script>(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=113844391","ym");ym(113844391,"init",{webvisor:true,clickmap:true,referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true,trackHash:false});</script><noscript><div><img src="https://mc.yandex.ru/watch/113844391" style="position:absolute;left:-9999px" alt="" /></div></noscript><!-- /Yandex.Metrika counter -->`;
-function page({ title, desc, canon, crumbs, body, ld, js, sticky }) {
+/* «Спроси механика» на странице: вопрос уходит на сервер ИИ (адрес — из ai-config.json) вместе с темой страницы,
+   ответ печатается потоком. Скрипт — m/ask.js (ниже), общий для всех страниц, кэшируется браузером. */
+const askBlock = (about) => `<section class="ask" data-ctx="${esc(about)}"><h2>Спроси механика</h2><form><textarea name="q" rows="2" maxlength="600" placeholder="Например: не заводится на холодную — что проверить?" required></textarea><button type="submit">Спросить</button></form><div class="ask-out" aria-live="polite"></div><p class="note">Отвечает ИИ по базе MotoHelper — сверяйся с мануалом. Удобнее в Telegram: <a href="https://t.me/motohelper_post_bot">@motohelper_post_bot</a>.</p></section>`;
+const ASK_JS = `(function(){var box=document.querySelector(".ask");if(!box)return;var f=box.querySelector("form"),out=box.querySelector(".ask-out"),btn=f.querySelector("button"),ep=null;
+fetch("/ai-config.json").then(function(r){return r.json()}).then(function(j){ep=j.endpoint}).catch(function(){});
+function show(t){out.textContent="";t.split(/(https:\\/\\/motohelper\\.ru\\/[^\\s)]*)/).forEach(function(x,i){if(i%2){var a=document.createElement("a");a.href=x.replace(/[.,]$/,"");a.textContent=x;out.appendChild(a)}else out.appendChild(document.createTextNode(x))})}
+f.addEventListener("submit",function(e){e.preventDefault();var q=f.q.value.trim();if(q.length<3||!ep)return;btn.disabled=true;out.className="ask-out on";out.textContent="Механик думает…";var txt="",buf="";
+fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ask:q,ctx:box.dataset.ctx})}).then(function(r){if(!r.ok||!r.body)throw new Error(r.status===429?"Слишком много вопросов за сегодня — продолжи в Telegram-боте.":"ИИ сейчас перегружен — попробуй через минуту.");var rd=r.body.getReader(),dec=new TextDecoder();
+function pump(){return rd.read().then(function(c){if(c.done){if(!txt)throw new Error("Пустой ответ — попробуй ещё раз.");return}buf+=dec.decode(c.value,{stream:true});var i;while((i=buf.indexOf("\\n"))>=0){var l=buf.slice(0,i).trim();buf=buf.slice(i+1);if(l.indexOf("data:")!==0)continue;try{var j=JSON.parse(l.slice(5));txt+=j.response||(j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content)||""}catch(x){}}show(txt.replace(/\\*\\*/g,"").replace(/^#+\\s*/gm,""));return pump()})}return pump()})
+.catch(function(err){out.textContent=err.message||"Не получилось — попробуй ещё раз."}).then(function(){btn.disabled=false;if(window.ym)try{ym(113844391,"reachGoal","page_ask")}catch(x){}})})})();`;
+
+function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask }) {
   return `<!doctype html>
 <html lang="ru">
 <head>
@@ -170,11 +185,13 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky }) {
 <main>
 <nav class="crumbs">${crumbs.map((c) => (c[1] ? `<a href="${c[1]}">${esc(c[0])}</a>` : esc(c[0]))).join(" › ")}</nav>
 ${body}
+${ask ? askBlock(ask) : ""}
 ${AD}
 <footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/">Приложение</a> · <a href="https://t.me/motohelper_post_bot">ИИ-механик в Telegram</a></footer>
 </main>
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}
 ${js ? `<script>${js}</script>` : ""}
+${ask ? `<script src="/m/ask.js" defer></script>` : ""}
 ${METRIKA}
 </body>
 </html>
@@ -295,7 +312,7 @@ ${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div clas
 ${faqHtml}
 ${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
   const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${e0.oil || "—"}${e0.oilVol ? " " + e0.oilVol : ""}, свеча ${e0.spark || "—"}, зазоры клапанов ${e0.valveIn || "—"} / ${e0.valveEx || "—"}. Слабые места и ремонт.`;
-  files.set("m/" + slug + "/index.html", page({ title: `${full} — масло, свечи, зазоры клапанов, слабые места | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b, 0),
+  files.set("m/" + slug + "/index.html", page({ ask: full + " (мотор " + e0.code + ")", title: `${full} — масло, свечи, зазоры клапанов, слабые места | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b, 0),
     ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: full, url: canon, inLanguage: "ru", description: desc },
       { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] }));
 });
@@ -348,7 +365,7 @@ ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d
 ${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="chips">${gs.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>` : ""}`;
   const desc = `Мотор ${engTitle(e)}${e.cc ? ", " + e.cc + " см³" : ""}: масло ${e.oil || "—"}${e.oilVol ? " " + e.oilVol : ""}, свеча ${e.spark || "—"}${e.gap ? " (зазор " + e.gap + ")" : ""}, клапаны ${e.valveIn || "—"} / ${e.valveEx || "—"}. На каких мотоциклах стоит, слабые места, ремонт.`;
   const tName = dupCode[e.code] > 1 && e.name && e.name !== e.code ? e.name : e.code;
-  files.set("m/motor/" + slug + "/index.html", page({ title: `${tName} — масло и объём, свеча, зазоры клапанов | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b0, 0),
+  files.set("m/motor/" + slug + "/index.html", page({ ask: "мотор " + tName, title: `${tName} — масло и объём, свеча, зазоры клапанов | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b0, 0),
     ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: "Мотор " + e.code, url: canon, inLanguage: "ru", description: desc }] }));
 });
 {
@@ -380,7 +397,7 @@ ${vt.html}
   const desc = (g.title + ": " + plain.slice(0, 3).join(" ")).slice(0, 230).replace(/\s+\S*$/, "") + "…";
   const ld = { "@context": "https://schema.org", "@type": "HowTo", name: g.title, inLanguage: "ru", url: canon, step: plain.map((t, i) => ({ "@type": "HowToStep", position: i + 1, text: t })) };
   if (g.tools && g.tools.length) ld.tool = g.tools.map((t) => ({ "@type": "HowToTool", name: t }));
-  files.set("m/remont/" + g.id + "/index.html", page({ title: `${g.title} на мотоцикле и питбайке — пошагово | MotoHelper`, desc, canon, crumbs, body, sticky: "/#g=" + g.id, ld: [crumbLd(crumbs), ld] }));
+  files.set("m/remont/" + g.id + "/index.html", page({ ask: "инструкция «" + g.title + "»", title: `${g.title} на мотоцикле и питбайке — пошагово | MotoHelper`, desc, canon, crumbs, body, sticky: "/#g=" + g.id, ld: [crumbLd(crumbs), ld] }));
 });
 {
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Инструкции", null]];
@@ -414,7 +431,7 @@ ${vt.html}
     const pl = (t) => String(t).replace(/\{(\w+)\}/g, (m, k) => vt.keys.indexOf(k) >= 0 ? PHI[k] || "по таблице" : "по мануалу");
     return { "@type": "Question", name: pl(st.q), acceptedAnswer: { "@type": "Answer", text: pl(r.result + ". " + r.action) } };
   }) };
-  files.set("m/polomka/" + d.id + "/index.html", page({ title: `${d.title}: причины и что проверить — мотоцикл, питбайк | MotoHelper`, desc, canon, crumbs, body, sticky: "/#d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
+  files.set("m/polomka/" + d.id + "/index.html", page({ ask: "неисправность «" + d.title + "»", title: `${d.title}: причины и что проверить — мотоцикл, питбайк | MotoHelper`, desc, canon, crumbs, body, sticky: "/#d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
 });
 
 /* «модель + поломка» (см. PROB выше) */
@@ -450,7 +467,7 @@ ${iss}
       const r = typeof st.onNo === "object" ? st.onNo : st.onYes;
       return { "@type": "Question", name: fillT(efi && st.efiQ ? st.efiQ : st.q), acceptedAnswer: { "@type": "Answer", text: fillT(r.result + ". " + act(r)) } };
     }) };
-    files.set("m/" + slug + "/" + d.id + "/index.html", page({ title: `${phrase}: причины и что проверить | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b, 0) + "&d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
+    files.set("m/" + slug + "/" + d.id + "/index.html", page({ ask: phrase + " (мотор " + e.code + ")", title: `${phrase}: причины и что проверить | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b, 0) + "&d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
     probPages.push(canon);
   });
 });
@@ -610,6 +627,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 }
 
 files.set("m/m.css", CSS + "\n");
+files.set("m/ask.js", ASK_JS + "\n");
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),
