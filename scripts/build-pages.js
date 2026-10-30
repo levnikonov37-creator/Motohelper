@@ -10,6 +10,8 @@ const ROOT = path.join(__dirname, "..");
 const SITE = "https://motohelper.ru/";
 const OUT = path.join(ROOT, "m");
 const check = process.argv.includes("--check");
+// сначала — сжатые файлы сайта и метки версий (index.html, sw.js); --check тоже передаётся
+require("./build-assets");
 
 const ctx = {};
 vm.createContext(ctx);
