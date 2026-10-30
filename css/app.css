@@ -2625,3 +2625,13 @@ code { background: #141414 !important; color: #fff; }
 /* чат ИИ: у последнего ответа запас высоты — новый вопрос встаёт наверх экрана, ответ пишется под ним, страница не прыгает */
 .ai-page .chat > .msg.assistant:last-child { min-height: calc(100vh - 460px); align-content: flex-start; }
 @media (max-width: 979px) { .ai-page .chat > .msg.assistant:last-child { min-height: calc(100vh - 330px); } }
+
+/* Telegram-канал: карточка внизу главной, ссылка в боковом меню */
+.tg-card { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: #0B0B0B; color: #fff; text-decoration: none; }
+.tg-card:hover { border-color: rgba(255,255,255,.4); }
+.tg-ico { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: #229ED9; color: #fff; }
+.tg-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.tg-txt b { font: 600 15px var(--cond); }
+.tg-txt span { color: #9A9A9A; font-size: 13px; line-height: 1.3; }
+.tg-go { flex: none; padding: 7px 12px; border-radius: 999px; background: #fff; color: #000; font: 600 13px var(--cond); }
+.rail-tg { display: inline-flex; align-items: center; gap: 6px; }

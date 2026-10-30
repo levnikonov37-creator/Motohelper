@@ -12105,7 +12105,14 @@ function App() {
   }, "\u041A\u0430\u043A \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C\u0441\u044F \u0441\u0430\u0439\u0442\u043E\u043C"), /*#__PURE__*/React.createElement("button", {
     className: "link",
     onClick: () => setPicker(true)
-  }, "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0434\u0440\u0443\u0433\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"))), /*#__PURE__*/React.createElement("header", {
+  }, "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0434\u0440\u0443\u0433\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("a", {
+    className: "link rail-tg",
+    href: TG_CHANNEL,
+    target: "_blank",
+    rel: "noopener"
+  }, /*#__PURE__*/React.createElement(TgIcon, {
+    s: 14
+  }), " Канал в Telegram"))), /*#__PURE__*/React.createElement("header", {
     className: "topbar"
   }, /*#__PURE__*/React.createElement("a", {
     className: "brand",
@@ -12206,7 +12213,7 @@ function App() {
     q0: partsQ
   })), page === "home" && /*#__PURE__*/React.createElement("footer", {
     className: "foot"
-  }, /*#__PURE__*/React.createElement(BackupBar, {
+  }, /*#__PURE__*/React.createElement(TgCard, null), /*#__PURE__*/React.createElement(BackupBar, {
     flash: flash
   })))), /*#__PURE__*/React.createElement("nav", {
     className: "tabbar"
@@ -16985,6 +16992,38 @@ function backupRestore(obj) {
   keys.forEach(k => localStorage.setItem(k, obj.data[k]));
   return keys.length;
 }
+/* Ссылка на Telegram-канал — на главной и в боковом меню */
+const TG_CHANNEL = "https://t.me/motohelperru";
+const TG_PATH = "M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.8-3.6-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.5 13.1 1.8 11.6c-1-.3-1-1 .2-1.5L20.6 3c.9-.3 1.6.2 1.3 1.3z";
+function TgIcon({
+  s
+}) {
+  return /*#__PURE__*/React.createElement("svg", {
+    width: s || 18,
+    height: s || 18,
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: TG_PATH
+  }));
+}
+function TgCard() {
+  return /*#__PURE__*/React.createElement("a", {
+    className: "tg-card",
+    href: TG_CHANNEL,
+    target: "_blank",
+    rel: "noopener"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tg-ico"
+  }, /*#__PURE__*/React.createElement(TgIcon, {
+    s: 22
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "tg-txt"
+  }, /*#__PURE__*/React.createElement("b", null, "Канал MotoHelper в Telegram"), /*#__PURE__*/React.createElement("span", null, "Советы по ремонту и ТО каждый день в 18:00")), /*#__PURE__*/React.createElement("span", {
+    className: "tg-go"
+  }, "Открыть"));
+}
 function BackupBar({
   flash
 }) {
@@ -17303,15 +17342,9 @@ function AiChat({
     rel: "noopener",
     title: "\u041A\u0430\u043D\u0430\u043B MotoHelper \u0432 Telegram",
     "aria-label": "\u041A\u0430\u043D\u0430\u043B MotoHelper \u0432 Telegram"
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: 18,
-    height: 18,
-    viewBox: "0 0 24 24",
-    fill: "currentColor",
-    "aria-hidden": "true"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.8-3.6-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.5 13.1 1.8 11.6c-1-.3-1-1 .2-1.5L20.6 3c.9-.3 1.6.2 1.3 1.3z"
-  })))), ai.state === "checking" && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(TgIcon, {
+    s: 18
+  }))), ai.state === "checking" && /*#__PURE__*/React.createElement("div", {
     className: "panel"
   }, /*#__PURE__*/React.createElement("p", {
     className: "muted"
