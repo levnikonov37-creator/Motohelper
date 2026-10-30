@@ -12,6 +12,7 @@
 //   привязка AI (Settings → Bindings → Workers AI, имя AI) — необязательно, последний запасной вариант.
 //   TELEGRAM_BOT_TOKEN — ключ бота (@BotFather), бот — админ канала: тогда сервер ведёт Telegram-канал по tg/posts.json;
 //   YANDEX_METRIKA_TOKEN — OAuth-ключ Метрики: по понедельникам отчёт о посещаемости владельцу (тому, кто написал боту /start).
+//   YANDEX_WEBMASTER_TOKEN — необязательно, OAuth-ключ Вебмастера: в отчёте — сколько страниц в поиске Яндекса.
 //   TG_HOOK_SECRET — любой пароль: с ним бот отвечает в личке как ИИ-механик (Telegram шлёт сообщения на <адрес>/tg-hook).
 //     Подключить один раз: открыть <адрес сервера>/?tg=setup.
 // Сайт сам узнаёт, что фото работают: GET на адрес сервера отвечает {"images": true}.
@@ -354,6 +355,7 @@ async function weeklyReport(env) {
     const delta = (a, b) => (!b ? "" : " (" + (a >= b ? "+" : "") + Math.round(((a - b) / b) * 100) + "% к прошлой неделе)");
     const min = Math.floor((t[3] || 0) / 60), sec = Math.round((t[3] || 0) % 60);
     const qs = await questionStats(env).catch(() => null);
+    const wm = await webmasterStats(env).catch(() => null);
     let subs = null;
     try {
       const posts = await fetch(TG_POSTS).then((r) => r.json());
@@ -368,6 +370,7 @@ async function weeklyReport(env) {
       "📄 Просмотров страниц: " + n(t[2]),
       "⏱ В среднем на сайте: " + min + " мин " + sec + " с",
       subs != null ? "📣 Подписчиков канала: " + n(subs) : "",
+      wm ? "🔎 В поиске Яндекса: " + n(wm.searchable) + " страниц" + (wm.excluded ? " (исключено " + n(wm.excluded) + ")" : "") + (wm.sqi != null ? ", ИКС " + n(wm.sqi) : "") + (wm.problems ? "\n⚠️ Проблемы сайта в Вебмастере: " + wm.problems : "") : "",
       qs ? "🤖 Вопросов ИИ-механику: " + n(qs.total) + " (сайт " + n(qs.site) + ", Telegram " + n(qs.tg) + ")" + (qs.top.length ? "\nО чём спрашивали: " + qs.top.join(", ") : "") : "",
       "",
       (src.data || []).length ? "Откуда пришли:\n" + src.data.map((d) => "• " + d.dimensions[0].name + " — " + n(d.metrics[0])).join("\n") : "",
@@ -781,4 +784,20 @@ async function saveReview(env, r, ip) {
     if (idx.indexOf(slug) < 0) await env.FEEDBACK.put("rv:index", JSON.stringify(idx.concat(slug)));
   }
   return json({ ok: true, published: true, item });
+}
+
+/* --- Яндекс.Вебмастер: сколько страниц в поиске (для понедельничного отчёта) --- */
+async function webmasterStats(env) {
+  if (!env.YANDEX_WEBMASTER_TOKEN) return null;
+  const api = (p) => fetch("https://api.webmaster.yandex.net/v4" + p, { headers: { Authorization: "OAuth " + env.YANDEX_WEBMASTER_TOKEN } }).then((r) => r.json());
+  const me = await api("/user");
+  if (!me.user_id) return null;
+  const hosts = await api("/user/" + me.user_id + "/hosts");
+  const h = (hosts.hosts || []).find((x) => /motohelper\.ru/.test(x.ascii_host_url || x.host_id || ""));
+  if (!h) return null;
+  const sm = await api("/user/" + me.user_id + "/hosts/" + encodeURIComponent(h.host_id) + "/summary");
+  const pr = sm.site_problems || {};
+  const RU = { FATAL: "фатальные", CRITICAL: "критичные", POSSIBLE_PROBLEM: "возможные", RECOMMENDATION: "рекомендации" };
+  const problems = Object.keys(pr).filter((k) => pr[k]).map((k) => (RU[k] || k.toLowerCase()) + " — " + pr[k]).join(", ");
+  return { searchable: sm.searchable_pages_count || 0, excluded: sm.excluded_pages_count || 0, sqi: sm.sqi, problems };
 }
