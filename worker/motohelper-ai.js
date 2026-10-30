@@ -459,11 +459,21 @@ async function botHook(request, env, ctx) {
   } catch (e) {
     return new Response("ok");
   }
+  // «@motohelper_post_bot масло tt250» в любом чате — карточки из справочника, без ИИ (ответ нужен за секунды)
+  if (up.inline_query) {
+    await botInline(env, up.inline_query).catch(() => {});
+    return new Response("ok");
+  }
   const m = up.message;
-  // только личка: в канале и группах бот молчит. Telegram отвечаем сразу, а ответ ИИ готовим в фоне: если держать
-  // запрос, Telegram может оборвать соединение, и Cloudflare остановит работу. В фоне есть ~30 с — ставим срок 25 с.
-  if (!m || !m.chat || m.chat.type !== "private") return new Response("ok");
-  ctx.waitUntil(botSafe(env, m, up.update_id));
+  if (!m || !m.chat) return new Response("ok");
+  // Telegram отвечаем сразу, а ответ ИИ готовим в фоне: если держать запрос, Telegram может оборвать соединение,
+  // и Cloudflare остановит работу. В фоне есть ~30 с — ставим срок 25 с.
+  if (m.chat.type === "private") ctx.waitUntil(botSafe(env, m, up.update_id));
+  else if (m.chat.type === "group" || m.chat.type === "supergroup") {
+    // в группе бот отвечает только когда к нему обращаются: /ask, @упоминание или ответ на его сообщение
+    const q = await groupQuestion(env, m);
+    if (q) ctx.waitUntil(botSafe(env, Object.assign({}, m, { text: q, caption: undefined }), up.update_id));
+  }
   return new Response("ok");
 }
 const SEEN = new Set();
@@ -487,38 +497,44 @@ async function botSafe(env, m, updateId) {
   }
 }
 async function botReply(env, m, dbg = () => {}) {
-  const chat = m.chat.id, say = (text) => tgApi(env, "sendMessage", { chat_id: chat, text: String(text).slice(0, 4096), disable_web_page_preview: true });
+  const chat = m.chat.id, group = m.chat.type !== "private";
+  // в группе отвечаем ответом на сообщение спросившего, чтобы было понятно кому
+  const to = group ? { reply_to_message_id: m.message_id, allow_sending_without_reply: true } : {};
+  const say = (text) => tgApi(env, "sendMessage", Object.assign({ chat_id: chat, text: String(text).slice(0, 4096), disable_web_page_preview: true }, to));
   const text = String(m.text || m.caption || "").trim();
+  if (group && text === "__hello") return say(GROUP_HELLO);
   // всё о собеседнике — в одной записи KV (на бесплатном тарифе 1000 записей в сутки):
-  // d — день, n — ответов за день, t — время последнего ответа, h — последние реплики (разговор забывается через 6 часов)
-  const key = "tg:u:" + chat, day = mskDay();
+  // d — день, n — ответов за день, t — время последнего ответа, h — последние реплики (разговор забывается через 6 часов).
+  // У группы — общий счётчик, а история не хранится: контекст — сообщение бота, на которое ответили
+  const key = (group ? "tg:g:" : "tg:u:") + chat, day = mskDay();
   let st = null;
   try {
     st = env.FEEDBACK && JSON.parse((await env.FEEDBACK.get(key)) || "null");
   } catch (e) {}
   st = st || { d: day, n: 0, t: 0, h: [] };
   if (st.d !== day) (st.d = day), (st.n = 0);
-  if (Date.now() - st.t > 6 * 3600e3) st.h = [];
-  if (/^\/start/.test(text)) {
+  if (Date.now() - st.t > 6 * 3600e3 || group) st.h = [];
+  if (group && m.reply_to_message && m.reply_to_message.from && m.reply_to_message.from.is_bot && m.reply_to_message.text) st.h = [{ role: "assistant", content: m.reply_to_message.text.slice(0, 1500) }];
+  if (!group && /^\/start/.test(text)) {
     if (env.FEEDBACK && !(await env.FEEDBACK.get("tg:owner"))) await env.FEEDBACK.put("tg:owner", String(chat));
-    return say("Привет! Я ИИ-механик MotoHelper 🏍\n\nНапиши, что случилось и какой у тебя мотоцикл — например: «TT250 не заводится на холодную». Можно прислать фото детали или поломки.\n\nНовый разговор — /new\nСайт: https://motohelper.ru/");
+    return say("Привет! Я ИИ-механик MotoHelper 🏍\n\nНапиши, что случилось и какой у тебя мотоцикл — например: «TT250 не заводится на холодную». Можно прислать фото детали или поломки.\n\nНовый разговор — /new\n\n💬 Добавь меня в чат мотоциклистов — там спрашивай через /ask.\n🔎 В любом чате набери @motohelper_post_bot и модель (например, tt250) — пришлю карточку с маслом, свечой и зазорами.\n\nСайт: https://motohelper.ru/");
   }
   if (/^\/new/.test(text)) {
     if (env.FEEDBACK && st.h.length) await env.FEEDBACK.put(key, JSON.stringify(Object.assign(st, { h: [] })), { expirationTtl: 60 * 60 * 48 });
     return say("Начнём заново. Какой мотоцикл и что с ним?");
   }
   if (!text && !m.photo) return say("Я понимаю текст и фото. Опиши поломку словами 🙂");
-  if (st.n >= BOT_DAILY) return say("На сегодня лимит ответов исчерпан — приходи завтра. Пока можно поискать на сайте: https://motohelper.ru/");
+  if (st.n >= (group ? GROUP_DAILY : BOT_DAILY)) return say("На сегодня лимит ответов исчерпан — приходи завтра. Пока можно поискать на сайте: https://motohelper.ru/");
   const typing = () => tgApi(env, "sendChatAction", { chat_id: chat, action: "typing" }).catch(() => {});
   typing();
   const tick = setInterval(typing, 4500); // «печатает…» гаснет через 5 секунд — обновляем, пока ИИ пишет
   try {
-    return await botAnswer(env, m, chat, say, text, key, st, dbg);
+    return await botAnswer(env, m, chat, say, text, key, st, dbg, to);
   } finally {
     clearInterval(tick);
   }
 }
-async function botAnswer(env, m, chat, say, text, key, st, dbg) {
+async function botAnswer(env, m, chat, say, text, key, st, dbg, to) {
   const past = st.h;
   const q = text || "Что на фото и что с этим делать?";
   const refs = await botRefs(past.filter((x) => x.role === "user").map((x) => x.content).concat(q).join(" "));
@@ -536,15 +552,16 @@ async function botAnswer(env, m, chat, say, text, key, st, dbg) {
   const shop = await shopLine(q, refs);
   const esc = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   // ссылки на магазины — короткими словами (HTML), а не длинными адресами; если Telegram не принял HTML — шлём текстом
-  let sent = shop ? await tgApi(env, "sendMessage", { chat_id: chat, text: (esc(reply) + "\n\n" + shop).slice(0, 4096), parse_mode: "HTML", disable_web_page_preview: true }) : null;
+  let sent = shop ? await tgApi(env, "sendMessage", Object.assign({ chat_id: chat, text: (esc(reply) + "\n\n" + shop).slice(0, 4096), parse_mode: "HTML", disable_web_page_preview: true }, to)) : null;
   if (!sent || !sent.ok) sent = await say(reply);
   if (!sent || !sent.ok) dbg("Telegram не принял ответ: " + JSON.stringify(sent).slice(0, 200));
   return sent;
 }
 async function botSetup(env, origin) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TG_HOOK_SECRET) return { ok: false, error: "нужны TELEGRAM_BOT_TOKEN и TG_HOOK_SECRET" };
-  const hook = await tgApi(env, "setWebhook", { url: origin + "/tg-hook", secret_token: env.TG_HOOK_SECRET, allowed_updates: ["message"], drop_pending_updates: true });
+  const hook = await tgApi(env, "setWebhook", { url: origin + "/tg-hook", secret_token: env.TG_HOOK_SECRET, allowed_updates: ["message", "inline_query"], drop_pending_updates: true });
   await tgApi(env, "setMyCommands", { commands: [{ command: "new", description: "Новый разговор" }, { command: "start", description: "Как пользоваться" }] });
+  await tgApi(env, "setMyCommands", { scope: { type: "all_group_chats" }, commands: [{ command: "ask", description: "Спросить механика: /ask TT250 не заводится" }] });
   await tgApi(env, "setMyName", { name: "MotoHelper — ИИ-механик" });
   await tgApi(env, "setMyShortDescription", { short_description: "ИИ-механик: поломки, ТО и ремонт мотоциклов и питбайков. motohelper.ru" });
   await tgApi(env, "setMyDescription", { description: "Опиши поломку и модель — ИИ-механик MotoHelper подскажет, что проверить, и даст цифры: масло, свечи, зазоры клапанов. Можно прислать фото." });
@@ -635,4 +652,62 @@ async function questionStats(env) {
   const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]).slice(0, 5).map((k) => k + " — " + cnt[k]);
   const tg = vals.filter((v) => v.src === "tg").length;
   return { total: keys.length, tg: Math.round((tg / (vals.length || 1)) * keys.length), site: keys.length - Math.round((tg / (vals.length || 1)) * keys.length), top };
+}
+
+/* --- Бот в группах и чатах мотоциклистов --- */
+const GROUP_DAILY = 300; // ответов в сутки на одну группу
+const GROUP_HELLO = "Привет, я ИИ-механик MotoHelper 🏍\n\nСпроси меня прямо здесь:\n/ask TT250 не заводится на холодную\n\nИли ответь на моё сообщение — продолжу разговор. Знаю 2 700 моделей и 970 моторов: масло, свечи, зазоры, частые поломки.";
+let BOT_ME = null;
+async function botMe(env) {
+  if (!BOT_ME) {
+    const r = await tgApi(env, "getMe", {}).catch(() => null);
+    BOT_ME = (r && r.result && r.result.username) || "motohelper_post_bot";
+  }
+  return BOT_ME;
+}
+async function groupQuestion(env, m) {
+  const me = (await botMe(env)).toLowerCase();
+  const text = String(m.text || m.caption || "").trim();
+  // бота добавили в группу — коротко рассказываем, как спрашивать
+  if ((m.new_chat_members || []).some((u) => u.is_bot && String(u.username).toLowerCase() === me)) return "__hello";
+  const cmd = /^\/(\w+)(@(\w+))?\s*([\s\S]*)$/.exec(text);
+  if (cmd) {
+    if (cmd[3] && cmd[3].toLowerCase() !== me) return null; // команда другому боту
+    if (cmd[1] === "start" || cmd[1] === "help") return "__hello";
+    if (cmd[1] !== "ask") return null;
+    // «/ask» в ответ на чужой вопрос — отвечаем на него
+    return cmd[4].trim() || (m.reply_to_message && (m.reply_to_message.text || m.reply_to_message.caption)) || "__hello";
+  }
+  const re = new RegExp("@" + me + "\\b", "i");
+  if (re.test(text)) return text.replace(re, "").trim() || "__hello";
+  const r = m.reply_to_message;
+  if (r && r.from && r.from.is_bot && String(r.from.username).toLowerCase() === me && text) return text;
+  return null;
+}
+
+/* --- Встроенный режим: карточки моделей и моторов прямо в любом чате --- */
+async function botInline(env, iq) {
+  const q = String(iq.query || "").trim();
+  const results = [];
+  if (q.length >= 2) {
+    const refs = await botRefs(q), me = await botMe(env);
+    refs.slice(0, 8).forEach((line, i) => {
+      const m = /^(.+?) — (https:\/\/motohelper\.ru\/\S+)$/.exec(line);
+      if (!m) return;
+      const head = m[1], url = m[2];
+      const title = head.split(":")[0].replace(/^Мотор /, "Мотор ");
+      const facts = head.indexOf(":") > 0 ? head.slice(head.indexOf(":") + 1).trim() : head;
+      results.push({
+        type: "article",
+        id: String(i) + "-" + url.length,
+        title: title.slice(0, 64),
+        description: facts.slice(0, 200),
+        url,
+        input_message_content: { message_text: ("🏍 " + head.replace(/; /g, "\n• ").replace(": мотор ", "\n• мотор ") + "\n\nПодробно: " + url + "\nСпросить механика: @" + me).slice(0, 4000), disable_web_page_preview: true },
+      });
+    });
+  }
+  const res = { inline_query_id: iq.id, results, cache_time: 3600, is_personal: false };
+  if (!results.length) res.button = { text: "Спросить ИИ-механика в личке", start_parameter: "inline" };
+  return tgApi(env, "answerInlineQuery", res);
 }
