@@ -15831,7 +15831,7 @@ function TuneCatalog({
       "aria-selected": cat === c,
       className: "tz-tab" + (cat === c ? " on" : ""),
       style: {
-        "--c": c === "all" ? "#FFFFFF" : c === "power" ? "#FF7A1A" : TUNE_CAT_COLOR[c] || "#9CA3AF"
+        "--c": c === "all" ? "#FFFFFF" : c === "power" ? "var(--hot)" : TUNE_CAT_COLOR[c] || "#9CA3AF"
       },
       onClick: () => {
         setCat(c);
