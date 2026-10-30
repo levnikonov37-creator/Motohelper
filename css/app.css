@@ -2480,23 +2480,32 @@ code { background: #141414 !important; color: #fff; }
 .ai-tg { display: inline-block; margin-top: 4px; font-size: 13px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ===================== v62: немного цвета =====================
-   Чёрно-белый стиль остаётся, цвет — точечно: фирменный оранжевый на главных кнопках, активном пункте меню,
-   точке в шапке и шкалах; зелёный — прирост, красный — потери. В тюнинге у каждой категории свой цвет (--c). */
-:root, :root:not([data-theme="light"]), :root[data-theme="dark"] { --hot: #FF7A1A; --hot2: #FFA24D; --hot-ink: #160900; --good: #34D399; --bad: #F87171; --acc-rgb: 255, 122, 26; --acc2-rgb: 255, 162, 77; }
-.btn.primary, .hero .btn.primary, .btn.ai-btn.primary { background: linear-gradient(180deg, var(--hot2), var(--hot)) !important; color: var(--hot-ink) !important; border-color: transparent !important; }
-.btn.primary .ico, .btn.primary svg { color: var(--hot-ink) !important; }
-.btn.primary:hover { background: var(--hot2) !important; }
-.btn.primary:active { background: #E5650C !important; color: var(--hot-ink) !important; }
-.btn.primary:active .ico, .btn.primary:active svg { color: var(--hot-ink) !important; }
+   Чёрно-белый стиль остаётся, цвет — точечно: фирменный «хамелеон» (переливается, как краска-хамелеон:
+   бирюза → синий → фиолетовый → розовый) на главных кнопках, активном пункте меню, точке в шапке и шкалах;
+   зелёный — прирост, красный — потери. В тюнинге у каждой категории свой цвет (--c). */
+:root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+  /* фирменный цвет: сменить цвет сайта = поменять эти строки (и такие же в scripts/build-pages.js для страниц каталога) */
+  --holo: linear-gradient(100deg, #3AF2CF 0%, #4E95FF 35%, #9B6BFF 65%, #FF6FD0 100%);
+  --hot-rgb: 143, 132, 255; --hot2-rgb: 78, 149, 255; --hot-ink: #06060F;
+  --hot: rgb(var(--hot-rgb)); --hot2: rgb(var(--hot2-rgb)); --good: #34D399; --bad: #F87171; --acc-rgb: var(--hot-rgb); --acc2-rgb: var(--hot2-rgb); }
+.btn.primary, .hero .btn.primary, .btn.ai-btn.primary, .btn.primary:hover, .btn.primary:active { background: var(--holo) !important; color: var(--hot-ink) !important; border-color: transparent !important; }
+.btn.primary:hover { filter: brightness(1.1); }
+.btn.primary:active { filter: brightness(.85); }
+.btn.primary .ico, .btn.primary svg, .btn.primary:active .ico, .btn.primary:active svg { color: var(--hot-ink) !important; }
 .tab.on, .tab.on .tab-ico svg { color: var(--hot) !important; }
-.tab.on:not(.tab-ai)::before { background: var(--hot) !important; }
-.hero-dot { background: var(--hot) !important; box-shadow: 0 0 0 3px rgba(255,122,26,.22) !important; }
-.grad, .main .grad { -webkit-text-stroke-color: var(--hot2) !important; }
-.meter-bar .now, .g-progress span, .gm-dots button.cur, .intro-bar span, .cause-bar span, .sg-bar span, .pbar span, .cbar span, .start-bar span { background: linear-gradient(90deg, var(--hot), var(--hot2)) !important; }
-.meter-bar .was { background: rgba(255,162,77,.28) !important; }
+.tab.on:not(.tab-ai)::before, .hero-dot, .panel h2::before, .page h2::before { background: var(--holo) !important; }
+.hero-dot { box-shadow: 0 0 0 3px rgba(var(--hot-rgb),.22) !important; }
+.grad, .main .grad { background: var(--holo) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; -webkit-text-fill-color: transparent !important; -webkit-text-stroke: 0 !important; }
+/* перелив: медленно гоняем градиент только на главной кнопке и надписи в шапке (не на каждой кнопке — бережём батарею)
+   (двигаем через переменную: старые слои держат background-position с !important, а его анимация не перебивает) */
+@property --holo-x { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+.hero .btn.primary, .grad, .main .grad { background-size: 220% 100% !important; background-position: var(--holo-x) 50% !important; animation: mh-holo 7s ease-in-out infinite alternate !important; }
+@keyframes mh-holo { from { --holo-x: 0%; } to { --holo-x: 100%; } }
+@media (prefers-reduced-motion: reduce) { .hero .btn.primary, .grad, .main .grad { animation: none !important; } }
+.meter-bar .now, .g-progress span, .gm-dots button.cur, .intro-bar span, .cause-bar span, .sg-bar span, .pbar span, .cbar span, .start-bar span { background: var(--holo) !important; }
+.meter-bar .was { background: rgba(var(--hot2-rgb),.28) !important; }
 .tc-gain, .tz-gain, .proj-hp .now, .proj-speed .up, .tc-speed.up, .tz-speed.up { color: var(--good) !important; }
 .tc-speed.down, .tz-speed.down, .proj-speed .down { color: var(--bad) !important; }
-.panel h2::before, .page h2::before { background: var(--hot) !important; }
 .warns li { border-left-color: #FBBF24 !important; }
 ::selection { background: var(--hot); color: #000; }
 
@@ -2516,7 +2525,7 @@ code { background: #141414 !important; color: #fff; }
 @media (min-width: 760px) { .tz-list { grid-template-columns: 1fr 1fr; } }
 .tz-card { position: relative; padding: 12px 12px 10px 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; background: #0B0B0B; overflow: hidden; }
 .tz-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--c); opacity: .9; }
-.tz-card.in { border-color: var(--hot); background: linear-gradient(180deg, rgba(255,122,26,.08), #0B0B0B 60%); }
+.tz-card.in { border-color: transparent; background: linear-gradient(#0B0B0B, #0B0B0B) padding-box, var(--holo) border-box; }
 .tz-card.owned { opacity: .78; }
 .tz-card.no { opacity: .55; }
 .tz-card.must { border-style: dashed; border-color: rgba(251,191,36,.6); }
