@@ -2586,3 +2586,42 @@ code { background: #141414 !important; color: #fff; }
 .md-parts .part-tag { margin: 0; padding: 5px 10px; gap: 6px; font-size: 13px; line-height: 1.2; text-align: left; }
 .md-parts .part-tag span { font-weight: 500; }
 .md-parts .part-tag b { white-space: nowrap; }
+
+/* ===================== v65: тюнинг — ресурс мотора, звёзды =====================
+   Вместо выдуманных шкал «тяга/надёжность/проходимость» — ресурс мотора (оценка, TUNE_WEAR в data.js);
+   на карточках — метка «ресурс −…%» или «бережёт мотор» вместо «звёзд» без источника. */
+.tz-wear { padding: 1px 7px; border-radius: 999px; background: rgba(248,113,113,.14); color: var(--bad); }
+.tz-saves { padding: 1px 7px; border-radius: 999px; background: rgba(52,211,153,.12); color: var(--good); }
+.tz-why { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; font-size: 14px; line-height: 1.45; color: #D6D6D6; }
+.tz-why.bad { background: rgba(248,113,113,.08); border-left: 3px solid var(--bad); }
+.tz-why.risk { background: rgba(251,191,36,.08); border-left: 3px solid #FBBF24; }
+.tz-why.good { background: rgba(52,211,153,.07); border-left: 3px solid var(--good); }
+.tz-why b { color: #fff; }
+.proj-wear { margin: 12px 0; padding: 10px 12px; border-radius: 10px; background: #0E0E0E; border: 1px solid rgba(255,255,255,.1); }
+.proj-wear.bad { border-color: rgba(248,113,113,.4); }
+.pw-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.pw-head span { color: #A8A8A8; font: 600 14px var(--cond); }
+.pw-head b { font: 600 20px var(--cond); color: var(--good); }
+.proj-wear.bad .pw-head b { color: var(--bad); }
+.proj-wear p { margin: 4px 0 0; }
+.pw-list { list-style: none; margin: 6px 0 0; padding: 0; font-size: 13px; }
+.pw-list li { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-top: 1px dashed rgba(255,255,255,.08); }
+.pw-list li b { color: var(--bad); white-space: nowrap; font-weight: 600; }
+.pw-saves { color: var(--good); }
+.pl-wear { display: block; color: var(--bad); font-size: 12px; }
+.spr-cur { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; color: #A8A8A8; font-size: 14px; }
+.spr-cur b { color: #fff; font: 600 16px var(--cond); }
+.spr-presets { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; }
+.spr-presets .chip { min-height: 34px !important; padding: 5px 12px !important; font-size: 13px; }
+.spr-presets .chip.on { background: #fff !important; color: #000 !important; }
+.spr-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.spr-step { display: flex; flex-direction: column; gap: 4px; }
+.spr-step > span { font: 600 12px var(--cond); color: #8A8A8A; text-transform: uppercase; letter-spacing: .04em; }
+.spr-step > div { display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,.16); border-radius: 10px; background: #0A0A0A; }
+.spr-step button { width: 44px; height: 44px; border: 0; background: none; color: #fff; font: 600 22px var(--cond); cursor: pointer; }
+.spr-step button:disabled { opacity: .3; }
+.spr-step b { font: 600 20px var(--cond); color: #fff; }
+.spr-res small { margin-top: 2px; font-size: 11px; color: #777; }
+/* чат ИИ: у последнего ответа запас высоты — новый вопрос встаёт наверх экрана, ответ пишется под ним, страница не прыгает */
+.ai-page .chat > .msg.assistant:last-child { min-height: calc(100vh - 460px); align-content: flex-start; }
+@media (max-width: 979px) { .ai-page .chat > .msg.assistant:last-child { min-height: calc(100vh - 330px); } }
