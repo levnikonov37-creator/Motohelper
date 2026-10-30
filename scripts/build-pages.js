@@ -170,7 +170,7 @@ f.addEventListener("submit",function(e){e.preventDefault();if(!ep)return;var b=f
 fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({review:{slug:box.dataset.slug,model:box.dataset.model,name:f.elements.name.value,km:f.elements.km.value,text:f.elements.text.value}})}).then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})}).then(function(o){
 if(o.j.published){var e=list.querySelector(".rv-empty");if(e)e.remove();list.insertBefore(item(o.j.item),list.firstChild);f.reset();msg.textContent="Спасибо! Отзыв опубликован.";if(window.ym)try{ym(113844391,"reachGoal","review")}catch(x){}}
 else msg.textContent=o.s===429?"Сегодня больше отзывов отправить нельзя.":o.j.error==="short"?"Напиши чуть подробнее — хотя бы пару предложений.":"Спасибо! Отзыв не прошёл автоматическую проверку: без ссылок, контактов и мата, пожалуйста."}).catch(function(){msg.textContent="Не получилось отправить — попробуй позже."}).then(function(){b.disabled=false})})})();`;
-const askBlock = (about) => `<section class="ask" data-ctx="${esc(about)}"><h2>Спроси механика</h2><form><textarea name="q" rows="2" maxlength="600" placeholder="Например: не заводится на холодную — что проверить?" required></textarea><button type="submit">Спросить</button></form><div class="ask-out" aria-live="polite"></div><p class="note">Отвечает ИИ по базе MotoHelper — сверяйся с мануалом. Удобнее в Telegram: <a href="https://t.me/motohelper_post_bot">@motohelper_post_bot</a>.</p></section>`;
+const askBlock = (about) => `<section class="ask" data-ctx="${esc(about)}"><h2>Спроси механика</h2><form><textarea name="q" rows="2" maxlength="600" placeholder="Например: не заводится на холодную — что проверить?" required></textarea><button type="submit">Спросить</button></form><div class="ask-out" aria-live="polite"></div><p class="note">Отвечает ИИ по базе MotoHelper — сверяйся с мануалом. Подробный разговор с фото — в <a href="/#ai=1">ИИ-механике MotoHelper</a>.</p></section>`;
 const ASK_JS = `(function(){var box=document.querySelector(".ask");if(!box)return;var f=box.querySelector("form"),out=box.querySelector(".ask-out"),btn=f.querySelector("button"),ep=null;
 fetch("/ai-config.json").then(function(r){return r.json()}).then(function(j){ep=j.endpoint}).catch(function(){});
 function show(t){out.textContent="";t.split(/(https:\\/\\/motohelper\\.ru\\/[^\\s)]*)/).forEach(function(x,i){if(i%2){var a=document.createElement("a");a.href=x.replace(/[.,]$/,"");a.textContent=x;out.appendChild(a)}else out.appendChild(document.createTextNode(x))})}
@@ -219,7 +219,7 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv }) {
 ${body}
 ${ask ? askBlock(ask) : ""}
 ${AD}
-<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/">Приложение</a> · <a href="https://t.me/motohelper_post_bot">ИИ-механик в Telegram</a></footer>
+<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a></footer>
 </main>
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}
 ${js ? `<script>${js}</script>` : ""}
@@ -426,7 +426,7 @@ ${(g.tools || []).length ? `<h2>Понадобится</h2><ul class="plain">${g
 <h2>Пошагово</h2><ol class="steps">${g.steps.map((x) => `<li>${phText(x, vt.keys)}</li>`).join("")}</ol>
 ${vt.html}
 <a class="cta" href="/#g=${g.id}">Открыть с цифрами для своего мотоцикла →</a>
-<p>Не нашёл ответ? Опиши поломку <a href="https://t.me/motohelper_post_bot">ИИ-механику в Telegram</a> — подскажет по твоей модели.</p>
+<p>Не нашёл ответ? Опиши поломку <a href="/#ai=1">ИИ-механику MotoHelper</a> — выбери свою модель, и он ответит с её цифрами.</p>
 <h2>Другие инструкции</h2><div class="chips">${GUIDES.filter((x) => x !== g && x.area && x.area === g.area).slice(0, 12).concat(GUIDES.filter((x) => KEY_GUIDES.indexOf(x.id) >= 0 && x !== g)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 16).map((x) => `<a class="chip" href="/m/remont/${x.id}/">${esc(x.title)}</a>`).join("")}<a class="chip" href="/m/remont/">Все инструкции →</a></div>`;
   const desc = (g.title + ": " + plain.slice(0, 3).join(" ")).slice(0, 230).replace(/\s+\S*$/, "") + "…";
   const ld = { "@context": "https://schema.org", "@type": "HowTo", name: g.title, inLanguage: "ru", url: canon, step: plain.map((t, i) => ({ "@type": "HowToStep", position: i + 1, text: t })) };
@@ -457,7 +457,7 @@ DIAG.forEach((d) => {
 <h2>Что проверить</h2><ol class="steps">${steps}</ol>
 ${vt.html}
 <a class="cta" href="/#d=${d.id}">Пройти проверку в MotoHelper под свой мотоцикл →</a>
-<p>Не нашёл ответ? Опиши поломку <a href="https://t.me/motohelper_post_bot">ИИ-механику в Telegram</a> — подскажет по твоей модели.</p>
+<p>Не нашёл ответ? Опиши поломку <a href="/#ai=1">ИИ-механику MotoHelper</a> — выбери свою модель, и он ответит с её цифрами.</p>
 <h2>Другие неисправности</h2><div class="chips">${DIAG.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/polomka/${x.id}/">${esc(x.title)}</a>`).join("")}</div>`;
   const desc = `${d.title} — мотоцикл, питбайк, скутер: что проверить по шагам${causes.length ? " (" + causes.slice(0, 4).join(", ") + ")" : ""} и как исправить.`;
   const faq = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: d.steps.filter((st) => st.onNo && st.onNo.result || st.onYes && st.onYes.result).slice(0, 8).map((st) => {
@@ -493,7 +493,7 @@ ${nums.length ? `<h2>Цифры ${esc(e.code)}</h2><div class="tiles">${nums.map
 <h2>Что проверить</h2><ol class="steps">${steps}</ol>
 ${iss}
 <a class="cta" href="${appLink(b, 0)}&d=${d.id}">Пройти проверку в MotoHelper для ${esc(full)} →</a>
-<p>Не нашёл ответ? Опиши поломку <a href="https://t.me/motohelper_post_bot">ИИ-механику в Telegram</a> — он знает ${esc(full)}.</p>
+<p>Не нашёл ответ? Опиши поломку <a href="${appLink(b, 0)}&amp;ai=1">ИИ-механику MotoHelper</a> — он знает ${esc(full)}.</p>
 <h2>Другие поломки ${esc(full)}</h2><div class="chips">${list.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/${slug}/${x.id}/">${esc(x.title)}</a>`).join("")}<a class="chip" href="/m/${slug}/">Всё о ${esc(b.name)} →</a></div>
 <p><a href="/m/polomka/${d.id}/">${esc(d.title)} — общая проверка для любого мотоцикла</a></p>`;
     const desc = `${phrase}: что проверить по шагам — свеча ${val("spark") || "по мануалу"}${val("valveIn") ? ", зазоры клапанов " + val("valveIn") + " / " + (val("valveEx") || "—") : ""}${causes.length ? ". Причины: " + causes.slice(0, 3).join(", ") : ""}.`;

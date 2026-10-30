@@ -2580,3 +2580,9 @@ code { background: #141414 !important; color: #fff; }
 /* ===================== v64: быстрее отрисовка =====================
    Тень у переливающейся надписи перерисовывалась каждый кадр — на чёрном фоне её не видно, убрана. */
 .grad, .main .grad { filter: none !important; }
+
+/* детали из ответа ИИ — строкой под текстом: «+ Свеча D8EA 350 ₽» */
+.md-parts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.08); }
+.md-parts .part-tag { margin: 0; padding: 5px 10px; gap: 6px; font-size: 13px; line-height: 1.2; text-align: left; }
+.md-parts .part-tag span { font-weight: 500; }
+.md-parts .part-tag b { white-space: nowrap; }
