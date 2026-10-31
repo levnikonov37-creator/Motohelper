@@ -2759,3 +2759,7 @@ code { background: #141414 !important; color: #fff; }
 .smoke-ov.fire .flame { animation: flamePop .42s ease-out; }
 @keyframes flamePop { 0% { opacity: 0; transform: scaleX(.3); } 12% { opacity: 1; transform: scaleX(1.25); } 30% { opacity: .35; transform: scaleX(.8); } 45% { opacity: 1; transform: scaleX(1.1); } 100% { opacity: 0; transform: scaleX(.6); } }
 @media (prefers-reduced-motion: reduce) { .smoke-ov.fire .flame { animation: none; } }
+/* v68: рисунок мотоцикла на главной крупнее */
+.hero .hero-bike { max-width: 620px !important; }
+.hero .hero-bike svg { max-height: 250px !important; }
+@media (max-width: 600px) { .hero .hero-bike svg { max-height: 175px !important; } .hero .hero-bike { margin: 2px auto 6px !important; } }
