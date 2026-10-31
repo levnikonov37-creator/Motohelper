@@ -149,6 +149,16 @@ TUNING.forEach((t) => {
   if (!t.id || !t.title) fail(`Доработка без id или названия: ${JSON.stringify(t).slice(0, 80)}`);
 });
 
+// Фото моделей: модель есть в базе, оба файла (800 px и миниатюра) на месте
+{
+  const keys = new Set(BIKES.map((b) => b.brand + " " + b.name));
+  for (const k of ctx.BIKE_PHOTOS || []) {
+    if (!keys.has(k)) fail("BIKE_PHOTOS: нет модели «" + k + "»");
+    const f = ctx.bikePhotoSlug(k) + ".webp";
+    for (const d of ["img/bikes/", "img/bikes/s/"]) if (!fs.existsSync(path.join(root, d + f))) fail("BIKE_PHOTOS: нет файла " + d + f);
+  }
+}
+
 if (errors.length) {
   console.error(`Найдено ошибок: ${errors.length}`);
   errors.slice(0, 200).forEach((e) => console.error(" - " + e));

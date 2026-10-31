@@ -2666,3 +2666,55 @@ code { background: #141414 !important; color: #fff; }
 .pj-how summary { cursor: pointer; color: #8A8A8A; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
 .pj-how p { margin: 6px 0 8px; }
 .tz-hint { margin: 4px 0 -4px; }
+/* ===================== v67: фото моделей =====================
+   Свои снимки (img/bikes) — мотоцикл сбоку без фона: на главной вместо рисунка, в «Мотоцикле» первым,
+   в поиске — миниатюрой. */
+.hero-bike.has-photo { max-width: 560px; }
+.hero-bike .hb-photo { position: relative; display: block; width: auto; max-width: 100%; height: auto; max-height: 230px; margin: 0 auto; filter: drop-shadow(0 18px 16px rgba(0,0,0,.65)); transition: transform .35s cubic-bezier(.2,.8,.2,1); animation: hbIn .5s cubic-bezier(.2,.8,.2,1) both; }
+.hero-bike.has-photo::before { top: 34%; }
+@keyframes hbIn { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: none; } }
+@media (hover: hover) { .hero-bike.has-photo:hover .hb-photo { transform: translateX(6px) rotate(-1deg); } }
+@media (max-width: 600px) { .hero-bike .hb-photo { max-height: 150px; } }
+@media (prefers-reduced-motion: reduce) { .hero-bike .hb-photo { animation: none; transition: none; } }
+.model-photo.own { background: radial-gradient(120% 90% at 50% 100%, #2a2c30 0%, #141518 55%, #0c0c0d 100%); }
+.model-photo.own .mp-bg { display: none; }
+.model-photo.own .mp-img { padding: 6% 5% 7%; box-sizing: border-box; filter: drop-shadow(0 14px 14px rgba(0,0,0,.6)); }
+.bf-item.has-ph { grid-template-columns: 92px 1fr auto; }
+.bf-thumb { width: 92px; height: 58px; object-fit: contain; align-self: center; filter: drop-shadow(0 4px 4px rgba(0,0,0,.5)); }
+.bf-item.has-ph .bf-vers { grid-column: 1 / -1; }
+@media (max-width: 420px) { .bf-item.has-ph { grid-template-columns: 72px 1fr auto; } .bf-thumb { width: 72px; height: 46px; } }
+/* ===================== v67: первый заход — один экран «Какой у тебя мотоцикл?» ===================== */
+.onb2 { max-width: 640px !important; width: 100%; }
+.onb2 .onb-body { padding: 4px 20px 20px; gap: 12px; }
+.onb2-top { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 10px; padding: 14px 20px 10px; background: linear-gradient(#050505 70%, rgba(5,5,5,0)); }
+.onb2-top .brand-mark { width: 30px; height: 30px; font-size: 13px; }
+.onb2-top b { font: 600 16px var(--cond); letter-spacing: .02em; }
+.onb2-skip { margin-left: auto; color: #9A9A9A !important; font-size: 14px; }
+.onb2-title { margin: 0 !important; font: italic 400 30px/1.05 var(--display) !important; text-transform: uppercase; letter-spacing: .01em; }
+.onb2-sub { margin: 0; color: #B5B5B5; font-size: 15px; }
+.onb2-what { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.onb2-what li { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: #0E0E0E; border: 1px solid rgba(255,255,255,.1); }
+.onb2-what li svg { color: var(--acc, #fff); }
+.onb2-what span { display: flex; flex-direction: column; }
+.onb2-what b { font: 600 14px/1.2 var(--cond); }
+.onb2-what small { color: #8A8A8A; font-size: 12px; line-height: 1.25; }
+@media (max-width: 520px) { .onb2-what { grid-template-columns: 1fr 1fr; } .onb2-title { font-size: 25px !important; } }
+.onb2-h { margin: 6px 0 -2px; font: 600 12px var(--cond); text-transform: uppercase; letter-spacing: .08em; color: #8A8A8A; }
+.onb2-pop { display: grid; grid-auto-flow: column; grid-auto-columns: 148px; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; margin: 0 -20px; padding-left: 20px; padding-right: 20px; scrollbar-width: none; }
+.onb2-pop::-webkit-scrollbar { display: none; }
+.onb2-card { scroll-snap-align: start; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 8px 10px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12); background: radial-gradient(120% 90% at 50% 100%, #26282c 0%, #121315 60%, #0b0b0c 100%); color: #fff; text-align: left; cursor: pointer; transition: border-color .15s, transform .15s; }
+.onb2-card:hover, .onb2-card:focus-visible { border-color: rgba(255,255,255,.5); transform: translateY(-2px); }
+.onb2-card img { width: 100%; height: 82px; object-fit: contain; margin-bottom: 4px; filter: drop-shadow(0 6px 6px rgba(0,0,0,.55)); }
+.onb2-card small { color: #8A8A8A; font: 600 11px var(--cond); text-transform: uppercase; letter-spacing: .05em; }
+.onb2-card b { font: 600 15px/1.15 var(--cond); }
+.onb2 .bf.compact { max-height: none !important; overflow: visible !important; }
+.cc-pics { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 12px; }
+.cc-pics a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px; border-radius: 10px; background: radial-gradient(120% 90% at 50% 100%, #24262a 0%, #111214 60%, #0b0b0c 100%); border: 1px solid rgba(255,255,255,.08); color: #BDBDBD; text-decoration: none; font: 600 12px/1.15 var(--cond); text-align: center; min-width: 0; }
+.cc-pics a:hover { border-color: rgba(255,255,255,.4); color: #fff; }
+.cc-pics img { width: 100%; height: 48px; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,.5)); }
+.cc-pics span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+@media (max-width: 600px) { .cc-pics { grid-template-columns: repeat(3, 1fr); } }
+.onb2 { overflow-x: hidden !important; }
+.onb2 .onb-body { grid-template-columns: minmax(0, 1fr); }
+.onb2 .onb-body > * { min-width: 0; }
+@media (min-width: 900px) { .actions4.home-acts { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; } }
