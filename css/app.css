@@ -2763,3 +2763,25 @@ code { background: #141414 !important; color: #fff; }
 .hero .hero-bike { max-width: 620px !important; }
 .hero .hero-bike svg { max-height: 250px !important; }
 @media (max-width: 600px) { .hero .hero-bike svg { max-height: 175px !important; } .hero .hero-bike { margin: 2px auto 6px !important; } }
+/* ===================== v68: тюнинг — стенд и ступени ===================== */
+.tstand .dyno { margin: 6px 0 0; }
+.tstand .pj-stats { margin-top: 4px; }
+.ts-hint { margin: 8px 0 0; }
+.ts-title { margin: 18px 0 8px; font: italic 400 18px var(--display); text-transform: uppercase; letter-spacing: .02em; }
+.tstages { display: grid; gap: 10px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .tstages { grid-template-columns: repeat(3, 1fr); } }
+.tstage { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; background: #0E0E0E; border: 1px solid rgba(255,255,255,.12); overflow: hidden; }
+.tstage::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--sc); }
+.tstage.s1 { --sc: #34D399; } .tstage.s2 { --sc: #FBBF24; } .tstage.s3 { --sc: #F43F5E; }
+.tstage.on { border-color: var(--sc); box-shadow: 0 0 0 1px var(--sc) inset; }
+.ts-head { display: flex; gap: 12px; align-items: flex-start; }
+.ts-n { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: var(--sc); color: #000; font: 400 20px var(--display); }
+.ts-head b { display: block; font: 600 17px/1.2 var(--cond); }
+.ts-head small { display: block; margin-top: 2px; color: #8A8A8A; font-size: 13px; line-height: 1.35; }
+.ts-nums { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 600 13px var(--cond); color: #B5B5B5; }
+.ts-nums b { color: #fff; font: 400 20px var(--display); }
+.ts-nums .bad { color: var(--bad); } .ts-nums .good { color: var(--good); }
+.ts-items { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.ts-items li { padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); font-size: 12.5px; color: #CFCFCF; }
+.ts-items li.in { border-color: var(--sc); color: #fff; }
+.tstage .btn { margin-top: auto; align-self: flex-start; }
