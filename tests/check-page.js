@@ -103,8 +103,8 @@ const server = http.createServer((req, res) => {
     else await page.keyboard.press("Escape");
     // Вид «Мотоцикл»: фото модели из поиска картинок, «Другое фото» листает снимки
     await page.getByRole("button", { name: "Главная" }).last().click();
-    // мотор и вид мотоцикла — во вкладке «Мотоцикл», на главной к нему ведёт плитка «Мотор в 3D»
-    await page.locator(".home-acts .act", { hasText: "Мотор в 3D" }).click();
+    // мотор и вид мотоцикла — во вкладке «Мотоцикл», на главной к нему ведёт плитка «Мотор»
+    await page.locator(".home-acts .act", { has: page.locator("b", { hasText: /^Мотор$/ }) }).click();
     await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
     // по умолчанию — рисунок; фото модели — по кнопке «Фото»
     await page.locator(".bv-toggle button", { hasText: "Фото" }).click();
@@ -125,7 +125,7 @@ const server = http.createServer((req, res) => {
     // фото не загрузилось (нет сети, сервер недоступен) — сам показывается рисунок
     await page.locator(".bv-toggle button", { hasText: "Фото" }).click();
     // 2D-схемы мотора больше нет; газ проверяем на виде «Мотоцикл» (в 3D без видеокарты кадры слишком редкие)
-    const b3d = page.locator(".view-toggle button", { hasText: "3D" });
+    const b3d = page.locator(".view-toggle button", { hasText: /^Мотор$/ });
     // Ручка газа: завести, держать — обороты растут, отпустить — падают; при удержании текст не выделяется
     await page.locator(".start-btn").click();
     const grip = page.locator(".thr-grip");
@@ -289,9 +289,14 @@ const server = http.createServer((req, res) => {
     if (!offOk) errors.push("Без интернета сайт не открылся");
     else {
       await off.getByRole("button", { name: "Мотоцикл" }).last().click();
-      await off.locator(".view-toggle button", { hasText: "3D" }).first().click();
+      await off.locator(".view-toggle button", { hasText: /^Мотор$/ }).first().click();
       const has3d = await off.waitForFunction(() => !!window.THREE, null, { timeout: 10000 }).then(() => true, () => false);
       if (!has3d) errors.push("Без интернета не загрузилась 3D-модель мотора");
+      else {
+        // отстрел: язык пламени и искры из глушителя
+        const bf = await off.waitForFunction(() => { const c = document.querySelector(".stage canvas"); return c && c.__backfire && c.__backfire(1); }, null, { timeout: 10000 }).then((h) => h.jsonValue(), () => "");
+        if (!/^[1-9]/.test(bf || "")) errors.push("Мотор: отстрел из глушителя не появился (" + bf + ")");
+      }
     }
     await offCtx.close();
     // Первый заход: один экран «Какой у тебя мотоцикл?» — популярные с фото; выбрал — на главной фото этой модели

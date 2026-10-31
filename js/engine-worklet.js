@@ -58,6 +58,7 @@ class MhEngine extends AudioWorkletProcessor {
     this.tick = 0;
     this.tz = 0;
     this.pop = 0;
+    this.pops = 0;
     this.thump = 0;
     this.thPh = 0;
     this.whPh = 0;
@@ -175,10 +176,10 @@ class MhEngine extends AudioWorkletProcessor {
             amp = 0.07 * Math.min(1, this.rpm / 250);
           } else if (this.limit && this.rnd() < 0.62) {
             amp = 0.05;
-            if (this.rnd() < 0.35 * this.popK) this.pop = Math.max(this.pop, 0.9 + this.rnd() * 0.5);
+            if (this.rnd() < 0.35 * this.popK) { this.pop = Math.max(this.pop, 0.9 + this.rnd() * 0.5); this.pops++; }
           } else if (this.decel > 0.3 && this.thr < 0.05) {
             amp = 0.13 + 0.08 * this.rnd();
-            if (this.rnd() < 0.09 * this.popK * this.decel) this.pop = Math.max(this.pop, 0.6 + this.rnd() * 0.8);
+            if (this.rnd() < 0.09 * this.popK * this.decel) { this.pop = Math.max(this.pop, 0.6 + this.rnd() * 0.8); this.pops++; }
           } else {
             const load = 0.5 + 0.5 * this.thrS;
             amp = load * (0.62 + 0.38 * lift);
@@ -256,7 +257,7 @@ class MhEngine extends AudioWorkletProcessor {
       this.accN++;
     }
     if (this.accN >= 1800) {
-      this.port.postMessage({ l: Math.min(1, Math.sqrt(this.acc / this.accN) * 4), r: Math.round(this.rpm), f: this.fires });
+      this.port.postMessage({ l: Math.min(1, Math.sqrt(this.acc / this.accN) * 4), r: Math.round(this.rpm), f: this.fires, p: this.pops });
       this.acc = 0;
       this.accN = 0;
     }
