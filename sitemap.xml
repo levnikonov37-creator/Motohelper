@@ -4019,8 +4019,8 @@
   <url><loc>https://motohelper.ru/m/podborka/enduro-600/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/sport-900/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/kross-enduro-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/podborka/legkiy-enduro-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/klassika-450/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/podborka/legkiy-enduro-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/sport-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/moped-50/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/klassika-900/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4059,8 +4059,8 @@
   <url><loc>https://motohelper.ru/m/podborka/sport-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/motard-900/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/motard-450/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/podborka/skuter-110/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/neyked-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/podborka/skuter-110/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/kross-enduro-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/moped-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/enduro-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4118,10 +4118,7 @@
   <url><loc>https://motohelper.ru/m/sravnenie/avantis-enduro-250-vs-progasi-super-max-250-rr/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sravnenie/motoland-rz200-vs-regulmoto-senke-sk200gy-5/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sravnenie/motoland-rz200-vs-racer-enduro-rc200gy-c2/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/sravnenie/motoland-rz200-vs-stels-flame-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sravnenie/regulmoto-senke-sk200gy-5-vs-racer-enduro-rc200gy-c2/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/sravnenie/regulmoto-senke-sk200gy-5-vs-stels-flame-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/sravnenie/racer-enduro-rc200gy-c2-vs-stels-flame-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sravnenie/regulmoto-fargo-300-vs-racer-triumph-300-rc300-gy8h/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sravnenie/kove-800x-pro-vs-cfmoto-800mt/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sravnenie/motoland-tt125-vs-kayo-tt125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
