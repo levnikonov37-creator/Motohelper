@@ -51,6 +51,14 @@ const server = http.createServer((req, res) => {
 
     const counts = await page.evaluate(() => ({ bikes: BIKES.length, engines: Object.keys(ENGINES).length }));
     if (counts.bikes < 1000) errors.push("Слишком мало моделей: " + counts.bikes);
+    // мопед (Альфа) рисуется маленьким мотоциклом, а не скутером; у кроссового — переднее крыло с боковиной
+    const art = await page.evaluate(() => {
+      const f = (k) => { const b = BIKES.find((x) => bikeKey(x) === k); return b && bikeArtFor(b, ENGINES[b.versions ? b.versions[0].engine : b.engine] || ENGINES[b.engine], null, "t"); };
+      const a = f("Motoland Alpha RX 125"), h = f("Hasky A10 Pro NB300");
+      return { alpha: !!a && /t-mpl/.test(a.svg), alphaPins: a ? Object.keys(a.pins).length : 0, mx: !!h && (h.svg.match(/clip-path/g) || []).length };
+    });
+    if (!art.alpha || art.alphaPins < 9) errors.push("Мопед Альфа нарисован не своим шаблоном: " + JSON.stringify(art));
+    if (art.mx < 3) errors.push("Кроссовый рисунок без боковин пластика: " + JSON.stringify(art));
 
     // Поиск в окне «Найди свой мотоцикл»
     await page.locator(".bike-chip").first().click({ timeout: 10000 });
