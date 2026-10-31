@@ -10769,7 +10769,7 @@ var BIKE_COLORS = {
   "BSE Z7 300": {"body": "#484D4A", "side": "#98D65C", "fender": "#26292E", "fenderR": "#75756E", "seat": "#ACEB70", "frame": "#060B0B", "swing": "#111515", "muffler": "#050909", "engine": "#858685", "fork": "#2A2E33"},
   "BSE Z8": {"body": "#5A565F", "side": "#C41515", "fender": "#26292E", "fenderR": "#848186", "seat": "#49464C", "frame": "#0F0E12", "swing": "#1F1C1E", "muffler": "#645E67", "engine": "#171617", "fork": "#2A2E33"},
   "GR GR2 300 Pro": {"body": "#324657", "side": "#ECF2F6", "fender": "#5E8DA5", "seat": "#E1E0C3", "frame": "#E5E8F1", "swing": "#D0E0F0", "muffler": "#B8C0C9", "engine": "#C7D0D8", "fork": "#D5DADF"},
-  "Hasky A10 Pro NB300": {"body": "#D78690", "side": "#F99095", "fender": "#741B24", "fenderR": "#6E1A20", "seat": "#F95B5B", "frame": "#D47F86", "swing": "#D7261E", "muffler": "#2D2826", "engine": "#1F2024", "fork": "#D5DADF", "rim": "#1D1D20"},
+  "Hasky A10 Pro NB300": {"body": "#cc2435", "side": "#cc2435", "fender": "#C42232", "fenderR": "#B01F2D", "seat": "#cc2435", "frame": "#cc2435", "swing": "#D7261E", "muffler": "#2D2826", "engine": "#1F2024", "fork": "#D5DADF", "rim": "#1D1D20"},
   "Hasky F6 Racing": {"body": "#E61721", "side": "#FCFBFA", "fender": "#C11829", "fenderR": "#F1E8DC", "seat": "#E72F39", "frame": "#FDF8F3", "swing": "#F9DED8", "engine": "#181612", "fork": "#D5DADF"},
   "Irbis TTR125R": {"body": "#4E4A4A", "side": "#4A4446", "fender": "#C6A7A6", "seat": "#6A1815", "frame": "#5D5658", "swing": "#312C2C", "muffler": "#312E2F", "engine": "#474546", "fork": "#2A2E33"},
   "Irbis TTR250R": {"body": "#4E4F52", "side": "#F5F6F6", "fender": "#2A2A2C", "fenderR": "#242627", "seat": "#F6F6F6", "frame": "#1F1F22", "swing": "#242526", "muffler": "#232526", "engine": "#1D1E22", "fork": "#2A2E33"},
@@ -10798,7 +10798,7 @@ var BIKE_COLORS = {
   "Regulmoto Sport-003 PR": {"body": "#FCFBFB", "side": "#F9FBFC", "fender": "#B6B3B2", "fenderR": "#26292E", "seat": "#8B8E92", "frame": "#1F1C1C", "swing": "#F9F7F0", "muffler": "#E0DCDC", "engine": "#4C3E34", "fork": "#2A2E33"},
   "Regulmoto Sport-003 PRO": {"body": "#FCFAFA", "side": "#F8FBFC", "fender": "#B6B3B2", "fenderR": "#26292E", "seat": "#8C8E93", "frame": "#1F1D1D", "swing": "#F9F7F0", "muffler": "#D2D4D8", "engine": "#4C3E34", "fork": "#2A2E33"},
   "Regulmoto TE 250": {"body": "#BBBDB4", "side": "#D6D4D2", "fender": "#26292E", "fenderR": "#26292E", "seat": "#0F1110", "frame": "#0A0C08", "swing": "#0E0F0E", "engine": "#110F10", "fork": "#2A2E33"},
-  "Roliz Sport-005": {"body": "#EC370A", "side": "#CB270B", "fender": "#D20606", "fenderR": "#E8927E", "seat": "#F33108", "frame": "#261F17", "swing": "#18110C", "muffler": "#EDE6DA", "engine": "#211C14", "fork": "#2A2E33", "rim": "#150E08"},
+  "Roliz Sport-005": {"body": "#EC370A", "side": "#CB270B", "fender": "#D20606", "fenderR": "#e6360a", "seat": "#F33108", "frame": "#261F17", "swing": "#18110C", "muffler": "#EDE6DA", "engine": "#211C14", "fork": "#2A2E33", "rim": "#150E08"},
   "Roliz Sport-007": {"body": "#35904C", "side": "#508D51", "fender": "#38934D", "fenderR": "#80A98C", "seat": "#59976A", "frame": "#1F1D18", "swing": "#292A26", "muffler": "#333434", "engine": "#0F0E0C", "fork": "#D5DADF", "rim": "#32833B"},
   "Stels Enduro 250": {"body": "#CA1616", "side": "#D02226", "fender": "#D71E24", "fenderR": "#E8E3E0", "seat": "#2D2D2C", "frame": "#C91B1A", "swing": "#363433", "muffler": "#F4E7D9", "engine": "#171717", "fork": "#2A2E33"}
 };
