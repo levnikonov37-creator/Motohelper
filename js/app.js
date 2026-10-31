@@ -13829,6 +13829,7 @@ function Home(props) {
     compact: true
   })), /*#__PURE__*/React.createElement(Passport, {
     eng: eng,
+    bike: bike,
     go: go
   }), /*#__PURE__*/React.createElement("div", {
     className: "actions4 home-acts"
@@ -13851,14 +13852,47 @@ function Home(props) {
 /* Паспорт мотора на главной: то, за чем чаще всего заходят, — масло, свеча, клапаны, топливо */
 function Passport({
   eng,
+  bike,
   go
 }) {
   const ok = v => v && v !== "—" && !/по мануалу/i.test(v);
+  /* фото модели (своё, без фона) — сверху, на «подиуме» с подсветкой и отражением */
+  const ph = bike ? ownPhoto(bike) : "";
+  const [phOk, setPhOk] = useState(0);
+  useEffect(() => setPhOk(0), [ph]);
   const rows = [["Масло", eng.oil, ok(eng.oilVol) ? eng.oilVol : ""], ["Свеча", eng.spark, ok(eng.gap) ? "зазор " + eng.gap : ""], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", ""] : ["Клапаны", ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", "впуск / выпуск, мм"], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + " км" : ""]];
   return /*#__PURE__*/React.createElement("div", {
-    className: "panel passport",
+    className: "panel passport" + (ph && phOk >= 0 ? " has-ph" : ""),
     "aria-label": "Паспорт мотора"
-  }, rows.map(r => /*#__PURE__*/React.createElement("div", {
+  }, ph && phOk >= 0 && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "pp-photo" + (phOk > 0 ? " on" : ""),
+    "aria-label": "Открыть " + bike.brand + " " + bike.name,
+    onClick: () => go("bike", "overview")
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "pp-spot",
+    "aria-hidden": "true"
+  }), /*#__PURE__*/React.createElement("img", {
+    key: ph,
+    className: "pp-img",
+    src: ph,
+    alt: bike.brand + " " + bike.name,
+    width: 800,
+    height: 560,
+    decoding: "async",
+    onLoad: () => setPhOk(1),
+    onError: () => setPhOk(-1)
+  }), /*#__PURE__*/React.createElement("img", {
+    className: "pp-refl",
+    src: ph,
+    alt: "",
+    "aria-hidden": "true",
+    width: 800,
+    height: 560,
+    decoding: "async"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "pp-name"
+  }, /*#__PURE__*/React.createElement("small", null, bike.brand), /*#__PURE__*/React.createElement("b", null, bike.name))), rows.map(r => /*#__PURE__*/React.createElement("div", {
     key: r[0]
   }, /*#__PURE__*/React.createElement("span", null, r[0]), /*#__PURE__*/React.createElement("b", null, r[1] || "—"), r[2] && /*#__PURE__*/React.createElement("small", null, r[2]))), /*#__PURE__*/React.createElement("button", {
     type: "button",

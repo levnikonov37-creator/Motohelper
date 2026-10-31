@@ -2856,3 +2856,19 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .catalog-card .cc-t b, .sh-txt b { font-family: var(--body) !important; font-weight: 600 !important; font-size: 17px !important; }
 .ai-head h1, .ai-page .ai-who h1, .sub-head h1, .page > h1 { font-family: var(--display) !important; font-weight: 700 !important; }
 .pr-title h2 { font-size: 17px !important; }
+
+/* ===== v71: фото модели в паспорте — подиум с подсветкой и отражением ===== */
+.passport .pp-photo { grid-column: 1 / -1; position: relative; display: block; width: 100%; aspect-ratio: 16 / 8.6; max-height: 330px; margin: -4px 0 6px; padding: 0; border: 0; border-radius: 14px; overflow: hidden; cursor: pointer;
+  background: radial-gradient(70% 60% at 50% 88%, rgba(138,140,255,.16), transparent 70%), linear-gradient(180deg, #15171d 0%, #0d0e12 62%, #121318 100%); }
+.passport .pp-photo::after { content: ""; position: absolute; left: 6%; right: 6%; bottom: 16%; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent); }
+.passport .pp-spot { position: absolute; left: 50%; top: -30%; width: 90%; height: 120%; transform: translateX(-50%); background: radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,.07), transparent 70%); pointer-events: none; }
+.passport .pp-img, .passport .pp-refl { position: absolute; left: 50%; bottom: 16%; width: 92%; height: 76%; object-fit: contain; object-position: 50% 100%; transform: translateX(-50%); opacity: 0; transition: opacity .45s ease, transform .45s ease; }
+.passport .pp-img { transform: translate(-50%, 6px); filter: drop-shadow(0 14px 18px rgba(0,0,0,.55)); }
+.passport .pp-refl { transform: translateX(-50%) scaleY(-1); transform-origin: 50% 100%; -webkit-mask-image: linear-gradient(0deg, rgba(0,0,0,.28), transparent 32%); mask-image: linear-gradient(0deg, rgba(0,0,0,.28), transparent 32%); filter: blur(1px); }
+.passport .pp-photo.on .pp-img { opacity: 1; transform: translate(-50%, 0); }
+.passport .pp-photo.on .pp-refl { opacity: 1; }
+.passport .pp-name { position: absolute; left: 14px; top: 10px; display: grid; text-align: left; line-height: 1.15; }
+.passport .pp-name small { color: var(--g-muted); font: 600 11px var(--cond); text-transform: uppercase; letter-spacing: .08em; }
+.passport .pp-name b { font: 700 16px var(--display); color: var(--g-ink); letter-spacing: -.01em; }
+.passport .pp-photo:hover .pp-img { transform: translate(-50%, -2px) scale(1.015); }
+@media (prefers-reduced-motion: reduce) { .passport .pp-img, .passport .pp-refl { transition: none; } }
