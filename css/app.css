@@ -2718,3 +2718,44 @@ code { background: #141414 !important; color: #fff; }
 .onb2 .onb-body { grid-template-columns: minmax(0, 1fr); }
 .onb2 .onb-body > * { min-width: 0; }
 @media (min-width: 900px) { .actions4.home-acts { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; } }
+/* ===================== v67: ручка газа =====================
+   Держишь — газ, ведёшь вправо — больше. Сверху шифт-лампы, обороты цифрами и «Отсечка».
+   Ни выделения, ни лупы, ни меню «Копировать» при долгом нажатии. */
+.thr { flex: 1 1 100%; grid-column: 1 / -1; display: grid; gap: 8px; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.thr * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.thr-top { display: flex; align-items: center; gap: 10px; min-height: 26px; }
+.thr-leds { display: flex; gap: 4px; }
+.thr-led { width: 16px; height: 8px; border-radius: 2px; background: #1E1E20; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); transition: background-color .05s, box-shadow .05s; }
+.thr-led.g.on { background: #34D399; box-shadow: 0 0 10px #34D399; }
+.thr-led.y.on { background: #FBBF24; box-shadow: 0 0 10px #FBBF24; }
+.thr-led.r.on { background: #F43F5E; box-shadow: 0 0 12px #F43F5E; }
+.thr.lim .thr-led.on { animation: thrBlink .1s steps(2) infinite; }
+.thr-rpm { margin-left: auto; color: #8A8A8A; font: 600 12px var(--cond); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+.thr-rpm b { display: inline-block; min-width: 5ch; text-align: right; color: #fff; font: 400 22px/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.thr-lim { display: none; color: #F43F5E; font: 700 12px var(--cond); text-transform: uppercase; letter-spacing: .12em; }
+.thr.lim .thr-lim { display: inline; animation: thrBlink .14s steps(2) infinite; }
+.thr-grip { position: relative; display: block; width: 100%; height: 66px; padding: 0; border-radius: 16px; border: 1.5px solid rgba(229,83,61,.55); background: linear-gradient(180deg, #1B1B1D, #0C0C0D); overflow: hidden; color: #fff; cursor: grab; touch-action: none; transition: border-color .15s, box-shadow .15s; }
+.thr-grip:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.thr.held .thr-grip { cursor: grabbing; border-color: #E5533D; box-shadow: 0 0 28px -6px rgba(229,83,61,.75), inset 0 0 0 1px rgba(229,83,61,.4); }
+.thr-fill { position: absolute; inset: 0; transform-origin: left center; transform: scaleX(0); background: linear-gradient(90deg, rgba(229,83,61,.15), rgba(229,83,61,.55) 70%, rgba(255,120,90,.9)); transition: transform .09s linear; }
+.thr-ribs { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 11px, rgba(255,255,255,.07) 11px 13px); -webkit-mask: linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent); mask: linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent); }
+.thr-t { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; pointer-events: none; }
+.thr-t b { font: italic 400 22px/1.1 var(--display); text-transform: uppercase; letter-spacing: .08em; }
+.thr-t small { color: rgba(255,255,255,.65); font-size: 12px; }
+.thr.lim .thr-grip { animation: thrShake .06s linear infinite; }
+@keyframes thrBlink { 50% { opacity: .25; } }
+@keyframes thrShake { 0% { transform: translateX(0); } 50% { transform: translateX(1.5px); } 100% { transform: translateX(-1.5px); } }
+@media (prefers-reduced-motion: reduce) { .thr.lim .thr-grip, .thr.lim .thr-led.on, .thr.lim .thr-lim { animation: none; } }
+.thr { position: relative; }
+.thr-leds { flex: 1 1 auto; max-width: 220px; }
+.thr-led { flex: 1 1 0; width: auto; max-width: 18px; }
+.thr-lim { position: absolute; right: 12px; bottom: 8px; z-index: 2; pointer-events: none; }
+.thr-pct { display: none; font: 600 13px var(--cond) !important; color: #fff !important; }
+.thr.held .thr-t small:not(.thr-pct) { display: none; }
+.thr.held .thr-pct { display: block; visibility: visible !important; }
+/* хлопок из глушителя при сбросе газа */
+.smoke-ov .flame { position: absolute; left: var(--sx, 92.9%); top: var(--sy, 87.7%); width: 9%; aspect-ratio: 2 / 1; translate: -8% -50%; transform-origin: left center; border-radius: 50%; background: radial-gradient(ellipse at 12% 50%, #FFF8D0 0%, #FFC14D 26%, rgba(255,96,32,.75) 50%, rgba(255,60,20,0) 72%); opacity: 0; mix-blend-mode: screen; pointer-events: none; }
+.smoke-ov.back .flame { translate: -92% -50%; transform-origin: right center; background: radial-gradient(ellipse at 88% 50%, #FFF8D0 0%, #FFC14D 26%, rgba(255,96,32,.75) 50%, rgba(255,60,20,0) 72%); }
+.smoke-ov.fire .flame { animation: flamePop .42s ease-out; }
+@keyframes flamePop { 0% { opacity: 0; transform: scaleX(.3); } 12% { opacity: 1; transform: scaleX(1.25); } 30% { opacity: .35; transform: scaleX(.8); } 45% { opacity: 1; transform: scaleX(1.1); } 100% { opacity: 0; transform: scaleX(.6); } }
+@media (prefers-reduced-motion: reduce) { .smoke-ov.fire .flame { animation: none; } }
