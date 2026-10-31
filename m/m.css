@@ -83,6 +83,16 @@ ul.plain{margin:0;padding-left:20px}ul.plain li{margin:3px 0}
 .faq{display:grid;gap:8px}.faq details{border:1px solid rgba(255,255,255,.14);border-radius:4px;background:#0E0E0E}
 .faq summary{cursor:pointer;padding:12px 14px;font:600 16px var(--cond);list-style:none}.faq summary::-webkit-details-marker{display:none}
 .faq summary::after{content:"+";float:right;color:var(--muted)}.faq details[open] summary::after{content:"–"}.faq p{margin:0;padding:0 14px 12px;color:#D0D0D0}
+/* v70 «Гараж» — как в приложении: графит, спокойные заголовки (Unbounded), мягкие карточки */
+:root{--display:"Unbounded","Fira Sans",Arial,sans-serif;--bg:#0C0E12;--card:#161A21;--card2:#1C2129;--line:rgba(255,255,255,.075);--ink:#EEF1F5;--muted:#8E98A6}
+body{background:radial-gradient(900px 520px at 70% -160px,rgba(124,132,255,.16),transparent 70%),#0C0E12!important;color:var(--ink)}
+h1,h2,.card.big b,.tile b{font-style:normal!important;text-transform:none!important;text-shadow:none!important;letter-spacing:-.01em!important}
+h1{font-weight:700!important}h2{font-weight:600!important;font-size:19px!important}.card.big b{font-family:"Fira Sans",Arial,sans-serif!important;font-weight:600!important;font-size:17px!important}
+.hero{background:radial-gradient(120% 90% at 80% 0%,rgba(124,132,255,.2),transparent 55%),linear-gradient(160deg,#161A22,#12151B 60%,#0F1216)!important;border:1px solid var(--line)!important;border-radius:22px!important}
+.hero::before,.hero::after{display:none!important}
+.card,.tile,.faq details,.steps li,.ask,.rv-item,.tblw{background:var(--card)!important;border:1px solid var(--line)!important;border-radius:16px!important}
+.card{border-left-width:1px!important}.card:hover{background:var(--card2)!important;border-color:rgba(255,255,255,.16)!important}
+.kick{background:linear-gradient(95deg,#5FA8FF,#8A8CFF)!important;-webkit-background-clip:text!important;background-clip:text!important}
 /* фото моделей: снимок без фона на тёмной «студии» */
 .mphoto{margin:14px 0 4px;padding:4% 4% 3%;border-radius:12px;background:radial-gradient(120% 90% at 50% 100%,#2a2c30 0%,#141518 55%,#0c0c0d 100%);border:1px solid rgba(255,255,255,.1)}
 .mphoto img{display:block;width:100%;max-width:640px;height:auto;margin:0 auto;filter:drop-shadow(0 14px 14px rgba(0,0,0,.6))}

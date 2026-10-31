@@ -13827,7 +13827,10 @@ function Home(props) {
     placeholder: "Поломка, деталь или инструкция"
   })), /*#__PURE__*/React.createElement(GarageBar, _extends({}, props, {
     compact: true
-  })), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement(Passport, {
+    eng: eng,
+    go: go
+  }), /*#__PURE__*/React.createElement("div", {
     className: "actions4 home-acts"
   }, [["list", "ТО и масло", () => go("repair", "to"), "", "Что и когда менять"], ["book", "Инструкции", () => go("repair", "guides"), "", "Пошагово, со схемами"], ["cart", "Запчасти", () => go("parts"), "", "Только под твой мотор"], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 ? "В проекте " + project.length : "Что даст прибавку"], ["engine", "Мотор в 3D", () => goStage(go), "", "Заведи и загляни внутрь"], ["check", "Проверка б/у", () => go("repair", "buy"), "", "Перед покупкой"]].map(a => /*#__PURE__*/React.createElement("button", {
     key: a[1],
@@ -13844,6 +13847,24 @@ function Home(props) {
   }), /*#__PURE__*/React.createElement(CatalogCard, null), /*#__PURE__*/React.createElement(AdSlot, {
     place: "home"
   }), /*#__PURE__*/React.createElement(SupportCard, null), /*#__PURE__*/React.createElement(InstallCard, null));
+}
+/* Паспорт мотора на главной: то, за чем чаще всего заходят, — масло, свеча, клапаны, топливо */
+function Passport({
+  eng,
+  go
+}) {
+  const ok = v => v && v !== "—" && !/по мануалу/i.test(v);
+  const rows = [["Масло", eng.oil, ok(eng.oilVol) ? eng.oilVol : ""], ["Свеча", eng.spark, ok(eng.gap) ? "зазор " + eng.gap : ""], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", ""] : ["Клапаны", ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", "впуск / выпуск, мм"], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + " км" : ""]];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "panel passport",
+    "aria-label": "Паспорт мотора"
+  }, rows.map(r => /*#__PURE__*/React.createElement("div", {
+    key: r[0]
+  }, /*#__PURE__*/React.createElement("span", null, r[0]), /*#__PURE__*/React.createElement("b", null, r[1] || "—"), r[2] && /*#__PURE__*/React.createElement("small", null, r[2]))), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "link pp-more",
+    onClick: () => go("bike", "overview")
+  }, "Все характеристики →"));
 }
 /* Каталог моделей (страницы /m/ для поисковиков) — с главной, с популярными марками */
 const CAT_TR = {

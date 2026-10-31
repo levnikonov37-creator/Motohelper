@@ -2785,3 +2785,74 @@ code { background: #141414 !important; color: #fff; }
 .ts-items li { padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); font-size: 12.5px; color: #CFCFCF; }
 .ts-items li.in { border-color: var(--sc); color: #fff; }
 .tstage .btn { margin-top: auto; align-self: flex-start; }
+/* ===================== v70: «Гараж» — новая визуальная система =====================
+   Вместо чёрного фона, курсивных заголовков капслоком и полос — графит, спокойные заголовки (Unbounded),
+   мягкие карточки с тонкой границей, один акцентный цвет (сине-фиолетовый, из «хамелеона») для главных
+   кнопок и выделений. Слой последний: перекрывает прежние слои. */
+:root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+  --g-bg: #0C0E12; --g-bg2: #11141A; --g-card: #161A21; --g-card2: #1C2129; --g-line: rgba(255,255,255,.075); --g-line2: rgba(255,255,255,.14);
+  --g-ink: #EEF1F5; --g-muted: #8E98A6; --g-acc: #8A8CFF; --g-acc2: #5FA8FF; --g-acc-ink: #0B0D18;
+  --display: "Unbounded", "Fira Sans", "Segoe UI", Arial, sans-serif;
+  --bg: var(--g-bg); --surface: var(--g-card); --surface2: var(--g-card2); --ink: var(--g-ink); --muted: var(--g-muted); --line: var(--g-line2);
+}
+body { background: var(--g-bg) !important; color: var(--g-ink) !important; }
+body::before { background: radial-gradient(900px 520px at 70% -160px, rgba(124,132,255,.16), transparent 70%), radial-gradient(700px 500px at -10% 110%, rgba(95,168,255,.07), transparent 70%) !important; opacity: 1 !important; }
+body::after { display: none !important; }
+/* заголовки: без курсива и капслока */
+h1, h2, h3, .home-title, .phero h1, .panel h2, .panel-head h2, .act b, .fold-head b, .ts-title, .onb2-title, .brand, .rail-bike .rb-code,
+.hero .home-title, .stage-code, .tstage b, .area-head h2, .sheet-head h2, .bf-brandhead h3, .pj-stat b, .ts-n, .ts-nums b, .thr-t b, .thr-rpm b {
+  font-style: normal !important; text-transform: none !important; letter-spacing: -0.01em !important; text-shadow: none !important; }
+h1, .home-title, .phero h1, .onb2-title { font-family: var(--display) !important; font-weight: 700 !important; }
+h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-family: var(--display) !important; font-weight: 600 !important; font-size: 18px !important; }
+.act b, .fold-head b, .tstage .ts-head b { font-family: var(--body) !important; font-weight: 600 !important; font-size: 16px !important; }
+.hero .home-title { font-size: clamp(22px, 4vw, 34px) !important; line-height: 1.15 !important; }
+.phero h1 { font-size: clamp(24px, 4.6vw, 38px) !important; }
+.grad { -webkit-text-fill-color: transparent; background: linear-gradient(95deg, var(--g-acc2), var(--g-acc) 60%, #C98BFF) !important; -webkit-background-clip: text !important; background-clip: text !important; }
+/* шапка и нижнее меню */
+.topbar { background: rgba(12,14,18,.82) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--g-line) !important; box-shadow: none !important; }
+.tabbar { background: rgba(14,16,21,.9) !important; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--g-line) !important; }
+.brand-mark { border-radius: 9px !important; }
+/* карточки */
+.panel, .act, .guide, .tcard, .cause, .fold, .tstage, .bf-item, .install-card, .catalog-card, .season-home, .preride, .tg-card {
+  background: var(--g-card) !important; border: 1px solid var(--g-line) !important; border-radius: 18px !important; box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 18px 40px -30px rgba(0,0,0,.9) !important; }
+.panel::before, .panel::after, .act::after, .act::before { display: none !important; }
+.act { border-left-width: 1px !important; }
+.act:hover, .bf-item:hover { border-color: var(--g-line2) !important; background: var(--g-card2) !important; }
+/* шапка-герой главной и разделов */
+.hero, .phero { background: radial-gradient(120% 90% at 80% 0%, rgba(124,132,255,.22), transparent 55%), linear-gradient(160deg, #161A22 0%, #12151B 60%, #0F1216 100%) !important; border: 1px solid var(--g-line) !important; border-radius: 24px !important; box-shadow: 0 30px 60px -40px rgba(0,0,0,.9) !important; }
+.hero::after, .hero::before, .phero::after, .phero-ico { display: none !important; }
+.hero-k { background: rgba(255,255,255,.06) !important; border: 1px solid var(--g-line) !important; color: #C9CFD8 !important; font-family: var(--body) !important; }
+/* кнопки */
+.btn { border-radius: 12px !important; border: 1px solid var(--g-line2) !important; background: var(--g-card2) !important; color: var(--g-ink) !important; font-family: var(--body) !important; font-style: normal !important; text-transform: none !important; letter-spacing: 0 !important; box-shadow: none !important; }
+.btn:hover { background: #242A33 !important; }
+.btn.primary, .hero .btn.primary, .btn.primary.shine, .ic-btn { background: linear-gradient(135deg, var(--g-acc2), var(--g-acc)) !important; color: var(--g-acc-ink) !important; border-color: transparent !important; font-weight: 700 !important; box-shadow: 0 10px 24px -12px rgba(124,132,255,.8) !important; }
+.btn.primary .ico, .btn.primary svg { color: var(--g-acc-ink) !important; }
+.btn.ghost { background: rgba(255,255,255,.04) !important; }
+.chip { border-radius: 999px !important; border: 1px solid var(--g-line2) !important; background: rgba(255,255,255,.03) !important; color: #D5DAE1 !important; }
+.chip.on, a.chip:hover, button.chip:hover { background: rgba(124,132,255,.18) !important; border-color: rgba(124,132,255,.55) !important; color: #fff !important; }
+.seg { border-radius: 12px !important; border: 1px solid var(--g-line2) !important; background: rgba(255,255,255,.03) !important; }
+.seg button.on { background: #EEF1F5 !important; color: #0C0E12 !important; }
+.tabs { background: rgba(22,26,33,.85) !important; border: 1px solid var(--g-line) !important; border-radius: 16px !important; }
+.tabs button.on, .tabs [aria-selected="true"] { background: #EEF1F5 !important; color: #0C0E12 !important; }
+/* плитки действий: иконка в круге с цветом */
+.act > .ico { border-radius: 12px !important; background: rgba(255,255,255,.05) !important; border: 1px solid var(--g-line) !important; }
+.act span { color: var(--g-muted) !important; }
+/* поиск */
+.site-search input, .bf-search input { border-radius: 14px !important; }
+/* текст */
+.muted, .small.muted { color: var(--g-muted) !important; }
+.page h2::before { width: 4px !important; transform: none !important; border-radius: 3px !important; box-shadow: none !important; background: linear-gradient(180deg, var(--g-acc2), var(--g-acc)) !important; }
+@media (min-width: 900px) { .rail { background: var(--g-bg2) !important; border-right: 1px solid var(--g-line) !important; } .rail-item.on { background: var(--g-card2) !important; box-shadow: inset 3px 0 0 var(--g-acc) !important; } .rail-bike { background: var(--g-card) !important; border: 1px solid var(--g-line) !important; border-radius: 16px !important; } }
+/* паспорт мотора на главной */
+.passport { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0; padding: 12px !important; }
+.passport > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.passport span { color: var(--g-muted); font: 600 11.5px var(--cond); text-transform: uppercase; letter-spacing: .05em; }
+.passport b { font: 600 15px/1.25 var(--body); color: var(--g-ink); overflow-wrap: anywhere; }
+.passport small { color: var(--g-muted); font-size: 12px; }
+.passport .pp-more { grid-column: 1 / -1; justify-self: start; }
+@media (max-width: 600px) { .passport { grid-template-columns: 1fr 1fr; } }
+.catalog-card .cc-t b, .ai-head h1, .ai-page .ai-who h1, .backup-bar > span b, .edit legend, .onb-hero h2, .page > h1, .page h2, .sub-head h1, .pr-title h2, .sh-txt b {
+  font-style: normal !important; text-transform: none !important; letter-spacing: -0.01em !important; }
+.catalog-card .cc-t b, .sh-txt b { font-family: var(--body) !important; font-weight: 600 !important; font-size: 17px !important; }
+.ai-head h1, .ai-page .ai-who h1, .sub-head h1, .page > h1 { font-family: var(--display) !important; font-weight: 700 !important; }
+.pr-title h2 { font-size: 17px !important; }
