@@ -8319,12 +8319,14 @@ function Smoke({
 }) {
   const dur = rpm < 2500 ? 1.6 : rpm < 5500 ? 1.05 : 0.7;
   return /*#__PURE__*/React.createElement("div", {
-    className: "smoke-ov" + (two ? " two" : ""),
+    className: "smoke-ov" + (two ? " two" : "") + (back ? " back" : ""),
     "aria-hidden": "true",
     style: Object.assign({
       "--puff": dur + "s"
     }, style || {})
-  }, [0, 1, 2, 3, 4, 5].map(i => /*#__PURE__*/React.createElement("i", {
+  }, /*#__PURE__*/React.createElement("b", {
+    className: "flame"
+  }), [0, 1, 2, 3, 4, 5].map(i => /*#__PURE__*/React.createElement("i", {
     key: i,
     style: {
       width: (back ? 2.2 : 3.1) + i % 3 * 1.2 + "%",
@@ -12536,6 +12538,125 @@ function App() {
   }));
 }
 
+/* Ручка газа: держи — газ, веди вправо — больше (слева ¼, справа полностью). Шкала открытия, обороты и
+   шифт-лампы обновляются напрямую из цикла оборотов (meter), без перерисовки React. Пробел/Enter — тоже газ.
+   Удержание пальцем не выделяет и не копирует текст: selectstart, contextmenu и touchstart гасим. */
+const THR_LEDS = 10;
+function Throttle({
+  meter,
+  red,
+  onDown,
+  onAmt,
+  onUp
+}) {
+  const ref = useRef(null);
+  const held = useRef(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const no = e => e.preventDefault();
+    el.addEventListener("selectstart", no);
+    el.addEventListener("contextmenu", no);
+    el.addEventListener("touchstart", no, {
+      passive: false
+    });
+    const leds = el.querySelectorAll(".thr-led"),
+      num = el.querySelector(".thr-rpm b"),
+      fill = el.querySelector(".thr-fill"),
+      pct = el.querySelector(".thr-pct");
+    meter.current = (r, amt, lim) => {
+      const f = Math.max(0, Math.min(1, r / red));
+      const n = Math.round(f * THR_LEDS);
+      for (let i = 0; i < leds.length; i++) leds[i].classList.toggle("on", i < n);
+      if (num) num.textContent = String(Math.round(r / 100) * 100);
+      if (fill) fill.style.transform = "scaleX(" + amt.toFixed(3) + ")";
+      if (pct) pct.textContent = Math.round(amt * 100) + "%";
+      el.classList.toggle("lim", !!lim);
+    };
+    meter.current(0, 0, false);
+    return () => {
+      el.removeEventListener("selectstart", no);
+      el.removeEventListener("contextmenu", no);
+      el.removeEventListener("touchstart", no);
+      meter.current = null;
+      if (held.current) onUp();
+    };
+  }, [red]);
+  const amtAt = e => {
+    const b = ref.current.querySelector(".thr-grip").getBoundingClientRect();
+    return Math.max(0.25, Math.min(1, (e.clientX - b.left) / Math.max(1, b.width) * 1.15));
+  };
+  const down = e => {
+    if (e.button > 0) return;
+    e.preventDefault();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (x) {}
+    held.current = true;
+    ref.current.classList.add("held");
+    onDown(amtAt(e));
+  };
+  const move = e => {
+    if (held.current) onAmt(amtAt(e));
+  };
+  const up = () => {
+    if (!held.current) return;
+    held.current = false;
+    ref.current && ref.current.classList.remove("held");
+    onUp();
+  };
+  const key = (e, on) => {
+    if (e.key !== " " && e.key !== "Enter") return;
+    e.preventDefault();
+    if (on && !held.current) {
+      held.current = true;
+      ref.current.classList.add("held");
+      onDown(1);
+    } else if (!on) up();
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    ref: ref,
+    className: "thr",
+    "aria-hidden": "false"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "thr-top",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "thr-leds"
+  }, Array.from({
+    length: THR_LEDS
+  }, (_, i) => /*#__PURE__*/React.createElement("i", {
+    key: i,
+    className: "thr-led " + (i < 6 ? "g" : i < 8 ? "y" : "r")
+  }))), /*#__PURE__*/React.createElement("span", {
+    className: "thr-rpm"
+  }, /*#__PURE__*/React.createElement("b", null, "0"), " об/мин"), /*#__PURE__*/React.createElement("span", {
+    className: "thr-lim"
+  }, "Отсечка")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "thr-grip",
+    "aria-label": "Газ: нажми и держи",
+    onPointerDown: down,
+    onPointerMove: move,
+    onPointerUp: up,
+    onPointerCancel: up,
+    onLostPointerCapture: up,
+    onKeyDown: e => key(e, true),
+    onKeyUp: e => key(e, false),
+    onBlur: up
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "thr-fill",
+    "aria-hidden": "true"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "thr-ribs",
+    "aria-hidden": "true"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "thr-t",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("b", null, "Газ"), /*#__PURE__*/React.createElement("small", null, "держи · веди вправо — больше"), /*#__PURE__*/React.createElement("small", {
+    className: "thr-pct"
+  }, "0%"))));
+}
 /* ===== Сцена с двигателем ===== */
 function EngineExplorer({
   eng,
@@ -12581,6 +12702,7 @@ function EngineExplorer({
   gas.current.level = () => snd.current && snd.current.level ? snd.current.level() : -1;
   /* газ: живые обороты в gas.current.r; React перерисовывает схему и 3D только при смене диапазона оборотов */
   const tacho = useRef(null);
+  const meter = useRef(null);
   const [viz, setViz] = useState(null);
   const vrpm = viz != null ? viz : rpm;
   const pins = view === "photo" ? [] : view === "3d" ? enginePins(eng).map(p => ({
@@ -12668,7 +12790,9 @@ function EngineExplorer({
         return;
       }
     } else if (G.held) {
-      G.r = Math.min(top, G.r + up * dt * (1 - 0.45 * G.r / top));
+      /* ручка газа: amt — насколько открыта (0.15…1), обороты тянутся к своей цели */
+      const tgt = G.base + (top - G.base) * (G.amt == null ? 1 : G.amt);
+      G.r = G.r < tgt ? Math.min(tgt, G.r + up * dt * (1 - 0.45 * G.r / top)) : Math.max(tgt, G.r - down * dt);
       if (G.r >= top - 30) {
         G.r = top - Math.random() * 260;
         if (t - (G.buzzT || 0) > 160) {
@@ -12683,6 +12807,7 @@ function EngineExplorer({
       G.r = G.r > tgt ? Math.max(tgt, G.r - down * dt) : Math.min(tgt, G.r + up * 0.7 * dt);
     }
     if (tacho.current) tacho.current(G.r);
+    if (meter.current) meter.current(G.r, G.held ? G.amt == null ? 1 : G.amt : 0, G.r >= top - 300 && G.held);
     if (snd.current) snd.current.setRpm(G.r);
     const band = G.r < 2500 ? 1600 : G.r < 5500 ? 4000 : 7000;
     if (band !== G.viz) {
@@ -12697,6 +12822,7 @@ function EngineExplorer({
       G.viz = 0;
       setViz(null);
       if (tacho.current) tacho.current(G.base);
+      if (meter.current) meter.current(G.base, 0, false);
       if (snd.current) snd.current.setRpm(G.base);
     }
   }
@@ -12715,17 +12841,31 @@ function EngineExplorer({
     G.base = v;
     if (G.phase === "run") kick();
   }
-  function gasDown() {
+  function gasDown(amt) {
     const G = gas.current;
     if (G.phase !== "run") return;
+    G.amt = amt == null ? 1 : amt;
     G.held = true;
     if (snd.current) snd.current.setThrottle(true);
     if (!G.raf) G.raf = requestAnimationFrame(gasLoop);
   }
   function gasUp() {
     const G = gas.current;
+    /* сброс газа с высоких оборотов — хлопок из глушителя (звук делает worklet, здесь — вспышка) */
+    if (G.held && G.r > pk.red * 0.6) document.querySelectorAll(".smoke-ov").forEach(el => {
+      el.classList.remove("fire");
+      void el.offsetWidth;
+      el.classList.add("fire");
+    });
     G.held = false;
     if (snd.current) snd.current.setThrottle(false);
+    if (G.phase === "run") kick();
+  }
+  function gasAmt(amt) {
+    const G = gas.current;
+    if (!G.held) return;
+    G.amt = amt;
+    kick();
   }
   function stopSound() {
     if (snd.current) {
@@ -12917,16 +13057,13 @@ function EngineExplorer({
   }, /*#__PURE__*/React.createElement(Icon, {
     n: sound ? "sound" : "mute",
     s: 18
-  }), sound ? "Звук вкл." : "Звук"), running && /*#__PURE__*/React.createElement("button", {
-    className: "ctl gas",
-    onPointerDown: e => {
-      e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId);
-      gasDown();
-    },
-    onPointerUp: gasUp,
-    onPointerCancel: gasUp,
-    onContextMenu: e => e.preventDefault()
-  }, "Газ — нажми и держи")), (view === "bike" || view === "photo") && !running && /*#__PURE__*/React.createElement("div", {
+  }), sound ? "Звук вкл." : "Звук"), running && /*#__PURE__*/React.createElement(Throttle, {
+    meter: meter,
+    red: pk.red,
+    onDown: gasDown,
+    onAmt: gasAmt,
+    onUp: gasUp
+  })), (view === "bike" || view === "photo") && !running && /*#__PURE__*/React.createElement("div", {
     className: "real-look"
   }, /*#__PURE__*/React.createElement("a", {
     className: "ctl",

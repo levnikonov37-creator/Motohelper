@@ -123,6 +123,28 @@ const server = http.createServer((req, res) => {
     // фото не загрузилось (нет сети, сервер недоступен) — сам показывается рисунок
     await page.locator(".bv-toggle button", { hasText: "Фото" }).click();
     await page.locator(".view-toggle button", { hasText: "Схема" }).first().click();
+    // Ручка газа: завести, держать — обороты растут, отпустить — падают; при удержании текст не выделяется
+    await page.locator(".start-btn").click();
+    const grip = page.locator(".thr-grip");
+    if (!(await grip.waitFor({ timeout: 8000 }).then(() => true, () => false))) errors.push("Мотор: после «Завести» нет ручки газа");
+    else {
+      await page.waitForTimeout(1500);
+      const gb = await grip.boundingBox();
+      const rpmNow = async () => +(await page.locator(".thr-rpm b").innerText()).replace(/\D/g, "");
+      const idle = await rpmNow();
+      await page.mouse.move(gb.x + gb.width * 0.95, gb.y + gb.height / 2);
+      await page.mouse.down();
+      await page.waitForTimeout(1200);
+      const high = await rpmNow();
+      await page.mouse.up();
+      await page.waitForTimeout(1500);
+      const back = await rpmNow();
+      if (!(high > idle + 2000)) errors.push(`Газ: обороты не выросли (${idle} → ${high})`);
+      if (!(back < high - 1500)) errors.push(`Газ отпущен, обороты не упали (${high} → ${back})`);
+      const selText = await page.evaluate(() => String(window.getSelection()));
+      if (selText) errors.push("Газ: при удержании выделился текст «" + selText.slice(0, 40) + "»");
+      await page.locator(".start-btn").click();
+    }
     await page.unroute(/mm\.bing\.net\/th/, fakePhoto);
     await page.route(/mm\.bing\.net\/th/, (r) => r.abort());
     await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
