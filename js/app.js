@@ -368,7 +368,7 @@ function EditBike({
     className: "f wide"
   }, /*#__PURE__*/React.createElement("span", {
     className: "f-label"
-  }, "\u041F\u043E\u043A\u0440\u0430\u0441\u043A\u0430 \u0434\u0432\u0438\u0433\u0430\u0442\u0435\u043B\u044F \u0432 3D", cu.engFinish && /*#__PURE__*/React.createElement("button", {
+  }, "Покраска мотора", cu.engFinish && /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "f-reset",
     onClick: () => setCu({
@@ -8283,7 +8283,7 @@ function EngineSVG({
     boxer: 2,
     i3: 3,
     i4: 4
-  }[eng.layout] || 2, ". \u041F\u043E\u043B\u043D\u044B\u0439 \u043C\u043E\u0442\u043E\u0440 \u2014 \u0432 3D"), xray && /*#__PURE__*/React.createElement(Internals, {
+  }[eng.layout] || 2, ". Полный мотор — во вкладке «Мотор»"), xray && /*#__PURE__*/React.createElement(Internals, {
     eng: eng,
     running: running,
     rpm: rpm
@@ -8642,7 +8642,9 @@ function engineSoundLegacy(eng) {
     osc2.start();
     nz.start();
   }
+  let pops = 0;
   function pop(t, big) {
+    pops++;
     const k = N.popK * (big ? 1.2 : 0.8);
     const s = ctx.createBufferSource();
     s.buffer = noise;
@@ -8737,6 +8739,9 @@ function engineSoundLegacy(eng) {
     label() {
       return P ? EX_LABEL[P.ex] : "";
     },
+    pops() {
+      return pops;
+    },
     stop() {
       clearInterval(timer);
       timer = null;
@@ -8764,6 +8769,7 @@ function engineSound(eng) {
     legacy = null,
     P = null,
     lvl = 0,
+    popsN = 0,
     gainN = null;
   const queued = {};
   function send(m) {
@@ -8820,6 +8826,7 @@ function engineSound(eng) {
         });
         node.port.onmessage = e => {
           lvl = e.data.l || 0;
+          if (e.data.p != null) popsN = e.data.p;
         };
         node.connect(gainN);
         send({});
@@ -8872,6 +8879,9 @@ function engineSound(eng) {
     label() {
       if (legacy) return legacy.label();
       return P ? EX_LABEL[P.ex] : "";
+    },
+    pops() {
+      return legacy ? legacy.pops ? legacy.pops() : -1 : popsN;
     },
     level() {
       return legacy ? -1 : lvl;
@@ -9121,6 +9131,62 @@ function e3Spline(pts, k) {
   s.splineThru(pts.slice(1).concat([pts[0]]).map(p => new THREE.Vector2(p[0] * (k || 1), p[1] * (k || 1))));
   return s;
 }
+/* мягкая круглая точка для частиц (смесь, бензин, газы) */
+let E3_SOFT = null;
+function e3Soft() {
+  if (E3_SOFT) return E3_SOFT;
+  const c = document.createElement("canvas");
+  c.width = c.height = 64;
+  const x = c.getContext("2d"),
+    g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.35, "rgba(255,255,255,.7)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+  x.fillStyle = g;
+  x.fillRect(0, 0, 64, 64);
+  E3_SOFT = new THREE.CanvasTexture(c);
+  return E3_SOFT;
+}
+/* поток частиц вдоль трубы: смесь (mist), бензин (fuel), горячие газы (hot, светятся) */
+function e3Flow(n, kind) {
+  const T = THREE,
+    geo = new T.BufferGeometry();
+  geo.setAttribute("position", new T.BufferAttribute(new Float32Array(n * 3), 3));
+  geo.setAttribute("color", new T.BufferAttribute(new Float32Array(n * 3), 3));
+  const m = new T.Points(geo, new T.PointsMaterial({
+    size: kind === "fuel" ? 0.09 : kind === "hot" ? 0.4 : kind === "air" ? 0.12 : 0.24,
+    map: e3Soft(),
+    vertexColors: true,
+    transparent: true,
+    opacity: kind === "mist" ? 0.6 : kind === "air" ? 0.45 : 1,
+    depthWrite: false,
+    blending: kind === "hot" ? T.AdditiveBlending : T.NormalBlending
+  }));
+  m.visible = false;
+  m.frustumCulled = false;
+  m.renderOrder = 3;
+  m.userData.kind = kind;
+  m.userData.rnd = Array.from({
+    length: n
+  }, () => [Math.random(), Math.random() * 2 - 1, Math.random() * 2 - 1, 0.65 + Math.random() * 0.7]);
+  return m;
+}
+/* складчатый конусный фильтр «нулевик» */
+function e3Pleated(r0, r1, h, n) {
+  const g = new THREE.CylinderGeometry(r0, r1, h, n * 2, 8, true),
+    P = g.attributes.position,
+    row = n * 2 + 1;
+  for (let i = 0; i < P.count; i++) {
+    const seg = i % row,
+      y = P.getY(i);
+    if (seg % 2 && Math.abs(y) < h / 2 - h * 0.08) {
+      P.setX(i, P.getX(i) * 0.9);
+      P.setZ(i, P.getZ(i) * 0.9);
+    }
+  }
+  g.computeVertexNormals();
+  return g;
+}
 let E3_BUMP = null;
 function e3Bump() {
   if (E3_BUMP) return E3_BUMP;
@@ -9202,7 +9268,7 @@ function buildEngine3D(eng, finish) {
     semi = /полуавтомат/.test(eng.gearbox);
   const fin = finish || e3DefaultFinish(eng);
   const bump = e3Bump(), brushed = e3Brushed();
-  const caseCol = fin === "black" ? 0x1f2124 : fin === "bronze" ? 0x8a6c3e : 0x9ba1a7;
+  const caseCol = fin === "black" ? 0x1f2124 : fin === "bronze" ? 0x8a6c3e : 0x8c939a;
   const coverCol = fin === "black" ? 0x2a2d31 : fin === "bronze" ? 0xa8875a : 0xe2e5e8;
   const finCol = fin === "silver" ? 0xb8bec4 : fin === "bronze" ? 0x6e5432 : 0x22252a;
   const BASE = {
@@ -9302,6 +9368,11 @@ function buildEngine3D(eng, finish) {
       metalness: 0,
       roughness: 0.75
     }),
+    podBlack: new T.MeshStandardMaterial({
+      color: 0x2b2e33,
+      metalness: 0,
+      roughness: 0.85
+    }),
     blue: new T.MeshStandardMaterial({
       color: 0x3c7bd9,
       metalness: 0.2,
@@ -9318,8 +9389,37 @@ function buildEngine3D(eng, finish) {
       color: 0xff8a2a,
       transparent: true,
       opacity: 0
+    }),
+    /* фрезерованные кромки рёбер: у чёрного цилиндра — светлый металл по краю */
+    finEdge: new T.MeshStandardMaterial({
+      color: fin === "black" ? 0x8d939a : fin === "bronze" ? 0xd8b680 : 0xe4e7ea,
+      metalness: 0.95,
+      roughness: 0.18,
+      roughnessMap: brushed
+    }),
+    fuelLiq: new T.MeshStandardMaterial({
+      color: 0xf2a428,
+      metalness: 0,
+      roughness: 0.08,
+      transparent: true,
+      opacity: 0.82,
+      emissive: 0x3a1e00
+    }),
+    clear: new T.MeshStandardMaterial({
+      color: 0xdfe9ee,
+      metalness: 0,
+      roughness: 0.06,
+      transparent: true,
+      opacity: 0.3,
+      depthWrite: false
+    }),
+    paper: new T.MeshStandardMaterial({
+      color: 0xf1ead8,
+      metalness: 0,
+      roughness: 0.9
     })
   };
+  BASE.heat.name = "heat";
   const cache = {},
     meshes = [];
   function mat(area, key, shell) {
@@ -9337,6 +9437,14 @@ function buildEngine3D(eng, finish) {
   }
   function M(geo, area, key, parent, shell) {
     const m = new T.Mesh(geo, mat(area, key, shell));
+    m.castShadow = m.receiveShadow = true;
+    m.userData.area = area;
+    (parent || outer).add(m);
+    meshes.push(m);
+    return m;
+  }
+  function MF(geo, area, k1, k2, parent, shell) {
+    const m = new T.Mesh(geo, [mat(area, k1, shell), mat(area, k2, shell)]);
     m.castShadow = m.receiveShadow = true;
     m.userData.area = area;
     (parent || outer).add(m);
@@ -9361,7 +9469,12 @@ function buildEngine3D(eng, finish) {
   const caseDepth = A.depth,
     zR = caseDepth / 2 + 0.05,
     zL = -caseDepth / 2 - 0.05;
-  M(e3Extrude(e3Spline(A.caseP), caseDepth, 0.09, 48), "oil", "cast", outer, true);
+  M(e3Extrude(e3Spline(A.caseP), caseDepth, 0.045, 48), "oil", "cast", outer, true);
+  /* литые рёбра жёсткости по картеру — с обеих сторон, вдоль контура */
+  [1, -1].forEach(sd => {
+    const rib = new THREE.CatmullRomCurve3(A.caseP.map(p => new T.Vector3(p[0] * 0.8 + 0.1, p[1] * 0.8 - 0.03, sd * (caseDepth / 2 + 0.035))), true);
+    M(new T.TubeGeometry(rib, 90, 0.018, 6, true), "oil", "cast", outer, true);
+  });
   /* линия разъёма половин картера */
   M(e3Extrude(e3Spline(A.caseP, 1.004), 0.012, 0, 40), "oil", "black", outer, true);
   const clutchC = A.clutch,
@@ -9542,7 +9655,7 @@ function buildEngine3D(eng, finish) {
       const n = 16;
       for (let i = 0; i < n; i++) {
         const k = 1 - i * 0.008;
-        const f = M(e3Extrude(e3RoundRect(finW * k, finD * k, finR), 0.022, 0.007, 6).rotateX(Math.PI / 2), "cyl", "fin", G, true);
+        const f = MF(e3Extrude(e3RoundRect(finW * k, finD * k, finR), 0.012, 0.004, 4).rotateX(Math.PI / 2), "cyl", "fin", "finEdge", G, true);
         f.position.y = 0.66 + i * 0.054;
       }
       if (ohv) {
@@ -9566,7 +9679,7 @@ function buildEngine3D(eng, finish) {
       } else {
         for (let i = 0; i < 5; i++) {
           const k = 1 - i * 0.08;
-          M(e3Extrude(e3RoundRect(finW * 1.05 * k, finD * 1.05 * k, 0.2), 0.035, 0.01, 6).rotateX(Math.PI / 2), "head", "fin", G, true).position.y = 1.52 + i * 0.07;
+          MF(e3Extrude(e3RoundRect(finW * 1.05 * k, finD * 1.05 * k, 0.2), 0.03, 0.009, 6).rotateX(Math.PI / 2), "head", "fin", "finEdge", G, true).position.y = 1.52 + i * 0.07;
         }
         M(new T.SphereGeometry(0.42, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2).scale(1, 0.55, 1), "head", "fin", G, true).position.y = 1.5;
       }
@@ -9576,7 +9689,7 @@ function buildEngine3D(eng, finish) {
       }));
     } else {
       M(e3Extrude(e3RoundRect(1.1, 0.96, 0.12), 0.4, 0.035).rotateX(Math.PI / 2), "head", "cast", G, true).position.y = 1.72;
-      if (!liq) for (let i = 0; i < 6; i++) M(e3Extrude(e3RoundRect(finW * 1.04, finD * 1.04, finR), 0.022, 0.007, 6).rotateX(Math.PI / 2), "head", "fin", G, true).position.y = 1.53 + i * 0.056;
+      if (!liq) for (let i = 0; i < 6; i++) MF(e3Extrude(e3RoundRect(finW * 1.04, finD * 1.04, finR), 0.012, 0.004, 4).rotateX(Math.PI / 2), "head", "fin", "finEdge", G, true).position.y = 1.53 + i * 0.056;
       if (ohv) {
         tag(M(e3Extrude(e3RoundRect(0.86, 0.7, 0.12), 0.18, 0.035).rotateX(Math.PI / 2), "head", "polish", G, true), "valvecover").position.y = 2.02;
         [-0.24, 0.24].forEach(x => M(new T.CylinderGeometry(0.05, 0.05, 0.08, 6), "head", "steel", G).position.set(x, 2.14, 0));
@@ -9647,8 +9760,10 @@ function buildEngine3D(eng, finish) {
     } else {
       /* корпус карбюратора — литой цинк (PE/PZ серебристые), PWK — тёмный анод */
       const cm = inst.indexOf("pwk") >= 0 || inst.indexOf("pwk28") >= 0 ? "black" : "zinc";
-      const body = M(geoAx(0.19, 0.4), "carb", cm, G);
+      const body = M(geoAx(0.17, 0.42), "carb", cm, G);
       body.position.copy(at(0.44));
+      /* фланцы на входе и выходе */
+      [0.24, 0.64].forEach(d => M(geoAx(0.205, 0.045), "carb", cm, G).position.copy(at(d)));
       const tw = M(e3Cyl(0.13, 0.3, 28), "carb", cm, G);
       tw.position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(0.28, 0, 0) : new T.Vector3(0, 0.28, 0));
       if (ax === "y") tw.rotation.z = Math.PI / 2;
@@ -9656,18 +9771,48 @@ function buildEngine3D(eng, finish) {
       twCap.rotation.x = -Math.PI / 2;
       twCap.position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(0.44, 0, 0) : new T.Vector3(0, 0.43, 0));
       if (ax === "y") twCap.rotation.set(0, 0, -Math.PI / 2);
-      /* поплавковая камера — круглая, со сливным винтом */
-      const bowl = M(e3Cyl(0.16, 0.2, 28), "carb", cm, G);
-      bowl.position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(-0.27, 0, 0) : new T.Vector3(0, -0.27, 0));
-      if (ax === "y") bowl.rotation.z = Math.PI / 2;
-      M(e3Cyl(0.035, 0.06, 6), "carb", "steel", G).position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(-0.4, 0, 0) : new T.Vector3(0, -0.4, 0));
+      /* регулятор троса газа на крышке башни */
+      const adj = M(e3Cyl(0.035, 0.12, 12), "carb", "steel", G);
+      adj.position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(0.52, 0, 0) : new T.Vector3(0, 0.51, 0));
+      if (ax === "y") adj.rotation.z = Math.PI / 2;
+      /* поплавковая камера: литой короб с четырьмя винтами, снизу — сливной винт и дренажные трубки */
+      if (ax === "x") {
+        const bowl = M(e3Extrude(e3RoundRect(0.36, 0.32, 0.08), 0.24, 0.025, 8).rotateX(Math.PI / 2), "carb", cm, G);
+        bowl.position.copy(at(0.44)).add(new T.Vector3(0, -0.26, 0));
+        [[-0.14, -0.13], [0.14, -0.13], [-0.14, 0.13], [0.14, 0.13]].forEach(q => bolt("carb", at(0.44).x + q[0], at(0.44).y - 0.17, at(0.44).z + q[1], 0.018, G));
+        M(e3Cyl(0.03, 0.05, 6), "carb", "steel", G).position.copy(at(0.44)).add(new T.Vector3(0.06, -0.41, 0));
+        [-0.05, 0.05].forEach((dz, k) => {
+          const o = at(0.44).add(new T.Vector3(-0.06 + k * 0.03, -0.38, dz));
+          M(new T.TubeGeometry(new T.CatmullRomCurve3([o, o.clone().add(new T.Vector3(-0.02, -0.25, 0.02)), o.clone().add(new T.Vector3(-0.08, -0.62, 0.05 + k * 0.04))]), 12, 0.014, 6), "carb", "clear", G);
+        });
+        /* рычажок подсоса и винт холостых с пружиной */
+        const ch = M(new T.BoxGeometry(0.16, 0.035, 0.025), "carb", "black", G);
+        ch.position.copy(at(0.3)).add(new T.Vector3(0, 0.05, 0.21));
+        ch.rotation.z = 0.5;
+        const idl = M(e3Cyl(0.022, 0.16, 10, "z"), "carb", "brass", G);
+        idl.position.copy(at(0.52)).add(new T.Vector3(0, -0.08, 0.24));
+        const spr = M(new T.TorusGeometry(0.026, 0.006, 5, 10), "carb", "steel", G);
+        spr.position.copy(at(0.52)).add(new T.Vector3(0, -0.08, 0.2));
+      } else {
+        const bowl = M(e3Cyl(0.16, 0.2, 28), "carb", cm, G);
+        bowl.position.copy(at(0.44)).add(new T.Vector3(-0.27, 0, 0));
+        bowl.rotation.z = Math.PI / 2;
+        M(e3Cyl(0.035, 0.06, 6), "carb", "steel", G).position.copy(at(0.44)).add(new T.Vector3(-0.4, 0, 0));
+      }
       M(e3Cyl(0.03, 0.08, 12, "z"), "carb", "steel", G).position.copy(at(0.36)).add(new T.Vector3(0, 0, 0.22));
     }
     tag(M(geoAx(0.2, 0.36), "carb", "rubber", G), "airbox").position.copy(at(0.84));
-    if (inst.indexOf("filter") >= 0) {
-      const pod = tag(M(new T.CylinderGeometry(0.19, 0.28, 0.4, 24), "carb", "pod", G), "airbox");
+    if (inst.indexOf("filter") >= 0 || !efi && ax === "x") {
+      const pod = tag(M(e3Pleated(0.2, 0.3, 0.42, 26), "carb", inst.indexOf("filter") >= 0 ? "pod" : "podBlack", G), "airbox");
+      pod.material.side = T.DoubleSide;
       if (ax === "x") pod.rotation.z = -Math.PI / 2;
       pod.position.copy(at(1.2));
+      const capE = tag(M(new T.CylinderGeometry(0.205, 0.205, 0.03, 32), "carb", "chrome", G), "airbox");
+      if (ax === "x") capE.rotation.z = -Math.PI / 2;
+      capE.position.copy(at(1.42));
+      const capB = tag(M(new T.CylinderGeometry(0.3, 0.3, 0.04, 32), "carb", "rubber", G), "airbox");
+      if (ax === "x") capB.rotation.z = -Math.PI / 2;
+      capB.position.copy(at(0.99));
     } else {
       /* корпус воздушного фильтра — скруглённый пластик */
       const bx = e3Extrude(e3RoundRect(ax === "x" ? 0.42 : 0.58, ax === "x" ? 0.58 : 0.42, 0.12), 0.6, 0.05, 10);
@@ -9680,15 +9825,30 @@ function buildEngine3D(eng, finish) {
     if (!efi || two) M(new T.TubeGeometry(new T.CatmullRomCurve3([towerTop, towerTop.clone().add(new T.Vector3(-0.05, 0.35, 0.05)), towerTop.clone().add(new T.Vector3(-0.35, 1.0, 0.25))]), 20, 0.022, 8), "carb", "black", G);
     const nip = efi && !two ? at(0.2).add(new T.Vector3(0, 0.36, 0.15)) : at(0.36).add(new T.Vector3(0, 0, 0.26));
     const fuelCurve = new T.CatmullRomCurve3([nip.clone().add(new T.Vector3(-0.1, 0.95, 0.3)), nip.clone().add(new T.Vector3(0.06, 0.4, 0.22)), nip.clone()]);
-    const fuelHose = new T.Mesh(new T.TubeGeometry(fuelCurve, 24, 0.032, 8), new T.MeshStandardMaterial({
-      color: 0xe0a040,
-      metalness: 0,
-      roughness: 0.15,
-      transparent: true,
-      opacity: 0.45,
-      depthWrite: false
-    }));
+    /* бензошланг прозрачный: видно, как идёт бензин; сверху кран, посередине фильтр-колбочка */
+    const fuelHose = new T.Mesh(new T.TubeGeometry(fuelCurve, 30, 0.034, 10), mat("carb", "clear"));
+    fuelHose.renderOrder = 2;
     G.add(fuelHose);
+    tag(M(new T.TubeGeometry(fuelCurve, 30, 0.02, 8), "carb", "fuelLiq", G), "fuelhose");
+    const tapP = fuelCurve.getPoint(0),
+      tapB = tag(M(new T.BoxGeometry(0.14, 0.12, 0.1), "carb", "black", G), "fuelhose");
+    tapB.position.copy(tapP).add(new T.Vector3(0, 0.07, 0));
+    const tapL = tag(M(new T.BoxGeometry(0.18, 0.03, 0.03), "carb", "black", G), "fuelhose");
+    tapL.position.copy(tapP).add(new T.Vector3(0.06, 0.08, 0.07));
+    tapL.rotation.z = 0.4;
+    const fpos = fuelCurve.getPoint(0.42),
+      ftan = fuelCurve.getTangent(0.42),
+      fq = new T.Quaternion().setFromUnitVectors(new T.Vector3(0, 1, 0), ftan);
+    const fglass = tag(M(new T.CylinderGeometry(0.06, 0.06, 0.18, 16), "carb", "clear", G), "fuelhose");
+    fglass.position.copy(fpos);
+    fglass.quaternion.copy(fq);
+    fglass.renderOrder = 2;
+    const fpaper = tag(M(new T.CylinderGeometry(0.038, 0.038, 0.13, 16), "carb", "paper", G), "fuelhose");
+    fpaper.position.copy(fpos);
+    fpaper.quaternion.copy(fq);
+    const fliq = tag(M(new T.CylinderGeometry(0.055, 0.055, 0.09, 16), "carb", "fuelLiq", G), "fuelhose");
+    fliq.position.copy(fpos).addScaledVector(ftan, -0.04);
+    fliq.quaternion.copy(fq);
     if (!two) M(new T.TubeGeometry(new T.CatmullRomCurve3([new T.Vector3(0.3, 2.3, 0), new T.Vector3(0.8, 2.45, 0.05), new T.Vector3(1.2, 2.0, 0.15)]), 20, 0.03, 8), "head", "rubber", G);
     if (!two && !liq && arch !== "cub" && (arch === "vert" || arch === "cg")) {
       const oc = new T.CatmullRomCurve3([new T.Vector3(0.48, 0.66, 0.4), new T.Vector3(0.62, 1.15, 0.46), new T.Vector3(0.5, 1.78, 0.44)]);
@@ -9699,20 +9859,14 @@ function buildEngine3D(eng, finish) {
       });
     }
     const flowPts = two ? [at(1.22), at(0.84), at(0.44), at(0.12), inPort.clone(), new T.Vector3(0.2, 0.5, 0)] : arch === "cub" ? [at(1.22), at(0.84), at(0.44), at(0.12), inPort.clone().add(new T.Vector3(0.38, 0.3, 0)), inPort.clone().add(new T.Vector3(0.18, 0.02, 0)), inPort.clone(), new T.Vector3(0.3, 1.66, 0), new T.Vector3(0.17, 1.56, 0)] : [at(1.22), at(0.84), at(0.44), at(0.12), inPort.clone(), new T.Vector3(0.3, 1.66, 0), new T.Vector3(0.17, 1.56, 0)];
-    const dotG = new T.SphereGeometry(0.03, 8, 6);
-    const mkFlow = (n, parent) => {
-      const m = new T.InstancedMesh(dotG, new T.MeshBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.9,
-        depthWrite: false
-      }), n);
-      m.visible = false;
-      m.frustumCulled = false;
+    const mkFlow = (n, parent, kind) => {
+      const m = e3Flow(n, kind || "mist");
       parent.add(m);
-      for (let i = 0; i < n; i++) m.setColorAt(i, new T.Color(0xffffff));
       return m;
     };
+    /* воздух снаружи затягивает в фильтр */
+    const mouth = at(1.46),
+      airPts = [mouth.clone().add(new T.Vector3(ax === "y" ? 0.2 : 1.1, ax === "y" ? 1.0 : 0.25, 0.15)), mouth.clone().add(new T.Vector3(ax === "y" ? 0.08 : 0.55, ax === "y" ? 0.5 : 0.1, 0.05)), mouth.clone()];
 
     /* внутренности: поршень, шатун, клапаны с кулачками */
     const RC = 0.29;
@@ -9742,12 +9896,17 @@ function buildEngine3D(eng, finish) {
       exOpen: 0,
       inFlow: {
         curve: new T.CatmullRomCurve3(flowPts),
-        mesh: mkFlow(34, G),
+        mesh: mkFlow(84, G, "mist"),
         s: 0
       },
       fuel: {
         curve: fuelCurve,
-        mesh: mkFlow(9, G),
+        mesh: mkFlow(16, G, "fuel"),
+        s: 0
+      },
+      airIn: {
+        curve: new T.CatmullRomCurve3(airPts),
+        mesh: mkFlow(26, G, "air"),
         s: 0
       }
     };
@@ -9888,16 +10047,8 @@ function buildEngine3D(eng, finish) {
     const mEnd = new T.Vector3(2.25 + 0.85 * Math.cos(0.32), -0.35 + 0.85 * Math.sin(0.32), zx),
       mStart = new T.Vector3(2.25 - 0.7 * Math.cos(0.32), -0.35 - 0.7 * Math.sin(0.32), zx);
     const exFlowCurve = new T.CatmullRomCurve3([v0].concat(pts).concat([mStart, mEnd]), false, "centripetal");
-    const exm = new T.InstancedMesh(new T.SphereGeometry(0.045, 8, 6), new T.MeshBasicMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.85,
-      depthWrite: false
-    }), 44);
-    exm.visible = false;
-    exm.frustumCulled = false;
+    const exm = e3Flow(120, "hot");
     exG.add(exm);
-    for (let k = 0; k < 44; k++) exm.setColorAt(k, new T.Color(0xffffff));
     c.exFlow = {
       curve: exFlowCurve,
       mesh: exm,
@@ -9913,9 +10064,22 @@ function buildEngine3D(eng, finish) {
   muff.position.set(2.25, -0.35, zx);
   muff.rotation.z = 0.32;
   exG.add(muff);
-  M(e3Cyl(0.18, 1.45, 32, "x"), "exhaust", mm, muff);
-  [-0.62, 0.62].forEach(x => M(e3Cyl(0.19, 0.06, 32, "x"), "exhaust", "black", muff).position.x = x);
-  M(e3Cyl(0.08, 0.12, 20, "x"), "exhaust", "steel", muff).position.x = 0.78;
+  const mbody = M(new T.CylinderGeometry(0.2, 0.17, 1.45, 36), "exhaust", mm, muff);
+  mbody.rotation.z = Math.PI / 2;
+  [-0.62, 0.62].forEach(x => M(e3Cyl(x > 0 ? 0.205 : 0.175, 0.07, 36, "x"), "exhaust", "black", muff).position.x = x);
+  /* экран от ожогов — сверху, с отверстиями */
+  const shield = M(new T.CylinderGeometry(0.235, 0.215, 0.85, 28, 1, true, Math.PI * 0.15, Math.PI * 0.7), "exhaust", "black", muff);
+  shield.rotation.z = Math.PI / 2;
+  shield.position.x = -0.05;
+  shield.material.side = T.DoubleSide;
+  for (let i = 0; i < 7; i++) {
+    const h = M(e3Cyl(0.03, 0.02, 12), "exhaust", "steel", muff);
+    h.position.set(-0.4 + i * 0.12, 0.225, 0);
+  }
+  const cap2 = M(e3Cover(0.2, 0.08), "exhaust", "steel", muff);
+  cap2.rotation.y = Math.PI / 2;
+  cap2.position.x = 0.66;
+  M(e3Cyl(0.065, 0.16, 20, "x"), "exhaust", "steel", muff).position.x = 0.8;
   const smokeO = new T.Object3D();
   smokeO.position.set(0.9, 0, 0);
   muff.add(smokeO);
@@ -9942,13 +10106,13 @@ function buildEngine3D(eng, finish) {
   const sprocket = M(e3GearT(TS, 2 * sprocketR / TS, 0.07, 0.05), "gearbox", "gear", outer);
   sprocket.position.set(outC[0], outC[1], zL - 0.12);
   bolt("gearbox", outC[0], outC[1], zL - 0.18, 0.05);
-  const chainPts = [new T.Vector3(4.5, outC[1] + sprocketR, 0), new T.Vector3(outC[0] + 0.4, outC[1] + sprocketR, 0)];
+  const chainPts = [new T.Vector3(outC[0] + 1.35, outC[1] + sprocketR + 0.04, 0), new T.Vector3(outC[0] + 0.4, outC[1] + sprocketR, 0)];
   for (let i = 0; i <= 16; i++) {
     const a = Math.PI / 2 + i / 16 * Math.PI;
     chainPts.push(new T.Vector3(outC[0] + Math.cos(a) * sprocketR, outC[1] + Math.sin(a) * sprocketR, 0));
   }
   chainPts.push(new T.Vector3(outC[0] + 0.4, outC[1] - sprocketR - 0.01, 0));
-  chainPts.push(new T.Vector3(4.5, outC[1] - sprocketR - 0.25, 0));
+  chainPts.push(new T.Vector3(outC[0] + 1.35, outC[1] - sprocketR - 0.1, 0));
   const chainCurve = new T.CatmullRomCurve3(chainPts, false, "centripetal");
   const chainPitch = 2 * Math.PI * sprocketR / TS,
     CN = Math.floor(chainCurve.getLength() / chainPitch);
@@ -10354,7 +10518,10 @@ function Engine3D({
         ndc.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
         ray.setFromCamera(ndc, camera);
         const hits = ray.intersectObjects(E.meshes.filter(m => m.visible && m.parent && isVis(m)), false);
-        const h = hits.find(x => x.object.userData.area && !(live.current.cut && x.object.material.userData && x.object.material.userData.shell));
+        const h = hits.find(x => {
+          const mm = Array.isArray(x.object.material) ? x.object.material[0] : x.object.material;
+          return x.object.userData.area && !(live.current.cut && mm.userData && mm.userData.shell);
+        });
         live.current.onPick && live.current.onPick(h ? h.object.userData.area : null, h ? h.object.userData.det : null);
       }
     };
@@ -10416,11 +10583,20 @@ function Engine3D({
           m.material = m.userData.origD;
           m.userData.origD = null;
         }
-        if (d && m.userData.det === d && m.material && m.material.emissive) {
-          m.userData.origD = m.material;
-          const c = m.material.clone();
-          c.emissive = new T.Color(0x8a5c00);
-          m.material = c;
+        if (d && m.userData.det === d && m.material) {
+          const hl = x => {
+            if (!x.emissive) return x;
+            const c = x.clone();
+            c.emissive = new T.Color(0x8a5c00);
+            return c;
+          };
+          if (Array.isArray(m.material)) {
+            m.userData.origD = m.material;
+            m.material = m.material.map(hl);
+          } else if (m.material.emissive) {
+            m.userData.origD = m.material;
+            m.material = hl(m.material);
+          }
         }
       });
     }
@@ -10442,7 +10618,8 @@ function Engine3D({
       });
       /* в разрезе прозрачные корпуса не должны затенять внутренности */
       E.root.traverse(o => {
-        if (o.isMesh && o.material && o.material.userData && (o.material.userData.shell || o.material.userData.area === "exhaust" || o.material.userData.area === "carb")) o.castShadow = !c;
+        const mu = o.isMesh && o.material ? (Array.isArray(o.material) ? o.material[0] : o.material).userData : null;
+        if (mu && (mu.shell || mu.area === "exhaust" || mu.area === "carb")) o.castShadow = !c;
       });
     }
     function setSel(s) {
@@ -10456,23 +10633,31 @@ function Engine3D({
       if (m.emissive) m.userData.baseEm = m.emissive.getHex();
     });
     const FLOW_AIR = new T.Color(0xdfeaf5),
-      FLOW_MIX = new T.Color(0x6aaeff),
-      FLOW_FUEL = new T.Color(0xffb020),
-      FLOW_HOT = new T.Color(0xff6a1a),
-      FLOW_SMOKE = new T.Color(0x8d9399);
-    const fdum = new T.Object3D();
-    function placeFlow(f, n, colorAt, scaleAt) {
+      FLOW_MIX = new T.Color(0x9cc8ff),
+      FLOW_FUEL = new T.Color(0xffb52a),
+      FLOW_HOT = new T.Color(0xff7a2a),
+      FLOW_SMOKE = new T.Color(0x3a3d40),
+      FLOW_TMP = new T.Color();
+    const red = enginePeak(eng).red;
+    /* поток: частицы бегут по трубе с небольшим разбросом поперёк; у горячих газов яркость — это и прозрачность */
+    function placeFlow(f, colorAt, rad, fadeEnds) {
+      const g = f.mesh.geometry,
+        pos = g.attributes.position,
+        col = g.attributes.color,
+        R = f.mesh.userData.rnd,
+        n = R.length;
       for (let i = 0; i < n; i++) {
-        const t = (i / n + f.s) % 1;
-        fdum.position.copy(f.curve.getPointAt(t));
-        const sc = scaleAt(t);
-        fdum.scale.set(sc, sc, sc);
-        fdum.updateMatrix();
-        f.mesh.setMatrixAt(i, fdum.matrix);
-        f.mesh.setColorAt(i, colorAt(t));
+        const r = R[i],
+          t = ((i + r[0] * 0.9) / n + f.s) % 1,
+          p = f.curve.getPointAt(t),
+          j = rad(t);
+        pos.setXYZ(i, p.x + r[1] * j, p.y + r[2] * j, p.z + r[1] * r[2] * j);
+        const c = colorAt(t),
+          k = (fadeEnds ? Math.min(1, t * 10, (1 - t) * 6) : 1) * r[3];
+        col.setXYZ(i, c.r * k, c.g * k, c.b * k);
       }
-      f.mesh.instanceMatrix.needsUpdate = true;
-      if (f.mesh.instanceColor) f.mesh.instanceColor.needsUpdate = true;
+      pos.needsUpdate = true;
+      col.needsUpdate = true;
     }
     function placeChain(mesh, curve, n, offset, len, pitch) {
       const step = pitch || len / n;
@@ -10519,7 +10704,91 @@ function Engine3D({
       smoke.push(sp);
     }
     let spawnAcc = 0,
-      heat = 0;
+      heat = 0,
+      flashEx = 0;
+    /* отстрелы: язык пламени из глушителя, искры, отсвет и толчок; со звуком — ровно на хлопках звука */
+    const fcv = document.createElement("canvas");
+    fcv.width = fcv.height = 64;
+    const fcx = fcv.getContext("2d"),
+      fgr = fcx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    fgr.addColorStop(0, "rgba(255,255,235,1)");
+    fgr.addColorStop(0.22, "rgba(255,214,120,.95)");
+    fgr.addColorStop(0.55, "rgba(255,110,30,.4)");
+    fgr.addColorStop(1, "rgba(255,60,0,0)");
+    fcx.fillStyle = fgr;
+    fcx.fillRect(0, 0, 64, 64);
+    const flameTex = new T.CanvasTexture(fcv),
+      flames = [],
+      sparks = [];
+    const mkSpr = c => {
+      const s = new T.Sprite(new T.SpriteMaterial({
+        map: flameTex,
+        color: c,
+        transparent: true,
+        depthWrite: false,
+        blending: T.AdditiveBlending,
+        opacity: 0
+      }));
+      s.visible = false;
+      s.renderOrder = 5;
+      scene.add(s);
+      return s;
+    };
+    for (let i = 0; i < 24; i++) flames.push(mkSpr(0xffffff));
+    for (let i = 0; i < 40; i++) sparks.push(mkSpr(0xffd27a));
+    const popL = new T.PointLight(0xff7a20, 0, 6, 2);
+    scene.add(popL);
+    let popT = 9,
+      popKick = 0,
+      lastPops = -1,
+      wasHeld = false,
+      popUntil = 0,
+      popRate = 0;
+    function backfire(power, slow) {
+      const sl = slow || 1;
+      E.smokeO.getWorldPosition(sp0);
+      E.smokeO.getWorldQuaternion(sq);
+      ax.set(1, 0, 0).applyQuaternion(sq);
+      const k = E.scale * (0.75 + power * 0.55);
+      for (let i = 0; i < 6; i++) {
+        const f = flames.find(x => !x.visible);
+        if (!f) break;
+        f.visible = true;
+        f.userData = {
+          age: 0,
+          life: (0.12 + Math.random() * 0.14 + i * 0.015) * sl,
+          off: (0.02 + i * 0.12) * k,
+          s0: (0.55 - i * 0.06) * k,
+          base: sp0.clone(),
+          dir: ax.clone(),
+          jit: new T.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(0.07 * k)
+        };
+        f.material.color.setHex(i === 0 ? 0x8fb0ff : i < 3 ? 0xffe6a8 : 0xff8a34);
+      }
+      const ns = 6 + Math.round(power * 8);
+      for (let i = 0; i < ns; i++) {
+        const sp = sparks.find(x => !x.visible);
+        if (!sp) break;
+        sp.visible = true;
+        sp.position.copy(sp0);
+        sp.userData = {
+          age: 0,
+          life: (0.22 + Math.random() * 0.35) * sl,
+          v: ax.clone().multiplyScalar((2.2 + Math.random() * 3.2) * k).add(new T.Vector3((Math.random() - 0.5) * 1.8, Math.random() * 1.5, (Math.random() - 0.5) * 1.8).multiplyScalar(k)),
+          s: (0.03 + Math.random() * 0.04) * k
+        };
+      }
+      popT = 0;
+      popL.position.copy(sp0).addScaledVector(ax, 0.35 * k);
+      popKick = Math.max(popKick, 0.035 * (0.6 + power * 0.8));
+      flashEx = 1;
+      wake();
+    }
+    /* для автопроверки: вызвать отстрел вручную */
+    renderer.domElement.__backfire = (p, slow) => {
+      backfire(p, slow);
+      return flames.filter(f => f.visible).length + "/" + sparks.filter(f => f.visible).length;
+    };
     const sq = new T.Quaternion(),
       sp0 = new T.Vector3(),
       ax = new T.Vector3();
@@ -10564,7 +10833,7 @@ function Engine3D({
         lastSel = L.sel;
         dirty = 3;
       }
-      if (!L.running && !L.cut && performance.now() - lastAct > 1500 && dirty <= 0) {
+      if (!L.running && !L.cut && performance.now() - lastAct > 1500 && dirty <= 0 && popT > 0.5) {
         cancelAnimationFrame(raf);
         raf = 0;
         return;
@@ -10628,17 +10897,27 @@ function Engine3D({
           c.inOpen = d2 > 200 || d2 < 30 ? 0.8 : 0.1;
         }
         const flowOn = L.running || L.cut,
-          sf = Math.max(0.18, speed);
-        [c.inFlow, c.fuel, c.exFlow].forEach(f => {
-          if (f) f.mesh.visible = flowOn;
-        });
+          sf = Math.max(0.18, speed),
+          thrK = G && G.held ? 0.5 + 0.5 * (G.amt == null ? 1 : G.amt) : 0.35;
+        /* бензин в прозрачном шланге виден всегда; смесь во впуске и газы в выпуске — в разрезе (корпуса прозрачные);
+           снаружи видно, как воздух затягивает в фильтр */
+        c.fuel.mesh.visible = flowOn;
+        c.inFlow.mesh.visible = !!L.cut;
+        if (c.exFlow) c.exFlow.mesh.visible = !!L.cut;
+        c.airIn.mesh.visible = L.running && !L.cut;
         if (flowOn) {
-          c.inFlow.s += dt * sf * (0.05 + 0.5 * c.inOpen);
-          c.fuel.s += dt * sf * 0.22;
-          if (c.exFlow) c.exFlow.s += dt * sf * (0.04 + 0.85 * c.exOpen);
-          placeFlow(c.inFlow, 34, t => t < 0.33 ? FLOW_AIR : FLOW_MIX, t => t > 0.9 ? 0.7 : 1);
-          placeFlow(c.fuel, 9, () => FLOW_FUEL, () => 1);
-          if (c.exFlow) placeFlow(c.exFlow, 44, t => t < 0.1 ? FLOW_HOT : FLOW_HOT.clone().lerp(FLOW_SMOKE, Math.min(1, (t - 0.1) / 0.5)), t => 0.6 + t * 0.9);
+          c.inFlow.s += dt * sf * (0.04 + 0.55 * c.inOpen) * (0.6 + thrK);
+          c.fuel.s += dt * sf * 0.12 * (0.5 + thrK);
+          c.airIn.s += dt * sf * (0.12 + 0.5 * c.inOpen) * (0.5 + thrK);
+          if (c.exFlow) c.exFlow.s += dt * sf * (0.03 + 0.9 * c.exOpen);
+          placeFlow(c.inFlow, t => t < 0.33 ? FLOW_AIR : FLOW_MIX, t => (t < 0.33 ? 0.09 : 0.06) * (t > 0.85 ? 0.6 : 1), false);
+          placeFlow(c.fuel, () => FLOW_FUEL, () => 0.008, false);
+          placeFlow(c.airIn, () => FLOW_AIR, t => 0.22 * (1 - t) + 0.02, true);
+          if (c.exFlow) {
+            /* горячо у клапана, к глушителю остывает; при отстреле — вспышка по всей трубе */
+            const hot = Math.min(1, 0.55 + 0.45 * R / red + flashEx);
+            placeFlow(c.exFlow, t => FLOW_TMP.copy(FLOW_HOT).lerp(FLOW_SMOKE, Math.min(1, t / 0.75)).multiplyScalar(hot * (1.2 - 0.6 * t)), t => 0.04 + t * 0.07, true);
+          }
         }
         const deg = (th * 180 / Math.PI % 720 + 720) % 720;
         let fire = 0;
@@ -10702,8 +10981,12 @@ function Engine3D({
       E.sprocket.rotation.z = outAng;
       placeChain(E.chain, E.chainCurve, E.CN, outAng * E.sprocketR, outLen, E.chainPitch);
       /* выхлопные газы и нагрев коллектора */
-      heat = L.running ? Math.min(1, heat + dt / 12) : Math.max(0, heat - dt / 25);
-      E.exMats.forEach(m => m.emissive.setRGB(0.9 * heat * 0.45, 0.35 * heat * 0.45, 0.05 * heat * 0.45));
+      /* коллектор греется от оборотов: на высоких — тёмно-красное свечение; отстрел даёт вспышку */
+      const hT = L.running ? Math.min(1, 0.22 + 0.78 * Math.pow(R / red, 1.6)) : 0;
+      heat += (hT - heat) * Math.min(1, dt / (hT > heat ? 5 : 12));
+      flashEx = Math.max(0, flashEx - dt * 4);
+      const hg = heat * heat * 0.8 + flashEx * 0.6;
+      E.exMats.forEach(m => m.emissive.setRGB(1.0 * hg, 0.26 * hg, 0.04 * hg));
       if (L.running) {
         spawnAcc += dt * (5 + R / 330) * (E.two ? 1.4 : 1);
         E.smokeO.getWorldPosition(sp0);
@@ -10723,6 +11006,61 @@ function Engine3D({
           p.userData.op = (E.two ? 0.5 : 0.32) * (0.7 + Math.random() * 0.5);
         }
       }
+      /* отстрелы: со звуком — по счётчику хлопков звукового движка, без звука — по тем же правилам здесь */
+      const pc = G && G.pops ? G.pops() : -1;
+      if (pc >= 0) {
+        if (lastPops >= 0 && pc > lastPops && L.running) backfire(Math.min(1, 0.35 + (pc - lastPops) * 0.3));
+        lastPops = pc;
+      } else if (L.running && G && G.phase === "run") {
+        const now = performance.now() / 1000,
+          held = !!G.held;
+        if (wasHeld && !held && R > red * 0.5) {
+          popUntil = now + 1.3;
+          popRate = 7;
+        }
+        wasHeld = held;
+        if (now < popUntil && Math.random() < popRate * dt) backfire(0.3 + Math.random() * 0.7);
+        popRate *= Math.pow(0.35, dt);
+        if (held && R > red * 0.93 && Math.random() < 2.2 * dt) backfire(0.5 + Math.random() * 0.5);
+      }
+      popT += dt;
+      popL.intensity = popT < 0.18 ? 9 * Math.pow(1 - popT / 0.18, 2) : 0;
+      if (popKick > 0.0005) {
+        holder.position.x += (Math.random() - 0.5) * popKick;
+        holder.position.y += (Math.random() - 0.3) * popKick;
+        popKick *= Math.pow(0.02, dt);
+      }
+      flames.forEach(f => {
+        if (!f.visible) return;
+        const u = f.userData;
+        u.age += dt;
+        const k = u.age / u.life;
+        if (k >= 1) {
+          f.visible = false;
+          f.material.opacity = 0;
+          return;
+        }
+        f.position.copy(u.base).addScaledVector(u.dir, u.off * (1 + k * 0.9)).add(u.jit);
+        const s = u.s0 * (0.5 + Math.sin(Math.PI * Math.min(1, k * 1.5)) * 0.9);
+        f.scale.set(s, s, s);
+        f.material.opacity = Math.min(1, (1 - k) * 1.4);
+      });
+      sparks.forEach(sp => {
+        if (!sp.visible) return;
+        const u = sp.userData;
+        u.age += dt;
+        const k = u.age / u.life;
+        if (k >= 1) {
+          sp.visible = false;
+          sp.material.opacity = 0;
+          return;
+        }
+        u.v.y -= dt * 4 * E.scale;
+        u.v.multiplyScalar(1 - dt * 1.2);
+        sp.position.addScaledVector(u.v, dt);
+        sp.scale.set(u.s, u.s, u.s);
+        sp.material.opacity = 1 - k;
+      });
       smoke.forEach(p => {
         if (!p.visible) return;
         const u = p.userData;
@@ -10773,6 +11111,7 @@ function Engine3D({
         if (o.isSprite) o.material.dispose();
       });
       smokeTex.dispose();
+      flameTex.dispose();
       Object.values(E.cache).forEach(m => m.dispose());
       goldM.dispose();
       envRT.dispose();
@@ -12792,6 +13131,7 @@ function EngineExplorer({
   });
   const snd = useRef(null);
   gas.current.level = () => snd.current && snd.current.level ? snd.current.level() : -1;
+  gas.current.pops = () => snd.current && snd.current.pops ? snd.current.pops() : -1;
   /* газ: живые обороты в gas.current.r; React перерисовывает схему и 3D только при смене диапазона оборотов */
   const tacho = useRef(null);
   const meter = useRef(null);
@@ -13046,13 +13386,13 @@ function EngineExplorer({
     className: "view-toggle",
     role: "group",
     "aria-label": "\u0427\u0442\u043E \u043F\u043E\u043A\u0430\u0437\u0430\u0442\u044C"
-  }, !no3d && /*#__PURE__*/React.createElement("button", {
-    className: view === "3d" ? "on" : "",
-    onClick: () => switchView("3d")
-  }, "3D"), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("button", {
     className: view === "bike" ? "on" : "",
     onClick: () => switchView("bike")
-  }, "\u041C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("button", {
+  }, "\u041C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), !no3d && /*#__PURE__*/React.createElement("button", {
+    className: view === "3d" ? "on" : "",
+    onClick: () => switchView("3d")
+  }, "Мотор"), /*#__PURE__*/React.createElement("button", {
     className: view === "photo" ? "on" : "",
     onClick: () => switchView("photo")
   }, "\u0424\u043E\u0442\u043E")), view === "3d" && !no3d ? /*#__PURE__*/React.createElement(Engine3D, {
@@ -13614,7 +13954,7 @@ function cartTotal(cart) {
 /* ===== Главная ===== */
 /* открыть «Мотоцикл → Обзор» и докрутить до мотора */
 function goStage(go) {
-  /* «Мотор в 3D»: открыть «Мотоцикл» сразу на 3D (по умолчанию там рисунок мотоцикла) */
+  /* «Мотор»: открыть «Мотоцикл» сразу на моторе (по умолчанию там рисунок мотоцикла) */
   save("view4", "3d");
   window.dispatchEvent(new Event("mh-view3d"));
   go("bike", "overview");
@@ -13833,7 +14173,7 @@ function Home(props) {
     go: go
   }), /*#__PURE__*/React.createElement("div", {
     className: "actions4 home-acts"
-  }, [["list", "ТО и масло", () => go("repair", "to"), "", "Что и когда менять"], ["book", "Инструкции", () => go("repair", "guides"), "", "Пошагово, со схемами"], ["cart", "Запчасти", () => go("parts"), "", "Только под твой мотор"], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 ? "В проекте " + project.length : "Что даст прибавку"], ["engine", "Мотор в 3D", () => goStage(go), "", "Заведи и загляни внутрь"], ["check", "Проверка б/у", () => go("repair", "buy"), "", "Перед покупкой"]].map(a => /*#__PURE__*/React.createElement("button", {
+  }, [["list", "ТО и масло", () => go("repair", "to"), "", "Что и когда менять"], ["book", "Инструкции", () => go("repair", "guides"), "", "Пошагово, со схемами"], ["cart", "Запчасти", () => go("parts"), "", "Только под твой мотор"], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 ? "В проекте " + project.length : "Что даст прибавку"], ["engine", "Мотор", () => goStage(go), "", "Заведи, дай газу, загляни внутрь"], ["check", "Проверка б/у", () => go("repair", "buy"), "", "Перед покупкой"]].map(a => /*#__PURE__*/React.createElement("button", {
     key: a[1],
     className: "act" + a[3],
     onClick: a[2]
