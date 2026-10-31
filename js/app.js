@@ -13774,7 +13774,9 @@ function CatalogCard() {
       const j = Math.floor(Math.random() * (i + 1));
       [l[i], l[j]] = [l[j], l[i]];
     }
-    return l.slice(0, 6);
+    /* по одной модели от марки — разнообразнее */
+    const seen = {};
+    return l.filter(b => !seen[b.brand] && (seen[b.brand] = 1)).slice(0, 6);
   }, []);
   return /*#__PURE__*/React.createElement("section", {
     className: "panel catalog-card"

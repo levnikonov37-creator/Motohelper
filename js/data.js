@@ -10727,18 +10727,20 @@ TUNING.forEach(function (t) {
    Имя файла — bikeKey в нижнем регистре, всё кроме букв и цифр → «-» (bikePhotoSlug). Новое фото: положить оба файла
    и добавить модель сюда; tests/check-data.js проверит, что файлы на месте. ===== */
 var BIKE_PHOTOS = [
-  "Avantis A2 Lux 250", "Avantis Enduro 250 PRO", "Avantis Enduro 300 PRO", "Avantis FX 250", "BSE M2 250",
-  "BSE RTC 300", "BSE Z1 250", "BSE Z2 250", "BSE Z3 300", "BSE Z5 250", "BSE Z7 300", "BSE Z8", "GR GR2 250 Enduro",
-  "GR GR2 300 Pro", "Hasky A10 Pro NB300", "Hasky F6 Racing", "Hasky F7 Pro", "Irbis TTR125R", "Irbis TTR250",
-  "Irbis TTR250R", "Kayo K1 250", "Kayo K1 300", "Kayo K2 250", "Kayo K6-R 250", "Kayo K6-R 300", "Kayo T2 250",
-  "Kayo T4 250", "Kayo T4 300", "Kayo T6 300", "Kayo T6 450", "Kove 450 Rally EX", "Kove 450 Rally Pro",
-  "Motoland Enduro LT 250", "Motoland Enduro ST 250", "Motoland TT250", "Motoland XR250", "Motoland XR250 Enduro",
-  "Motoland XR300", "Motoland XT250 HS", "Motoland XT250 ST", "Motoland XT300 HS", "Progasi Race 250",
-  "Progasi Race 300", "Progasi Race 300 Air", "Progasi Super Max 250 NG", "Progasi Super Max 250 RR",
-  "Progasi Super Max 250 SM", "Progasi Super Max 300", "Progasi Super Max 300 PRO", "Progasi Super Max 300 PRO NG",
-  "Racer Enduro RC200GY-C2", "Racer Panther RC250GY-C2", "Racer Panther RC300", "Racer Pitbike RC125PM",
-  "Regulmoto Athlete 250", "Regulmoto Crosstrec 300", "Regulmoto Holeshot 250", "Regulmoto Sport 003",
-  "Regulmoto Sport-003 PR", "Regulmoto Sport-003 PRO", "Regulmoto TE 250", "Roliz Sport-005", "Roliz Sport-007",
-  "Stels Enduro 250", "Stels Flame 200"
+  "Avantis A2 Lux 250", "Avantis Enduro 250 CARB ARS", "Avantis Enduro 250 EFI", "Avantis Enduro 250 EFI Exclusive",
+  "Avantis Enduro 250 PRO", "Avantis Enduro 300 PRO", "Avantis Enduro 300 PRO 21/18", "Avantis Enduro 300 PRO CARB",
+  "Avantis Enduro 300 PRO Carb FCR Exclusive", "Avantis Enduro 300 PRO EFI", "Avantis Enduro 300 PRO EFI Exclusive",
+  "Avantis FX 250", "BSE M2 250", "BSE RTC 300", "BSE Z1 250", "BSE Z2 250", "BSE Z3 300", "BSE Z5 250", "BSE Z7 300",
+  "BSE Z8", "GR GR2 250 Enduro", "GR GR2 300 Pro", "Hasky A10 Pro NB300", "Hasky F6 Racing", "Hasky F7 Pro",
+  "Irbis TTR125R", "Irbis TTR250", "Irbis TTR250R", "Kayo K1 250", "Kayo K1 300", "Kayo K2 250", "Kayo K6-R 250",
+  "Kayo K6-R 300", "Kayo T2 250", "Kayo T4 250", "Kayo T4 300", "Kayo T6 300", "Kayo T6 450", "Kove 450 Rally EX",
+  "Kove 450 Rally Pro", "Motoland Enduro LT 250", "Motoland Enduro ST 250", "Motoland TT250", "Motoland XR250",
+  "Motoland XR250 Enduro", "Motoland XR300", "Motoland XT250 HS", "Motoland XT250 ST", "Motoland XT300 HS",
+  "Progasi Race 250", "Progasi Race 300", "Progasi Race 300 Air", "Progasi Super Max 250 NG",
+  "Progasi Super Max 250 RR", "Progasi Super Max 250 SM", "Progasi Super Max 300", "Progasi Super Max 300 PRO",
+  "Progasi Super Max 300 PRO NG", "Racer Enduro RC200GY-C2", "Racer Panther RC250GY-C2", "Racer Panther RC300",
+  "Racer Pitbike RC125PM", "Regulmoto Athlete 250", "Regulmoto Crosstrec 300", "Regulmoto Holeshot 250",
+  "Regulmoto Sport 003", "Regulmoto Sport-003 PR", "Regulmoto Sport-003 PRO", "Regulmoto TE 250", "Roliz Sport-005",
+  "Roliz Sport-007", "Stels Enduro 250", "Stels Flame 200"
 ];
 function bikePhotoSlug(key) { return String(key).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
