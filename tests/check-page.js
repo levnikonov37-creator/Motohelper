@@ -134,13 +134,25 @@ const server = http.createServer((req, res) => {
       // мотор схватывает не сразу (стартер крутит до секунды-двух) — ждём устойчивые холостые
       await page.waitForTimeout(3000);
       // в центр экрана: у края её закрывает нижнее меню
-      await grip.evaluate((el) => el.scrollIntoView({ block: "center" }));
-      await page.waitForTimeout(300);
-      const gb = await grip.boundingBox();
+      // без плавной прокрутки (у html scroll-behavior: smooth, она идёт ~0,5 с) и ждём, пока ручка встанет на место,
+      // иначе координаты берутся на середине прокрутки и нажатие уходит мимо
+      await grip.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      let gb = await grip.boundingBox();
+      for (let i = 0; i < 20; i++) {
+        await page.waitForTimeout(100);
+        const nb = await grip.boundingBox();
+        const still = nb && gb && Math.abs(nb.y - gb.y) < 1;
+        gb = nb;
+        if (still) break;
+      }
       const rpmNow = async () => +(await page.locator(".thr-rpm b").innerText()).replace(/\D/g, "");
       const idle = await rpmNow();
-      await page.mouse.move(gb.x + gb.width * 0.95, gb.y + gb.height / 2);
+      const px = gb.x + gb.width * 0.95, py = gb.y + gb.height / 2;
+      await page.mouse.move(px, py);
       await page.mouse.down();
+      await page.waitForTimeout(100);
+      if (!(await page.evaluate(() => !!document.querySelector(".thr.held"))))
+        errors.push("Газ: нажатие не попало в ручку, под курсором " + (await page.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e ? e.tagName + "." + e.className : "ничего"; }, [px, py])));
       let high = idle;
       for (let i = 0; i < 15 && high <= idle + 2000; i++) { await page.waitForTimeout(200); high = await rpmNow(); }
       await page.mouse.up();
