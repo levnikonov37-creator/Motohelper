@@ -124,20 +124,25 @@ const server = http.createServer((req, res) => {
     if (artPaths < 60 || artPins < 5) errors.push(`Рисунок мотоцикла не построился: ${artPaths} фигур, ${artPins} точек`);
     // фото не загрузилось (нет сети, сервер недоступен) — сам показывается рисунок
     await page.locator(".bv-toggle button", { hasText: "Фото" }).click();
-    await page.locator(".view-toggle button", { hasText: "Схема" }).first().click();
+    // 2D-схемы мотора больше нет; газ проверяем на виде «Мотоцикл» (в 3D без видеокарты кадры слишком редкие)
+    const b3d = page.locator(".view-toggle button", { hasText: "3D" });
     // Ручка газа: завести, держать — обороты растут, отпустить — падают; при удержании текст не выделяется
     await page.locator(".start-btn").click();
     const grip = page.locator(".thr-grip");
     if (!(await grip.waitFor({ timeout: 8000 }).then(() => true, () => false))) errors.push("Мотор: после «Завести» нет ручки газа");
     else {
-      await page.waitForTimeout(1500);
+      // мотор схватывает не сразу (стартер крутит до секунды-двух) — ждём устойчивые холостые
+      await page.waitForTimeout(3000);
+      // в центр экрана: у края её закрывает нижнее меню
+      await grip.evaluate((el) => el.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(300);
       const gb = await grip.boundingBox();
       const rpmNow = async () => +(await page.locator(".thr-rpm b").innerText()).replace(/\D/g, "");
       const idle = await rpmNow();
       await page.mouse.move(gb.x + gb.width * 0.95, gb.y + gb.height / 2);
       await page.mouse.down();
-      await page.waitForTimeout(1200);
-      const high = await rpmNow();
+      let high = idle;
+      for (let i = 0; i < 15 && high <= idle + 2000; i++) { await page.waitForTimeout(200); high = await rpmNow(); }
       await page.mouse.up();
       await page.waitForTimeout(1500);
       const back = await rpmNow();
@@ -149,10 +154,13 @@ const server = http.createServer((req, res) => {
     }
     await page.unroute(/mm\.bing\.net\/th/, fakePhoto);
     await page.route(/mm\.bing\.net\/th/, (r) => r.abort());
+    // заново открыть «Мотоцикл», чтобы фото грузилось снова (уже без сети картинок)
+    await page.locator(".view-toggle button", { hasText: "Фото" }).first().click();
     await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
     const artBack = await page.locator(".bv-note").waitFor({ timeout: 8000 }).then(() => true, () => false);
     if (!artBack || !(await page.locator(".bike-svg").count())) errors.push("Фото не загрузилось, а рисунок вместо него не показался");
-    await page.locator(".view-toggle button", { hasText: "Схема" }).first().click();
+    if (await b3d.count()) await b3d.first().click();
+    if (await page.locator(".view-toggle button", { hasText: "Схема" }).count()) errors.push("Вид «Схема» (2D-мотор) всё ещё есть");
     console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
 
     await page.getByRole("button", { name: "Мотоцикл" }).last().click();
@@ -291,7 +299,7 @@ const server = http.createServer((req, res) => {
     }
     await fresh.close();
   } catch (e) {
-    errors.push("Сценарий не прошёл: " + e.message.split("\n")[0]);
+    errors.push("Сценарий не прошёл: " + e.message.split("\n").slice(0, 3).join(" | "));
   } finally {
     await browser.close();
     server.close();

@@ -8923,7 +8923,7 @@ function e3Extrude(shape, depth, bevel, segs) {
     bevelEnabled: bevel > 0,
     bevelThickness: bevel,
     bevelSize: bevel,
-    bevelSegments: 2,
+    bevelSegments: bevel >= 0.05 ? 4 : 2,
     curveSegments: segs || 10
   });
   g.translate(0, 0, -depth / 2);
@@ -9125,9 +9125,9 @@ let E3_BUMP = null;
 function e3Bump() {
   if (E3_BUMP) return E3_BUMP;
   const s = document.createElement("canvas");
-  s.width = s.height = 48;
+  s.width = s.height = 96;
   const sx = s.getContext("2d");
-  const im = sx.createImageData(48, 48);
+  const im = sx.createImageData(96, 96);
   for (let i = 0; i < im.data.length; i += 4) {
     const v = 128 + (Math.random() - 0.5) * 50;
     im.data[i] = im.data[i + 1] = im.data[i + 2] = v;
@@ -9141,8 +9141,42 @@ function e3Bump() {
   x.drawImage(s, 0, 0, 256, 256);
   E3_BUMP = new THREE.CanvasTexture(c);
   E3_BUMP.wrapS = E3_BUMP.wrapT = THREE.RepeatWrapping;
-  E3_BUMP.repeat.set(0.6, 0.6);
+  E3_BUMP.repeat.set(1.6, 1.6);
   return E3_BUMP;
+}
+/* шлифованный металл крышек: тонкие горизонтальные штрихи шероховатости */
+let E3_BRUSH = null;
+function e3Brushed() {
+  if (E3_BRUSH) return E3_BRUSH;
+  const c = document.createElement("canvas");
+  c.width = c.height = 256;
+  const x = c.getContext("2d");
+  x.fillStyle = "rgb(110,110,110)";
+  x.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 900; i++) {
+    const v = 80 + Math.random() * 90;
+    x.fillStyle = "rgba(" + v + "," + v + "," + v + ",0.35)";
+    x.fillRect(Math.random() * 256, Math.random() * 256, 40 + Math.random() * 160, 1);
+  }
+  E3_BRUSH = new THREE.CanvasTexture(c);
+  E3_BRUSH.wrapS = E3_BRUSH.wrapT = THREE.RepeatWrapping;
+  return E3_BRUSH;
+}
+/* побежалость приёмной трубы: у головки синева, дальше золото, к концу — обычная сталь */
+let E3_HEAT = null;
+function e3HeatTint() {
+  if (E3_HEAT) return E3_HEAT;
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 4;
+  const x = c.getContext("2d"),
+    g = x.createLinearGradient(0, 0, 256, 0);
+  [[0, "#5b4a9e"], [0.18, "#7b5fb8"], [0.38, "#b8864a"], [0.55, "#d8b26a"], [0.78, "#c9ced3"], [1, "#d7dbdf"]].forEach(s => g.addColorStop(s[0], s[1]));
+  x.fillStyle = g;
+  x.fillRect(0, 0, 256, 4);
+  E3_HEAT = new THREE.CanvasTexture(c);
+  E3_HEAT.encoding = THREE.sRGBEncoding;
+  return E3_HEAT;
 }
 function buildEngine3D(eng, finish) {
   const T = THREE,
@@ -9167,22 +9201,24 @@ function buildEngine3D(eng, finish) {
     kick = /Кик|кик/.test(eng.start),
     semi = /полуавтомат/.test(eng.gearbox);
   const fin = finish || e3DefaultFinish(eng);
-  const bump = e3Bump();
-  const caseCol = fin === "black" ? 0x1f2124 : fin === "bronze" ? 0x8a6c3e : 0xb3b9bf;
-  const coverCol = fin === "black" ? 0x232528 : fin === "bronze" ? 0x9c7b47 : 0xd2d6da;
+  const bump = e3Bump(), brushed = e3Brushed();
+  const caseCol = fin === "black" ? 0x1f2124 : fin === "bronze" ? 0x8a6c3e : 0x9ba1a7;
+  const coverCol = fin === "black" ? 0x2a2d31 : fin === "bronze" ? 0xa8875a : 0xe2e5e8;
   const finCol = fin === "silver" ? 0xb8bec4 : fin === "bronze" ? 0x6e5432 : 0x22252a;
   const BASE = {
     cast: new T.MeshStandardMaterial({
       color: caseCol,
-      metalness: fin === "black" ? 0.35 : 0.75,
-      roughness: fin === "black" ? 0.55 : 0.5,
+      metalness: fin === "black" ? 0.35 : 0.78,
+      roughness: fin === "black" ? 0.6 : 0.52,
       bumpMap: bump,
-      bumpScale: 0.006
+      bumpScale: 0.012,
+      roughnessMap: bump
     }),
     polish: new T.MeshStandardMaterial({
       color: coverCol,
-      metalness: fin === "black" ? 0.4 : 0.9,
-      roughness: fin === "black" ? 0.4 : 0.34
+      metalness: fin === "black" ? 0.4 : 0.95,
+      roughness: fin === "black" ? 0.4 : 0.3,
+      roughnessMap: fin === "black" ? null : brushed
     }),
     fin: new T.MeshStandardMaterial({
       color: finCol,
@@ -9200,9 +9236,10 @@ function buildEngine3D(eng, finish) {
       roughness: 0.06
     }),
     heat: new T.MeshStandardMaterial({
-      color: 0xb48ad8,
+      color: 0xffffff,
+      map: e3HeatTint(),
       metalness: 1,
-      roughness: 0.18
+      roughness: 0.2
     }),
     ti: new T.MeshStandardMaterial({
       color: 0x8aa6d8,
@@ -9300,6 +9337,7 @@ function buildEngine3D(eng, finish) {
   }
   function M(geo, area, key, parent, shell) {
     const m = new T.Mesh(geo, mat(area, key, shell));
+    m.castShadow = m.receiveShadow = true;
     m.userData.area = area;
     (parent || outer).add(m);
     meshes.push(m);
@@ -9323,7 +9361,7 @@ function buildEngine3D(eng, finish) {
   const caseDepth = A.depth,
     zR = caseDepth / 2 + 0.05,
     zL = -caseDepth / 2 - 0.05;
-  M(e3Extrude(e3Spline(A.caseP), caseDepth, 0.06, 40), "oil", "cast", outer, true);
+  M(e3Extrude(e3Spline(A.caseP), caseDepth, 0.09, 48), "oil", "cast", outer, true);
   /* линия разъёма половин картера */
   M(e3Extrude(e3Spline(A.caseP, 1.004), 0.012, 0, 40), "oil", "black", outer, true);
   const clutchC = A.clutch,
@@ -9333,7 +9371,7 @@ function buildEngine3D(eng, finish) {
   rc.position.z = zR;
   const rim = new THREE.CatmullRomCurve3(A.coverP.map(p => new T.Vector3(p[0] * 0.985, p[1] * 0.985, zR + 0.07)), true);
   M(new T.TubeGeometry(rim, 80, 0.022, 8, true), "clutch", "polish", outer, true);
-  const dome = M(e3Cover(0.43, 0.19), "clutch", "polish", outer, true);
+  const dome = M(e3Cover(0.45, 0.26), "clutch", "polish", outer, true);
   dome.position.set(clutchC[0], clutchC[1], zR + 0.05);
   const domeRing = M(new T.TorusGeometry(0.43, 0.02, 8, 48), "clutch", "black", outer);
   domeRing.position.set(clutchC[0], clutchC[1], zR + 0.06);
@@ -9344,7 +9382,7 @@ function buildEngine3D(eng, finish) {
   }
   for (let i = 0; i < 5; i++) {
     const a = i / 5 * Math.PI * 2 + 0.4;
-    bolt("clutch", clutchC[0] + Math.cos(a) * 0.34, clutchC[1] + Math.sin(a) * 0.34, zR + 0.15, 0.026);
+    bolt("clutch", clutchC[0] + Math.cos(a) * 0.34, clutchC[1] + Math.sin(a) * 0.34, zR + 0.2, 0.026);
   }
   if (!two && arch !== "cub") {
     const sight = tag(M(e3Cyl(0.055, 0.03, 24, "z"), "oil", "glass"), "filler");
@@ -9365,7 +9403,7 @@ function buildEngine3D(eng, finish) {
   }
   /* левая крышка генератора */
   const gR = A.gen;
-  const gc = M(e3Cover(gR, 0.15), "gen", "polish", outer, true);
+  const gc = M(e3Cover(gR, 0.24), "gen", "polish", outer, true);
   gc.position.set(0, 0, zL);
   gc.rotation.y = Math.PI;
   for (let i = 0; i < 6; i++) {
@@ -9373,7 +9411,7 @@ function buildEngine3D(eng, finish) {
     bolt("gen", Math.cos(a) * (gR - 0.06), Math.sin(a) * (gR - 0.06), zL - 0.05, 0.03);
   }
   const cap = M(e3Cyl(0.11, 0.06, 32, "z"), "gen", "chrome");
-  cap.position.set(0, 0, zL - 0.17);
+  cap.position.set(0, 0, zL - 0.26);
   M(e3Cyl(0.05, 0.04, 6, "z"), "gen", "steel").position.set(0.22, 0.2, zL - 0.15);
   /* левая крышка звезды */
   const spc = M(e3Extrude(e3RoundRect(0.62, 0.46, 0.14), 0.06, 0.015, 10), "gearbox", "polish");
@@ -9501,11 +9539,11 @@ function buildEngine3D(eng, finish) {
       M(e3Cyl(0.07, 0.18, 16, "x"), "cooling", "cast", G).position.set(-0.5, 1.25, 0.15);
     } else {
       M(e3Cyl(0.36, 0.95, 32), "cyl", "fin", G, true).position.y = 1.04;
-      const n = 10;
+      const n = 16;
       for (let i = 0; i < n; i++) {
-        const k = 1 - i * 0.012;
-        const f = M(e3Extrude(e3RoundRect(finW * k, finD * k, finR), 0.034, 0.01, 6).rotateX(Math.PI / 2), "cyl", "fin", G, true);
-        f.position.y = 0.66 + i * 0.086;
+        const k = 1 - i * 0.008;
+        const f = M(e3Extrude(e3RoundRect(finW * k, finD * k, finR), 0.022, 0.007, 6).rotateX(Math.PI / 2), "cyl", "fin", G, true);
+        f.position.y = 0.66 + i * 0.054;
       }
       if (ohv) {
         M(e3Cyl(0.06, 1.05, 16), "head", "polish", G).position.set(0.12, 1.12, 0.52);
@@ -9538,7 +9576,7 @@ function buildEngine3D(eng, finish) {
       }));
     } else {
       M(e3Extrude(e3RoundRect(1.1, 0.96, 0.12), 0.4, 0.035).rotateX(Math.PI / 2), "head", "cast", G, true).position.y = 1.72;
-      if (!liq) for (let i = 0; i < 4; i++) M(e3Extrude(e3RoundRect(finW * 1.04, finD * 1.04, finR), 0.032, 0.008, 6).rotateX(Math.PI / 2), "head", "fin", G, true).position.y = 1.56 + i * 0.085;
+      if (!liq) for (let i = 0; i < 6; i++) M(e3Extrude(e3RoundRect(finW * 1.04, finD * 1.04, finR), 0.022, 0.007, 6).rotateX(Math.PI / 2), "head", "fin", G, true).position.y = 1.53 + i * 0.056;
       if (ohv) {
         tag(M(e3Extrude(e3RoundRect(0.86, 0.7, 0.12), 0.18, 0.035).rotateX(Math.PI / 2), "head", "polish", G, true), "valvecover").position.y = 2.02;
         [-0.24, 0.24].forEach(x => M(new T.CylinderGeometry(0.05, 0.05, 0.08, 6), "head", "steel", G).position.set(x, 2.14, 0));
@@ -9607,13 +9645,22 @@ function buildEngine3D(eng, finish) {
       inj.position.copy(at(0.2)).add(new T.Vector3(0, 0.2, 0.15));
       inj.rotation.z = -0.4;
     } else {
-      const body = M(geoAx(0.19, 0.4), "carb", arch === "cub" || has("cg") ? "zinc" : "brass", G);
+      /* корпус карбюратора — литой цинк (PE/PZ серебристые), PWK — тёмный анод */
+      const cm = inst.indexOf("pwk") >= 0 || inst.indexOf("pwk28") >= 0 ? "black" : "zinc";
+      const body = M(geoAx(0.19, 0.4), "carb", cm, G);
       body.position.copy(at(0.44));
-      const tw = M(e3Cyl(0.12, 0.3, 24), "carb", arch === "cub" || has("cg") ? "zinc" : "brass", G);
+      const tw = M(e3Cyl(0.13, 0.3, 28), "carb", cm, G);
       tw.position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(0.28, 0, 0) : new T.Vector3(0, 0.28, 0));
       if (ax === "y") tw.rotation.z = Math.PI / 2;
-      const bowl = M(new T.BoxGeometry(0.28, 0.18, 0.28), "carb", arch === "cub" || has("cg") ? "zinc" : "brass", G);
-      bowl.position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(-0.25, 0, 0) : new T.Vector3(0, -0.25, 0));
+      const twCap = M(e3Cover(0.14, 0.07), "carb", "chrome", G);
+      twCap.rotation.x = -Math.PI / 2;
+      twCap.position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(0.44, 0, 0) : new T.Vector3(0, 0.43, 0));
+      if (ax === "y") twCap.rotation.set(0, 0, -Math.PI / 2);
+      /* поплавковая камера — круглая, со сливным винтом */
+      const bowl = M(e3Cyl(0.16, 0.2, 28), "carb", cm, G);
+      bowl.position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(-0.27, 0, 0) : new T.Vector3(0, -0.27, 0));
+      if (ax === "y") bowl.rotation.z = Math.PI / 2;
+      M(e3Cyl(0.035, 0.06, 6), "carb", "steel", G).position.copy(at(0.44)).add(ax === "y" ? new T.Vector3(-0.4, 0, 0) : new T.Vector3(0, -0.4, 0));
       M(e3Cyl(0.03, 0.08, 12, "z"), "carb", "steel", G).position.copy(at(0.36)).add(new T.Vector3(0, 0, 0.22));
     }
     tag(M(geoAx(0.2, 0.36), "carb", "rubber", G), "airbox").position.copy(at(0.84));
@@ -9622,7 +9669,9 @@ function buildEngine3D(eng, finish) {
       if (ax === "x") pod.rotation.z = -Math.PI / 2;
       pod.position.copy(at(1.2));
     } else {
-      const box = tag(M(new T.BoxGeometry(ax === "x" ? 0.4 : 0.56, ax === "x" ? 0.56 : 0.4, 0.6), "carb", "black", G), "airbox");
+      /* корпус воздушного фильтра — скруглённый пластик */
+      const bx = e3Extrude(e3RoundRect(ax === "x" ? 0.42 : 0.58, ax === "x" ? 0.58 : 0.42, 0.12), 0.6, 0.05, 10);
+      const box = tag(M(bx, "carb", "rubber", G), "airbox");
       box.position.copy(at(1.22));
     }
 
@@ -10173,7 +10222,10 @@ function Engine3D({
     renderer.setPixelRatio(pr);
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.toneMapping = T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.92;
+    renderer.toneMappingExposure = 1.0;
+    /* тени деталей друг на друга — главное, что делает модель «настоящей» */
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
     el.appendChild(renderer.domElement);
     const scene = new T.Scene();
     /* студийное окружение для отражений */
@@ -10197,9 +10249,19 @@ function Engine3D({
     const envRT = pmrem.fromScene(env, 0.03);
     scene.environment = envRT.texture;
     scene.add(new T.HemisphereLight(0xdfe8f0, 0x2a2c30, 0.35));
-    const key2 = new T.DirectionalLight(0xffffff, 1.0);
+    const key2 = new T.DirectionalLight(0xfff6ec, 1.25);
     key2.position.set(3, 6, 5);
+    key2.castShadow = true;
+    key2.shadow.mapSize.set(1024, 1024);
+    Object.assign(key2.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 0.5, far: 20 });
+    key2.shadow.bias = -0.0006;
+    key2.shadow.normalBias = 0.02;
+    key2.shadow.radius = 3;
     scene.add(key2);
+    /* контровой свет — светлая кромка по рёбрам и крышкам */
+    const rim = new T.DirectionalLight(0xcfe0ff, 0.55);
+    rim.position.set(-5, 3, -4);
+    scene.add(rim);
     const fireL = new T.PointLight(0xff8a2a, 0, 3);
     scene.add(fireL);
     let lastAct = performance.now(),
@@ -10213,9 +10275,15 @@ function Engine3D({
       ctr = box.getCenter(new T.Vector3());
     E.root.position.sub(new T.Vector3(ctr.x, 0, ctr.z));
     E.root.position.y -= 0.1;
+    /* мягкая тень на «полу» под мотором */
+    const floor = new T.Mesh(new T.PlaneGeometry(14, 14), new T.ShadowMaterial({ opacity: 0.32 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = box.min.y - 0.1 - 0.02;
+    floor.receiveShadow = true;
+    holder.add(floor);
     const camera = new T.PerspectiveCamera(30, 1.5, 0.1, 100);
     const view = {
-      yaw: Math.PI + 0.62,
+      yaw: 0.6,
       pitch: 0.2,
       dist: 8.6,
       tY: (box.max.y + box.min.y) / 2 - 0.1,
@@ -10372,6 +10440,10 @@ function Engine3D({
       E.cyls.forEach(cy => {
         cy.I.visible = c;
       });
+      /* в разрезе прозрачные корпуса не должны затенять внутренности */
+      E.root.traverse(o => {
+        if (o.isMesh && o.material && o.material.userData && (o.material.userData.shell || o.material.userData.area === "exhaust" || o.material.userData.area === "carb")) o.castShadow = !c;
+      });
     }
     function setSel(s) {
       Object.values(E.cache).forEach(m => {
@@ -10460,6 +10532,14 @@ function Engine3D({
       if (slowN > 24 && pr > 1) {
         pr = Math.max(1, pr - 0.5);
         renderer.setPixelRatio(pr);
+        slowN = 0;
+        dirty = 3;
+      } else if (slowN > 24 && renderer.shadowMap.enabled) {
+        /* и в низком разрешении не успевает — выключаем тени */
+        renderer.shadowMap.enabled = false;
+        scene.traverse(o => {
+          if (o.material) o.material.needsUpdate = true;
+        });
         slowN = 0;
         dirty = 3;
       }
@@ -12685,8 +12765,9 @@ function EngineExplorer({
 }) {
   const vkey = bikeKey(bike) + "|" + Math.max(0, bike.versions.indexOf(ver));
   const [view, setView] = useState(() => {
-    const v = load("view4", "engine");
-    return v;
+    /* 2D-схемы мотора больше нет; по умолчанию — рисунок мотоцикла, 3D — по кнопке или с главной */
+    const v = load("view4", "bike");
+    return v === "engine" ? "bike" : v;
   });
   const [gearN, setGearN] = useState(2);
   const [det, setDet] = useState(null);
@@ -12727,6 +12808,11 @@ function EngineExplorer({
     t: AREAS[p.id].t
   }));
   const pk = enginePeak(eng);
+  useEffect(() => {
+    const h = () => setView("3d");
+    window.addEventListener("mh-view3d", h);
+    return () => window.removeEventListener("mh-view3d", h);
+  }, []);
   function switchView(v) {
     setView(v);
     save("view4", v);
@@ -12964,9 +13050,6 @@ function EngineExplorer({
     className: view === "3d" ? "on" : "",
     onClick: () => switchView("3d")
   }, "3D"), /*#__PURE__*/React.createElement("button", {
-    className: view === "engine" ? "on" : "",
-    onClick: () => switchView("engine")
-  }, "\u0421\u0445\u0435\u043C\u0430"), /*#__PURE__*/React.createElement("button", {
     className: view === "bike" ? "on" : "",
     onClick: () => switchView("bike")
   }, "\u041C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("button", {
@@ -12989,8 +13072,9 @@ function EngineExplorer({
       }
     },
     onFail: () => {
+      /* нет WebGL — показываем мотоцикл */
       setNo3d(true);
-      setView("engine");
+      setView("bike");
     }
   }) : view === "engine" || view === "3d" ? /*#__PURE__*/React.createElement("div", {
     className: "eng-box"
@@ -13530,6 +13614,9 @@ function cartTotal(cart) {
 /* ===== Главная ===== */
 /* открыть «Мотоцикл → Обзор» и докрутить до мотора */
 function goStage(go) {
+  /* «Мотор в 3D»: открыть «Мотоцикл» сразу на 3D (по умолчанию там рисунок мотоцикла) */
+  save("view4", "3d");
+  window.dispatchEvent(new Event("mh-view3d"));
   go("bike", "overview");
   let n = 0;
   const t = setInterval(() => {
