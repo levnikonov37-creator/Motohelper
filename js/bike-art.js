@@ -93,7 +93,8 @@
 
   function bikeArt(o) {
     var U = o.uid || "ba";
-    var res = draw(o);
+    /* без надписей марок на пластике: рисунок мотоцикла, а не его графика */
+    var res = DIRT[o.cls] && !o.legacy ? drawDirt(o) : draw(Object.assign({}, o, { brand: "" }));
     if (U !== "ba") res.svg = res.svg.replace(/ba-/g, U + "-");
     return res;
   }
@@ -1081,6 +1082,420 @@
     if (customAcc) { c.accent = customAcc; c.accent2 = lum(customAcc) > 0.6 ? "#1E2125" : "#F2F3F0"; }
     return c;
   }
+  /* ===================== Эндуро, кросс, питбайк, мотард — новый рисунок =====================
+     Анатомия — по студийным снимкам настоящих моделей (колёса, база, высота сиденья и крыльев сняты с фото):
+     высокое переднее крыло под нижней траверсой, маска с фарой (или номерная табличка), радиаторные обтекатели,
+     переходящие в бак, длинное ровное сиденье, боковина и поднимающееся заднее крыло; рама и подрамник,
+     маятник, амортизатор; мотор с наклонным оребрённым цилиндром, крышкой сцепления и карбюратором; приёмная
+     труба идёт вниз и назад, глушитель — под боковиной. Вид справа (как у производителей): цепь на левой
+     стороне не видна, видны глушитель, задний тормозной диск и крышка сцепления. Без надписей и наклеек. */
+  var DIRT = { enduro: 1, cross: 1, light: 1, motard: 1, pit: 1, kids: 1 };
+  /* контуры деталей в мм при базе 1480 и сиденье 952 (масштабируются под модель); третье число 1 — острый угол.
+     trail — туристический эндуро с маской-фарой (Kayo T2, Motoland TT250), mx — кроссовая компоновка
+     (KTM-подобные: Avantis, BSE, Progasi, Kayo K): хвост выше и острее, боковины крупнее, длинный глушитель. */
+  var SHAPES = {
+    trail: {
+      rfend: [[80, 935, 1], [-140, 992], [-230, 1015], [-280, 1018, 1], [-274, 992, 1], [-150, 962], [30, 900, 1]],
+      side: [[-70, 935], [565, 888], [578, 805, 1], [548, 715, 1], [330, 735], [80, 790, 1], [-40, 870]],
+      airbox: [[-20, 900], [560, 880], [575, 640, 1], [420, 600], [160, 700, 1]],
+      seat: [[-150, 996], [0, 984], [220, 968], [450, 952], [610, 958], [730, 984], [865, 1030, 1], [845, 990, 1], [730, 935], [600, 895], [300, 890], [0, 905], [-150, 948, 1]],
+      shroud: [[785, 1000], [900, 1022], [985, 1030, 1], [1022, 985], [1032, 880], [1048, 712, 1], [1008, 640, 1], [930, 655], [820, 700], [705, 800, 1], [722, 900], [762, 972]],
+      scoop: [[1048, 712, 1], [1008, 640, 1], [930, 655], [830, 698], [760, 745, 1], [900, 742], [1040, 768, 1]],
+      tank: [[780, 1000], [900, 1032], [-70, -15, "h"], [-55, -80, "h"], [820, 950]], cap: [815, 1020],
+      muf: [[180, 705], [-150, 838]], mufW: 50, hdr: [[935, 620], [800, 600], [560, 625], [380, 660]], shield: [[860, 606], [680, 607]],
+      fender: [[-160, -22, 1], [-60, 0], [140, 0], [390, -25], [630, -62], [670, -76, 1], [652, -94, 1], [390, -56], [140, -38], [-60, -40], [-150, -44, 1]], fl: -50,
+      shock: [[600, 455], [505, 860]], gills: [925, 930], tail: -280, tailY: 1018
+    },
+    mx: {
+      rfend: [[60, 930, 1], [-120, 1002], [-250, 1012], [-330, 1004, 1], [-322, 984, 1], [-160, 955], [-20, 902, 1]],
+      side: [[-125, 952], [560, 902], [586, 815, 1], [522, 642, 1], [380, 682], [150, 782, 1], [-60, 880]],
+      airbox: [[-30, 905], [570, 890], [592, 622, 1], [430, 598], [140, 720, 1]],
+      seat: [[-110, 1004], [100, 990], [400, 960], [620, 954], [760, 986], [862, 1038, 1], [842, 996, 1], [720, 936], [500, 905], [200, 915], [-110, 946, 1]],
+      shroud: [[770, 992], [880, 1020], [985, 1024, 1], [1016, 965], [1022, 850], [1012, 722, 1], [972, 668, 1], [880, 700], [760, 760], [652, 832, 1], [700, 920], [740, 972]],
+      scoop: [[1012, 722, 1], [972, 668, 1], [880, 700], [790, 745], [742, 782, 1], [860, 772], [1006, 762, 1]],
+      tank: [[700, 992], [790, 1046], [-90, 0, "h"], [-62, -62, "h"], [760, 958]], cap: [742, 1048],
+      muf: [[430, 650], [-110, 818]], mufW: 54, hdr: [[920, 615], [780, 630], [600, 640]], shield: [[840, 632], [660, 640]],
+      fender: [[-150, 6, 1], [-60, 30], [150, 30], [420, 2], [640, -38], [682, -52, 1], [668, -72, 1], [420, -32], [150, -14], [-60, -14], [-150, -22, 1]], fl: -25,
+      shock: [[575, 470], [600, 880]], gills: [930, 935], tail: -330, tailY: 1004
+    }
+  };
+  function drawDirt(o) {
+    var cls = o.cls, g = Object.assign({}, GEO[cls], o.geo || {});
+    var E = o.eng || {}, C = o.col || {}, X = o.o || {}, mods = o.mods || [];
+    var k = g.k || 1, two = E.stroke === "2T", liq = !!E.liquid;
+    var horiz = !!E.horiz && (cls === "pit" || cls === "kids" || cls === "light");
+    var motard = cls === "motard", mx = cls === "cross" || cls === "pit" || cls === "kids";
+    var lowFender = motard || cls === "light";
+    var style = X.style || (cls === "light" ? "trail" : "mx"), SH = SHAPES[style];
+    var body = C.body || "#D7262E", fenderC = C.fender || X.fenderCol || body, sideC = C.side || fenderC, fenderRC = C.fenderR || fenderC, maskC = C.mask || body;
+    var acc = C.accent || "#1E2125";
+    var frameC = C.frame || "#23272C", subC = C.sub || (lum(frameC) < 0.3 ? "#9AA1A9" : frameC);
+    var seatC = C.seat || "#17191C", rimC = C.rim || "#1C1F23", hubC = C.hub || "#A9B0B7";
+    var forkC = C.fork || "#C8962E", forkLow = C.forkLow || "#2A2E33", clampC = C.clamp || "#2C3036";
+    var guardC = X.guard || C.guard || (lum(fenderC) > 0.7 ? fenderC : "#1E2125"), springC = X.spring || C.spring || "#E8C21E";
+    var exC = mods.indexOf("full") >= 0 ? "carbon" : mods.indexOf("slip") >= 0 ? "ti" : C.muffler && lum(C.muffler) < 0.25 ? "carbon" : "steel";
+    var defs = [], out = [], nid = 0;
+    function push(s) { out.push(s); }
+    function gid(p) { return "ba-" + p + (nid++); }
+    function lin(st, x1, y1, x2, y2, user) {
+      var i = gid("g");
+      defs.push('<linearGradient id="' + i + '"' + (user ? ' gradientUnits="userSpaceOnUse"' : "") + ' x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '">' + stops(st) + "</linearGradient>");
+      return "url(#" + i + ")";
+    }
+    function rad(st, c, r, f) {
+      var i = gid("r");
+      defs.push('<radialGradient id="' + i + '" gradientUnits="userSpaceOnUse" cx="' + r1(c[0]) + '" cy="' + r1(-c[1]) + '" r="' + r1(r) + '"' + (f ? ' fx="' + r1(f[0]) + '" fy="' + r1(-f[1]) + '"' : "") + ">" + stops(st) + "</radialGradient>");
+      return "url(#" + i + ")";
+    }
+    /* пластик: ровный цвет + свет сверху, тень снизу, тонкий тёмный край — как глянцевая деталь на фото */
+    defs.push('<linearGradient id="ba-pl" x1="0" y1="0" x2=".15" y2="1">' + stops([[0, "#fff", 0.32], [0.12, "#fff", 0.12], [0.35, "#fff", 0], [0.7, "#000", 0.02], [1, "#000", 0.3]]) + "</linearGradient>");
+    defs.push('<filter id="ba-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10"/></filter>');
+    function plastic(d, col, extra) {
+      return path(d, 'fill="' + col + '"') + path(d, 'fill="url(#ba-pl)"') + path(d, 'fill="none" stroke="' + shade(col, lum(col) > 0.7 ? -0.38 : -0.55) + '" stroke-width="4" stroke-linejoin="round"' + (extra || ""));
+    }
+    function shadowUnder(d, op) { return path(d, 'fill="#000" opacity="' + (op || 0.28) + '" filter="url(#ba-blur)" transform="translate(6,12)"'); }
+    /* трубка/перо: тёмный край, светлее середина, блик */
+    function tube(a, b, w, col, hi) {
+      var d = L([a, b]);
+      return path(d, 'stroke="' + shade(col, -0.45) + '" stroke-width="' + r1(w) + '" stroke-linecap="round" fill="none"') +
+        path(d, 'stroke="' + col + '" stroke-width="' + r1(w * 0.72) + '" stroke-linecap="round" fill="none"') +
+        (hi !== false ? path(L([add(a, mul(perp(norm(sub(b, a))), w * 0.18)), add(b, mul(perp(norm(sub(b, a))), w * 0.18))]), 'stroke="#fff" stroke-opacity=".38" stroke-width="' + r1(w * 0.16) + '" stroke-linecap="round" fill="none"') : "");
+    }
+    function pipe(ps, w, col) {
+      var d = P(ps, false);
+      return path(d, 'stroke="' + shade(col, -0.5) + '" stroke-width="' + r1(w) + '" stroke-linecap="round" stroke-linejoin="round" fill="none"') +
+        path(d, 'stroke="' + col + '" stroke-width="' + r1(w * 0.7) + '" stroke-linecap="round" fill="none"') +
+        path(d, 'stroke="#fff" stroke-opacity=".45" stroke-width="' + r1(w * 0.16) + '" stroke-linecap="round" fill="none" transform="translate(0,' + r1(-w * 0.17) + ')"');
+    }
+    var metal = lin([[0, "#F1F3F5"], [0.45, "#B9C0C7"], [0.55, "#8C949C"], [1, "#D5DADF"]], 0, 0, 0, 1);
+    var alu = lin([[0, "#D2D7DC"], [0.45, "#9AA3AC"], [1, "#565E66"]], 0, 0, 0, 1);
+    var dark = lin([[0, "#3A3F45"], [0.5, "#24282D"], [1, "#121417"]], 0, 0, 0, 1);
+
+    /* ---------- опорные точки ---------- */
+    var R = [0, g.rr], F = [g.wb, g.rf], PV = [g.pv[0], g.pv[1]];
+    var u = [-Math.sin(g.rake * DEG), Math.cos(g.rake * DEG)], nf = [Math.cos(g.rake * DEG), Math.sin(g.rake * DEG)];
+    function at(l, off) { return add(add(F, mul(u, l)), mul(nf, off || 0)); }
+    var BC = at(g.lc), TC = at(g.fl), HEAD = lerp(BC, TC, 0.5);
+    var sh = g.seat[2], xs = g.seat[1], tail = g.tail;
+    function K(p) { return [p[0] * k, p[1] * k]; }
+
+    /* ---------- тень на земле ---------- */
+    defs.push('<radialGradient id="ba-gs">' + stops([[0, "#000", 0.55], [0.6, "#000", 0.22], [1, "#000", 0]]) + "</radialGradient>");
+    push(ell([g.wb / 2, 6], g.wb / 2 + g.rf * 0.9, 34 * k, 0, 'fill="url(#ba-gs)"'));
+
+    /* ---------- колёса ---------- */
+    function wheel(c, r, rim, front) {
+      var s = "", tireH = r - rim;
+      /* шина: боковина с мягким светом, по краю — шипы (у мотарда — дорожный протектор) */
+      s += path(ring(c, rim - 2, r - (motard ? 0 : 12)), 'fill="' + rad([[0, "#30343A"], [0.8, "#1E2125"], [1, "#101113"]], c, r) + '"');
+      if (!motard) {
+        var nK = Math.round(r * 2 * Math.PI / 34), kn = "", kt = "";
+        for (var i = 0; i < nK; i++) {
+          var a = i * 360 / nK, big = i % 2 === 0, w0 = big ? 12 : 9, h0 = r - 16, h1 = r + (big ? 3 : 1);
+          var da0 = w0 * 180 / (Math.PI * h0), da1 = w0 * 0.75 * 180 / (Math.PI * h1);
+          kn += "M" + pt(polar(c, h0, a - da0)) + " L" + pt(polar(c, h1, a - da1)) + " L" + pt(polar(c, h1, a + da1)) + " L" + pt(polar(c, h0, a + da0)) + " Z";
+          kt += "M" + pt(polar(c, h1, a - da1)) + " L" + pt(polar(c, h1, a + da1)) + " ";
+          if (big) { var q = r - 30; kn += " M" + pt(polar(c, q - 10, a - 2.2)) + " L" + pt(polar(c, q, a - 2.6)) + " L" + pt(polar(c, q, a + 1.2)) + " L" + pt(polar(c, q - 10, a + 0.9)) + " Z"; }
+        }
+        s += path(kn, 'fill="#2B2F35"');
+        s += path(kt, 'stroke="#4A5058" stroke-width="2.5" fill="none"');
+        s += path(arc(c, r - 6, 100, 160), 'stroke="#fff" stroke-opacity=".1" stroke-width="8" fill="none"');
+      } else {
+        s += path(ring(c, r - 9, r - 6), 'fill="#2C3036"');
+        s += path(arc(c, r - 4, 100, 160), 'stroke="#fff" stroke-opacity=".14" stroke-width="5" fill="none"');
+      }
+      /* обод */
+      s += path(ring(c, rim - 24 * k, rim + 2), 'fill="' + rimC + '"');
+      s += path(ring(c, rim - 24 * k, rim - 19 * k), 'fill="#000" fill-opacity=".35"');
+      s += path(ring(c, rim - 7 * k, rim - 4 * k), 'fill="#fff" fill-opacity=".18"');
+      /* передний диск — на левой стороне, виден сквозь спицы */
+      if (front) {
+        var dr = motard ? 150 * k : 128 * k;
+        var dd = ""; for (var di = 0; di <= 48; di++) { var da = di * 7.5, rr3 = dr * (di % 4 === 1 || di % 4 === 2 ? 1 : 0.94); dd += (di ? " L" : "M") + pt(polar(c, rr3, da)); }
+        s += path(dd + " Z", 'fill="#A9B1B9" opacity=".85"') + path(ring(c, dr * 0.5, dr * 0.6), 'fill="#5A626B" opacity=".8"');
+      }
+      /* спицы: 36, тангенциальная шнуровка */
+      var sp = "", hubR = 46 * k, nS = 36;
+      for (var j = 0; j < nS; j++) {
+        var a0 = j * 360 / nS, off = j % 2 ? 24 : -24;
+        sp += "M" + pt(polar(c, hubR * (j % 2 ? 0.95 : 0.75), a0 + off)) + " L" + pt(polar(c, rim - 20 * k, a0)) + " ";
+      }
+      s += path(sp, 'stroke="#C9CFD5" stroke-width="' + r1(3 * k) + '" stroke-linecap="round" opacity=".92"');
+      s += path(sp, 'stroke="#fff" stroke-width="' + r1(1 * k) + '" opacity=".35" transform="translate(0,-1)"');
+      /* ступица */
+      s += circ(c, hubR, 'fill="' + rad([[0, "#E8ECEF"], [0.7, hubC], [1, shade(hubC, -0.4)]], add(c, [-12, 14]), hubR) + '"');
+      s += circ(c, hubR * 0.45, 'fill="' + shade(hubC, -0.35) + '"');
+      s += circ(c, 11 * k, 'fill="#D5DADF" stroke="#5A626B" stroke-width="2"');
+      return s;
+    }
+    push(wheel(R, g.rr, g.rimR, false));
+    push(wheel(F, g.rf, g.rimF, true));
+    /* задний тормозной диск (справа) и суппорт */
+    var rDisc = 108 * k;
+    (function () {
+      var d = "", n = 12;
+      for (var i = 0; i <= n * 4; i++) { var a = i * 360 / (n * 4), rr2 = rDisc * (i % 4 === 1 || i % 4 === 2 ? 1 : 0.94); d += (i ? " L" : "M") + pt(polar(R, rr2, a)); }
+      push(path(d + " Z", 'fill="' + rad([[0, "#D3D8DD"], [0.75, "#A2AAB2"], [1, "#6C747C"]], R, rDisc) + '"'));
+      var holes = ""; for (var h2 = 0; h2 < 10; h2++) holes += circ(polar(R, rDisc * 0.78, h2 * 36 + 8), 5 * k, 'fill="#3A3F45"');
+      push(holes);
+      push(circ(R, rDisc * 0.55, 'fill="#2A2E33"'));
+      push(circ(R, rDisc * 0.42, 'fill="' + hubC + '"'));
+      push(circ(R, 11 * k, 'fill="#D5DADF" stroke="#5A626B" stroke-width="2"'));
+    })();
+    var cal = polar(R, rDisc * 0.86, -38);
+    push(path(P([polar(cal, 34 * k, 150), polar(cal, 40 * k, 60), polar(cal, 30 * k, -20), polar(cal, 38 * k, -110), polar(cal, 30 * k, 200)].map(cn), true), 'fill="#B7232A" stroke="#6E1217" stroke-width="2"'));
+    push(circ(cal, 9 * k, 'fill="#E7E9EC"'));
+
+    /* ---------- маятник и амортизатор ---------- */
+    var kx = g.wb / 1480, ky = sh / 952;
+    function T(x, y) { return [x * kx, y * ky]; }
+    function Tc(x, y) { return [x * kx, y * ky, 1]; }
+    function Tp(p) { return p[2] === "h" ? add(HEAD, [p[0] * k, p[1] * k]) : p[2] ? Tc(p[0], p[1]) : T(p[0], p[1]); }
+    var swA = 46 * k, swB = 27 * k, sd = norm(sub(R, PV)), sn = perp(sd);
+    var swPoly = [add(PV, mul(sn, swA)), add(R, mul(sn, swB)), add(add(R, mul(sd, 30 * k)), mul(sn, swB * 0.4)), add(add(R, mul(sd, 30 * k)), mul(sn, -swB * 0.6)), add(R, mul(sn, -swB)), add(PV, mul(sn, -swA))];
+    var shockBot = Tp(SH.shock[0]), shockTop = Tp(SH.shock[1]);
+    (function () {
+      var a = shockBot, b = shockTop, d = norm(sub(b, a)), nn = perp(d), Lsh = len(sub(b, a));
+      push(tube(a, b, 26 * k, "#C9CFD5"));
+      var s0 = add(a, mul(d, Lsh * 0.2)), s1 = add(a, mul(d, Lsh * 0.84)), coils = "";
+      push(path(L([add(s0, mul(nn, 23 * k)), add(s1, mul(nn, 23 * k)), add(s1, mul(nn, -23 * k)), add(s0, mul(nn, -23 * k))], true), 'fill="' + shade(springC, -0.4) + '"'));
+      for (var i = 0; i <= 12; i++) { var p = lerp(s0, s1, i / 12); coils += "M" + pt(add(p, mul(nn, 25 * k))) + " L" + pt(add(add(p, mul(d, 8 * k)), mul(nn, -25 * k))) + " "; }
+      push(path(coils, 'stroke="' + springC + '" stroke-width="' + r1(8 * k) + '" stroke-linecap="round"'));
+      push(path(coils, 'stroke="#fff" stroke-opacity=".35" stroke-width="' + r1(2.5 * k) + '" transform="translate(-1,-2)"'));
+    })();
+    push(path(P(swPoly.map(cn), true), 'fill="' + (C.swing && lum(C.swing) < 0.3 ? lin([[0, "#4A5058"], [0.5, "#2A2E33"], [1, "#15171A"]], 0, 0, 0, 1) : X.swingAlu === false ? frameC : alu) + '" stroke="#3E454C" stroke-width="2"'));
+    push(path(L([add(PV, mul(sn, swA * 0.45)), add(R, mul(sn, swB * 0.4))]), 'stroke="#fff" stroke-opacity=".35" stroke-width="' + r1(5 * k) + '"'));
+    push(path(L([add(lerp(PV, R, 0.12), mul(sn, -swA * 0.2)), add(lerp(PV, R, 0.78), mul(sn, -swB * 0.2))]), 'stroke="#000" stroke-opacity=".18" stroke-width="' + r1(10 * k) + '"'));
+
+    /* ---------- рама ---------- */
+    var head0 = add(BC, mul(u, -35)), head1 = add(TC, mul(u, 30));
+    var frW = 52 * k;
+    function frameLine(ps, w, col) {
+      var d = P(ps, false, 0.8);
+      return path(d, 'stroke="' + shade(col, -0.4) + '" stroke-width="' + r1(w) + '" stroke-linecap="round" stroke-linejoin="round" fill="none"') +
+        path(d, 'stroke="' + col + '" stroke-width="' + r1(w * 0.72) + '" stroke-linecap="round" stroke-linejoin="round" fill="none"') +
+        path(d, 'stroke="#fff" stroke-opacity="' + (lum(col) < 0.25 ? 0.18 : 0.32) + '" stroke-width="' + r1(w * 0.14) + '" fill="none" transform="translate(0,' + r1(-w * 0.2) + ')"');
+    }
+    /* подрамник */
+    push(frameLine([T(640, 830), T(250, 905), T(-130, 950)], 28 * k, subC));
+    push(frameLine([T(575, 560), T(240, 760), T(20, 900)], 24 * k, subC));
+    /* передняя труба и люлька под мотором */
+    push(frameLine([add(HEAD, [-20 * k, -70 * k]), T(990, 640), T(955, 420), T(880, 300), T(660, 290), T(585, 380)], frW * 0.8, frameC));
+    /* основная балка: от рулевой колонки к оси маятника */
+    push(frameLine([add(HEAD, [-30 * k, -10 * k]), T(850, 900), T(660, 770), T(605, 610), T(585, 470)], frW, frameC));
+    /* пластина оси маятника */
+    push(path(P([add(PV, [-38 * k, 80 * k]), add(PV, [55 * k, 120 * k]), add(PV, [75 * k, -45 * k]), add(PV, [-20 * k, -70 * k])].map(cn), true), 'fill="' + frameC + '" stroke="' + shade(frameC, -0.4) + '" stroke-width="3"'));
+    push(circ(PV, 18 * k, 'fill="#C9CFD5" stroke="#4A5058" stroke-width="3"'));
+
+    /* ---------- мотор ---------- */
+    var engDark = C.engine ? lum(C.engine) < 0.3 : !!E.dark;
+    var engCol = engDark ? "#3A3F46" : "#C3C9CF", engCol2 = engDark ? "#24282D" : "#9AA2AA";
+    var caseG = lin([[0, shade(engCol, 0.3)], [0.55, engCol], [1, shade(engCol, -0.4)]], 0, 0, 0, 1);
+    var crank = horiz ? [T(600, 470), T(700, 545), T(905, 540), T(960, 470), T(930, 340), T(780, 300), T(640, 315), T(590, 380)]
+      : [T(595, 470), T(650, 560), T(770, 585), T(870, 560), T(905, 440), T(870, 325), T(730, 295), T(615, 335)];
+    var cc0 = horiz ? T(740, 425) : T(725, 435);
+    var cylBase = horiz ? T(880, 495) : T(790, 565), cylDir = horiz ? dir(14) : dir(90 - (two ? 16 : 11)), cylN = perp(cylDir);
+    var cylL = (two ? 150 : 165) * k * (E.cc >= 280 ? 1.05 : 1), cylW = (two ? 150 : 145) * k, headL = (two ? 72 : 95) * k;
+    function cylPt(l, w) { return add(add(cylBase, mul(cylDir, l)), mul(cylN, w)); }
+    push(shadowUnder(P(crank, true), 0.35));
+    push(path(P(crank, true), 'fill="' + caseG + '" stroke="' + shade(engCol, -0.5) + '" stroke-width="3"'));
+    /* цилиндр с рёбрами (у жидкостного — гладкий, с рубашкой) */
+    var cyl = [cylPt(0, -cylW / 2), cylPt(cylL, -cylW / 2), cylPt(cylL, cylW / 2), cylPt(0, cylW / 2)];
+    push(path(L(cyl, true), 'fill="' + lin([[0, shade(engCol2, -0.35)], [0.5, engCol], [1, shade(engCol2, -0.25)]], 0, 0, 1, 0) + '"'));
+    if (!liq) {
+      var fins = "", wf = cylW / 2 + 18 * k;
+      for (var f = 10 * k; f < cylL + headL * 0.5; f += 14 * k) fins += "M" + pt(cylPt(f, -wf)) + " L" + pt(cylPt(f, wf)) + " ";
+      push(path(fins, 'stroke="' + shade(engCol, -0.5) + '" stroke-width="' + r1(8.5 * k) + '" stroke-linecap="round"'));
+      push(path(fins, 'stroke="' + shade(engCol, 0.4) + '" stroke-width="' + r1(3 * k) + '" stroke-linecap="round" transform="translate(0,-2)"'));
+    } else {
+      push(path(L([cylPt(cylL * 0.1, -cylW / 2 - 4), cylPt(cylL, -cylW / 2 - 4), cylPt(cylL, cylW / 2 + 4), cylPt(cylL * 0.1, cylW / 2 + 4)], true), 'fill="' + caseG + '" stroke="' + shade(engCol, -0.5) + '" stroke-width="3"'));
+    }
+    var hd = [cylPt(cylL, -cylW / 2 - 12 * k), cylPt(cylL + headL, -cylW / 2 - 2 * k), cylPt(cylL + headL + 16 * k, -cylW / 4), cylPt(cylL + headL + 16 * k, cylW / 4), cylPt(cylL + headL, cylW / 2 + 2 * k), cylPt(cylL, cylW / 2 + 12 * k)];
+    push(path(P(hd.map(cn), true), 'fill="' + caseG + '" stroke="' + shade(engCol, -0.5) + '" stroke-width="3"'));
+    if (!two) {
+      push(circ(cylPt(cylL + headL * 0.55, -cylW * 0.22), 18 * k, 'fill="' + metal + '" stroke="#5A626B" stroke-width="2"'));
+      push(circ(cylPt(cylL + headL * 0.55, cylW * 0.22), 18 * k, 'fill="' + metal + '" stroke="#5A626B" stroke-width="2"'));
+    }
+    var plug = cylPt(cylL + headL * 0.7, cylW * 0.02);
+    push(tube(plug, add(plug, mul(norm(add(cylDir, mul(cylN, horiz ? 0.8 : -0.8))), 70 * k)), 24 * k, "#1E2125", false));
+    /* крышка сцепления справа, крышка фильтра */
+    push(ell(cc0, 108 * k, 96 * k, 0, 'fill="' + rad([[0, shade(engCol, 0.45)], [0.65, engCol], [1, shade(engCol, -0.35)]], add(cc0, [-30, 40]), 130 * k) + '" stroke="' + shade(engCol, -0.5) + '" stroke-width="3"'));
+    push(ell(cc0, 70 * k, 62 * k, 0, 'fill="none" stroke="' + shade(engCol, -0.3) + '" stroke-width="3"'));
+    var bolts = ""; for (var bi = 0; bi < 9; bi++) bolts += circ(add(cc0, [Math.cos(bi * 40 * DEG) * 98 * k, Math.sin(bi * 40 * DEG) * 86 * k]), 5.5 * k, 'fill="#E5E8EB" stroke="#5A626B" stroke-width="1.5"');
+    push(bolts);
+    push(circ(horiz ? T(880, 380) : T(850, 360), 28 * k, 'fill="' + metal + '" stroke="#5A626B" stroke-width="2"'));
+    /* карбюратор и впуск за головкой */
+    var carbAt = horiz ? T(760, 600) : add(cylPt(cylL + headL * 0.4, 0), [-150 * k, -10 * k]);
+    push(tube(add(carbAt, [-40 * k, 4 * k]), add(carbAt, [-150 * k, 25 * k]), 50 * k, "#1E2125", false));
+    push(path(P([add(carbAt, [-55 * k, 36 * k]), add(carbAt, [42 * k, 38 * k]), add(carbAt, [55 * k, -26 * k]), add(carbAt, [5 * k, -58 * k]), add(carbAt, [-58 * k, -32 * k])].map(cn), true), 'fill="' + metal + '" stroke="#5A626B" stroke-width="2.5"'));
+    /* жидкостное охлаждение: радиатор за обтекателем и патрубок */
+    if (liq) {
+      push(path(L([T(880, 960), T(1000, 950), T(985, 640), T(870, 660)], true), 'fill="#24282D" stroke="#15171A" stroke-width="3"'));
+      var gr = ""; for (var gi = 0; gi < 15; gi++) { var yy = 940 - gi * 20; gr += "M" + pt(T(885 - gi * 0.6, yy)) + " L" + pt(T(995 - gi, yy - 4)) + " "; }
+      push(path(gr, 'stroke="#4A5058" stroke-width="3"'));
+      push(pipe([cylPt(cylL * 0.6, cylW / 2 + 8), T(940, 690)], 22 * k, "#1E2125"));
+    }
+
+    /* ---------- выхлоп ---------- */
+    var exPort = horiz ? cylPt(cylL + headL * 0.5, -cylW / 2) : cylPt(cylL + headL * 0.35, cylW / 2 + 6 * k);
+    var mufF = Tp(SH.muf[0]), mufR = Tp(SH.muf[1]);
+    var exCol = exC === "carbon" ? "#2A2D31" : exC === "ti" ? "#8A7FA3" : "#C2C8CE";
+    if (two) {
+      var chamber = [exPort, add(exPort, [60 * k, -80 * k]), T(930, 330), T(700, 260), T(560, 330), T(420, 560), add(mufF, [40 * k, -6 * k])];
+      push(path(band(chamber, [40 * k, 60 * k, 100 * k, 100 * k, 80 * k, 50 * k, 38 * k]), 'fill="' + lin([[0, "#9AA2AA"], [0.4, "#E9ECEF"], [1, "#4E565E"]], 0, 0, 0, 1) + '" stroke="#3E454C" stroke-width="2.5"'));
+    } else if (horiz) {
+      push(pipe([exPort, add(exPort, [60 * k, -40 * k]), T(1000, 330), T(800, 285), T(560, 330), T(380, 560), add(mufF, [40 * k, -6 * k])], 42 * k, exCol));
+    } else {
+      push(pipe([exPort, add(exPort, [65 * k, -50 * k])].concat(SH.hdr.map(Tp), [add(mufF, [40 * k, -6 * k])]), 44 * k, exCol));
+      /* термозащита на трубе */
+      push(path(band(SH.shield.map(Tp), 40 * k), 'fill="' + metal + '" stroke="#5A626B" stroke-width="2"'));
+    }
+    var mD = norm(sub(mufR, mufF)), mN = perp(mD), mW = (two ? 40 : SH.mufW) * k;
+    var muf = [add(mufF, mul(mN, mW * 0.82)), add(mufR, mul(mN, mW)), add(add(mufR, mul(mD, 28 * k)), mul(mN, mW * 0.6)), add(add(mufR, mul(mD, 28 * k)), mul(mN, -mW * 0.6)), add(mufR, mul(mN, -mW)), add(mufF, mul(mN, -mW * 0.82))];
+    var mufG = exC === "carbon" ? lin([[0, "#4A4E54"], [0.35, "#2A2D31"], [1, "#0E0F11"]], 0, 0, 0, 1) : lin([[0, "#F4F6F8"], [0.22, exC === "ti" ? "#B8ACD0" : "#C9CFD5"], [0.55, exC === "ti" ? "#6E6290" : "#7C858E"], [1, "#3A4047"]], 0, 0, 0, 1);
+    var mufHead = function () {
+      push(path(P(muf.map(cn), true), 'fill="' + mufG + '" stroke="#353A40" stroke-width="2.5"'));
+      push(path(L([add(add(mufR, mul(mD, 2)), mul(mN, mW * 0.96)), add(add(mufR, mul(mD, 2)), mul(mN, -mW * 0.96))]), 'stroke="#2A2E33" stroke-width="' + r1(9 * k) + '"'));
+      push(circ(add(mufR, mul(mD, 32 * k)), 12 * k, 'fill="#16181B"'));
+      push(path(L([add(lerp(mufF, mufR, 0.2), mul(mN, mW * 0.85)), add(lerp(mufF, mufR, 0.2), mul(mN, -mW * 0.85))]), 'stroke="#2A2E33" stroke-opacity=".55" stroke-width="5"'));
+    };
+
+    /* ---------- заднее крыло, боковина, сиденье ---------- */
+    var tx = SH.tail, tyT = SH.tailY;
+    var rfend = SH.rfend.map(Tp);
+    push(shadowUnder(P(rfend, true), 0.25));
+    push(plastic(P(rfend, true), fenderRC));
+    if (!mx) {
+      var tl = T(tx + 60, 960);
+      push(path(P([add(tl, [-32 * k, 12 * k]), add(tl, [32 * k, 8 * k]), add(tl, [26 * k, -15 * k]), add(tl, [-28 * k, -12 * k])].map(cn), true), 'fill="#C8202A" stroke="#6E1217" stroke-width="2"'));
+      push(path(P([add(tl, [-8 * k, -10 * k]), Tc(tx - 40, 820), Tc(tx - 75, 820), add(tl, [-38 * k, -14 * k])], true), 'fill="#1C1F23"'));
+      push(path(L([T(tx - 50, 860), T(tx - 75, 720), T(tx - 92, 724), T(tx - 68, 864)], true), 'fill="#E9ECEF" stroke="#8A9199" stroke-width="2"'));
+      if (X.signals !== false) { push(tube(T(tx + 30, 935), T(tx - 20, 900), 14 * k, "#1C1F23", false)); push(ell(T(tx - 32, 895), 18 * k, 13 * k, 0, 'fill="#F29A1E"')); }
+    }
+    /* воздушный фильтр и внутреннее крыло под сиденьем — чёрные */
+    push(path(P(SH.airbox.map(Tp), true), 'fill="#17191C"'));
+    push(path(P([T(380, 820), T(540, 800), T(540, 680), T(420, 650)], true), 'fill="#24282D"'));
+    var side = SH.side.map(Tp);
+    push(plastic(P(side, true), sideC));
+    push(path(P([T(-40, 905), T(300, 870), T(560, 860)], false), 'stroke="#fff" stroke-opacity=".3" stroke-width="' + r1(5 * k) + '" fill="none" stroke-linecap="round"'));
+    mufHead();
+    var seat = SH.seat.map(Tp);
+    push(path(P(seat, true), 'fill="' + seatC + '"'));
+    push(path(P([T(-130, 984), T(0, 972), T(220, 956), T(450, 940), T(610, 946), T(730, 972), T(850, 1016)], false), 'stroke="#fff" stroke-opacity=".16" stroke-width="' + r1(8 * k) + '" fill="none" stroke-linecap="round"'));
+    push(path(P([T(-120, 950), T(300, 915), T(600, 918), T(740, 955)], false), 'stroke="' + shade(seatC, 0.25) + '" stroke-width="' + r1(4 * k) + '" fill="none" stroke-dasharray="' + r1(10 * k) + ' ' + r1(7 * k) + '"'));
+
+    /* ---------- бак и радиаторные обтекатели ---------- */
+    var tank = SH.tank.map(Tp);
+    push(path(P(tank, true), 'fill="' + (C.tank || shade(body, lum(body) > 0.7 ? -0.1 : 0.12)) + '"'));
+    push(ell(Tp(SH.cap), 30 * k, 12 * k, -10, 'fill="#1C1F23"'));
+    var shroud = SH.shroud.map(Tp);
+    push(shadowUnder(P(shroud, true), 0.3));
+    push(plastic(P(shroud, true), body));
+    push(path(P([T(800, 975), T(925, 992), T(990, 985)], false), 'stroke="#fff" stroke-opacity=".35" stroke-width="' + r1(6 * k) + '" fill="none" stroke-linecap="round"'));
+    push(path(P([T(720, 900), T(860, 760), T(980, 700)], false), 'stroke="#000" stroke-opacity=".12" stroke-width="' + r1(5 * k) + '" fill="none" stroke-linecap="round"'));
+    /* нижняя часть обтекателя — вторым тоном (у многих моделей так и есть) */
+    var scoop = SH.scoop.map(Tp);
+    push(plastic(P(scoop, true), lum(body) > 0.6 ? "#24282D" : shade(body, -0.45)));
+    /* решётка-«жабры» */
+    var gill = ""; for (var gv = 0; gv < 3; gv++) gill += "M" + pt(T(SH.gills[0], SH.gills[1] - gv * 38)) + " L" + pt(T(SH.gills[0] + 75, SH.gills[1] - 30 - gv * 38)) + " ";
+    push(path(gill, 'stroke="#15171A" stroke-opacity=".75" stroke-width="' + r1(13 * k) + '" stroke-linecap="round"'));
+
+    /* ---------- переднее крыло ---------- */
+    var fm = at(g.lc + SH.fl * k);
+    var ffen = lowFender && motard ? [Tc(-1, 0)] : null;
+    if (lowFender) {
+      var rf = g.rf;
+      ffen = [add(F, [-rf * 0.66, rf * 0.58 + 10]), add(F, [-rf * 0.15, rf + 32]), add(F, [rf * 0.5, rf * 0.9 + 12]), cn(add(F, [rf * 0.8, rf * 0.62 + 6])), cn(add(F, [rf * 0.78, rf * 0.56])), add(F, [rf * 0.45, rf * 0.86]), add(F, [-rf * 0.15, rf + 12]), cn(add(F, [-rf * 0.64, rf * 0.53]))];
+    } else {
+      ffen = SH.fender.map(function (p) { var q = add(fm, [p[0] * k, p[1] * k]); return p[2] ? cn(q) : q; });
+    }
+
+    /* ---------- вилка ---------- */
+    var usd = X.usd !== false;
+    var outerLen = usd ? g.fl * 0.55 : g.fl * 0.6;
+    var fTop = add(TC, mul(u, 25)), fMid = at(g.fl - outerLen), fAx = add(F, mul(u, 30 * k));
+    push(tube(add(fTop, [-18, 8]), add(fMid, [-18, 8]), 60 * k, shade(usd ? forkC : "#C9CFD5", -0.5), false));
+    if (usd) {
+      push(tube(fMid, fAx, 44 * k, "#D9DEE3"));
+      push(tube(fTop, fMid, 62 * k, forkC));
+      push(tube(at(110 * k), F, 54 * k, forkLow, false));
+      var gd = [at(70 * k, 30 * k), at(330 * k, 36 * k), at(345 * k, 10 * k), at(120 * k, -10 * k)];
+      push(path(P(gd.map(cn), true), 'fill="' + guardC + '" stroke="' + shade(guardC, -0.4) + '" stroke-width="2.5"'));
+    } else {
+      push(tube(fTop, fMid, 46 * k, "#E2E6EA"));
+      push(tube(fMid, fAx, 62 * k, "#2A2E33"));
+      push(tube(fMid, add(fMid, mul(u, -22 * k)), 66 * k, "#1A1C1F", false));
+      var gd2 = [at(60 * k, 34 * k), at(300 * k, 40 * k), at(315 * k, 14 * k), at(110 * k, -8 * k)];
+      push(path(P(gd2.map(cn), true), 'fill="' + guardC + '" stroke="' + shade(guardC, -0.4) + '" stroke-width="2.5"'));
+    }
+    push(circ(F, 18 * k, 'fill="#C9CFD5" stroke="#4A5058" stroke-width="3"'));
+    push(path(P([at(g.lc + 20 * k, -50 * k), at(g.lc + 30 * k, 60 * k), at(g.lc - 30 * k, 64 * k), at(g.lc - 36 * k, -40 * k)].map(cn), true), 'fill="' + clampC + '" stroke="#111" stroke-width="2"'));
+    push(path(P([at(g.fl + 18 * k, -50 * k), at(g.fl + 22 * k, 56 * k), at(g.fl - 12 * k, 58 * k), at(g.fl - 14 * k, -44 * k)].map(cn), true), 'fill="' + clampC + '" stroke="#111" stroke-width="2"'));
+    push(tube(head0, head1, 70 * k, frameC));
+    push(shadowUnder(P(ffen, true), 0.25));
+    push(plastic(P(ffen, true), fenderC));
+
+    /* ---------- маска с фарой / номерная табличка ---------- */
+    var lights = X.lights || (mx ? "plate" : "mask");
+    if (lights !== "none") {
+      var mk = mx ? [Tc(-1, -1)] : null;
+      function A2(l, off) { return at(l * k, off * k); }
+      mk = mx ? [cn(A2(945, 50)), A2(895, 112), A2(760, 104), cn(A2(690, 46)), A2(700, 0), cn(A2(930, 6))]
+        : [cn(A2(968, 55)), A2(900, 128), A2(790, 120), cn(A2(685, 44)), A2(700, -4), cn(A2(950, 4))];
+      push(shadowUnder(P(mk, true), 0.3));
+      push(plastic(P(mk, true), C.mask || (mx ? (lum(body) > 0.7 ? body : fenderC) : body)));
+      if (!mx) {
+        var lamp = [A2(888, 126), A2(800, 119), A2(795, 96), A2(880, 102)];
+        push(path(P(lamp.map(cn), true), 'fill="' + lin([[0, "#FFFFFF"], [0.45, "#CFE0EC"], [1, "#6F8496"]], 0, 0, 1, 1) + '" stroke="#2A2E33" stroke-width="3"'));
+        push(path(L([A2(870, 116), A2(812, 112)]), 'stroke="#fff" stroke-width="' + r1(5 * k) + '" stroke-linecap="round" opacity=".9"'));
+      }
+    }
+
+    /* ---------- руль, рычаги, защита рук, зеркала ---------- */
+    var barB = add(TC, mul(u, 45 * k)), grip = add(TC, [-215 * k, 98 * k]);
+    push(tube(add(TC, mul(u, 15 * k)), barB, 30 * k, "#2A2E33", false));
+    push(pipe([add(barB, [30 * k, -6 * k]), add(barB, [-40 * k, 22 * k]), add(grip, [40 * k, 0])], 24 * k, "#30353B"));
+    push(tube(add(grip, [40 * k, -6 * k]), add(grip, [-35 * k, 6 * k]), 34 * k, "#16181B", false));
+    push(path(P([add(barB, [-20 * k, 16 * k]), add(barB, [75 * k, -22 * k]), add(barB, [82 * k, -12 * k]), add(barB, [-8 * k, 28 * k])].map(cn), true), 'fill="#9AA2AA"'));
+    if (X.handguards !== false && !motard) {
+      var hg = [cn(add(grip, [-6 * k, 20 * k])), add(grip, [60 * k, 30 * k]), add(grip, [112 * k, 12 * k]), cn(add(grip, [122 * k, -14 * k])), add(grip, [70 * k, -8 * k]), cn(add(grip, [0, -14 * k]))];
+      push(plastic(P(hg, true), lum(body) > 0.7 ? "#1E2125" : body));
+    }
+    if (X.mirrors) {
+      var mb = add(grip, [55 * k, 12 * k]), mt = add(mb, [-35 * k, 170 * k]);
+      push(tube(mb, mt, 12 * k, "#1C1F23", false));
+      push(ell(add(mt, [-12 * k, 26 * k]), 46 * k, 28 * k, 12, 'fill="#1C1F23" stroke="#000" stroke-width="2"')); push(ell(add(mt, [-16 * k, 32 * k]), 30 * k, 10 * k, 12, 'fill="#fff" opacity=".12"'));
+    }
+
+    /* ---------- подножка, педаль тормоза, кикстартер ---------- */
+    var peg = T(590, 360);
+    push(path(P([add(peg, [-50 * k, 14 * k]), add(peg, [55 * k, 16 * k]), add(peg, [55 * k, -12 * k]), add(peg, [-50 * k, -14 * k])].map(cn), true), 'fill="#2A2E33" stroke="#0E0F11" stroke-width="2"'));
+    push(pipe([add(peg, [10 * k, -10 * k]), T(720, 320), T(760, 345)], 16 * k, "#3A3F45"));
+    if (X.kick) push(pipe([T(650, 520), T(600, 450), T(520, 400)], 18 * k, "#C9CFD5"));
+
+    /* ---------- рамка и точки узлов ---------- */
+    var minX = Math.min(-g.rr - 40, tx * kx - 110 * k, mufR[0] - 70 * k), maxX = Math.max(g.wb + g.rf + 40, add(fm, [600 * k, 0])[0] + 30);
+    var top = Math.max(grip[1] + (X.mirrors ? 290 * k : 90 * k), at(1000 * k)[1] + 30, tyT * ky + 40);
+    var vb = [r1(minX), r1(-top), r1(maxX - minX), r1(top + 50)];
+    var P2 = function (p) { return [r1(p[0]), r1(-p[1])]; };
+    var pins = {
+      engine: P2(cc0),
+      fork: P2(at(g.fl * 0.25, 0)),
+      shock: P2(lerp(shockBot, shockTop, 0.5)),
+      brakes: P2(cal),
+      wheels: P2(polar(F, g.rimF * 0.6, 220)),
+      chain: P2(lerp(PV, R, 0.55)),
+      cockpit: P2(grip),
+      electric: P2(T(260, 800)),
+      frame: P2(T(900, 800))
+    };
+    var res = { svg: "<defs>" + defs.join("") + "</defs>" + out.join(""), vb: vb, pins: pins, smoke: P2(add(mufR, mul(mD, 40 * k))) };
+    /* контуры деталей в мм — для подбора цветов по фото модели (scripts) */
+    if (o.parts) res.parts = { body: shroud, side: side, fender: ffen, fenderR: rfend, mask: lights !== "none" ? mk : null, seat: seat, swing: swPoly, muffler: muf, engine: crank,
+      frame: [add(HEAD, [-30 * k, -10 * k]), T(850, 900), T(660, 770)], fork: [fTop, fMid], rimR: [R, g.rimR - 12 * k], rimF: [F, g.rimF - 12 * k] };
+    return res;
+  }
+
   window.bikeArt = bikeArt;
   window.bikeLivery = livery;
 })();

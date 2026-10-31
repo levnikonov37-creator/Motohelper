@@ -106,6 +106,8 @@ const server = http.createServer((req, res) => {
     // мотор и вид мотоцикла — во вкладке «Мотоцикл», на главной к нему ведёт плитка «Мотор в 3D»
     await page.locator(".home-acts .act", { hasText: "Мотор в 3D" }).click();
     await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
+    // по умолчанию — рисунок; фото модели — по кнопке «Фото»
+    await page.locator(".bv-toggle button", { hasText: "Фото" }).click();
     const photoOk = await page.locator(".model-photo.ok").waitFor({ timeout: 8000 }).then(() => true, () => false);
     if (!photoOk) errors.push("Вид «Мотоцикл»: фото модели не показалось");
     else {
@@ -282,8 +284,8 @@ const server = http.createServer((req, res) => {
       const name = (await card.locator("b").innerText()).trim();
       await card.click();
       if (await fresh.locator(".onb2").count()) errors.push("Первый заход: после выбора модели окно не закрылось");
-      const shown = await fresh.waitForFunction(() => { const im = document.querySelector(".hero-bike .hb-photo"); return im && im.complete && im.naturalWidth > 100; }, null, { timeout: 8000 }).then(() => true, () => false);
-      if (!shown) errors.push("Главная: нет фото выбранной модели «" + name + "»");
+      const shown = await fresh.waitForFunction(() => document.querySelectorAll(".hero-bike svg path").length > 80, null, { timeout: 8000 }).then(() => true, () => false);
+      if (!shown) errors.push("Главная: нет рисунка выбранной модели «" + name + "»");
       const chip = await fresh.locator(".bike-chip .bc-name").innerText();
       if (chip.trim() !== name) errors.push("Первый заход: выбрана «" + name + "», в шапке «" + chip + "»");
     }
