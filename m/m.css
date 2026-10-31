@@ -83,4 +83,11 @@ ul.plain{margin:0;padding-left:20px}ul.plain li{margin:3px 0}
 .faq{display:grid;gap:8px}.faq details{border:1px solid rgba(255,255,255,.14);border-radius:4px;background:#0E0E0E}
 .faq summary{cursor:pointer;padding:12px 14px;font:600 16px var(--cond);list-style:none}.faq summary::-webkit-details-marker{display:none}
 .faq summary::after{content:"+";float:right;color:var(--muted)}.faq details[open] summary::after{content:"–"}.faq p{margin:0;padding:0 14px 12px;color:#D0D0D0}
+/* фото моделей: снимок без фона на тёмной «студии» */
+.mphoto{margin:14px 0 4px;padding:4% 4% 3%;border-radius:12px;background:radial-gradient(120% 90% at 50% 100%,#2a2c30 0%,#141518 55%,#0c0c0d 100%);border:1px solid rgba(255,255,255,.1)}
+.mphoto img{display:block;width:100%;max-width:640px;height:auto;margin:0 auto;filter:drop-shadow(0 14px 14px rgba(0,0,0,.6))}
+.card.ph{display:grid;grid-template-columns:96px 1fr;column-gap:12px;align-items:center}.card.ph img{grid-row:span 2;width:96px;height:60px;object-fit:contain;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5))}
+.card.ph small{grid-column:2}
+.showcase{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}.show{display:flex;flex-direction:column;gap:2px;padding:10px 12px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:radial-gradient(120% 90% at 50% 100%,#24262a 0%,#111214 60%,#0b0b0c 100%);color:var(--ink);text-decoration:none;transition:transform .15s,border-color .15s}
+.show:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.4)}.show img{width:100%;height:120px;object-fit:contain;margin-bottom:6px;filter:drop-shadow(0 8px 8px rgba(0,0,0,.55))}.show small{color:var(--muted);font:500 13px var(--cond)}.show b{font:600 17px/1.2 var(--cond)}
 

@@ -15,9 +15,12 @@ require("./build-assets");
 
 const ctx = {};
 vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(path.join(ROOT, "js/data.js"), "utf8") + "\n;this.__E = ENGINES; this.__B = BIKES; this.__G = GUIDES; this.__D = DIAG; this.__NC = NO_CVT_GUIDES; this.__AKA = ENGINE_AKA;", ctx);
+vm.runInContext(fs.readFileSync(path.join(ROOT, "js/data.js"), "utf8") + "\n;this.__E = ENGINES; this.__B = BIKES; this.__G = GUIDES; this.__D = DIAG; this.__NC = NO_CVT_GUIDES; this.__AKA = ENGINE_AKA; this.__P = BIKE_PHOTOS; this.__PS = bikePhotoSlug;", ctx);
 const ENGINES = ctx.__E, BIKES = ctx.__B.filter((b) => b.brand !== "Любая модель");
 const GUIDES = ctx.__G, DIAG = ctx.__D, NO_CVT = ctx.__NC, AKA = ctx.__AKA || {};
+// свои фото моделей (img/bikes): путь к снимку или ""
+const PHOTOS = new Set(ctx.__P || []);
+const photoOf = (b, small) => (PHOTOS.has(b.brand + " " + b.name) ? "/img/bikes/" + (small ? "s/" : "") + ctx.__PS(b.brand + " " + b.name) + ".webp" : "");
 
 const TR = { а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya" };
 const slugify = (s) => String(s).toLowerCase().split("").map((c) => (c in TR ? TR[c] : c)).join("")
@@ -133,6 +136,13 @@ ul.plain{margin:0;padding-left:20px}ul.plain li{margin:3px 0}
 .faq{display:grid;gap:8px}.faq details{border:1px solid rgba(255,255,255,.14);border-radius:4px;background:#0E0E0E}
 .faq summary{cursor:pointer;padding:12px 14px;font:600 16px var(--cond);list-style:none}.faq summary::-webkit-details-marker{display:none}
 .faq summary::after{content:"+";float:right;color:var(--muted)}.faq details[open] summary::after{content:"–"}.faq p{margin:0;padding:0 14px 12px;color:#D0D0D0}
+/* фото моделей: снимок без фона на тёмной «студии» */
+.mphoto{margin:14px 0 4px;padding:4% 4% 3%;border-radius:12px;background:radial-gradient(120% 90% at 50% 100%,#2a2c30 0%,#141518 55%,#0c0c0d 100%);border:1px solid rgba(255,255,255,.1)}
+.mphoto img{display:block;width:100%;max-width:640px;height:auto;margin:0 auto;filter:drop-shadow(0 14px 14px rgba(0,0,0,.6))}
+.card.ph{display:grid;grid-template-columns:96px 1fr;column-gap:12px;align-items:center}.card.ph img{grid-row:span 2;width:96px;height:60px;object-fit:contain;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5))}
+.card.ph small{grid-column:2}
+.showcase{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}.show{display:flex;flex-direction:column;gap:2px;padding:10px 12px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:radial-gradient(120% 90% at 50% 100%,#24262a 0%,#111214 60%,#0b0b0c 100%);color:var(--ink);text-decoration:none;transition:transform .15s,border-color .15s}
+.show:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.4)}.show img{width:100%;height:120px;object-fit:contain;margin-bottom:6px;filter:drop-shadow(0 8px 8px rgba(0,0,0,.55))}.show small{color:var(--muted);font:500 13px var(--cond)}.show b{font:600 17px/1.2 var(--cond)}
 `;
 
 const SEARCH_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>`;
@@ -257,7 +267,12 @@ const tiles = (e, v) => [["Объём", e.cc ? e.cc + " см³" : ""], ["Мощ�
 const files = new Map(); // путь относительно корня → содержимое
 const SEV = { high: "серьёзно", med: "важно", low: "мелочь" };
 const engShort = (b) => { const e = ENGINES[b.versions[0].engine]; return [e.code, e.cc ? e.cc + " см³" : "", (b.versions[0].hp || e.hp) ? (b.versions[0].hp || e.hp) + " л.с." : ""].filter(Boolean).join(" · "); };
-const modelCard = (b, withBrand) => `<a class="card" href="/m/${bikeSlug.get(b)}/" data-t="${esc(b.type)}"><b>${esc((withBrand ? b.brand + " " : "") + b.name)}</b><small>${esc(b.type)} · ${esc(engShort(b))}</small></a>`;
+/* витрина каталога: модели с фото — по одной-две от марки, чтобы были разные */
+const showcase = () => {
+  const seen = {}, list = BIKES.filter((b) => photoOf(b)).sort((a, b) => COLL.compare(a.brand, b.brand) || COLL.compare(a.name, b.name)).filter((b) => (seen[b.brand] = (seen[b.brand] || 0) + 1) <= 2);
+  return list.length ? `<h2>Популярные модели</h2><div class="showcase">${list.slice(0, 16).map((b) => `<a class="show" href="/m/${bikeSlug.get(b)}/"><img src="${photoOf(b, true)}" alt="${esc(b.brand + " " + b.name)}" loading="lazy" width="240" height="150"><small>${esc(b.brand)} · ${esc(b.type)}</small><b>${esc(b.name)}</b><small>${esc(engShort(b))}</small></a>`).join("")}</div>` : "";
+};
+const modelCard = (b, withBrand) => { const ph = photoOf(b, true); return `<a class="card${ph ? " ph" : ""}" href="/m/${bikeSlug.get(b)}/" data-t="${esc(b.type)}">${ph ? `<img src="${ph}" alt="" loading="lazy" width="240" height="150">` : ""}<b>${esc((withBrand ? b.brand + " " : "") + b.name)}</b><small>${esc(b.type)} · ${esc(engShort(b))}</small></a>`; };
 
 
 /* ===== моторы, инструкции, поломки: отдельные страницы под запросы «масло 172FMM», «зазоры клапанов», «не заводится» ===== */
@@ -339,7 +354,7 @@ BIKES.forEach((b) => {
   const faqHtml = `<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>`;
   const body = `<section class="hero"><div class="kick">${esc(b.brand)} · ${esc(b.type)}</div><h1>${esc(b.name)}</h1>
 <p class="lead">Мотор ${esc(e0.code)}${e0.cc ? ", " + e0.cc + " см³" : ""}${e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с" : ""}. Какое масло и сколько, свеча, зазоры клапанов, жиклёры и слабые места${b.versions.length > 1 ? " — по поколениям" : ""}.</p>
-${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}</section>
+${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}${photoOf(b) ? `<figure class="mphoto"><img src="${photoOf(b)}" alt="${esc(full)}" width="800" height="500" fetchpriority="high"></figure>` : ""}</section>
 ${vers}
 ${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>` : ""}
 ${faqHtml}
@@ -374,6 +389,7 @@ ${types.length > 1 ? `<div class="chips"><button class="chip on" data-f="*">Вс
 <div class="grid" style="margin-bottom:14px"><a class="card big" href="/m/polomka/"><b>Неисправности</b></a><a class="card big" href="/m/remont/"><b>Инструкции</b></a><a class="card big" href="/m/motor/"><b>Моторы</b></a><a class="card big" href="/m/podborka/"><b>Подборки</b></a><a class="card big" href="/m/sravnenie/"><b>Сравнения</b></a></div>
 <div class="search">${SEARCH_ICON}<input id="q" type="search" placeholder="Найти модель: «Kayo T2», «CRF250», «174»" autocomplete="off" aria-label="Поиск модели" /></div>
 <div id="res" class="grid models res"></div>
+${showcase()}
 <h2>Популярные марки</h2><div class="grid">${pop.map((br) => `<a class="card big" href="/m/${brandSlug[br]}/"><b>${esc(br)}</b><span class="n">${count(br)}</span></a>`).join("")}</div>
 <h2>Все марки</h2>${Object.keys(byLetter).map((l, i, ls) => `${cyr(l) && !cyr(ls[i - 1] || "a") ? `<h2>Российские марки</h2>` : ""}<div class="letter">${esc(l)}</div><div class="grid">${byLetter[l].map((br) => `<a class="card" href="/m/${brandSlug[br]}/"><b>${esc(br)}</b><small>${count(br)} ${plural(count(br), "модель", "модели", "моделей")}</small></a>`).join("")}</div>`).join("")}`;
   files.set("m/index.html", page({ title: "Каталог мотоциклов, питбайков и мопедов — масло, свечи, моторы | MotoHelper", desc: `${BIKES.length} моделей: мотор, масло и его объём, свечи, зазоры клапанов, жиклёры и слабые места.`, canon: SITE + "m/", crumbs, body, ld: [crumbLd(crumbs)], js: SEARCH_JS }));

@@ -1992,9 +1992,16 @@ function BikeFinder({
       e = ENGINES[v0.engine] || {},
       c0 = (custom || {})[bikeKey(b) + "|0"] || {},
       on = sel && bikeKey(b) === sel.key;
+    const th = ownPhoto(b, true);
     return /*#__PURE__*/React.createElement("div", {
-      className: "bf-item" + (on ? " on" : "")
-    }, /*#__PURE__*/React.createElement("button", {
+      className: "bf-item" + (on ? " on" : "") + (th ? " has-ph" : "")
+    }, th && /*#__PURE__*/React.createElement("img", {
+      className: "bf-thumb",
+      src: th,
+      alt: "",
+      loading: "lazy",
+      decoding: "async"
+    }), /*#__PURE__*/React.createElement("button", {
       className: "bf-main",
       onClick: () => pick(b, 0)
     }, /*#__PURE__*/React.createElement("span", {
@@ -2140,6 +2147,11 @@ function BikeFinder({
 }
 /* ===== Первый заход: приветствие и «С чего начать» ===== */
 const ONB_TILES = [["home", "Главная", "Поиск по всему сайту, быстрые входы, проверка перед выездом и что сделать по сезону — зимой консервация, весной подготовка."], ["wrench", "Ремонт и ТО", "Всё про починку по группам: что сломалось, обслуживание (ТО и сезон), инструкции со схемами — больше 100."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и ссылки на магазины."], ["bike", "Мой мотоцикл", "Объёмная модель мотора: крути, заводи, заглядывай внутрь. Характеристики, свои настройки и тюнинг."]];
+/* популярные модели с фото — первым экраном при первом заходе */
+const ONB_POPULAR = ["Kayo T2 250", "Motoland TT250", "BSE Z5 250", "Progasi Super Max 250 RR", "Regulmoto Sport-003 PR", "Kayo K1 250", "Motoland XR250", "Kayo T4 250", "BSE M2 250", "Progasi Race 300", "Motoland XT250 HS", "Kove 450 Rally Pro"];
+const ONB_WHAT = [["diag", "Поломки", "найти причину"], ["list", "ТО", "масло, свечи, зазоры"], ["cart", "Запчасти", "под твой мотор"], ["ai", "ИИ-механик", "спроси своими словами"]];
+/* Первый заход — один экран: «Какой у тебя мотоцикл?» (популярные с фото + поиск). Кнопка «?» — короткая
+   памятка по разделам (step0 === "help") */
 function Onboarding({
   step0,
   sel,
@@ -2147,28 +2159,39 @@ function Onboarding({
   onPickBike,
   onDone
 }) {
-  const [step, setStep] = useState(step0 || 0);
+  const help = step0 === "help";
+  const pop = useMemo(() => ONB_POPULAR.map(k => BIKES.find(b => bikeKey(b) === k)).filter(b => b && ownPhoto(b)), []);
+  const pick = (b, vi) => {
+    onPickBike(b, vi);
+    onDone();
+  };
+  useEffect(() => {
+    const k = e => e.key === "Escape" && onDone();
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, []);
   return /*#__PURE__*/React.createElement("div", {
     className: "overlay onb-ov"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "sheet onb",
+    className: "sheet onb onb2",
     role: "dialog",
     "aria-modal": "true",
-    "aria-label": "\u0417\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E \u0441 MotoHelper"
+    "aria-label": help ? "Как пользоваться MotoHelper" : "Выбор мотоцикла"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "onb-dots",
-    "aria-hidden": "true"
+    className: "onb2-top"
   }, /*#__PURE__*/React.createElement("span", {
-    className: step === 0 ? "on" : ""
-  }), /*#__PURE__*/React.createElement("span", {
-    className: step === 1 ? "on" : ""
-  })), step === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "brand-mark"
+  }, "MH"), /*#__PURE__*/React.createElement("b", null, "MotoHelper"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "link onb2-skip",
+    onClick: onDone
+  }, help ? "Закрыть" : "Пропустить")), help ? /*#__PURE__*/React.createElement("div", {
     className: "onb-body"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "onb-hero"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "brand-mark onb-mark"
-  }, "MH"), /*#__PURE__*/React.createElement("h2", null, "\u0414\u043E\u0431\u0440\u043E \u043F\u043E\u0436\u0430\u043B\u043E\u0432\u0430\u0442\u044C \u0432 MotoHelper"), /*#__PURE__*/React.createElement("p", null, "Помощник по ремонту, обслуживанию и тюнингу мотоциклов. Вот что здесь есть:")), /*#__PURE__*/React.createElement("ul", {
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "onb2-title"
+  }, "Как пользоваться"), /*#__PURE__*/React.createElement("p", {
+    className: "onb2-sub"
+  }, "Сверху выбран твой мотоцикл — все цифры и советы на сайте под его мотор. Разделы — в меню внизу экрана:"), /*#__PURE__*/React.createElement("ul", {
     className: "onb-tiles"
   }, ONB_TILES.map(t => /*#__PURE__*/React.createElement("li", {
     key: t[0]
@@ -2177,39 +2200,47 @@ function Onboarding({
   }, /*#__PURE__*/React.createElement(Icon, {
     n: t[0],
     s: 22
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, t[1]), /*#__PURE__*/React.createElement("p", null, t[2]))))), /*#__PURE__*/React.createElement("p", {
-    className: "muted small"
-  }, "\u042D\u0442\u0438 \u0440\u0430\u0437\u0434\u0435\u043B\u044B \u2014 \u0432 \u043C\u0435\u043D\u044E \u0432\u043D\u0438\u0437\u0443 \u044D\u043A\u0440\u0430\u043D\u0430. \u041F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u0443 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u043D\u043E\u0432\u0430 \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \xAB?\xBB \u0432\u0432\u0435\u0440\u0445\u0443."), /*#__PURE__*/React.createElement(SupportCard, {
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, t[1]), /*#__PURE__*/React.createElement("p", null, t[2]))))), /*#__PURE__*/React.createElement(SupportCard, {
     compact: true
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "onb-actions"
-  }, /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("button", {
     className: "btn primary big",
-    onClick: () => setStep(1)
-  }, "\u0414\u0430\u043B\u044C\u0448\u0435: \u043D\u0430\u0439\u0442\u0438 \u0441\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
     onClick: onDone
-  }, "\u041F\u0440\u043E\u043F\u0443\u0441\u0442\u0438\u0442\u044C"))) : /*#__PURE__*/React.createElement("div", {
+  }, "Понятно")) : /*#__PURE__*/React.createElement("div", {
     className: "onb-body"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "onb-find-head"
-  }, /*#__PURE__*/React.createElement("h2", null, "\u041D\u0430\u0439\u0434\u0438 \u0441\u0432\u043E\u0439 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B"), /*#__PURE__*/React.createElement("p", null, "Всё на сайте подстроится под него: мотор, обслуживание, запчасти и инструкции.")), /*#__PURE__*/React.createElement(BikeFinder, {
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "onb2-title"
+  }, "Какой у тебя мотоцикл?"), /*#__PURE__*/React.createElement("p", {
+    className: "onb2-sub"
+  }, "Выбери — и всё на сайте будет под твой мотор:"), /*#__PURE__*/React.createElement("ul", {
+    className: "onb2-what"
+  }, ONB_WHAT.map(w => /*#__PURE__*/React.createElement("li", {
+    key: w[0]
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: w[0],
+    s: 18
+  }), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, w[1]), /*#__PURE__*/React.createElement("small", null, w[2]))))), pop.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h4", {
+    className: "onb2-h"
+  }, "Популярные"), /*#__PURE__*/React.createElement("div", {
+    className: "onb2-pop"
+  }, pop.map(b => /*#__PURE__*/React.createElement("button", {
+    key: bikeKey(b),
+    type: "button",
+    className: "onb2-card",
+    onClick: () => pick(b, 0)
+  }, /*#__PURE__*/React.createElement("img", {
+    src: ownPhoto(b, true),
+    alt: "",
+    width: 240,
+    height: 150,
+    decoding: "async"
+  }), /*#__PURE__*/React.createElement("small", null, b.brand), /*#__PURE__*/React.createElement("b", null, b.name))))), /*#__PURE__*/React.createElement("h4", {
+    className: "onb2-h"
+  }, "Или найди свой"), /*#__PURE__*/React.createElement(BikeFinder, {
     compact: true,
     sel: sel,
     custom: custom,
-    onPick: (b, vi) => {
-      onPickBike(b, vi);
-      onDone();
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "onb-actions"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: () => setStep(0)
-  }, "\u2190 \u041D\u0430\u0437\u0430\u0434"), /*#__PURE__*/React.createElement("button", {
-    className: "link",
-    onClick: onDone
-  }, "\u0412\u044B\u0431\u0435\u0440\u0443 \u043F\u043E\u0437\u0436\u0435")))));
+    onPick: pick
+  }))));
 }
 function StartGuide({
   mt,
@@ -11120,6 +11151,12 @@ function webPhoto(q) {
   };
 }
 const PHOTO_SEEN = {};
+/* свои фото моделей (img/bikes, список — BIKE_PHOTOS в data.js): снимок сбоку без фона, грузится с сайта */
+const OWN_PHOTO = new Set(typeof BIKE_PHOTOS === "object" ? BIKE_PHOTOS : []);
+function ownPhoto(bike, small) {
+  const k = bikeKey(bike);
+  return OWN_PHOTO.has(k) ? "img/bikes/" + (small ? "s/" : "") + bikePhotoSlug(k) + ".webp" : "";
+}
 /* фото грузим, когда страница уже загрузилась (но не ждём дольше 4 с):
    если сервер картинок не отвечает, сайт не «висит» в загрузке */
 function usePageLoaded() {
@@ -11156,9 +11193,14 @@ function useModelPhotos(bike, ver) {
   }, [key, !wiki]);
   const vl = ver && ver.label || "";
   const web = useMemo(() => photoQueries(bike, ver).map(webPhoto), [key, vl]);
+  const own = ownPhoto(bike);
   return {
-    wait: !wiki,
-    list: (wiki && wiki.u ? [Object.assign({
+    wait: !wiki && !own,
+    list: (own ? [{
+      id: "own",
+      own: true,
+      u: own
+    }] : []).concat(wiki && wiki.u ? [Object.assign({
       id: "wiki"
     }, wiki)] : []).concat(web)
   };
@@ -11173,11 +11215,11 @@ function BikeView(props) {
   const ph = useModelPhotos(bike, ver),
     loaded = usePageLoaded();
   const [mode, setMode] = useState(() => load("bikeview2", "photo"));
-  const [pick, setPick] = useState(() => load("mphoto-pick", {})[key] || "");
+  const [pick, setPick] = useState(() => load("mphoto-pick2", {})[key] || "");
   const [bad, setBad] = useState({});
   const [okU, setOkU] = useState("");
   useEffect(() => {
-    setPick(load("mphoto-pick", {})[key] || "");
+    setPick(load("mphoto-pick2", {})[key] || "");
     setBad({});
   }, [key]);
   const live = ph.list.filter(p => !bad[p.u]);
@@ -11212,12 +11254,12 @@ function BikeView(props) {
   function another() {
     const n = live[(live.indexOf(cur) + 1) % live.length];
     setPick(n.id);
-    const m = load("mphoto-pick", {});
+    const m = load("mphoto-pick2", {});
     delete m[key];
     m[key] = n.id;
     const ks = Object.keys(m);
     if (ks.length > 200) delete m[ks[0]];
-    save("mphoto-pick", m);
+    save("mphoto-pick2", m);
   }
   const cu = props.cu || {},
     setCu = props.setCu;
@@ -11252,7 +11294,7 @@ function BikeView(props) {
   return /*#__PURE__*/React.createElement("div", {
     className: "bike-view"
   }, showPhoto ? /*#__PURE__*/React.createElement("figure", {
-    className: "model-photo" + (ok ? " ok" : "") + (running ? " running" : "")
+    className: "model-photo" + (ok ? " ok" : "") + (running ? " running" : "") + (cur && cur.own ? " own" : "")
   }, cur && /*#__PURE__*/React.createElement("img", {
     key: "bg" + curU,
     className: "mp-bg",
@@ -11276,7 +11318,7 @@ function BikeView(props) {
     role: "status"
   }, /*#__PURE__*/React.createElement("span", {
     className: "mp-spin"
-  }), "Ищу фото ", bike.brand, " ", bike.name, "…"), ok && /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("a", {
+  }), "Ищу фото ", bike.brand, " ", bike.name, "…"), ok && !cur.own && /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("a", {
     href: cur.page,
     target: "_blank",
     rel: "noopener noreferrer"
@@ -12101,7 +12143,7 @@ function App() {
     className: "rail-links"
   }, /*#__PURE__*/React.createElement("button", {
     className: "link",
-    onClick: () => setOnb(0)
+    onClick: () => setOnb("help")
   }, "\u041A\u0430\u043A \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C\u0441\u044F \u0441\u0430\u0439\u0442\u043E\u043C"), /*#__PURE__*/React.createElement("button", {
     className: "link",
     onClick: () => setPicker(true)
@@ -12147,7 +12189,7 @@ function App() {
   })), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn dark",
     "aria-label": "\u041A\u0430\u043A \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C\u0441\u044F",
-    onClick: () => setOnb(0)
+    onClick: () => setOnb("help")
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "help",
     s: 18
@@ -13358,23 +13400,35 @@ function HeroBike({
   cu,
   go
 }) {
+  /* есть своё фото модели — показываем его; не загрузилось или фото нет — рисунок по геометрии */
+  const photo = ownPhoto(bike);
+  const [bad, setBad] = useState("");
+  const usePhoto = !!photo && bad !== photo;
   const art = useMemo(() => {
+    if (usePhoto) return null;
     try {
       return window.bikeArt && bike.brand !== "Любая модель" ? bikeArtFor(bike, eng, cu, "hb") : null;
     } catch (e) {
       return null;
     }
-  }, [bike, eng, cu]);
-  if (!art) return null;
+  }, [bike, eng, cu, usePhoto]);
+  if (!art && !usePhoto) return null;
   return /*#__PURE__*/React.createElement("button", {
     type: "button",
-    className: "hero-bike",
+    className: "hero-bike" + (usePhoto ? " has-photo" : ""),
     "aria-label": "Открыть " + bike.brand + " " + bike.name,
     onClick: () => go("bike", "overview")
   }, /*#__PURE__*/React.createElement("span", {
     className: "hb-floor",
     "aria-hidden": "true"
-  }), /*#__PURE__*/React.createElement("svg", {
+  }), usePhoto ? /*#__PURE__*/React.createElement("img", {
+    key: photo,
+    className: "hb-photo",
+    src: photo,
+    alt: bike.brand + " " + bike.name,
+    decoding: "async",
+    onError: () => setBad(photo)
+  }) : /*#__PURE__*/React.createElement("svg", {
     viewBox: art.vb.join(" "),
     "aria-hidden": "true",
     dangerouslySetInnerHTML: {
@@ -13529,7 +13583,7 @@ function Home(props) {
     go: go
   }), /*#__PURE__*/React.createElement("p", {
     className: "hero-sub"
-  }, "Найди причину поломки, инструкцию или запчасть — всё подобрано под твой мотор."), /*#__PURE__*/React.createElement("div", {
+  }, "Поломки, ТО, запчасти и инструкции — всё под мотор ", eng.code, "."), /*#__PURE__*/React.createElement("div", {
     className: "hero-cta"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary shine",
@@ -13539,18 +13593,18 @@ function Home(props) {
     s: 18
   }), "\u0427\u0442\u043E \u0441\u043B\u043E\u043C\u0430\u043B\u043E\u0441\u044C?"), /*#__PURE__*/React.createElement("button", {
     className: "btn ghost",
-    onClick: () => goStage(go)
+    onClick: () => go("ai")
   }, /*#__PURE__*/React.createElement(Icon, {
-    n: "play",
+    n: "ai",
     s: 18
-  }), "Мотор в 3D")), /*#__PURE__*/React.createElement(SiteSearchInline, {
+  }), "Спросить ИИ")), /*#__PURE__*/React.createElement(SiteSearchInline, {
     ctx: props,
     placeholder: "Поломка, деталь или инструкция"
   })), /*#__PURE__*/React.createElement(GarageBar, _extends({}, props, {
     compact: true
   })), /*#__PURE__*/React.createElement("div", {
     className: "actions4 home-acts"
-  }, [["list", "ТО по пробегу", () => go("repair", "to"), "", "Что и когда менять"], ["book", "Инструкции", () => go("repair", "guides"), "", "Пошагово, со схемами"], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 ? "В проекте " + project.length : "Что даст прибавку"], ["check", "Проверка б/у", () => go("repair", "buy"), "", "Перед покупкой"]].map(a => /*#__PURE__*/React.createElement("button", {
+  }, [["list", "ТО и масло", () => go("repair", "to"), "", "Что и когда менять"], ["book", "Инструкции", () => go("repair", "guides"), "", "Пошагово, со схемами"], ["cart", "Запчасти", () => go("parts"), "", "Только под твой мотор"], ["tune", "Тюнинг", () => go("tuning"), "", project.length > 0 ? "В проекте " + project.length : "Что даст прибавку"], ["engine", "Мотор в 3D", () => goStage(go), "", "Заведи и загляни внутрь"], ["check", "Проверка б/у", () => go("repair", "buy"), "", "Перед покупкой"]].map(a => /*#__PURE__*/React.createElement("button", {
     key: a[1],
     className: "act" + a[3],
     onClick: a[2]
@@ -13576,6 +13630,15 @@ function catSlug(s) {
 }
 function CatalogCard() {
   const n = useMemo(() => BIKES.filter(b => b.brand !== "Любая модель").length, []);
+  /* несколько моделей с фото — каждый раз разные */
+  const pics = useMemo(() => {
+    const l = BIKES.filter(b => OWN_PHOTO.has(bikeKey(b)));
+    for (let i = l.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [l[i], l[j]] = [l[j], l[i]];
+    }
+    return l.slice(0, 6);
+  }, []);
   return /*#__PURE__*/React.createElement("section", {
     className: "panel catalog-card"
   }, /*#__PURE__*/React.createElement("a", {
@@ -13591,7 +13654,19 @@ function CatalogCard() {
   }, /*#__PURE__*/React.createElement("b", null, "Каталог моделей"), /*#__PURE__*/React.createElement("small", null, n, " моделей: масло, свечи, зазоры клапанов, слабые места")), /*#__PURE__*/React.createElement("span", {
     className: "cc-go",
     "aria-hidden": "true"
-  }, "→")));
+  }, "→")), pics.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "cc-pics"
+  }, pics.map(b => /*#__PURE__*/React.createElement("a", {
+    key: bikeKey(b),
+    href: "/m/" + catSlug(b.brand + " " + b.name) + "/",
+    title: b.brand + " " + b.name
+  }, /*#__PURE__*/React.createElement("img", {
+    src: ownPhoto(b, true),
+    alt: b.brand + " " + b.name,
+    loading: "lazy",
+    width: 240,
+    height: 150
+  }), /*#__PURE__*/React.createElement("span", null, b.name)))));
 }
 function PreRide({
   eng
