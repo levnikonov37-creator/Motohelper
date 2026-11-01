@@ -341,33 +341,6 @@ function EditBike({
     className: "f wide"
   }, /*#__PURE__*/React.createElement("span", {
     className: "f-label"
-  }, "\u0426\u0432\u0435\u0442 \u043F\u043B\u0430\u0441\u0442\u0438\u043A\u0430", cu.color && /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "f-reset",
-    onClick: () => setCu({
-      color: ""
-    })
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "reset",
-    s: 14
-  }), "\u0430\u0432\u0442\u043E")), /*#__PURE__*/React.createElement("div", {
-    className: "swatches"
-  }, PLASTIC.map(c => /*#__PURE__*/React.createElement("button", {
-    key: c[0],
-    type: "button",
-    className: "sw" + (cu.color === c[0] ? " on" : ""),
-    style: {
-      background: c[0]
-    },
-    "aria-label": c[1],
-    "aria-pressed": cu.color === c[0],
-    onClick: () => setCu({
-      color: c[0]
-    })
-  }))), null), /*#__PURE__*/React.createElement("div", {
-    className: "f wide"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "f-label"
   }, "Покраска мотора", cu.engFinish && /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "f-reset",
@@ -1236,7 +1209,7 @@ function Badges({
   const s = useStats();
   const x = {
     mods: eng.mods,
-    color: cu.color,
+    color: cu.color || cu.nick,
     odo: mt.odo || 0
   };
   const got = BADGES.filter(b => b.need(s, x));
@@ -11354,124 +11327,7 @@ function sprocketPath(cx, cy, r, t) {
   }
   return d + "Z";
 }
-/* ===== Мотоцикл: рисунок по реальной геометрии (js/bike-art.js) и настоящее фото модели ===== */
-function bikeArtFor(bike, eng, cu, uid) {
-  const L = bikeLook(bike, eng, cu);
-  const cls = bike.type === "Классика" ? "classic" : L.cls;
-  const g = eng.groups || [],
-    inst = eng.installed || [];
-  const cn = !/^(Honda|Yamaha|Kawasaki|Suzuki|KTM|Husqvarna|GasGas|Beta|Sherco|TM Racing|Fantic|Rieju|BMW|Triumph|Ducati|Aprilia|Harley-Davidson|Royal Enfield)$/.test(bike.brand);
-  /* цвета деталей — со снимка модели (BIKE_COLORS); свой цвет пластика из «Мотоцикла» — поверх */
-  const own = typeof BIKE_COLORS === "object" && BIKE_COLORS[bikeKey(bike)] || null;
-  const col = Object.assign(window.bikeLivery(bike.brand, bike.name), own || {}, cu && cu.color ? {
-    body: cu.color,
-    fender: cu.color,
-    fenderR: cu.color,
-    side: own && own.side && own.side !== own.body ? own.side : cu.color,
-    mask: cu.color
-  } : {});
-  const road = ["naked", "sport", "cruiser", "classic", "tour", "moped", "light", "motard"].indexOf(cls) >= 0;
-  /* туристические эндуро (маска-фара, хвост ниже) и кроссовая компоновка — у большинства современных моделей */
-  const trail = /^(Kayo T2|Motoland (TT|Enduro (LT|ST))|Motoland XR250( Lite)?$|Racer |Irbis |Stels |Roliz Sport-005|Regulmoto (TE|Sport.?003))/.test(bikeKey(bike));
-  return window.bikeArt({
-    uid: uid || "bk",
-    cls: cls,
-    brand: bike.brand === "Любая модель" ? "" : bike.brand.length <= 12 ? bike.brand : bike.brand.split(/[\s-]/)[0],
-    model: bike.brand === "Любая модель" ? "" : bike.name,
-    num: L.num,
-    eng: {
-      stroke: eng.stroke,
-      cc: eng.cc,
-      horiz: g.indexOf("horiz") >= 0,
-      liquid: g.indexOf("liquid") >= 0,
-      efi: g.indexOf("efi") >= 0,
-      layout: eng.layout || "single",
-      dark: g.indexOf("liquid") >= 0 || !cn
-    },
-    col: col,
-    mods: inst,
-    o: {
-      kick: /Кик|кик/.test(eng.start || ""),
-      style: cls === "moped" && bike.type === "Мопед" ? "alpha" : trail ? "trail" : "mx",
-      handguards: ["enduro", "cross", "tour"].indexOf(cls) >= 0 || inst.indexOf("hand") >= 0,
-      plate: road || cls === "enduro",
-      signals: road && cls !== "motard",
-      mirrors: road || cls === "enduro" && trail,
-      usd: own && own.fork ? own.fork !== "#D5DADF" : L.usd,
-      cast: ["naked", "sport", "cruiser"].indexOf(cls) >= 0 || cls === "tour" && eng.cc >= 700 || cls === "moped" && /RX|Lux|Люкс|Grom|MSX|Monkey|Super Cub/i.test(bike.name),
-      frontDisc: ["naked", "sport", "tour", "cruiser", "motard"].indexOf(cls) >= 0,
-      twinShock: L.twinShock,
-      swingAlu: L.swingAlu,
-      fenderCol: col.fender,
-      guard: col.guard,
-      number: cls === "cross"
-    }
-  });
-}
-function BikeSVG({
-  eng,
-  bike,
-  cu,
-  sel,
-  onSel,
-  running
-}) {
-  const art = useMemo(() => bikeArtFor(bike, eng, cu), [bike, eng, cu]);
-  const vb = art.vb,
-    k = vb[2] / 640;
-  const click = id => e => {
-    e.stopPropagation();
-    onSel(id);
-  };
-  const smoke = art.smoke && running ? {
-    "--sx": ((art.smoke[0] - vb[0]) / vb[2] * 100).toFixed(1) + "%",
-    "--sy": ((art.smoke[1] - vb[1]) / vb[3] * 100).toFixed(1) + "%"
-  } : null;
-  return /*#__PURE__*/React.createElement("div", {
-    className: "bike-box"
-  }, /*#__PURE__*/React.createElement("svg", {
-    className: "bike-svg" + (running ? " running" : ""),
-    viewBox: vb.join(" "),
-    role: "img",
-    "aria-label": "Рисунок " + bike.brand + " " + bike.name,
-    onClick: () => onSel(null)
-  }, /*#__PURE__*/React.createElement("g", {
-    dangerouslySetInnerHTML: {
-      __html: art.svg
-    }
-  }), !running && Object.keys(art.pins).map(id => CH_AREAS[id] && /*#__PURE__*/React.createElement("g", {
-    key: id,
-    className: "pin" + (sel === id ? " on" : ""),
-    transform: "translate(" + art.pins[id][0] + " " + art.pins[id][1] + ") scale(" + k.toFixed(2) + ")",
-    role: "button",
-    tabIndex: "0",
-    "aria-label": CH_AREAS[id].t,
-    onClick: click(id),
-    onKeyDown: e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        onSel(id);
-      }
-    }
-  }, /*#__PURE__*/React.createElement("title", null, CH_AREAS[id].t), /*#__PURE__*/React.createElement("circle", {
-    className: "pin-hit",
-    r: "24"
-  }), /*#__PURE__*/React.createElement("circle", {
-    className: "pin-pulse",
-    r: "13"
-  }), /*#__PURE__*/React.createElement("circle", {
-    className: "pin-dot",
-    r: "11"
-  }), /*#__PURE__*/React.createElement("circle", {
-    className: "pin-core",
-    r: "4"
-  })))), smoke && /*#__PURE__*/React.createElement(Smoke, {
-    two: eng.stroke === "2T",
-    rpm: 1600,
-    back: true,
-    style: smoke
-  }));
-}
+/* ===== Мотоцикл: настоящее фото модели (своё вырезанное или из поиска картинок) ===== */
 
 /* Настоящее фото модели — Wikimedia Commons (свободные лицензии). Ищем по точному названию
    марки и модели в имени файла; результат (и «не нашли») запоминаем, чтобы не спрашивать каждый раз */
@@ -11646,7 +11502,6 @@ function BikeView(props) {
   const key = bikeKey(bike);
   const ph = useModelPhotos(bike, ver),
     loaded = usePageLoaded();
-  const [mode, setMode] = useState(() => load("bikeview3", "art"));
   const [pick, setPick] = useState(() => load("mphoto-pick2", {})[key] || "");
   const [bad, setBad] = useState({});
   const [okU, setOkU] = useState("");
@@ -11661,7 +11516,7 @@ function BikeView(props) {
   const curU = cur ? cur.u : "",
     ok = !!curU && okU === curU;
   const hasPhoto = !!cur || pending && live.length > 0;
-  const showPhoto = mode === "photo" && hasPhoto;
+  const showPhoto = hasPhoto;
   function fail(p) {
     if (!p.web) {
       PHOTO_SEEN[key] = {};
@@ -11693,36 +11548,6 @@ function BikeView(props) {
     if (ks.length > 200) delete m[ks[0]];
     save("mphoto-pick2", m);
   }
-  const cu = props.cu || {},
-    setCu = props.setCu;
-  /* цвета под свой мотоцикл: заводская раскраска есть не у всех моделей */
-  const swatches = (label, list, key) => /*#__PURE__*/React.createElement("div", {
-    className: "bv-row",
-    role: "group",
-    "aria-label": label
-  }, /*#__PURE__*/React.createElement("span", null, label), list.map(c => /*#__PURE__*/React.createElement("button", {
-    key: c[0],
-    type: "button",
-    className: "sw" + (cu[key] === c[0] ? " on" : ""),
-    style: {
-      background: c[0]
-    },
-    "aria-label": c[1],
-    "aria-pressed": cu[key] === c[0],
-    onClick: () => setCu({
-      [key]: c[0]
-    })
-  })), cu[key] && /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "sw sw-auto",
-    "aria-label": "Как на заводе",
-    onClick: () => setCu({
-      [key]: ""
-    })
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "reset",
-    s: 14
-  })));
   return /*#__PURE__*/React.createElement("div", {
     className: "bike-view"
   }, showPhoto ? /*#__PURE__*/React.createElement("figure", {
@@ -11761,28 +11586,22 @@ function BikeView(props) {
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "reset",
     s: 15
-  }), "Другое фото")) : /*#__PURE__*/React.createElement(BikeSVG, props), hasPhoto && /*#__PURE__*/React.createElement("div", {
-    className: "seg dark sm bv-toggle",
-    role: "group",
-    "aria-label": "Что показать"
-  }, [["art", "Рисунок"], ["photo", "Фото"]].map(x => /*#__PURE__*/React.createElement("button", {
-    key: x[0],
-    className: (showPhoto ? "photo" : "art") === x[0] ? "on" : "",
-    onClick: () => {
-      setMode(x[0]);
-      save("bikeview3", x[0]);
-    }
-  }, x[1]))), mode === "photo" && !hasPhoto && ph.list.length > 0 && /*#__PURE__*/React.createElement("p", {
+  }), "Другое фото")) : /*#__PURE__*/React.createElement("div", {
+    className: "model-photo none"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "photo",
+    s: 30
+  }), /*#__PURE__*/React.createElement("p", {
     className: "bv-note"
-  }, "Фото модели не загрузилось — показан рисунок. ", /*#__PURE__*/React.createElement("button", {
+  }, "Фото ", bike.brand, " ", bike.name, " не загрузилось."), ph.list.length > 0 && /*#__PURE__*/React.createElement("button", {
     type: "button",
-    className: "link inline",
+    className: "btn ghost sm",
     onClick: () => setBad({})
-  }, "Попробовать ещё раз")), !showPhoto && !running && setCu && /*#__PURE__*/React.createElement("div", {
-    className: "bv-colors"
-  }, swatches("Пластик", PLASTIC, "color")));
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "reset",
+    s: 15
+  }), "Попробовать ещё раз")));
 }
-const BIKE_ACCENTS = [["#F2F3F0", "Белые"], ["#1E2125", "Чёрные"], ["#D31F2B", "Красные"], ["#F26722", "Оранжевые"], ["#F6D21B", "Жёлтые"], ["#1D4F9C", "Синие"], ["#5DBB3E", "Зелёные"]];
 function ChassisPanel({
   area,
   eng,
@@ -13395,7 +13214,7 @@ function EngineExplorer({
   }, "Мотор"), /*#__PURE__*/React.createElement("button", {
     className: view === "photo" ? "on" : "",
     onClick: () => switchView("photo")
-  }, "\u0424\u043E\u0442\u043E")), view === "3d" && !no3d ? /*#__PURE__*/React.createElement(Engine3D, {
+  }, "Моё фото")), view === "3d" && !no3d ? /*#__PURE__*/React.createElement(Engine3D, {
     eng: eng,
     finish: cu.engFinish,
     running: running,
@@ -13969,38 +13788,6 @@ function goStage(go) {
   }, 100);
 }
 /* рисунок своего мотоцикла в шапке главной — в цветах марки; нажал — открылся «Мотоцикл» */
-function HeroBike({
-  eng,
-  bike,
-  cu,
-  go
-}) {
-  /* рисунок по геометрии и цветам настоящей модели */
-  const usePhoto = false;
-  const art = useMemo(() => {
-    try {
-      return window.bikeArt && bike.brand !== "Любая модель" ? bikeArtFor(bike, eng, cu, "hb") : null;
-    } catch (e) {
-      return null;
-    }
-  }, [bike, eng, cu]);
-  if (!art && !usePhoto) return null;
-  return /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "hero-bike" + (usePhoto ? " has-photo" : ""),
-    "aria-label": "Открыть " + bike.brand + " " + bike.name,
-    onClick: () => go("bike", "overview")
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "hb-floor",
-    "aria-hidden": "true"
-  }), /*#__PURE__*/React.createElement("svg", {
-    viewBox: art.vb.join(" "),
-    "aria-hidden": "true",
-    dangerouslySetInnerHTML: {
-      __html: art.svg
-    }
-  }));
-}
 /* «Поддержать проект»: ссылка на страницу доната — поле "support" в ai-config.json. Нет ссылки — кнопки нет */
 let supportCache = null;
 function useSupportUrl() {
@@ -14141,12 +13928,7 @@ function Home(props) {
     className: "home-title"
   }, "\u0427\u0442\u043E \u0441\u0434\u0435\u043B\u0430\u0435\u043C \u0441 ", /*#__PURE__*/React.createElement("span", {
     className: "grad"
-  }, cu.nick ? "«" + cu.nick + "»" : bike.name), "?"), /*#__PURE__*/React.createElement(HeroBike, {
-    eng: eng,
-    bike: bike,
-    cu: cu,
-    go: go
-  }), /*#__PURE__*/React.createElement("p", {
+  }, cu.nick ? "«" + cu.nick + "»" : bike.name), "?"), /*#__PURE__*/React.createElement("p", {
     className: "hero-sub"
   }, "Поломки, ТО, запчасти и инструкции — всё под мотор ", eng.code, "."), /*#__PURE__*/React.createElement("div", {
     className: "hero-cta"
@@ -14196,8 +13978,14 @@ function Passport({
   go
 }) {
   const ok = v => v && v !== "—" && !/по мануалу/i.test(v);
-  /* фото модели (своё, без фона) — сверху, на «подиуме» с подсветкой и отражением */
-  const ph = bike ? ownPhoto(bike) : "";
+  /* фото модели: своё (без фона) — на «подиуме» с подсветкой и отражением; иначе — первое из поиска картинок */
+  const own = bike ? ownPhoto(bike) : "";
+  const found = useModelPhotos(bike, null),
+    loaded = usePageLoaded();
+  const [bad, setBad] = useState({});
+  useEffect(() => setBad({}), [bikeKey(bike)]);
+  const web = own ? null : found.wait || !loaded ? null : found.list.find(p => !bad[p.u]) || null;
+  const ph = own || (web ? web.u : "");
   const [phOk, setPhOk] = useState(0);
   useEffect(() => setPhOk(0), [ph]);
   const rows = [["Масло", eng.oil, ok(eng.oilVol) ? eng.oilVol : ""], ["Свеча", eng.spark, ok(eng.gap) ? "зазор " + eng.gap : ""], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", ""] : ["Клапаны", ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", "впуск / выпуск, мм"], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + " км" : ""]];
@@ -14206,7 +13994,7 @@ function Passport({
     "aria-label": "Паспорт мотора"
   }, ph && phOk >= 0 && /*#__PURE__*/React.createElement("button", {
     type: "button",
-    className: "pp-photo" + (phOk > 0 ? " on" : ""),
+    className: "pp-photo" + (phOk > 0 ? " on" : "") + (own ? "" : " web"),
     "aria-label": "Открыть " + bike.brand + " " + bike.name,
     onClick: () => go("bike", "overview")
   }, /*#__PURE__*/React.createElement("span", {
@@ -14220,9 +14008,17 @@ function Passport({
     width: 800,
     height: 560,
     decoding: "async",
-    onLoad: () => setPhOk(1),
-    onError: () => setPhOk(-1)
-  }), /*#__PURE__*/React.createElement("img", {
+    referrerPolicy: "no-referrer",
+    onLoad: e => {
+      if (!own && (e.currentTarget.naturalWidth < 120 || e.currentTarget.naturalHeight < 80)) return setBad(b => Object.assign({}, b, {
+        [ph]: 1
+      }));
+      setPhOk(1);
+    },
+    onError: () => own ? setPhOk(-1) : setBad(b => Object.assign({}, b, {
+      [ph]: 1
+    }))
+  }), own && /*#__PURE__*/React.createElement("img", {
     className: "pp-refl",
     src: ph,
     alt: "",

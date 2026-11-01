@@ -2872,3 +2872,13 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .passport .pp-name b { font: 700 16px var(--display); color: var(--g-ink); letter-spacing: -.01em; }
 .passport .pp-photo:hover .pp-img { transform: translate(-50%, -2px) scale(1.015); }
 @media (prefers-reduced-motion: reduce) { .passport .pp-img, .passport .pp-refl { transition: none; } }
+
+/* ===== v72: только фото мотоцикла (рисунка больше нет) ===== */
+.passport .pp-photo.web { background: #0d0e12; }
+.passport .pp-photo.web .pp-img { left: 0; bottom: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; transform: none; filter: none; }
+.passport .pp-photo.web.on .pp-img { transform: none; }
+.passport .pp-photo.web::after { left: 0; right: 0; bottom: 0; height: 46%; background: linear-gradient(180deg, transparent, rgba(8,9,12,.7)); }
+.passport .pp-photo.web .pp-name { top: auto; bottom: 10px; z-index: 1; }
+.passport .pp-photo.web:hover .pp-img { transform: scale(1.02); }
+.model-photo.none { display: grid; place-items: center; align-content: center; gap: 10px; min-height: 240px; padding: 24px; text-align: center; color: var(--g-muted, #9AA0A6); border-radius: 14px; background: radial-gradient(70% 60% at 50% 80%, rgba(138,140,255,.10), transparent 70%), #111216; }
+.model-photo.none .bv-note { margin: 0; color: var(--g-ink, #E9EAEC); }
