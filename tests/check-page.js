@@ -51,6 +51,25 @@ const server = http.createServer((req, res) => {
 
     const counts = await page.evaluate(() => ({ bikes: BIKES.length, engines: Object.keys(ENGINES).length }));
     if (counts.bikes < 1000) errors.push("Слишком мало моделей: " + counts.bikes);
+    // конструктив: у YBS300 (LX176MN) кика нет — ни симптома, ни запчастей, ни причины; ИИ получает «кикстартера нет»;
+    // свой запуск владельца («сняли кик») учитывается; кроссовую технику и питбайки обслуживают по моточасам
+    const des = await page.evaluate(() => {
+      const spec = (k, cu) => { const b = BIKES.find((x) => bikeKey(x) === k); return [b, buildSpec(b, b.versions[0], cu || {})]; };
+      const syms = (e) => [].concat.apply([], SYMPTOMS.map((g) => g.items)).filter((i) => !i[2] || e.groups.indexOf(i[2]) >= 0).map((i) => i[0]);
+      const [yb, y] = spec("JHL LX6 YBS300");
+      const [cb, c] = spec("Avantis Enduro 250"), [, c2] = spec("Avantis Enduro 250", { start: "estart" });
+      const [, pit] = spec("Apollo RXF 140"), [, mx] = spec("GasGas MC 250F");
+      return {
+        ybsKickSym: syms(y).indexOf("kickslip") >= 0, ybsKickPart: PARTS.some((p) => /^kick/.test(p.kind) && fits(p, y)),
+        ybsKickCause: CAUSES.some((x) => x.id === "kickratchet" && okFor(x, y)), ybsCard: /КИКСТАРТЕРА НА ЭТОМ МОТОРЕ НЕТ/.test(aiCardBase(y, yb, yb.versions[0], {}, {})),
+        fmmKick: syms(c).indexOf("kickslip") >= 0, ownNoKick: syms(c2).indexOf("kickslip") < 0 && c.hours !== true,
+        pitHours: pit.hours === true && maintItems(pit)[0].every <= 15, mxHours: mx.hours === true,
+      };
+    });
+    if (des.ybsKickSym || des.ybsKickPart || des.ybsKickCause) errors.push("YBS300 без кика, а сайт предлагает кикстартер: " + JSON.stringify(des));
+    if (!des.ybsCard) errors.push("ИИ-механик не знает, что у YBS300 нет кикстартера");
+    if (!des.fmmKick || !des.ownNoKick) errors.push("Кик: у 172FMM должен быть, а «сняли кик» у своего экземпляра — убирать его: " + JSON.stringify(des));
+    if (!des.pitHours || !des.mxHours) errors.push("Питбайк и кроссовый мотоцикл: ТО должно быть в моточасах: " + JSON.stringify(des));
 
     // Поиск в окне «Найди свой мотоцикл»
     await page.locator(".bike-chip").first().click({ timeout: 10000 });
