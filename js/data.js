@@ -859,6 +859,8 @@ var WORKS = [
 ];
 
 function fits(item, eng) {
+  /* need — без этого узла деталь не нужна: стартер — только при электростартере, кик — только при кике */
+  if (item.need && eng && eng.groups.indexOf(item.need) < 0) return false;
   if (!item.fit || !eng) return true;
   return item.fit.some(function (f) { return f === eng.id || eng.groups.indexOf(f) >= 0; });
 }
@@ -1249,6 +1251,24 @@ function carbRange(e) {
 
 /* Пункты ТО с учётом пробега */
 function maintItems(e) {
+  /* 4T кроссовой техники и питбайков обслуживают по моточасам (oilInt / valveInt уже в моточасах — см. buildSpec) */
+  if (e.hours && e.stroke !== "2T") {
+    var h = [
+      { id: "oil", t: "Масло и фильтр", every: e.oilInt || 10 },
+      { id: "air", t: "Воздушный фильтр", every: 3 },
+      { id: "chain", t: "Смазка и натяжка цепи", every: 2 },
+      { id: "valves", t: "Клапаны", every: e.valveInt || 20 },
+      { id: "spark", t: "Свеча", every: 30 },
+      { id: "fork", t: "Масло в вилке", every: 40 },
+      { id: "camchain", t: "Цепь ГРМ — осмотр", every: 60 }
+    ].filter(function (x) {
+      if (x.id === "valves") return e.valveInt !== 0;
+      if (x.id === "camchain") return !/Шестерн|шестерн|Ремень|ремень|Вал|вал/.test(e.timing || "");
+      return true;
+    });
+    if (e.groups.indexOf("liquid") >= 0) h.push({ id: "coolant", t: "Антифриз", every: 100 });
+    return h;
+  }
   if (e.hours) return [
     { id: "air", t: "Воздушный фильтр", every: 2 },
     { id: "gear", t: "Масло КПП", every: 15 },
@@ -10737,3 +10757,42 @@ var BIKE_PHOTOS = [
 ];
 function bikePhotoSlug(key) { return String(key).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
 
+
+/* ===== Конструктив запуска: кикстартер и электростартер =====
+   Не на всех моторах есть кик (YBS300 / LX176MN, PR300, NB300, NC300 — только электростартер) и не на всех — стартер.
+   Симптомы, причины, проверки, инструкции и запчасти про кик показываем только там, где кик есть; про стартер —
+   только где есть электростартер. Признаки kick / estart — в groups мотора (по полю start); владелец может
+   поменять запуск у своего экземпляра в «Настроить» (cu.start). Замечание механика: «у 176MN кика нет вовсе,
+   а сайт предлагает „проскальзывает кикстартер“». */
+(function () {
+  /* исправления по проверке (магазины запчастей, характеристики продавцов) */
+  ["YBS300", "YBS300G2"].forEach(function (id) { if (ENGINES[id]) ENGINES[id].start = "Электро"; }); // «Система запуска: электростартер», кика нет
+  if (ENGINES.NC250) ENGINES.NC250.start = "Электро + кик";   // у ZS177MM есть вал и шестерня кикстартера
+  if (ENGINES.CBS300) ENGINES.CBS300.start = "Электро + кик"; // ZS174MN-3 — электро и кик (у NB300 / ZS174MN-5 кика нет)
+  Object.keys(ENGINES).forEach(function (id) { startTags(ENGINES[id]); });
+  /* кик — только где он есть; стартер — только где есть электростартер */
+  SYMPTOMS.forEach(function (g) { g.items.forEach(function (i) {
+    if (i[0] === "kickslip" && !i[2]) i[2] = "kick";
+    if ((i[0] === "nocrank" || i[0] === "starterspin") && !i[2]) i[2] = "estart";
+  }); });
+  var need = { kickratchet: "kick", strelay: "estart", starter: "estart", sprag: "estart" };
+  CAUSES.forEach(function (c) { if (need[c.id] && !c.only) c.only = [need[c.id]]; });
+  DIAG.forEach(function (d) { if (d.id === "kick" && !d.only) d.only = ["kick"]; if (d.id === "starter" && !d.only) d.only = ["estart"]; });
+  var gneed = { "kick-repair": "kick", "starter-brushes": "estart", "starter-clutch": "estart", "starter-relay": "estart" };
+  GUIDES.forEach(function (g) { if (gneed[g.id] && !g.only) g.only = [gneed[g.id]]; });
+  var pneed = { kick: "kick", kickkit: "kick", starter: "estart", sprag: "estart", starterrelay: "estart" };
+  PARTS.forEach(function (p) { if (pneed[p.kind]) p.need = pneed[p.kind]; });
+  /* слабые места про кик у моторов без кика — убрать */
+  Object.keys(ENGINES).forEach(function (id) {
+    var e = ENGINES[id];
+    if (e.groups.indexOf("kick") < 0 && e.issues) e.issues = e.issues.filter(function (x) { return !/кикстарт|кик\b/i.test(x.t + " " + (x.fix || "")); });
+  });
+})();
+/* признаки запуска по полю start: «Электро + кик» → kick, estart; «Кик (у части — электро)» → оба (не прячем лишнего) */
+function startTags(e) {
+  var s = String(e.start || "");
+  e.groups = (e.groups || []).filter(function (g) { return g !== "kick" && g !== "estart"; });
+  if (/кик/i.test(s)) e.groups.push("kick");
+  if (/электро|стартер/i.test(s)) e.groups.push("estart");
+  return e;
+}

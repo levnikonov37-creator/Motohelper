@@ -255,6 +255,17 @@ const crumbLd = (crumbs) => ({ "@context": "https://schema.org", "@type": "Bread
 
 /* характеристики группами: мотор / масло и ТО / зажигание и клапаны / питание */
 /* моточасы: тот же пересчёт, что в приложении (kmPerHour в js/app.js) — по износу мотора */
+/* кроссовую технику и питбайки обслуживают по моточасам (как в приложении: bikeClass → cross / pit / kids) */
+function hoursBike(e, b) {
+  const t = (b && b.type) || "";
+  if (/^(Мопед|Скутер|Спорт|Чоппер|Нейкед|Триал|Мотард|Тур-эндуро|Турер|Лёгкий эндуро|Классика)$/.test(t)) return false;
+  return t === "Питбайк" || t === "Кросс-эндуро" || e.stroke === "2T";
+}
+function hoursEvery(km, kind, e, b) {
+  if (!hoursBike(e, b) || e.hours) return "";
+  const h = kind === "oil" ? (km <= 1000 ? 10 : 15) : Math.max(15, Math.min(30, Math.round(km / 500) * 5));
+  return "каждые " + h + "\u00a0моточ. · ≈\u00a0" + (h * 50).toLocaleString("ru-RU").replace(/\u00a0/g, " ") + "\u00a0км";
+}
 function kmh(km, e, b) {
   const t = b && b.type || "";
   const k = /Питбайк|Кросс|Эндуро|Мотард|Триал/i.test(t) ? 50 : /Скутер|Мопед/i.test(t) || e.cvt ? 40 : t ? 60 : e.cc > 300 ? 60 : 50;
@@ -266,8 +277,8 @@ function specGroups(e, v, b) {
   const g = (title, rows) => ({ title, rows: rows.filter((r) => ok(r[1])) });
   return [
     g("Мотор", [["Двигатель", e.name], ["Код", e.code], ["Объём", e.cc ? e.cc + " см³" : ""], ["Мощность", (v.hp || e.hp) ? (v.hp || e.hp) + " л.с." : ""], ["Момент", e.torque], ["Тип", [e.stroke, e.cam].filter(Boolean).join(", ")], ["Охлаждение", e.cooling], ["Коробка", e.gearbox], ["Запуск", e.start], ["Компрессия", e.compression]]),
-    g("Масло и ТО", [["Масло", e.oil], ["Объём масла", e.oilVol], ["Замена масла", e.oilInt ? kmh(e.oilInt, e, b) : ""], ["Антифриз", e.coolant], ["Топливо", e.fuel]]),
-    g("Свеча и клапаны", [["Свеча", e.spark], ["Зазор свечи", e.gap], ["Клапаны, впуск", e.valveIn], ["Клапаны, выпуск", e.valveEx], ["Проверка клапанов", e.valveInt ? kmh(e.valveInt, e, b) : ""]]),
+    g("Масло и ТО", [["Масло", e.oil], ["Объём масла", e.oilVol], ["Замена масла", e.oilInt ? hoursEvery(e.oilInt, "oil", e, b) || kmh(e.oilInt, e, b) : ""], ["Антифриз", e.coolant], ["Топливо", e.fuel]]),
+    g("Свеча и клапаны", [["Свеча", e.spark], ["Зазор свечи", e.gap], ["Клапаны, впуск", e.valveIn], ["Клапаны, выпуск", e.valveEx], ["Проверка клапанов", e.valveInt ? hoursEvery(e.valveInt, "valve", e, b) || kmh(e.valveInt, e, b) : ""]]),
     g("Питание", [["Карбюратор / впрыск", v.carb || e.carb], ["Главный жиклёр", e.jetMain], ["Жиклёр ХХ", e.jetPilot], ["Игла", e.needle], ["Холостые", e.idle]]),
   ].filter((x) => x.rows.length);
 }
@@ -667,7 +678,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
    инструкции и поломки — tg/idx/g.json с основами слов. */
 {
   const ok = (v) => v && v !== "—";
-  const facts = (e) => [e.code + (e.cc ? " " + Math.round(e.cc) + " см³" : "") + (e.hp ? " " + e.hp + " л.с." : ""), ok(e.oil) ? "масло " + e.oil + (ok(e.oilVol) ? " " + e.oilVol : "") : "", ok(e.spark) ? "свеча " + e.spark + (ok(e.gap) ? " зазор " + e.gap : "") : "", ok(e.valveIn) ? "клапаны впуск " + e.valveIn + " выпуск " + (e.valveEx || "—") : ""].filter(Boolean).join("; ");
+  const facts = (e) => [e.code + (e.cc ? " " + Math.round(e.cc) + " см³" : "") + (e.hp ? " " + e.hp + " л.с." : ""), ok(e.oil) ? "масло " + e.oil + (ok(e.oilVol) ? " " + e.oilVol : "") : "", ok(e.spark) ? "свеча " + e.spark + (ok(e.gap) ? " зазор " + e.gap : "") : "", ok(e.valveIn) ? "клапаны впуск " + e.valveIn + " выпуск " + (e.valveEx || "—") : "", e.start ? "запуск " + e.start + (e.groups.indexOf("kick") < 0 ? " (кикстартера нет)" : "") + (e.groups.indexOf("estart") < 0 ? " (электростартера нет)" : "") : ""].filter(Boolean).join("; ");
   // те же правила, что в worker/motohelper-ai.js (latTokens, tokW)
   const LAT = { а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya" };
   const latTokens = (x) => { const w = String(x).toLowerCase().split("").map((c) => (c in LAT ? LAT[c] : c)).join("").match(/[a-z0-9]+/g) || []; return w.concat(w.slice(1).map((y, i) => w[i] + y)); };
