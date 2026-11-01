@@ -51,14 +51,6 @@ const server = http.createServer((req, res) => {
 
     const counts = await page.evaluate(() => ({ bikes: BIKES.length, engines: Object.keys(ENGINES).length }));
     if (counts.bikes < 1000) errors.push("Слишком мало моделей: " + counts.bikes);
-    // мопед (Альфа) рисуется маленьким мотоциклом, а не скутером; у кроссового — переднее крыло с боковиной
-    const art = await page.evaluate(() => {
-      const f = (k) => { const b = BIKES.find((x) => bikeKey(x) === k); return b && bikeArtFor(b, ENGINES[b.versions ? b.versions[0].engine : b.engine] || ENGINES[b.engine], null, "t"); };
-      const a = f("Motoland Alpha RX 125"), h = f("Hasky A10 Pro NB300");
-      return { alpha: !!a && /t-mpl/.test(a.svg), alphaPins: a ? Object.keys(a.pins).length : 0, mx: !!h && (h.svg.match(/clip-path/g) || []).length };
-    });
-    if (!art.alpha || art.alphaPins < 9) errors.push("Мопед Альфа нарисован не своим шаблоном: " + JSON.stringify(art));
-    if (art.mx < 3) errors.push("Кроссовый рисунок без боковин пластика: " + JSON.stringify(art));
 
     // Поиск в окне «Найди свой мотоцикл»
     await page.locator(".bike-chip").first().click({ timeout: 10000 });
@@ -114,24 +106,19 @@ const server = http.createServer((req, res) => {
     // мотор и вид мотоцикла — во вкладке «Мотоцикл», на главной к нему ведёт плитка «Мотор»
     await page.locator(".home-acts .act", { has: page.locator("b", { hasText: /^Мотор$/ }) }).click();
     await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
-    // по умолчанию — рисунок; фото модели — по кнопке «Фото»
-    await page.locator(".bv-toggle button", { hasText: "Фото" }).click();
+    // только фото модели: рисунка и переключателя «Рисунок / Фото» больше нет
     const photoOk = await page.locator(".model-photo.ok").waitFor({ timeout: 8000 }).then(() => true, () => false);
     if (!photoOk) errors.push("Вид «Мотоцикл»: фото модели не показалось");
     else {
-      if (!/DR-Z400S/.test(photoReqs[0] || "")) errors.push("Фото модели: запрос без названия модели — " + photoReqs[0]);
+      if (!photoReqs.some((q) => /DR-Z400S/.test(q || ""))) errors.push("Фото модели: запрос без названия модели — " + photoReqs.join(" | "));
       const src1 = await page.locator(".mp-img").getAttribute("src");
       await page.locator(".mp-next").click();
       await page.locator(".model-photo.ok").waitFor({ timeout: 5000 }).catch(() => {});
       if ((await page.locator(".mp-img").getAttribute("src")) === src1) errors.push("Кнопка «Другое фото» не сменила фото");
-      await page.locator(".bv-toggle button", { hasText: "Рисунок" }).click();
     }
-    // рисунок по геометрии строится, точки узлов на месте
-    await page.locator(".bike-svg").first().waitFor({ timeout: 5000 }).catch(() => {});
-    const artPaths = await page.locator(".bike-svg path").count(), artPins = await page.locator(".bike-svg .pin").count();
-    if (artPaths < 60 || artPins < 5) errors.push(`Рисунок мотоцикла не построился: ${artPaths} фигур, ${artPins} точек`);
-    // фото не загрузилось (нет сети, сервер недоступен) — сам показывается рисунок
-    await page.locator(".bv-toggle button", { hasText: "Фото" }).click();
+    if (await page.locator(".bike-svg, .bv-toggle").count()) errors.push("В «Мотоцикле» остался рисунок или переключатель «Рисунок / Фото»");
+    // узлы мотоцикла (вилка, амортизатор, тормоза…) — кнопками под фото
+    if ((await page.locator(".stage-chips .schip").count()) < 5) errors.push("Вид «Мотоцикл»: нет кнопок узлов под фото");
     // 2D-схемы мотора больше нет; газ проверяем на виде «Мотоцикл» (в 3D без видеокарты кадры слишком редкие)
     const b3d = page.locator(".view-toggle button", { hasText: /^Мотор$/ });
     // Ручка газа: завести, держать — обороты растут, отпустить — падают; при удержании текст не выделяется
@@ -177,8 +164,9 @@ const server = http.createServer((req, res) => {
     // заново открыть «Мотоцикл», чтобы фото грузилось снова (уже без сети картинок)
     await page.locator(".view-toggle button", { hasText: "Фото" }).first().click();
     await page.locator(".view-toggle button", { hasText: "Мотоцикл" }).first().click();
-    const artBack = await page.locator(".bv-note").waitFor({ timeout: 8000 }).then(() => true, () => false);
-    if (!artBack || !(await page.locator(".bike-svg").count())) errors.push("Фото не загрузилось, а рисунок вместо него не показался");
+    // фото не загрузилось (нет сети, сервер картинок недоступен) — сообщение и «Попробовать ещё раз», без рисунка
+    const noPhoto = await page.locator(".model-photo.none .bv-note").waitFor({ timeout: 15000 }).then(() => true, () => false);
+    if (!noPhoto || !(await page.locator(".model-photo.none button", { hasText: "Попробовать ещё раз" }).count())) errors.push("Фото не загрузилось, а сообщение с кнопкой «Попробовать ещё раз» не показалось");
     if (await b3d.count()) await b3d.first().click();
     if (await page.locator(".view-toggle button", { hasText: "Схема" }).count()) errors.push("Вид «Схема» (2D-мотор) всё ещё есть");
     console.log(`Страница открылась: ${counts.bikes} моделей, ${counts.engines} двигателей`);
@@ -317,8 +305,9 @@ const server = http.createServer((req, res) => {
       const name = (await card.locator("b").innerText()).trim();
       await card.click();
       if (await fresh.locator(".onb2").count()) errors.push("Первый заход: после выбора модели окно не закрылось");
-      const shown = await fresh.waitForFunction(() => document.querySelectorAll(".hero-bike svg path").length > 80, null, { timeout: 8000 }).then(() => true, () => false);
-      if (!shown) errors.push("Главная: нет рисунка выбранной модели «" + name + "»");
+      const shown = await fresh.waitForFunction(() => { const im = document.querySelector(".passport .pp-photo.on .pp-img"); return im && /img\/bikes\//.test(im.getAttribute("src")); }, null, { timeout: 8000 }).then(() => true, () => false);
+      if (!shown) errors.push("Главная: в паспорте нет фото выбранной модели «" + name + "»");
+      if (await fresh.locator(".hero-bike").count()) errors.push("Главная: остался рисунок мотоцикла");
       const chip = await fresh.locator(".bike-chip .bc-name").innerText();
       if (chip.trim() !== name) errors.push("Первый заход: выбрана «" + name + "», в шапке «" + chip + "»");
     }

@@ -2,7 +2,7 @@
 //   node scripts/build-assets.js          — собрать (её же запускает scripts/build-pages.js)
 //   node scripts/build-assets.js --check  — только проверить, что сборка свежая (для тестов)
 //
-// Правишь js/data.js, js/app.js, js/bike-art.js, js/motion.js или css/app.css — потом запускай сборку.
+// Правишь js/data.js, js/app.js, js/motion.js или css/app.css — потом запускай сборку.
 // Что она делает:
 //   1) сжимает эти файлы (esbuild) в *.min.js / app.min.css — браузеру меньше качать и разбирать;
 //   2) в index.html ставит ссылки вида js/app.min.js?v=<хэш>: у каждой версии файла свой адрес,
@@ -26,7 +26,6 @@ const check = process.argv.includes("--check");
 const MIN = [
   ["css/app.css", "css/app.min.css"],
   ["js/data.js", "js/data.min.js"],
-  ["js/bike-art.js", "js/bike-art.min.js"],
   ["js/app.js", "js/app.min.js"],
   ["js/motion.js", "js/motion.min.js"],
 ];
