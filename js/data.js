@@ -10796,3 +10796,26 @@ function startTags(e) {
   if (/электро|стартер/i.test(s)) e.groups.push("estart");
   return e;
 }
+
+/* ===== Свечи: исправления по магазинам и дилерам (жалоба: «свечи не те на некоторых моделях») =====
+   PR300 (ZS175FMN и родня) — NGK DR8EA (Regulmoto: «DR8EA (ZS172, PR300)»); питбайки YX140 / YX150 / YX160 — A7TC = NGK C7HSA
+   («A7TC для YX125, YX140, YX160»); Zongshen 190 (ZS1P62YML-2, W190) — NGK CR8E / CPR8EA-9 (10 мм). Свечи-запчасти пересобираем,
+   чтобы в «Запчастях» и в ТО была та же свеча, что в паспорте. */
+(function () {
+  function fixSpark(id, spark, gap) {
+    var e = ENGINES[id];
+    if (!e) return;
+    e.spark = spark;
+    if (gap) e.gap = gap;
+    PARTS.forEach(function (p) { if (p.kind === "spark" && p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (f) { return f !== id; }); });
+    var mine = PARTS.find(function (p) { return p.id === id + "-spark"; });
+    var name = "Свеча " + spark.split(" (")[0].split(" /")[0];
+    if (mine) mine.name = name;
+    else { var p = P(id + "-spark", name, 600, "Расходники", "spark", [id]); p.info = "Под " + e.code; PARTS.unshift(p); }
+  }
+  ["PR300", "FIXCN_PR300PRO", "FIXCN_PR300_5", "FIXCN_CB300RL_6"].forEach(function (id) { fixSpark(id, "NGK DR8EA", "0.6–0.7 мм"); });
+  ["YX140", "1P60FMK"].forEach(function (id) { fixSpark(id, "A7TC (NGK C7HSA)", "0.6–0.7 мм"); });
+  fixSpark("Z190", "NGK CR8E (CPR8EA-9)", "0.7–0.8 мм");
+})();
+/* у каждого мотора с известной свечой — своя свеча в запчастях */
+Object.keys(ENGINES).forEach(function (id) { var s = ENGINES[id].spark; if (s && !/мануал/i.test(s) && !partByKind("spark", ENGINES[id])) { delete (ensureSpark.has || {})[id]; ensureSpark(id, 1); } });
