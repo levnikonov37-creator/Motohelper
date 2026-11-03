@@ -681,7 +681,7 @@ async function shopLine(q, refs) {
     return typeof a === "string" && /^https:\/\//.test(a) ? (a.indexOf("{url}") >= 0 ? a.replace("{url}", encodeURIComponent(url)) : a + encodeURIComponent(url)) : url;
   };
   const link = (name, base) => '<a href="' + href(name, base).replace(/&/g, "&amp;").replace(/"/g, "&quot;") + '">' + name + "</a>";
-  return "🛒 " + query.replace(/&/g, "&amp;").replace(/</g, "&lt;") + ": " + [link("Ozon", "https://www.ozon.ru/search/?text="), link("Авито", "https://www.avito.ru/rossiya?q="), link("WB", "https://www.wildberries.ru/catalog/0/search.aspx?search=")].join(" · ");
+  return "🛒 " + query.replace(/&/g, "&amp;").replace(/</g, "&lt;") + ": " + [link("Ozon", "https://www.ozon.ru/search/?text="), link("Авито", "https://www.avito.ru/rossiya?q="), link("WB", "https://www.wildberries.ru/catalog/0/search.aspx?search="), link("AliExpress", "https://aliexpress.ru/wholesale?SearchText=")].join(" · ");
 }
 
 /* сколько вопросов задали ИИ за 7 дней и о чём — для понедельничного отчёта */
