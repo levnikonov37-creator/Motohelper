@@ -12372,6 +12372,7 @@ function App() {
     eng,
     bike,
     ver,
+    vkey,
     cu,
     setCu,
     resetCu,
@@ -14001,6 +14002,7 @@ function Home(props) {
   })), /*#__PURE__*/React.createElement(Passport, {
     eng: eng,
     bike: bike,
+    vkey: props.vkey,
     go: go
   }), /*#__PURE__*/React.createElement("div", {
     className: "actions4 home-acts"
@@ -14024,19 +14026,26 @@ function Home(props) {
 function Passport({
   eng,
   bike,
+  vkey,
   go
 }) {
+  /* своё фото владельца (вкладка «Моё фото») — главнее фото модели */
+  const mine = vkey ? load("photo|" + vkey, null) : null;
   const ok = v => v && v !== "—" && !/по мануалу/i.test(v);
   /* фото модели: своё (без фона) — на «подиуме» с подсветкой и отражением; иначе — первое из поиска картинок */
-  const own = bike ? ownPhoto(bike) : "";
+  const own = mine ? "" : bike ? ownPhoto(bike) : "";
   const found = useModelPhotos(bike, null),
     loaded = usePageLoaded();
   const [bad, setBad] = useState({});
   useEffect(() => setBad({}), [bikeKey(bike)]);
-  const web = own ? null : found.wait || !loaded ? null : found.list.find(p => !bad[p.u]) || null;
-  const ph = own || (web ? web.u : "");
-  const [phOk, setPhOk] = useState(0);
-  useEffect(() => setPhOk(0), [ph]);
+  const web = own || mine ? null : found.wait || !loaded ? null : found.list.find(p => !bad[p.u]) || null;
+  const ph = mine || own || (web ? web.u : "");
+  /* состояние — по адресу снимка: своё фото из памяти браузера грузится мгновенно, раньше эффектов */
+  const [st, setSt] = useState({});
+  const phOk = st[ph] || 0,
+    setPhOk = v => setSt(o => Object.assign({}, o, {
+      [ph]: v
+    }));
   const rows = [["Масло", eng.oil, ok(eng.oilVol) ? eng.oilVol : ""], ["Свеча", eng.spark, ok(eng.gap) ? "зазор " + eng.gap : ""], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", ""] : ["Клапаны", ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", "впуск / выпуск, мм"], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : ""]];
   return /*#__PURE__*/React.createElement("div", {
     className: "panel passport" + (ph && phOk >= 0 ? " has-ph" : ""),
@@ -14045,7 +14054,10 @@ function Passport({
     type: "button",
     className: "pp-photo" + (phOk > 0 ? " on" : "") + (own ? "" : " web"),
     "aria-label": "Открыть " + bike.brand + " " + bike.name,
-    onClick: () => go("bike", "overview")
+    onClick: () => {
+      if (mine) save("view4", "photo");
+      go("bike", "overview");
+    }
   }, /*#__PURE__*/React.createElement("span", {
     className: "pp-spot",
     "aria-hidden": "true"
@@ -14329,31 +14341,54 @@ function BikePage(props) {
 /* [коротко, полностью, слова для поиска, раздел, подраздел] */
 const SEARCH_SECTIONS = [["Что сломалось?", "Что сломалось? Поиск поломки по симптомам", "поломка неисправность диагностика причина симптом", "repair", "find"], ["ТО по пробегу", "ТО по пробегу: что и когда менять", "то обслуживание регламент замена масла пробег", "repair", "to"], ["Узлы", "Узлы мотоцикла", "узлы двигатель ходовая", "repair", "units"], ["Инструкции", "Все инструкции по ремонту", "инструкции ремонт как сделать своими руками", "repair", "guides"], ["Справочник", "Справочник: моменты затяжки, давление в шинах, коды ошибок", "справочник момент затяжки давление шин коды ошибок цвет свечи жидкости", "repair", "ref"], ["Зима: консервация", "Зима: консервация мотоцикла — чек-лист", "зима зимнее хранение консервация хранить гараж холод", "repair", "season:winter"], ["Весна: к сезону", "Весна: подготовка мотоцикла к сезону — чек-лист", "весна сезон расконсервация после зимы первый выезд", "repair", "season:spring"], ["Тюнинг", "Тюнинг и доработки", "тюнинг доработки мощность прирост проект", "tuning"], ["Характеристики", "Характеристики мотоцикла", "характеристики мощность объём скорость максималка регулировки жиклёры зазоры", "bike", "overview"], ["Настроить", "Настроить свой мотоцикл", "настроить изменить свап мотор жиклёры звёзды", "bike", "edit"], ["Запчасти", "Запчасти и корзина", "запчасти корзина купить магазин озон авито", "parts"], ["ИИ-механик", "ИИ-механик", "ии ai механик чат спросить", "ai"]];
 /* слова запроса; у каждого — основа без окончания («масло» найдёт «масла»), вариант в другой раскладке и транслитом */
+/* служебные слова вопросов — не ищем по ним («как поменять масло» = «поменять масло») */
+const SR_STOP = new Set("как какой какая какое какие каким сколько почему зачем что чем где куда когда нужно надо можно ли лить заливать залить ставить стоит мой моя моего моем моём мне у в во на с со и а по для при если делать сделать мотоцикл мотоцикла мотоцикле мото байк это".split(" "));
+/* синонимы: начало слова → что ещё искать */
+const SR_SYN = [[/^(поменя|помен|меня|менят|замени|сменит|смени)/, ["замен"]], [/^(шум|шурш|гуд|гул)/, ["шум", "шурш", "лязг", "гул"]], [/^(стук|стуч|цока|цок)/, ["стук", "цокан", "звон"]], [/^(бенз|топл)/, ["бенз", "топлив"]], [/^(акб|аккум)/, ["аккум"]], [/^(заво|запус)/, ["завод", "запуск"]], [/^(тек|теч|подтек)/, ["теч", "тек"]], [/^(греет|перегр)/, ["перегр", "греет"]], [/^(плох|тяжел|туго|туж)/, ["тяжел", "плох"]], [/^(зим|мороз|холод)/, ["холод"]], [/^(жар|горяч)/, ["горяч", "жар"]]];
+/* общие слова: убираем, только если в запросе есть что-то ещё («стук в моторе» = «стук») */
+const SR_SOFT = /^(мотор|двигател)/;
 function srTokens(q) {
-  return String(q || "").toLowerCase().replace(/ё/g, "е").split(/[\s,.;:!?«»"()]+/).filter(Boolean).map(t => {
+  let w = String(q || "").toLowerCase().replace(/ё/g, "е").split(/[\s,.;:!?«»"()]+/).filter(t => t && !SR_STOP.has(t));
+  if (w.some(t => !SR_SOFT.test(t))) w = w.filter(t => !SR_SOFT.test(t));
+  return w.map(t => {
     const alts = bfAlts(t);
     /* «кавасаки», «харлей», «ниндзя» → латинское название */
     const al = BF_ALIAS[t] || BF_ALIAS[Object.keys(BF_ALIAS).find(k => k.indexOf(" ") < 0 && t.length >= 4 && k.length > 3 && (t.indexOf(k) === 0 || k.indexOf(t) === 0))];
     if (al) alts.push(al.replace(/-/g, " ").split(" ")[0]);
     let st = t;
     while (st.length > 3 && /[аеиоуыэюяйь]$/.test(st)) st = st.slice(0, -1);
-    return st !== t ? [st].concat(alts) : alts;
+    const out = st !== t ? [st].concat(alts) : alts;
+    /* основа слова: «заводиться» → «заводит», «холодную» → «холод», «клапанов» → «клапа» */
+    if (/^[а-я]{6,}$/.test(t)) out.push(t.slice(0, Math.max(4, t.length - 3)));
+    SR_SYN.forEach(x => {
+      if (x[0].test(t)) x[1].forEach(w => out.indexOf(w) < 0 && out.push(w));
+    });
+    return out;
   });
 }
 /* насколько текст подходит под запрос: 0 — не подходит; больше — если слова стоят в начале */
 function srMatch(text, toks) {
   const s = String(text || "").toLowerCase().replace(/ё/g, "е");
-  let score = 0;
+  let score = 0,
+    hit = 0;
   for (let i = 0; i < toks.length; i++) {
     let best = 0;
     for (let j = 0; j < toks[i].length; j++) {
-      const at = s.indexOf(toks[i][j]);
+      const w = toks[i][j];
+      let at = s.indexOf(w);
+      /* короткие слова («не», «gy») — только с начала слова, иначе «не» найдётся в «глохНЕт» */
+      while (at > 0 && w.length <= 2 && !/[\s\-(«"\/]/.test(s[at - 1])) at = s.indexOf(w, at + 1);
       if (at >= 0) best = Math.max(best, at === 0 ? 3 : /[\s\-(«"\/]/.test(s[at - 1]) ? 2 : 1);
     }
-    if (!best) return 0;
-    score += best;
+    if (best) {
+      hit++;
+      score += best;
+    }
   }
-  return score;
+  /* все слова — лучше всего; из 3+ слов можно не совпасть одному (ниже по списку) */
+  const need = toks.length <= 2 ? toks.length : Math.max(2, Math.round(toks.length * 0.67));
+  if (!hit || hit < need) return 0;
+  return score + (hit === toks.length ? 2 : 0);
 }
 function siteSearch(q, ctx, opt) {
   const raw = String(q || "").trim();
@@ -14378,6 +14413,18 @@ function siteSearch(q, ctx, opt) {
       extra: extra
     });
   }
+  /* вопрос про свой мотоцикл («какое масло», «зазор свечи») — сразу ответ из паспорта мотора */
+  const ql = raw.toLowerCase().replace(/ё/g, "е"),
+    okv = v => v && v !== "—";
+  [[/масл/.test(ql) && !/вилк|фильтр|сальник|кардан|редукт|коробк|кпп/.test(ql) && okv(eng.oil), "Масло: " + eng.oil + (okv(eng.oilVol) ? ", " + eng.oilVol : "") + (eng.oilInt ? " · менять каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : "")], [/свеч/.test(ql) && okv(eng.spark), "Свеча: " + eng.spark + (okv(eng.gap) ? ", зазор " + eng.gap : "")], [/клапан/.test(ql) && eng.stroke === "4T" && okv(eng.valveIn), "Зазоры клапанов на холодную: впуск " + eng.valveIn + ", выпуск " + eng.valveEx], [/бенз|топлив/.test(ql) && okv(eng.fuel), "Топливо: " + eng.fuel], [/жикл/.test(ql) && okv(eng.jetMain), "Жиклёры: главный " + eng.jetMain + (okv(eng.jetPilot) ? ", холостой " + eng.jetPilot : "")], [/антифр|тосол|охлажд/.test(ql) && okv(eng.coolant), "Антифриз: " + eng.coolant], [/холост|оборот/.test(ql) && okv(eng.idle), "Холостой ход: " + eng.idle + " об/мин"]].forEach((a, i) => {
+    if (a[0]) out.push({
+      k: "a" + i,
+      type: "Ответ",
+      t: a[1],
+      act: () => go("bike", "overview"),
+      s: 20
+    });
+  });
   SEARCH_SECTIONS.forEach((x, i) => {
     if (!repairOnly || x[3] === "repair") add("Раздел", x[1], () => go(x[3], x[4]), x[2], 3, "x" + i);
   });

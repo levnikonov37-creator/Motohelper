@@ -69,6 +69,11 @@ const server = http.createServer((req, res) => {
     if (des.ybsKickSym || des.ybsKickPart || des.ybsKickCause) errors.push("YBS300 без кика, а сайт предлагает кикстартер: " + JSON.stringify(des));
     if (!des.ybsCard) errors.push("ИИ-механик не знает, что у YBS300 нет кикстартера");
     if (!des.fmmKick || !des.ownNoKick) errors.push("Кик: у 172FMM должен быть, а «сняли кик» у своего экземпляра — убирать его: " + JSON.stringify(des));
+    // поиск понимает вопросы: «какое масло» — ответ из паспорта, «не заводится на холодную», «стук в моторе» — не пусто
+    const sr = await page.evaluate(() => { const b = BIKES.find((x) => bikeKey(x) === "Avantis Enduro 250"), eng = buildSpec(b, b.versions[0], {}), c = { eng, go: () => {}, switchBike: () => {} };
+      return ["какое масло", "зазор свечи", "не заводится на холодную", "стук в моторе", "как поменять масло"].map((q) => [q, siteSearch(q, c, { max: 6 }).map((r) => r.type)]); });
+    sr.forEach(([q, t]) => { if (!t.length) errors.push("Поиск: «" + q + "» ничего не нашёл"); });
+    if (sr[0][1][0] !== "Ответ" || sr[1][1][0] !== "Ответ") errors.push("Поиск: на «какое масло» / «зазор свечи» нет ответа из паспорта");
     if (!des.pitHours || !des.mxHours) errors.push("Питбайк и кроссовый мотоцикл: ТО должно быть в моточасах: " + JSON.stringify(des));
 
     // Поиск в окне «Найди свой мотоцикл»
