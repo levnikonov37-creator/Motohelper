@@ -59,6 +59,8 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     // сообщения боту в личку (Telegram шлёт их сюда с секретом из TG_HOOK_SECRET)
     if (new URL(request.url).pathname === "/tg-hook") return botHook(request, env, ctx);
+    // переход в магазин по партнёрке: /go?u=<адрес на aliexpress.ru> → диплинк Admitad на эту страницу
+    if (new URL(request.url).pathname === "/go") return goShop(request, env, ctx);
     if (!allowed(request.headers.get("Origin"))) return json({ error: "not_allowed" }, 403);
     if (request.method === "GET") {
       const u = new URL(request.url);
@@ -902,4 +904,62 @@ async function geminiTimes(env) {
     }
   }));
   return { ok: true, order: GEMINI_MODELS, times: out };
+}
+
+/* ===== Партнёрские переходы на AliExpress через Admitad =====
+   У AliExpress в Admitad на каждую страницу своя ссылка, поэтому диплинк берём у API Admitad
+   (метод deeplink_generator) и кладём в KV на 30 дней. Нужны секреты ADMITAD_CLIENT_ID и ADMITAD_CLIENT_SECRET
+   (Admitad → настройки → доступ к API). Площадку и программу находим сами (или ADMITAD_W_ID / ADMITAD_C_ID).
+   Без ключей или при ошибке — стандартная ссылка программы (ADMITAD_ALI_DEFAULT) или сама страница. */
+const GO_HOSTS = /^https:\/\/(www\.)?aliexpress\.(ru|com)\//;
+async function goShop(request, env, ctx) {
+  const target = new URL(request.url).searchParams.get("u") || "";
+  if (!GO_HOSTS.test(target) || target.length > 600) return new Response("bad link", { status: 400 });
+  const kv = env.FEEDBACK, key = "dl|" + target;
+  let link = kv ? await kv.get(key) : null;
+  if (!link) {
+    try { link = await admitadDeeplink(env, target); } catch (e) { console.log("deeplink", e && e.message); }
+    if (link && kv) ctx.waitUntil(kv.put(key, link, { expirationTtl: 30 * 86400 }));
+  }
+  return new Response(null, { status: 302, headers: { Location: link || env.ADMITAD_ALI_DEFAULT || target, "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } });
+}
+async function admitadToken(env) {
+  const kv = env.FEEDBACK;
+  const cached = kv && await kv.get("admitad|token");
+  if (cached) return cached;
+  const r = await fetch("https://api.admitad.com/token/", {
+    method: "POST",
+    headers: { Authorization: "Basic " + btoa(env.ADMITAD_CLIENT_ID + ":" + env.ADMITAD_CLIENT_SECRET), "Content-Type": "application/x-www-form-urlencoded" },
+    body: "grant_type=client_credentials&client_id=" + encodeURIComponent(env.ADMITAD_CLIENT_ID) + "&scope=" + encodeURIComponent("deeplink_generator websites advcampaigns_for_website")
+  });
+  const j = await r.json();
+  if (!j.access_token) throw new Error("token " + r.status + " " + JSON.stringify(j).slice(0, 200));
+  if (kv) await kv.put("admitad|token", j.access_token, { expirationTtl: Math.max(60, (j.expires_in || 3600) - 300) });
+  return j.access_token;
+}
+async function admitadIds(env, tok) {
+  if (env.ADMITAD_W_ID && env.ADMITAD_C_ID) return [env.ADMITAD_W_ID, env.ADMITAD_C_ID];
+  const kv = env.FEEDBACK;
+  const cached = kv && await kv.get("admitad|ids");
+  if (cached) return cached.split(",");
+  const get = (path) => fetch("https://api.admitad.com" + path, { headers: { Authorization: "Bearer " + tok } }).then((r) => r.json());
+  const sites = (await get("/websites/v2/?limit=100")).results || [];
+  const site = sites.find((s) => /motohelper/i.test((s.name || "") + " " + (s.site_url || ""))) || sites[0];
+  if (!site) throw new Error("no website");
+  const progs = (await get("/advcampaigns/website/" + site.id + "/?limit=500")).results || [];
+  const ali = progs.find((c) => /aliexpress/i.test(c.name || "") && (c.connection_status || "active") === "active");
+  if (!ali) throw new Error("no aliexpress program");
+  const ids = [String(site.id), String(ali.id)];
+  if (kv) await kv.put("admitad|ids", ids.join(","), { expirationTtl: 7 * 86400 });
+  return ids;
+}
+async function admitadDeeplink(env, target) {
+  if (!env.ADMITAD_CLIENT_ID || !env.ADMITAD_CLIENT_SECRET) return null;
+  const tok = await admitadToken(env);
+  const [w, c] = await admitadIds(env, tok);
+  const r = await fetch("https://api.admitad.com/deeplink/" + w + "/advcampaign/" + c + "/?subid=site&ulp=" + encodeURIComponent(target), { headers: { Authorization: "Bearer " + tok } });
+  const j = await r.json();
+  const link = Array.isArray(j) && j[0] && j[0].link;
+  if (!link || !/^https:\/\//.test(link)) throw new Error("deeplink " + r.status + " " + JSON.stringify(j).slice(0, 200));
+  return link;
 }
