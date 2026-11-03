@@ -214,6 +214,7 @@ npm run test:data    # только база, без браузера, за се
 ```
 
 - `aff` — партнёрские ссылки магазинов из кнопок «Где купить» (ключи: `Авито`, `Ozon`, `WB`, `Маркет`, `AliExpress`). `{url}` заменяется
+- AliExpress (Admitad): у программы своя ссылка на каждую страницу, поэтому `aff.AliExpress` ведёт на ИИ-сервер `…/go?u={url}`, а он берёт диплинк у API Admitad и запоминает его на 30 дней. Для этого в Cloudflare → motohelper-ai → Settings → Variables and Secrets добавь секреты `ADMITAD_CLIENT_ID` и `ADMITAD_CLIENT_SECRET` (Admitad → настройки → доступ к API). Без них переход идёт по стандартной ссылке программы (`ADMITAD_ALI_DEFAULT` в `worker/wrangler.toml`).
   адресом поиска в магазине; без `{url}` адрес дописывается в конец. Такие ссылки получают `rel="sponsored"`.
 - `rsya.blockId` — блок Рекламной сети Яндекса: на главной приложения и на всех страницах каталога (после
   `node scripts/build-pages.js`). Пока поля нет — рекламы нет.
