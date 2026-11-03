@@ -24,4 +24,7 @@ crons = ["0 15 * * *", "0 6 * * 1"]
 
 # партнёрка AliExpress (Admitad): стандартная ссылка программы — запасной вариант для /go, пока нет ключей API
 [vars]
+# площадка Motohelper и программа «AliExpress RU&CIS» в Admitad (не секрет; ключи API — секреты в Cloudflare)
+ADMITAD_W_ID = "3016101"
+ADMITAD_C_ID = "25179"
 ADMITAD_ALI_DEFAULT = "https://ali.click/9d7cp17?gc=vv3q4oey1vb0f020d6f6b6d1781017&erid=2bL9aMPo2e49hMef4pdzo6JkYp"

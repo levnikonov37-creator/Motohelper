@@ -943,11 +943,12 @@ async function admitadIds(env, tok) {
   const cached = kv && await kv.get("admitad|ids");
   if (cached) return cached.split(",");
   const get = (path) => fetch("https://api.admitad.com" + path, { headers: { Authorization: "Bearer " + tok } }).then((r) => r.json());
-  const sites = (await get("/websites/v2/?limit=100")).results || [];
+  const sj = await get("/websites/v2/?limit=100"), sites = Array.isArray(sj) ? sj : sj.results || [];
   const site = sites.find((s) => /motohelper/i.test((s.name || "") + " " + (s.site_url || ""))) || sites[0];
   if (!site) throw new Error("no website");
   const progs = (await get("/advcampaigns/website/" + site.id + "/?limit=500")).results || [];
-  const ali = progs.find((c) => /aliexpress/i.test(c.name || "") && (c.connection_status || "active") === "active");
+  const ok = (c) => /aliexpress/i.test(c.name || "") && (c.connection_status || "active") === "active";
+  const ali = progs.find((c) => ok(c) && /RU/.test(c.name)) || progs.find(ok);
   if (!ali) throw new Error("no aliexpress program");
   const ids = [String(site.id), String(ali.id)];
   if (kv) await kv.put("admitad|ids", ids.join(","), { expirationTtl: 7 * 86400 });
