@@ -744,6 +744,20 @@ function shopHref(sh, q) {
   if (typeof a !== "string" || !/^https:\/\//.test(a)) return url;
   return a.indexOf("{url}") >= 0 ? a.replace("{url}", encodeURIComponent(url)) : a + encodeURIComponent(url);
 }
+/* маркировка рекламы: у партнёрской ссылки — пометка «реклама» и erid в подсказке */
+function shopAd(sh) {
+  const a = SITE_CFG.aff && SITE_CFG.aff[sh[0]];
+  if (typeof a !== "string" || !/^https:\/\//.test(a)) return null;
+  const m = /[?&]erid=([^&]+)/.exec(a);
+  return "Реклама. " + sh[0] + (m ? ", erid: " + decodeURIComponent(m[1]) : "");
+}
+function shopLabel(sh) {
+  const ad = shopAd(sh);
+  return ad ? [sh[0], /*#__PURE__*/React.createElement("small", {
+    key: "ad",
+    className: "ad-mark"
+  }, " реклама")] : sh[0];
+}
 /* Запрос в магазин: что за деталь + к чему. Магазины ищут по всем словам, поэтому лишнее только мешает:
    - расходники и детали со своей маркировкой (свечи, масла, смазки, подшипник 6301, покрышка 110/100-18,
      аккумулятор 12V 7Ah) — только название + «мото», без модели (иначе выдаёт наклейки и пластик на эту модель);
@@ -812,8 +826,9 @@ function BuyLinks({
     className: "sh-" + ({ "Авито": "av", "Ozon": "oz", "WB": "wb", "Маркет": "ym" }[sh[0]] || "x"),
     href: shopHref(sh, q),
     target: "_blank",
-    rel: SITE_CFG.aff && SITE_CFG.aff[sh[0]] ? "sponsored noopener" : "noopener"
-  }, sh[0])));
+    rel: shopAd(sh) ? "sponsored noopener" : "noopener",
+    title: shopAd(sh) || undefined
+  }, shopLabel(sh))));
 }
 /* Рекламный блок РСЯ: появляется, только если в ai-config.json задан rsya.blockId; иначе ничего не рисует */
 function AdSlot({
@@ -16443,8 +16458,9 @@ function TuneCatalog({
       className: "chip",
       href: shopHref(sh, q),
       target: "_blank",
-      rel: "noopener sponsored"
-    }, sh[0]))), isOpen && ok && TUNE_GUIDE[t.id] && guidesFor(eng).find(g => g.id === TUNE_GUIDE[t.id]) && /*#__PURE__*/React.createElement("button", {
+      rel: "noopener sponsored",
+      title: shopAd(sh) || undefined
+    }, shopLabel(sh)))), isOpen && ok && TUNE_GUIDE[t.id] && guidesFor(eng).find(g => g.id === TUNE_GUIDE[t.id]) && /*#__PURE__*/React.createElement("button", {
       className: "link small",
       onClick: () => go("repair", TUNE_GUIDE[t.id])
     }, "\u041A\u0430\u043A \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u2192"), /*#__PURE__*/React.createElement("div", {

@@ -2882,3 +2882,4 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .passport .pp-photo.web:hover .pp-img { transform: scale(1.02); }
 .model-photo.none { display: grid; place-items: center; align-content: center; gap: 10px; min-height: 240px; padding: 24px; text-align: center; color: var(--g-muted, #9AA0A6); border-radius: 14px; background: radial-gradient(70% 60% at 50% 80%, rgba(138,140,255,.10), transparent 70%), #111216; }
 .model-photo.none .bv-note { margin: 0; color: var(--g-ink, #E9EAEC); }
+.ad-mark{font-size:.7em;opacity:.6;font-weight:400}
