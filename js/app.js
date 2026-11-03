@@ -727,7 +727,7 @@ function Issues({
 
 /* ---------- Запчасти ---------- */
 /* Где купить: поиск детали на площадках, в новой вкладке. Код мотора добавляется, если деталь под конкретный мотор */
-const SHOPS = [["Авито", "https://www.avito.ru/rossiya?q="], ["Ozon", "https://www.ozon.ru/search/?text="], ["WB", "https://www.wildberries.ru/catalog/0/search.aspx?search="], ["Маркет", "https://market.yandex.ru/search?text="]];
+const SHOPS = [["Авито", "https://www.avito.ru/rossiya?q="], ["Ozon", "https://www.ozon.ru/search/?text="], ["WB", "https://www.wildberries.ru/catalog/0/search.aspx?search="], ["Маркет", "https://market.yandex.ru/search?text="], ["AliExpress", "https://aliexpress.ru/wholesale?SearchText="]];
 /* Настройки сайта из ai-config.json (один раз на загрузку): партнёрские ссылки магазинов и блок рекламы Яндекса.
    "aff": { "Ozon": "https://партнёрка/…?ulp={url}" } — поиск в магазине идёт через партнёрскую ссылку ({url} — адрес поиска;
    без {url} адрес дописывается в конец). "rsya": { "blockId": "R-A-…" } — показывать рекламный блок РСЯ. */
@@ -16438,7 +16438,7 @@ function TuneCatalog({
       className: "tz-shops"
     }, /*#__PURE__*/React.createElement("span", {
       className: "muted small"
-    }, "\u0413\u0434\u0435 \u043A\u0443\u043F\u0438\u0442\u044C:"), SHOPS.slice(0, 3).map(sh => /*#__PURE__*/React.createElement("a", {
+    }, "\u0413\u0434\u0435 \u043A\u0443\u043F\u0438\u0442\u044C:"), SHOPS.filter(sh => sh[0] !== "Маркет").map(sh => /*#__PURE__*/React.createElement("a", {
       key: sh[0],
       className: "chip",
       href: shopHref(sh, q),
