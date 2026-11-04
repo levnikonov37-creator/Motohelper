@@ -674,7 +674,7 @@ async function shopLine(q, refs) {
   const r0 = refs[0] || "";
   // код мотора из справочника: «мотор ZS172FMM 249 см³» → 172FMM (продавцы пишут без ZS)
   const code = ((/мотор (.+?) \d+ см³/.exec(r0) || [])[1] || "").replace(/^ZS\s*/i, "").replace(/\s*\(.*$/, "");
-  const spark = ((/свеча ([A-Z0-9]+)/.exec(r0) || [])[1]) || "";
+  const spark = ((/свеча (?:NGK |Torch |Denso |Bosch )?([A-Z0-9][A-Z0-9-]+)/.exec(r0) || [])[1]) || "";
   const oil = ((/масло (\d+W-\d+)/.exec(r0) || [])[1]) || "";
   const query = /свеч/.test(p[1]) && spark ? "свеча " + spark : /масло/.test(p[1]) && oil ? "масло " + oil + " мото" : p[2] || !code ? p[1] : p[1] + " " + code;
   if (!SITE_CFG) SITE_CFG = await fetch("https://motohelper.ru/ai-config.json", { cf: { cacheTtl: 3600 } }).then((r) => r.json()).catch(() => ({}));
