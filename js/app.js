@@ -12470,7 +12470,12 @@ function App() {
     rel: "noopener"
   }, /*#__PURE__*/React.createElement(TgIcon, {
     s: 14
-  }), " Канал в Telegram"))), /*#__PURE__*/React.createElement("header", {
+  }), " Канал в Telegram"), /*#__PURE__*/React.createElement("a", {
+    className: "link rail-tg",
+    href: VK_GROUP,
+    target: "_blank",
+    rel: "noopener"
+  }, "Группа ВКонтакте"))), /*#__PURE__*/React.createElement("header", {
     className: "topbar"
   }, /*#__PURE__*/React.createElement("a", {
     className: "brand",
@@ -17748,6 +17753,7 @@ function backupRestore(obj) {
 }
 /* Ссылка на Telegram-канал — на главной и в боковом меню */
 const TG_CHANNEL = "https://t.me/motohelperru";
+const VK_GROUP = "https://vk.com/motohelper_ru37";
 const TG_PATH = "M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.8-3.6-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.5 13.1 1.8 11.6c-1-.3-1-1 .2-1.5L20.6 3c.9-.3 1.6.2 1.3 1.3z";
 function TgIcon({
   s
