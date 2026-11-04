@@ -239,7 +239,7 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv }) {
 ${body}
 ${ask ? askBlock(ask) : ""}
 ${AD}
-<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a></footer>
+<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a> · <a href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a></footer>
 </main>
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}
 ${js ? `<script>${js}</script>` : ""}
