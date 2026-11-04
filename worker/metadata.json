@@ -1,0 +1,5 @@
+{"main_module":"motohelper-ai.js","compatibility_date":"2026-10-08",
+ "bindings":[{"type":"ai","name":"AI"},{"type":"kv_namespace","name":"FEEDBACK","namespace_id":"158eaf5afe82443b80c2ae3b721b57de"},
+  {"type":"plain_text","name":"ADMITAD_W_ID","text":"3016101"},{"type":"plain_text","name":"ADMITAD_C_ID","text":"25179"},
+  {"type":"plain_text","name":"ADMITAD_ALI_DEFAULT","text":"https://ali.click/9d7cp17?gc=vv3q4oey1vb0f020d6f6b6d1781017&erid=2bL9aMPo2e49hMef4pdzo6JkYp"}],
+ "keep_bindings":["secret_text","plain_text"]}
