@@ -1,0 +1,25 @@
+# Выкладка ИИ-сервера (worker/) в Cloudflare после каждого изменения в main.
+# Нужны секреты репозитория: CLOUDFLARE_API_TOKEN (Cloudflare → motohelper-ai → Settings → Builds →
+# «API token for external CI/CD» → Create token) и CLOUDFLARE_ACCOUNT_ID (из адреса dash.cloudflare.com/<ID>/…).
+# Без токена шаг пропускается, проверка не краснеет.
+name: deploy-worker
+on:
+  push:
+    branches: [main]
+    paths: ["worker/**", ".github/workflows/deploy-worker.yml"]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
+        working-directory: worker
+        run: npx --yes wrangler@4 deploy
+      - name: No token
+        if: ${{ env.CLOUDFLARE_API_TOKEN == '' }}
+        run: echo "CLOUDFLARE_API_TOKEN не задан — выкладка пропущена"
