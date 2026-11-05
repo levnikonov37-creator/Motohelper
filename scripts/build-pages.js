@@ -321,6 +321,8 @@ const dupCode = {};
 engIds.forEach((id) => (dupCode[ENGINES[id].code] = (dupCode[ENGINES[id].code] || 0) + 1));
 const popular = engIds.slice().sort((a, b) => bikesOf[b].length - bikesOf[a].length);
 const CMP_BRANDS = ["Motoland", "Kayo", "Regulmoto", "BSE", "Avantis", "Progasi", "Racer", "Irbis", "Stels", "Sharmax", "Apollo", "JHL", "Kove", "CFMOTO"];
+/* марки, по которым много поисковых запросов «не заводится / глохнет …» — им страницы поломок по моделям тоже */
+const PROB_BRANDS = CMP_BRANDS.concat(["Kews", "Zuumav", "Fuego", "Motax", "Hasky", "GR7", "Kovi", "Ataki", "Promax", "Xmotos", "Tekken", "Zontes", "Voge", "Minsk", "Минск"]);
 const FLAGSHIP = ["Motoland TT250", "Kayo T2 250", "Regulmoto Sport-003 PR", "Avantis Enduro 250", "Progasi Super Max 250 RR", "BSE Z8", "Kayo K1 300", "Regulmoto Athlete 300", "Avantis A7 NEW", "Motoland TT125", "BSE PH10 125"];
 /* «модель + поломка»: /m/<модель>/<поломка>/ — шаги проверки с цифрами именно этого мотора (свеча, зазоры, ХХ).
    Только популярные модели: флагманы и по 4 базовые модели каждой марки из CMP_BRANDS на 30 самых частых моторах,
@@ -328,8 +330,8 @@ const FLAGSHIP = ["Motoland TT250", "Kayo T2 250", "Regulmoto Sport-003 PR", "Av
 const PROB = { start: "{M} не заводится", cold: "{M} глохнет на холодную", hot: "{M} глохнет на горячую", idle: "{M} не держит холостые", smoke: "{M} дымит",
   knock: "Стучит мотор {M}", power: "{M} не тянет", overheat: "{M} перегревается", "stall-gear": "{M} глохнет при включении передачи", charge: "На {M} садится аккумулятор" };
 const probBikes = new Set(BIKES.filter((b) => FLAGSHIP.indexOf(b.brand + " " + b.name) >= 0));
-const topE = new Set(popular.slice(0, 30));
-CMP_BRANDS.forEach((br) => BIKES.filter((b) => b.brand === br && topE.has(b.versions[0].engine)).sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name)).slice(0, 4).forEach((b) => probBikes.add(b)));
+const topE = new Set(popular.slice(0, 40));
+PROB_BRANDS.forEach((br) => BIKES.filter((b) => b.brand === br && topE.has(b.versions[0].engine)).sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name)).slice(0, CMP_BRANDS.indexOf(br) >= 0 ? 8 : 4).forEach((b) => probBikes.add(b)));
 // первая буква строчная, остальное как есть: «Слишком жирная смесь 2T» → «слишком жирная смесь 2T»
 const lc1 = (t) => (/^[А-ЯЁ][а-яё]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t);
 const probsFor = (b) => { const e = ENGINES[b.versions[0].engine]; return DIAG.filter((d) => PROB[d.id] && (!d.only || d.only.some((g) => (e.groups || []).indexOf(g) >= 0))); };
@@ -371,6 +373,8 @@ BIKES.forEach((b) => {
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a></section>`;
   }).join("\n");
   const others = BIKES.filter((x) => x.brand === b.brand && x !== b).slice(0, 12);
+  // модели других марок на том же моторе: запчасти и советы у них общие — и перелинковка каталога
+  const twins = (bikesOf[b.versions[0].engine] || []).filter((x) => x !== b && x.brand !== b.brand && x.brand !== "Любая модель").slice(0, 10);
   /* вопрос-ответ: то, что спрашивают в поиске («какое масло в Kayo T2») — видимым блоком и разметкой FAQPage */
   const v0 = b.versions[0], multi = b.versions.length > 1 ? " (" + verName(v0, 0, e0) + ")" : "";
   const okv = (x) => x && x !== "—" && !/мануал/i.test(x);
@@ -390,7 +394,9 @@ BIKES.forEach((b) => {
 ${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}${photoOf(b) ? `<figure class="mphoto"><img src="${photoOf(b)}" alt="${esc(full)}" width="800" height="500" fetchpriority="high"></figure>` : ""}</section>
 ${vers}
 ${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>` : ""}
+${probBikes.has(b) ? "" : `<h2>Если что-то не так</h2><div class="chips">${probsFor(b).slice(0, 8).map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>`}
 ${faqHtml}
+${twins.length ? `<h2>Этот же мотор ${esc(e0.code)} стоит на</h2><div class="chips">${twins.map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div><p><a class="chip" href="/m/motor/${engSlug[b.versions[0].engine]}/">Всё о моторе ${esc(e0.code)} →</a></p>` : ""}
 ${rvBlock(slug, full, b.name)}
 ${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
   const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${e0.oil || "—"}${e0.oilVol ? " " + e0.oilVol : ""}, свеча ${e0.spark || "—"}, зазоры клапанов ${e0.valveIn || "—"} / ${e0.valveEx || "—"}. Слабые места и ремонт.`;
