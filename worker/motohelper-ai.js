@@ -61,6 +61,9 @@ export default {
     if (new URL(request.url).pathname === "/tg-hook") return botHook(request, env, ctx);
     // переход в магазин по партнёрке: /go?u=<адрес на aliexpress.ru> → диплинк Admitad на эту страницу
     if (new URL(request.url).pathname === "/go") return goShop(request, env, ctx);
+    // группа ВКонтакте: /vk-auth — владелец один раз разрешает публикацию, /vk-cb — ответ VK ID
+    if (new URL(request.url).pathname === "/vk-auth") return vkAuth(request, env);
+    if (new URL(request.url).pathname === "/vk-cb") return vkCallback(request, env);
     if (!allowed(request.headers.get("Origin"))) return json({ error: "not_allowed" }, 403);
     if (request.method === "GET") {
       const u = new URL(request.url);
@@ -76,6 +79,8 @@ export default {
       if (u.searchParams.get("reviews")) return listReviews(env, u.searchParams.get("reviews"));
       // Telegram-канал: ?tg=status — что выйдет следующим; ?tg=run — опубликовать пост на сегодня, если ещё не вышел
       if (u.searchParams.get("tg") === "run") return json(await tgRun(env));
+      // группа ВК: ?vk=status — подключена ли публикация
+      if (u.searchParams.get("vk") === "status") return json(await vkStatus(env));
       // отчёт уходит только владельцу бота, так что ручной запуск безопасен
       // &dry=1&token=<DEBUG_TOKEN> — показать текст отчёта, не отправляя
       if (u.searchParams.get("tg") === "report") return json(await dailyReport(env, !!(u.searchParams.get("dry") && env.DEBUG_TOKEN && u.searchParams.get("token") === env.DEBUG_TOKEN)));
@@ -344,7 +349,7 @@ async function tgRun(env) {
       await env.FEEDBACK.delete("tg:sent:" + due.id);
       return { ok: false, error: "telegram: " + (j.description || r.status), id: due.id };
     }
-    return { ok: true, posted: due.id, today };
+    return { ok: true, posted: due.id, today, text: String(due.text) };
   } catch (e) {
     return { ok: false, error: e.message };
   }
@@ -632,6 +637,12 @@ async function tellOwner(env, text) {
 /* раз в день: пост в канал и самопроверка ИИ; итог — в KV «health» (его читает ежедневная проверка по расписанию) */
 async function daily(env) {
   const tg = await tgRun(env);
+  // тот же пост — в группу ВКонтакте (если публикация подключена через /vk-auth)
+  let vk = null;
+  if (tg.ok && tg.posted && tg.text) {
+    vk = await vkPost(env, tg.text).catch((e) => ({ ok: false, error: e.message }));
+    if (vk && !vk.ok && !vk.off) await tellOwner(env, "⚠️ Пост в группу ВК не вышел: " + vk.error);
+  }
   let ai;
   try {
     const r = await selfTest(env);
@@ -639,7 +650,7 @@ async function daily(env) {
   } catch (e) {
     ai = { ok: false, error: e.message };
   }
-  const health = { t: new Date().toISOString(), tg: { ok: tg.ok, posted: tg.posted, error: tg.error }, ai: { ok: ai.ok, provider: ai.provider, error: ai.ok ? undefined : JSON.stringify(ai.error).slice(0, 300) } };
+  const health = { t: new Date().toISOString(), tg: { ok: tg.ok, posted: tg.posted, error: tg.error }, vk: vk && { ok: vk.ok, error: vk.error }, ai: { ok: ai.ok, provider: ai.provider, error: ai.ok ? undefined : JSON.stringify(ai.error).slice(0, 300) } };
   if (env.FEEDBACK) await env.FEEDBACK.put("health", JSON.stringify(health));
   if (!tg.ok) await tellOwner(env, "⚠️ Пост в канал не вышел: " + tg.error);
   return health;
@@ -963,4 +974,71 @@ async function admitadDeeplink(env, target) {
   const link = Array.isArray(j) && j[0] && j[0].link;
   if (!link || !/^https:\/\//.test(link)) throw new Error("deeplink " + r.status + " " + JSON.stringify(j).slice(0, 200));
   return link;
+}
+
+/* ===== Группа ВКонтакте: те же посты, что в Telegram-канале =====
+   ВК публикует на стене группы только по ключу администратора. Владелец один раз открывает
+   <сервер>/vk-auth и разрешает доступ в VK ID (приложение VK_CLIENT_ID, PKCE); сервер хранит ключ в KV
+   и сам его продлевает. Ключ сохраняется, только если вошедший — администратор группы VK_GROUP_ID. */
+const VK_API = "5.199";
+const vkRedirect = (req) => new URL(req.url).origin + "/vk-cb";
+const b64url = (buf) => btoa(String.fromCharCode.apply(null, new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const vkPage = (title, text, ok) => new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + title + '</title><body style="font:17px/1.5 sans-serif;background:#000;color:#f2f2f2;padding:32px 20px;max-width:560px;margin:auto"><h2>' + (ok ? "✅ " : "⚠️ ") + title + "</h2><p>" + text + "</p></body>", { status: ok ? 200 : 400, headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex" } });
+async function vkAuth(request, env) {
+  if (!env.VK_CLIENT_ID || !env.FEEDBACK) return vkPage("Не настроено", "Нет VK_CLIENT_ID или хранилища KV.", false);
+  const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+  const state = b64url(crypto.getRandomValues(new Uint8Array(24)));
+  const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
+  await env.FEEDBACK.put("vk:pkce:" + state, verifier, { expirationTtl: 900 });
+  const q = new URLSearchParams({ response_type: "code", client_id: env.VK_CLIENT_ID, redirect_uri: vkRedirect(request), state, code_challenge: challenge, code_challenge_method: "S256", scope: "wall groups" });
+  return Response.redirect("https://id.vk.com/authorize?" + q, 302);
+}
+async function vkCallback(request, env) {
+  const u = new URL(request.url), state = u.searchParams.get("state") || "", code = u.searchParams.get("code"), device = u.searchParams.get("device_id") || "";
+  if (u.searchParams.get("error")) return vkPage("ВК не дал доступ", (u.searchParams.get("error_description") || u.searchParams.get("error")).replace(/</g, "&lt;"), false);
+  const verifier = state && env.FEEDBACK && (await env.FEEDBACK.get("vk:pkce:" + state));
+  if (!code || !verifier) return vkPage("Ссылка устарела", "Открой подключение заново: " + new URL(request.url).origin + "/vk-auth", false);
+  await env.FEEDBACK.delete("vk:pkce:" + state);
+  const r = await fetch("https://id.vk.com/oauth2/auth", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ grant_type: "authorization_code", code, code_verifier: verifier, client_id: env.VK_CLIENT_ID, device_id: device, redirect_uri: vkRedirect(request), state }) });
+  const t = await r.json().catch(() => ({}));
+  if (!t.access_token) return vkPage("Не получилось", "VK ID: " + String(t.error_description || t.error || r.status).replace(/</g, "&lt;"), false);
+  const scope = String(t.scope || "");
+  const g = await vkCall("groups.getById", { group_id: env.VK_GROUP_ID, fields: "is_admin" }, t.access_token).catch((e) => ({ error: e.message }));
+  const grp = g && (g.groups || g)[0];
+  if (!grp || !grp.is_admin) return vkPage("Нужен администратор группы", "Войди тем аккаунтом ВК, который управляет группой MotoHelper." + (g && g.error ? " (" + String(g.error).replace(/</g, "&lt;") + ")" : ""), false);
+  await env.FEEDBACK.put("vk:auth", JSON.stringify({ access: t.access_token, refresh: t.refresh_token, exp: Date.now() + (t.expires_in || 3600) * 1000, device, user: t.user_id, scope }));
+  if (!/\bwall\b/.test(scope)) return vkPage("Нет доступа к стене", "ВК выдал права: «" + scope.replace(/</g, "&lt;") + "». Без «wall» посты в группу публиковать нельзя.", false);
+  return vkPage("Группа подключена", "Теперь каждый новый пост из Telegram-канала будет выходить и в группе «" + String(grp.name || "").replace(/</g, "&lt;") + "». Эту страницу можно закрыть.", true);
+}
+async function vkCall(method, params, token) {
+  const r = await fetch("https://api.vk.com/method/" + method, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(Object.assign({}, params, { access_token: token, v: VK_API })) });
+  const j = await r.json();
+  if (j.error) throw new Error(method + ": " + j.error.error_msg);
+  return j.response;
+}
+async function vkToken(env) {
+  const raw = env.FEEDBACK && (await env.FEEDBACK.get("vk:auth"));
+  if (!raw) return null;
+  const a = JSON.parse(raw);
+  if (a.exp - Date.now() > 120e3) return a.access;
+  const r = await fetch("https://id.vk.com/oauth2/auth", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: a.refresh, client_id: env.VK_CLIENT_ID, device_id: a.device, state: b64url(crypto.getRandomValues(new Uint8Array(16))) }) });
+  const t = await r.json().catch(() => ({}));
+  if (!t.access_token) throw new Error("ключ ВК не продлился (" + (t.error_description || t.error || r.status) + ") — открой /vk-auth ещё раз");
+  await env.FEEDBACK.put("vk:auth", JSON.stringify(Object.assign(a, { access: t.access_token, refresh: t.refresh_token || a.refresh, exp: Date.now() + (t.expires_in || 3600) * 1000 })));
+  return t.access_token;
+}
+async function vkPost(env, text) {
+  if (!env.VK_GROUP_ID) return { ok: false, off: true, error: "нет VK_GROUP_ID" };
+  const token = await vkToken(env);
+  if (!token) return { ok: false, off: true, error: "группа ВК не подключена (/vk-auth)" };
+  const res = await vkCall("wall.post", { owner_id: "-" + env.VK_GROUP_ID, from_group: 1, message: String(text).slice(0, 15000) }, token);
+  return { ok: true, post: res && res.post_id };
+}
+async function vkStatus(env) {
+  const raw = env.FEEDBACK && (await env.FEEDBACK.get("vk:auth"));
+  if (!raw) return { ok: false, connected: false };
+  const a = JSON.parse(raw);
+  return { ok: true, connected: true, scope: a.scope, expiresIn: Math.round((a.exp - Date.now()) / 60000) + " мин" };
 }

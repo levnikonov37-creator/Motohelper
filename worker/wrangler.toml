@@ -27,4 +27,7 @@ crons = ["0 15 * * *", "0 6 * * 1"]
 # площадка Motohelper и программа «AliExpress RU&CIS» в Admitad (не секрет; ключи API — секреты в Cloudflare)
 ADMITAD_W_ID = "3016101"
 ADMITAD_C_ID = "25179"
+# группа ВКонтакте vk.com/motohelper_ru37 и приложение VK ID (не секрет; ключ хранится в KV после /vk-auth)
+VK_CLIENT_ID = "54877491"
+VK_GROUP_ID = "242955472"
 ADMITAD_ALI_DEFAULT = "https://ali.click/9d7cp17?gc=vv3q4oey1vb0f020d6f6b6d1781017&erid=2bL9aMPo2e49hMef4pdzo6JkYp"
