@@ -17,33 +17,55 @@
 > *Game Settings → Security → Enable Studio Access to API Services*. Это нормально:
 > в окне Output будет предупреждение `Playing WITHOUT saving`.
 
-## Как опубликовать
+## Как опубликовать (один раз руками, дальше — само)
 
-1. File → **Publish to Roblox** → придумай название и описание.
-2. *Game Settings → Security*: включи **Enable Studio Access to API Services**.
-3. На [create.roblox.com](https://create.roblox.com/dashboard/creations) открой игру:
-   * **Places → Max Players = 6** (в игре 6 гаражей);
-   * заполни **анкету возрастного рейтинга (Maturity & Compliance)** — без неё игру не покажут;
-   * сделай иконку 512×512 и 2–3 скриншота-обложки (это решает, будут ли кликать).
-4. Переключи игру в **Public**.
+Создать новую игру через API Roblox не даёт, поэтому первый раз — руками, ~10 минут.
+Дальше GitHub после каждого изменения в `main` сам заливает новую версию, создаёт пропуска
+и товары за Robux и вписывает их ID в код (`.github/workflows/roblox.yml`).
 
-## Как подключить донат (здесь деньги)
+**1. Создай игру.** Открой `build/MotoEmpireTycoon.rbxl` в Studio → File → **Publish to Roblox** →
+«Create new experience», название `Moto Empire Tycoon`.
 
-Все настройки — в одном файле: `src/shared/Config.luau`.
+**2. Настрой её** на [create.roblox.com](https://create.roblox.com/dashboard/creations) → игра:
+* *Places* → стартовое место → *Settings* → **Max Players = 6** (в игре 6 гаражей; если оставить 50,
+  седьмой игрок останется без гаража);
+* **Maturity & Compliance** — заполни анкету, без неё игру не покажут;
+* *Places → Thumbnails*: иконка `assets/game-icon.png`, обложки `assets/thumbnail-1.png`, `thumbnail-2.png`;
+* скопируй **Universe ID** (на странице игры: «⋯» → Copy Universe ID) и **Place ID** (*Places* → «⋯» → Copy Place ID).
 
-**Game Passes** (покупают один раз). На create.roblox.com → твоя игра → *Monetization → Passes*
-создай 4 пропуска и вставь их ID вместо `Id = 0`:
+**3. Создай ключ API**: [create.roblox.com/dashboard/credentials](https://create.roblox.com/dashboard/credentials)
+→ *Create API Key*:
+* *Access Permissions* → добавь и выбери свою игру:
+  `universe-places` (Write), `game-pass` (Read + Write), `developer-product` (Read + Write), `universe` (Write);
+* *Accepted IP Addresses*: `0.0.0.0/0` (GitHub заходит с разных адресов);
+* срок — без ограничения или подольше. Скопируй ключ (его покажут один раз).
 
-| Ключ в Config | Что даёт | Цена (ориентир) |
+**4. Отдай всё GitHub**: репозиторий → *Settings → Secrets and variables → Actions → New repository secret*:
+`ROBLOX_API_KEY`, `ROBLOX_UNIVERSE_ID`, `ROBLOX_PLACE_ID`.
+
+**5. Запусти**: *Actions → roblox → Run workflow* (или просто влей изменения в `main`). За пару минут
+GitHub создаст 4 пропуска и 4 товара с иконками и ценами из `store.json`, вставит их ID в
+`Config.luau`, обновит описание игры и опубликует её. Повторный запуск ничего не дублирует.
+
+**6. Открой игру для всех**: на странице игры переключи **Public**. Готово.
+
+## Донат (здесь деньги)
+
+Цены и тексты — в `store.json`, ID пишутся в `src/shared/Config.luau` автоматически
+(можно и руками: *Monetization → Passes / Developer Products* и вписать ID вместо `Id = 0`).
+
+**Game Passes** (покупают один раз):
+
+| Ключ в Config | Что даёт | Цена |
 |---|---|---|
 | `DoubleCash` | x2 ко всем деньгам | 399 R$ |
 | `AutoCollect` | деньги сразу в кошелёк | 149 R$ |
 | `TurboDroppers` | станки в 1.5 раза быстрее | 249 R$ |
 | `VIP` | +25% денег и золотой тег [VIP] в чате | 299 R$ |
 
-**Developer Products** (покупают сколько угодно). *Monetization → Developer Products*:
+**Developer Products** (покупают сколько угодно):
 
-| Ключ | Что даёт | Цена (ориентир) |
+| Ключ | Что даёт | Цена |
 |---|---|---|
 | `Boost` | x2 к деньгам на 15 минут | 49 R$ |
 | `CashSmall` | 15 минут дохода (не меньше $2.5K) | 25 R$ |
@@ -113,6 +135,8 @@ rojo build default.project.json -o build/MotoEmpireTycoon.rbxl
 | `src/server/Services/MonetizationService.luau` | пропуска и покупки за Robux |
 | `src/server/Services/Builders.luau`, `WorldBuilder.luau` | как выглядят станки, байки и карта |
 | `src/client/*` | интерфейс: деньги, магазин, награды, подсказки |
+| `store.json`, `assets/` | цены, тексты и иконки пропусков/товаров, иконка и обложки игры |
+| `tools/roblox-cloud.mjs` | выкладка через Open Cloud (её запускает GitHub Actions) |
 
 Чтобы заменить кубики на красивые модели: положи модель в ServerStorage и в нужной функции
 `Builders.luau` клонируй её вместо постройки из Part'ов. Логика игры от этого не меняется.
