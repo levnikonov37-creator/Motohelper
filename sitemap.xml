@@ -4396,6 +4396,36 @@
   <url><loc>https://motohelper.ru/m/motoland-mx140/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motoland-mx140/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motoland-mx140/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-mx300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-rz200/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-tt155/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-t1/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-t1/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-t1/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4436,6 +4466,46 @@
   <url><loc>https://motohelper.ru/m/kayo-k4-mx/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-k4-mx/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-k4-mx/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt140/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-kt160/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-ts155/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-tt125/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/regulmoto-lfa/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/regulmoto-lfa/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/regulmoto-lfa/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4476,6 +4546,46 @@
   <url><loc>https://motohelper.ru/m/regulmoto-te-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/regulmoto-te-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/regulmoto-te-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-te-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zr-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/bse-j1/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/bse-j1/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/bse-j1/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4516,6 +4626,36 @@
   <url><loc>https://motohelper.ru/m/bse-t8/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/bse-t8/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/bse-t8/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-t9/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z6/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/bse-z10/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/avantis-a1/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/avantis-a1/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/avantis-a1/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4556,6 +4696,36 @@
   <url><loc>https://motohelper.ru/m/avantis-a8/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/avantis-a8/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/avantis-a8/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-basic/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-mt300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/avantis-a7-lux/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-race-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-race-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-race-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4576,6 +4746,14 @@
   <url><loc>https://motohelper.ru/m/progasi-race-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-race-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-race-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-race-450/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-race-450/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-race-450/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-race-450/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-race-450/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-race-450/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-race-450/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-race-450/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-gaudi-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-gaudi-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-gaudi-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4596,6 +4774,36 @@
   <url><loc>https://motohelper.ru/m/progasi-ibiza-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-ibiza-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/progasi-ibiza-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-palma-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-150/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/progasi-smart-160/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-z5/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-z5/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-z5/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4616,6 +4824,16 @@
   <url><loc>https://motohelper.ru/m/racer-z6-pr/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-z6-pr/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-z6-pr/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-rc50-f/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-nitro-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-nitro-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-nitro-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4626,6 +4844,16 @@
   <url><loc>https://motohelper.ru/m/racer-nitro-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-nitro-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-nitro-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-alpha-rc50/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-pitbike-z1/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-pitbike-z1/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-pitbike-z1/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4636,6 +4864,36 @@
   <url><loc>https://motohelper.ru/m/racer-pitbike-z1/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-pitbike-z1/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/racer-pitbike-z1/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-pitbike-z2/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/racer-trophy-110/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-z50r/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/irbis-gr-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/irbis-gr-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/irbis-gr-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4676,6 +4934,36 @@
   <url><loc>https://motohelper.ru/m/irbis-ttr250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/irbis-ttr250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/irbis-ttr250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-vj-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-xr250r/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/irbis-ttr125r/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-sb-200/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-sb-200/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-sb-200/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4696,6 +4984,16 @@
   <url><loc>https://motohelper.ru/m/stels-pit-125/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-pit-125/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-pit-125/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-delta-50/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-delta-125/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-delta-125/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-delta-125/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4716,6 +5014,36 @@
   <url><loc>https://motohelper.ru/m/stels-flame-200/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-flame-200/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/stels-flame-200/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-orion-110/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/stels-enduro-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-190/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sharmax-sport-230/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sharmax-sport-230/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sharmax-sport-230/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4756,6 +5084,36 @@
   <url><loc>https://motohelper.ru/m/sharmax-sport-320/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sharmax-sport-320/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sharmax-sport-320/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-powermax-330/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/sharmax-sport-300-air/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/apollo-m3-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/apollo-m3-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/apollo-m3-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4796,6 +5154,56 @@
   <url><loc>https://motohelper.ru/m/apollo-rxf-150/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/apollo-rxf-150/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/apollo-rxf-150/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-rxf-155/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-agb-37-125/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-db-x18-150/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/apollo-f5-300-nb300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lk140/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/jhl-l5-nb300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/jhl-l5-nb300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/jhl-l5-nb300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4836,4 +5244,516 @@
   <url><loc>https://motohelper.ru/m/jhl-z6-nb300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/jhl-z6-nb300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/jhl-z6-nb300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-h6-ybs300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx3-pr300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/jhl-lx6-nb300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k16-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k18-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kews-k21-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k5-lite/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zuumav-k8-nb300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-evo-450/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-evo-450/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-evo-450/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-evo-450/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-evo-450/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-evo-450/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-evo-450/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-evo-450/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-rambolor-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fuego-discovery-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-ex-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-140/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-mx-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motax-xr-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-pro/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f6-racing/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-f7-racing/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hasky-v4-racing/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f250a-enduro/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-t250l-enduro/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-nb300-motard/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gr7-f300l-4t-182mn-fcr-enduro-optimum/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-pro-300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-lite-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kovi-300-pro-s/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yami/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-yomi/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef125/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ataki-ef250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-k1-pr300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-touring-pr300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-nb300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb155/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb27-140/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb33-125/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/xmotos-xb88-190/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-450/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-450/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-450/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-450/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-450/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-450/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-450/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-450/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-pro/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tekken-300-lite/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650ds/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650ds/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650ds/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650ds/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650ds/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650ds/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650ds/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650ds/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650dsx/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650dsx/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650dsx/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650dsx/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650dsx/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650dsx/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650dsx/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-650dsx/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x200/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-x250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-d4-50/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/minsk-c4-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
