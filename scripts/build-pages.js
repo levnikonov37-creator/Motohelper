@@ -37,6 +37,17 @@ const appLink = (b, vi) => "/#bike=" + encodeURIComponent(b.brand + " " + b.name
 
 /* адреса: марка → /m/kayo/, модель → /m/kayo-t2-300-enduro/ (повторы — с номером) */
 const used = {}, brandSlug = {}, bikeSlug = new Map();
+/* как марку пишут по-русски — так её часто и ищут («масло в мотолэнд», «свечи кайо»): в заголовок, описание и разметку */
+const BRAND_RU = { Honda: "Хонда", Yamaha: "Ямаха", Kawasaki: "Кавасаки", Suzuki: "Сузуки", BMW: "БМВ", KTM: "КТМ", "Harley-Davidson": "Харлей-Дэвидсон",
+  Kayo: "Кайо", Motoland: "Мотолэнд", Ducati: "Дукати", Triumph: "Триумф", Husqvarna: "Хускварна", Racer: "Рейсер", Regulmoto: "Регулмото",
+  Progasi: "Прогаси", Avantis: "Авантис", BSE: "БСЕ", Aprilia: "Априлия", Beta: "Бета", CFMOTO: "СФМОТО", GasGas: "ГазГаз", Benelli: "Бенелли",
+  Bajaj: "Баджадж", "Moto Guzzi": "Мото Гуцци", "Royal Enfield": "Роял Энфилд", Indian: "Индиан", Irbis: "Ирбис", Voge: "Воге", Hyosung: "Хьосунг",
+  "MV Agusta": "МВ Агуста", Zontes: "Зонтес", Ataki: "Атаки", Sherco: "Шерко", Apollo: "Аполло", Kews: "Кевс", Jawa: "Ява", Stels: "Стелс",
+  Sharmax: "Шармакс", Promax: "Промакс", Zuumav: "Зумав", Lifan: "Лифан", Keeway: "Кивей", Kove: "Кове", Kymco: "Кимко", Piaggio: "Пьяджио",
+  Hasky: "Хаски", Motax: "Мотакс", Vespa: "Веспа", Wels: "Велс", Daelim: "Даелим", Fuego: "Фуего", Geon: "Геон", Kovi: "Кови", Loncin: "Лончин",
+  Tekken: "Теккен", Gilera: "Джилера", Peugeot: "Пежо", Simson: "Симсон", Derbi: "Дерби", Shineray: "Шинерай", Zongshen: "Зонгшен", Patron: "Патрон",
+  Hawk: "Хоук", Viper: "Вайпер", Darex: "Дарекс", Hero: "Хиро", Husaberg: "Хусаберг", Cagiva: "Кагива", Buell: "Бьюэлл", Victory: "Виктори",
+  Fantic: "Фантик", Rockot: "Рокот", Baltmotors: "Балтмоторс", Xmotos: "Иксмотос", Lifan: "Лифан" };
 const uniq = (s) => { let x = s, i = 2; while (used[x]) x = s + "-" + i++; used[x] = 1; return x; };
 const brands = [];
 ["motor", "remont", "polomka", "sravnenie", "podborka"].forEach((x) => (used[x] = 1)); // разделы моторов, инструкций и поломок
@@ -373,7 +384,8 @@ BIKES.forEach((b) => {
     (e0.issues || []).length && ["Какие слабые места у " + full + "?", e0.issues.slice(0, 3).map((x) => x.t + (x.fix ? " — " + lc(x.fix.replace(/\.$/, "")) : "")).join("; ")],
   ].filter(Boolean).map((q) => [q[0], dot(q[1])]);
   const faqHtml = `<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>`;
-  const body = `<section class="hero"><div class="kick">${esc(b.brand)} · ${esc(b.type)}</div><h1>${esc(b.name)}</h1>
+  const ru = BRAND_RU[b.brand], fullRu = ru ? ru + " " + b.name : "";
+  const body = `<section class="hero"><div class="kick">${esc(b.brand)}${ru ? " (" + esc(ru) + ")" : ""} · ${esc(b.type)}</div><h1>${esc(b.name)}</h1>
 <p class="lead">Мотор ${esc(e0.code)}${e0.cc ? ", " + e0.cc + " см³" : ""}${e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с" : ""}. Какое масло и сколько, свеча, зазоры клапанов, жиклёры и слабые места${b.versions.length > 1 ? " — по поколениям" : ""}.</p>
 ${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}${photoOf(b) ? `<figure class="mphoto"><img src="${photoOf(b)}" alt="${esc(full)}" width="800" height="500" fetchpriority="high"></figure>` : ""}</section>
 ${vers}
@@ -382,8 +394,9 @@ ${faqHtml}
 ${rvBlock(slug, full, b.name)}
 ${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
   const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${e0.oil || "—"}${e0.oilVol ? " " + e0.oilVol : ""}, свеча ${e0.spark || "—"}, зазоры клапанов ${e0.valveIn || "—"} / ${e0.valveEx || "—"}. Слабые места и ремонт.`;
-  files.set("m/" + slug + "/index.html", page({ rv: true, ask: full + " (мотор " + e0.code + ")", title: pickTitle(full, [" — масло, свечи, зазоры клапанов, слабые места | MotoHelper", " — масло, свечи, зазоры клапанов, слабые места", " — масло, свечи, зазоры клапанов", ": масло, свечи, клапаны"]), desc, canon, crumbs, body, sticky: appLink(b, 0),
-    ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: full, url: canon, inLanguage: "ru", description: desc },
+  const descRu = fullRu ? desc.replace(full + ":", full + " (" + fullRu + "):") : desc;
+  files.set("m/" + slug + "/index.html", page({ rv: true, ask: full + " (мотор " + e0.code + ")", title: pickTitle(full, [...(fullRu ? [" (" + ru + ") — масло, свечи, зазоры клапанов, слабые места", " (" + ru + ") — масло, свечи, зазоры клапанов"] : []), " — масло, свечи, зазоры клапанов, слабые места | MotoHelper", " — масло, свечи, зазоры клапанов, слабые места", " — масло, свечи, зазоры клапанов", ": масло, свечи, клапаны"]), desc: descRu, canon, crumbs, body, sticky: appLink(b, 0),
+    ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: full, alternateName: fullRu || undefined, url: canon, inLanguage: "ru", description: descRu },
       { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] }));
 });
 
@@ -391,10 +404,10 @@ brands.forEach((br) => {
   const list = BIKES.filter((b) => b.brand === br).sort((a, b) => COLL.compare(a.name, b.name));
   const types = [...new Set(list.map((b) => b.type))];
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], [br, null]];
-  const body = `<section class="hero"><div class="kick">Каталог · марка</div><h1>${esc(br)}</h1><p class="lead">${list.length} ${plural(list.length, "модель", "модели", "моделей")}: мотор, масло, свечи, зазоры клапанов и слабые места.</p>
+  const body = `<section class="hero"><div class="kick">Каталог · марка${BRAND_RU[br] ? " · " + esc(BRAND_RU[br]) : ""}</div><h1>${esc(br)}</h1><p class="lead">${list.length} ${plural(list.length, "модель", "модели", "моделей")}: мотор, масло, свечи, зазоры клапанов и слабые места.</p>
 ${types.length > 1 ? `<div class="chips"><button class="chip on" data-f="*">Все</button>${types.map((t) => `<button class="chip" data-f="${esc(t)}">${esc(t)}</button>`).join("")}</div>` : ""}</section>
 <div class="grid models">${list.map((b) => modelCard(b)).join("")}</div>`;
-  files.set("m/" + brandSlug[br] + "/index.html", page({ title: `${br}: все модели — масло, свечи, моторы | MotoHelper`, desc: `Справочник по мотоциклам ${br}: ${list.slice(0, 6).map((b) => b.name).join(", ")} и другие — мотор, масло, свечи, зазоры клапанов, слабые места.`,
+  files.set("m/" + brandSlug[br] + "/index.html", page({ title: `${br}${BRAND_RU[br] ? " (" + BRAND_RU[br] + ")" : ""}: все модели — масло, свечи, моторы | MotoHelper`, desc: `Справочник по мотоциклам ${br}${BRAND_RU[br] ? " (" + BRAND_RU[br] + ")" : ""}: ${list.slice(0, 6).map((b) => b.name).join(", ")} и другие — мотор, масло, свечи, зазоры клапанов, слабые места.`,
     canon: SITE + "m/" + brandSlug[br] + "/", crumbs, body, ld: [crumbLd(crumbs)], js: types.length > 1 ? FILTER_JS : "" }));
 });
 
