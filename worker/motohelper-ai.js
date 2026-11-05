@@ -1045,6 +1045,8 @@ async function vkToken(env) {
 }
 async function vkPost(env, text) {
   if (!env.VK_GROUP_ID) return { ok: false, off: true, error: "нет VK_GROUP_ID" };
+  const raw = env.FEEDBACK && (await env.FEEDBACK.get("vk:auth"));
+  if (raw && !/\bwall\b/.test(JSON.parse(raw).scope || "")) return { ok: false, off: true, error: "ВК не выдал доступ к стене" };
   const token = await vkToken(env);
   if (!token) return { ok: false, off: true, error: "группа ВК не подключена (/vk-auth)" };
   const res = await vkCall("wall.post", { owner_id: "-" + env.VK_GROUP_ID, from_group: 1, message: String(text).slice(0, 15000) }, token);
