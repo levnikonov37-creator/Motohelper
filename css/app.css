@@ -2324,6 +2324,7 @@ code { background: #141414 !important; color: #fff; }
 .pbuy a.sh-oz::before { background: #005BFF; } .pbuy a.sh-oz:hover { border-color: #005BFF !important; }
 .pbuy a.sh-wb::before { background: #CB11AB; } .pbuy a.sh-wb:hover { border-color: #CB11AB !important; }
 .pbuy a.sh-ym::before { background: #FFCC00; } .pbuy a.sh-ym:hover { border-color: #FFCC00 !important; }
+.pbuy a.sh-ali::before { background: #FF6A00; } .pbuy a.sh-ali:hover { border-color: #FF6A00 !important; }
 /* видео: значок «плей» в цвете площадки */
 .vlink.v-yt .ico { color: #FF0033 !important; } .vlink.v-vk .ico { color: #2787F5 !important; }
 .vlink.v-rt .ico { color: #14A3FF !important; } .vlink.v-ya .ico { color: #FC3F1D !important; }

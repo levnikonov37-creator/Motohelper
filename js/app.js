@@ -823,7 +823,7 @@ function BuyLinks({
     className: "pbuy open"
   }, SHOPS.map(sh => /*#__PURE__*/React.createElement("a", {
     key: sh[0],
-    className: "sh-" + ({ "Авито": "av", "Ozon": "oz", "WB": "wb", "Маркет": "ym" }[sh[0]] || "x"),
+    className: "sh-" + ({ "Авито": "av", "Ozon": "oz", "WB": "wb", "Маркет": "ym", "AliExpress": "ali" }[sh[0]] || "x"),
     href: shopHref(sh, q),
     target: "_blank",
     rel: shopAd(sh) ? "sponsored noopener" : "noopener",
