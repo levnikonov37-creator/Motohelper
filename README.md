@@ -25,6 +25,7 @@
 | `ai-config.json` | Адрес сервера ИИ-механика |
 | `worker/motohelper-ai.js` | Код сервера ИИ-механика (Cloudflare Workers): текст и фото |
 | `tests/` | Автопроверка |
+| `roblox/` | Игра для Roblox «Moto Empire Tycoon» (мото-тайкун с донатом). Отдельный проект, сайт не трогает — см. `roblox/README.md` |
 
 ## Как добавить модель или мотор
 
