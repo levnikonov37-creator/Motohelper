@@ -1,0 +1,18 @@
+{
+  "gamePasses": {
+    "DoubleCash": { "name": "2x Cash", "price": 399, "description": "Double ALL cash you earn in Moto Empire Tycoon. Forever!" },
+    "AutoCollect": { "name": "Auto Collect", "price": 149, "description": "Cash goes straight to your wallet - no more running to the collect pad." },
+    "TurboDroppers": { "name": "Turbo Factory", "price": 249, "description": "All your machines work 1.5x faster." },
+    "VIP": { "name": "VIP", "price": 299, "description": "+25% cash forever and a golden [VIP] tag in chat." }
+  },
+  "products": {
+    "Boost": { "name": "2x Boost (15 min)", "price": 49, "description": "Double all cash for 15 minutes. Stacks!" },
+    "CashSmall": { "name": "Bag of Cash", "price": 25, "description": "15 minutes of your income instantly." },
+    "CashMedium": { "name": "Case of Cash", "price": 99, "description": "1 hour of your income instantly." },
+    "CashLarge": { "name": "Truck of Cash", "price": 299, "description": "5 hours of your income instantly." }
+  },
+  "universe": {
+    "displayName": "Moto Empire Tycoon",
+    "description": "Build the biggest motorcycle factory! 🏍️\n\n🏭 Buy machines that make bike parts\n🎨 Paint, tune and chrome them for more cash\n🏆 Fill your showroom with pit bikes, enduros and rally bikes\n♻️ Rebirth for permanent cash bonuses\n🎁 Daily rewards and codes: MOTO, RELEASE, VROOM\n\nPlay with friends - every player gets their own garage!"
+  }
+}
