@@ -1013,12 +1013,17 @@ async function vkCallback(request, env) {
   const t = await r.json().catch(() => ({}));
   if (!t.access_token) return vkPage("Не получилось", "VK ID: " + String(t.error_description || t.error || r.status).replace(/</g, "&lt;"), false);
   const scope = String(t.scope || "");
-  const g = await vkCall("groups.getById", { group_id: env.VK_GROUP_ID, fields: "is_admin" }, t.access_token).catch((e) => ({ error: e.message }));
-  const grp = g && (g.groups || g)[0];
-  if (!grp || !grp.is_admin) return vkPage("Нужен администратор группы", "Войди тем аккаунтом ВК, который управляет группой MotoHelper." + (g && g.error ? " (" + String(g.error).replace(/</g, "&lt;") + ")" : ""), false);
+  const g = await vkCall("groups.getById", { group_id: env.VK_GROUP_ID, fields: "is_admin,admin_level" }, t.access_token).catch((e) => ({ error: e.message }));
+  const grp = (g && (g.groups || g)[0]) || {};
+  await env.FEEDBACK.put("vk:lastcb", JSON.stringify({ t: new Date().toISOString(), step: "token", scope, user: t.user_id, isAdmin: grp.is_admin, level: grp.admin_level, gerr: g && g.error }), { expirationTtl: 86400 });
+  // is_admin ВК отдаёт не всегда (зависит от выданных прав). Чужой аккаунт отсекаем так: если группа уже
+  // подключена, переподключить её может только тот же пользователь ВК
+  const prev = await env.FEEDBACK.get("vk:auth");
+  const prevUser = prev ? JSON.parse(prev).user : null;
+  if (prevUser && String(prevUser) !== String(t.user_id)) return vkPage("Группа уже подключена", "Её подключил другой аккаунт ВК.", false);
   await env.FEEDBACK.put("vk:auth", JSON.stringify({ access: t.access_token, refresh: t.refresh_token, exp: Date.now() + (t.expires_in || 3600) * 1000, device, user: t.user_id, scope }));
   if (!/\bwall\b/.test(scope)) return vkPage("Нет доступа к стене", "ВК выдал права: «" + scope.replace(/</g, "&lt;") + "». Без «wall» посты в группу публиковать нельзя.", false);
-  return vkPage("Группа подключена", "Теперь каждый новый пост из Telegram-канала будет выходить и в группе «" + String(grp.name || "").replace(/</g, "&lt;") + "». Эту страницу можно закрыть.", true);
+  return vkPage("Группа подключена", "Теперь каждый новый пост из Telegram-канала будет выходить и в группе MotoHelper. Эту страницу можно закрыть.", true);
 }
 async function vkCall(method, params, token) {
   const r = await fetch("https://api.vk.com/method/" + method, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(Object.assign({}, params, { access_token: token, v: VK_API })) });
