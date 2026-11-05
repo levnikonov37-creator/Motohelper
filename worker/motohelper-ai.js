@@ -81,6 +81,7 @@ export default {
       if (u.searchParams.get("tg") === "run") return json(await tgRun(env));
       // группа ВК: ?vk=status — подключена ли публикация
       if (u.searchParams.get("vk") === "status") return json(await vkStatus(env));
+      if (u.searchParams.get("vk") === "last") return json(JSON.parse((env.FEEDBACK && (await env.FEEDBACK.get("vk:lastcb"))) || "null"));
       // отчёт уходит только владельцу бота, так что ручной запуск безопасен
       // &dry=1&token=<DEBUG_TOKEN> — показать текст отчёта, не отправляя
       if (u.searchParams.get("tg") === "report") return json(await dailyReport(env, !!(u.searchParams.get("dry") && env.DEBUG_TOKEN && u.searchParams.get("token") === env.DEBUG_TOKEN)));
@@ -991,12 +992,20 @@ async function vkAuth(request, env) {
   const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
   await env.FEEDBACK.put("vk:pkce:" + state, verifier, { expirationTtl: 900 });
   const q = new URLSearchParams({ response_type: "code", client_id: env.VK_CLIENT_ID, redirect_uri: vkRedirect(request), state, code_challenge: challenge, code_challenge_method: "S256", scope: "wall groups" });
-  return Response.redirect("https://id.vk.com/authorize?" + q, 302);
+  // код-верификатор ещё и в куке: KV между точками Cloudflare догоняет до минуты, кука приходит сразу
+  return new Response(null, { status: 302, headers: { Location: "https://id.vk.com/authorize?" + q, "Set-Cookie": "vkpk=" + state + "." + verifier + "; Path=/vk-cb; Max-Age=900; HttpOnly; Secure; SameSite=Lax", "Cache-Control": "no-store" } });
 }
 async function vkCallback(request, env) {
-  const u = new URL(request.url), state = u.searchParams.get("state") || "", code = u.searchParams.get("code"), device = u.searchParams.get("device_id") || "";
-  if (u.searchParams.get("error")) return vkPage("ВК не дал доступ", (u.searchParams.get("error_description") || u.searchParams.get("error")).replace(/</g, "&lt;"), false);
-  const verifier = state && env.FEEDBACK && (await env.FEEDBACK.get("vk:pkce:" + state));
+  const u = new URL(request.url), sp = u.searchParams;
+  // VK ID присылает параметры либо прямо в адресе, либо одним JSON в payload
+  let pl = {};
+  try { pl = JSON.parse(sp.get("payload") || "{}"); } catch (e) {}
+  const pick = (k) => sp.get(k) || (pl[k] != null ? String(pl[k]) : "");
+  const state = pick("state"), code = pick("code"), device = pick("device_id");
+  if (env.FEEDBACK) await env.FEEDBACK.put("vk:lastcb", JSON.stringify({ t: new Date().toISOString(), keys: Array.from(sp.keys()), payloadKeys: Object.keys(pl), hasCode: !!code, hasState: !!state, cookie: /vkpk=/.test(request.headers.get("Cookie") || "") }), { expirationTtl: 86400 });
+  if (pick("error")) return vkPage("ВК не дал доступ", (pick("error_description") || pick("error")).replace(/</g, "&lt;"), false);
+  const ck = /(?:^|;\s*)vkpk=([^.;]+)\.([^;]+)/.exec(request.headers.get("Cookie") || "");
+  const verifier = (ck && ck[1] === state && ck[2]) || (state && env.FEEDBACK && (await env.FEEDBACK.get("vk:pkce:" + state)));
   if (!code || !verifier) return vkPage("Ссылка устарела", "Открой подключение заново: " + new URL(request.url).origin + "/vk-auth", false);
   await env.FEEDBACK.delete("vk:pkce:" + state);
   const r = await fetch("https://id.vk.com/oauth2/auth", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
