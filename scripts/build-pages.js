@@ -91,7 +91,7 @@ h2{font:400 20px var(--display);text-transform:uppercase;font-style:italic;margi
 .card.big{padding:16px 14px;border-left-color:var(--pink)}.card.big b{font:400 18px var(--display);font-style:italic;text-transform:uppercase;padding-right:36px}
 .letter{font:400 16px var(--display);color:var(--acc2);margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:0 0 14px}.tile{padding:10px 12px;border-radius:10px;background:var(--card2);border:1px solid var(--line)}
-.tile span{display:block;font:500 12px var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.tile b{display:block;font:400 18px/1.25 var(--display);margin-top:2px;overflow-wrap:anywhere}
+.tile span{display:block;font:500 12px var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.tile b{display:block;font:400 18px/1.25 var(--display);margin-top:2px;overflow-wrap:break-word}.tile b.long{font-size:15px;line-height:1.3}
 .ver{padding:16px;border-radius:14px;background:var(--card);border:1px solid var(--line);margin:0 0 16px}.ver>h2{margin-top:0}
 .groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.grp{padding:12px 14px;border-radius:10px;background:rgba(15,15,15,0.7);border:1px solid rgba(255,255,255,0.084)}
 .grp dl{margin:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:6px 12px;font-size:15px}.grp dt{color:var(--muted)}.grp dd{margin:0;font-weight:500;overflow-wrap:anywhere}
@@ -213,6 +213,8 @@ function pump(){return rd.read().then(function(c){if(c.done){if(!txt)throw new E
 /* Яндекс показывает ~70 знаков заголовка и ~160–200 описания: длинный заголовок теряет « | MotoHelper»,
    длинное описание обрезается по последней запятой или точке до 220 знаков */
 // заголовок «основа + хвост»: самый длинный хвост, при котором влезает в 75 знаков; длинную основу режем по слову
+/* диапазоны и единицы не рвём по строкам («0.6–0.7 мм» целиком) */
+const nbv = (t) => String(t).replace(/(\d)\s*([–-])\s*(\d)/g, "$1\u2060$2\u2060$3").replace(/(\d) (мм|л|Н·м|бар|км|см³|л\.с\.|об\/мин|моточ\.|ч)(?![\wа-яё])/g, "$1\u00a0$2");
 const pickTitle = (base, tails) => { const t = tails.map((x) => base + x).find((x) => x.length <= 75); if (t) return t;
   let b = base.slice(0, 62).replace(/[\s,/:;–—-]+\S*$/, ""); if ((b.match(/\(/g) || []).length > (b.match(/\)/g) || []).length) b = b.replace(/[\s,/:;–—-]+$/, "") + ")"; return b + tails[tails.length - 1]; };
 const fitTitle = (t) => (t.length > 70 ? t.replace(/ \| MotoHelper$/, "") : t);
@@ -545,7 +547,7 @@ probBikes.forEach((b) => {
     const causes = d.steps.flatMap((st) => [st.onYes, st.onNo].concat((st.options || []).filter(fitOpt).map((o) => o.result))).filter((r) => r && typeof r === "object" && r.result).map((r) => lc1(r.result));
     const iss = (e.issues || []).length ? `<h2>Слабые места мотора ${esc(e.code)}</h2><ul class="iss">${e.issues.map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const body = `<section class="hero"><div class="kick">${esc(b.brand)} · неисправность</div><h1>${esc(phrase)}</h1><p class="lead">Проверка по шагам для мотора ${esc(e.code)}${e.cc ? " (" + e.cc + " см³)" : ""} — с его цифрами. Иди по порядку, от простого к сложному.${causes.length ? " Частые причины: " + esc(causes.slice(0, 4).join(", ")) + "." : ""}</p></section>
-${nums.length ? `<h2>Цифры ${esc(e.code)}</h2><div class="tiles">${nums.map((x) => `<div class="tile"><small>${esc(x[0])}</small><b>${esc(x[1])}</b></div>`).join("")}</div>` : ""}
+${nums.length ? `<h2>Цифры ${esc(e.code)}</h2><div class="tiles">${nums.map((x) => `<div class="tile"><small>${esc(x[0])}</small><b${String(x[1]).length > 14 ? ' class="long"' : ""}>${nbv(esc(x[1]))}</b></div>`).join("")}</div>` : ""}
 <h2>Что проверить</h2><ol class="steps">${steps}</ol>
 ${iss}
 <a class="cta" href="${appLink(b, 0)}&d=${d.id}">Пройти проверку в MotoHelper для ${esc(full)} →</a>

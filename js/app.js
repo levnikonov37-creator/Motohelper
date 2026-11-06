@@ -266,6 +266,10 @@ function maintStatus(eng, mt) {
     });
   });
 }
+/* диапазоны и единицы не рвём по строкам: «0.6–0.7 мм» целиком, перенос — только на « / » и пробелах между словами */
+function nbv(v) {
+  return typeof v === "string" ? v.replace(/(\d)\s*([–-])\s*(\d)/g, "$1\u2060$2\u2060$3").replace(/(\d) (мм|л|Н·м|бар|км|см³|л\.с\.|об\/мин|моточ\.|ч)(?![\wа-яё])/g, "$1\u00a0$2") : v;
+}
 function Val({
   v,
   stock
@@ -274,7 +278,7 @@ function Val({
   return /*#__PURE__*/React.createElement("span", {
     className: changed ? "val changed" : "val",
     title: changed ? "С завода: " + stock : undefined
-  }, v, changed && /*#__PURE__*/React.createElement("small", null, "с завода ", stock));
+  }, nbv(v), changed && /*#__PURE__*/React.createElement("small", null, "с завода ", stock));
 }
 function Field({
   label,
@@ -14111,7 +14115,7 @@ function Passport({
     className: "pp-name"
   }, /*#__PURE__*/React.createElement("small", null, bike.brand), /*#__PURE__*/React.createElement("b", null, bike.name))), rows.map(r => /*#__PURE__*/React.createElement("div", {
     key: r[0]
-  }, /*#__PURE__*/React.createElement("span", null, r[0]), /*#__PURE__*/React.createElement("b", null, r[1] || "—"), r[2] && /*#__PURE__*/React.createElement("small", null, r[2]))), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("span", null, r[0]), /*#__PURE__*/React.createElement("b", null, nbv(r[1]) || "—"), r[2] && /*#__PURE__*/React.createElement("small", null, nbv(r[2])))), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "link pp-more",
     onClick: () => go("bike", "overview")
