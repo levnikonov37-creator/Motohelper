@@ -418,7 +418,7 @@ B("Avantis", "Pit 140", P, ["YX140"]);
 /* Regulmoto */
 B("Regulmoto", "Sport 003", E, [["165FMM", null, { carb: "PE30" }]]);
 B("Regulmoto", "Sport 004", E, [["PR300", null, { carb: "PWK32" }]]);
-B("Regulmoto", "Athlete 250", E, ["172FMM"]);
+B("Regulmoto", "Athlete 250", E, ["172FMM-3A"]); // дилеры (bvdshop, kubanmoto, globaldrive): Zongshen 172FMM-3A
 B("Regulmoto", "Athlete 300", E, ["PR300"]);
 B("Regulmoto", "Crosstrec 300", E, ["NB300"]);
 B("Regulmoto", "TE 250", E, ["165FMM"]);
