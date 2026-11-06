@@ -2884,3 +2884,16 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .model-photo.none { display: grid; place-items: center; align-content: center; gap: 10px; min-height: 240px; padding: 24px; text-align: center; color: var(--g-muted, #9AA0A6); border-radius: 14px; background: radial-gradient(70% 60% at 50% 80%, rgba(138,140,255,.10), transparent 70%), #111216; }
 .model-photo.none .bv-note { margin: 0; color: var(--g-ink, #E9EAEC); }
 .ad-mark{font-size:.7em;opacity:.6;font-weight:400}
+/* на телефоне ссылки-кнопки в тексте («инструкция», «укажи свои») — шире зона нажатия, вёрстка та же */
+@media (pointer: coarse) { button.link { padding-block: 8px; margin-block: -8px; } }
+/* узкие телефоны (320–360 px): кнопки шапки «Мотоцикла» не вылезают за край, подписи нижнего меню — в одну строку */
+@media (max-width: 640px) {
+  .phero-act { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .phero-act:has(> .btn:nth-of-type(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .phero-act .btn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+@media (max-width: 360px) {
+  .phero-act .btn { font-size: 12px !important; padding: 5px 4px !important; }
+  .phero-act .btn .ico, .phero-act .btn svg { display: none; }
+  .tabbar .tab { font-size: 10px !important; letter-spacing: -.02em; white-space: nowrap; }
+}
