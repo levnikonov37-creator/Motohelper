@@ -18,6 +18,8 @@ jobs:
       - run: npm ci
       - name: Проверка базы
         run: npm run test:data
+      - name: Проверка прошивки зажигания (hardware/cdi-174mn3)
+        run: make -C hardware/cdi-174mn3/firmware test
       - run: npx playwright install --with-deps chromium
       - name: Проверка страницы в браузере
         run: npm run test:page
