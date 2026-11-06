@@ -10820,5 +10820,61 @@ function startTags(e) {
   /* YBS300 (Loncin LX176MN): в комплекте и у дилеров — Torch B8RC (= NGK CR8E: M10×1, резьба 19 мм, ключ 16) */
   ["YBS300", "YBS300G2"].forEach(function (id) { fixSpark(id, "Torch B8RC (NGK CR8E)", "0.7–0.8 мм"); });
 })();
+/* ===== Точные значения вместо «по мануалу» (часть 1): свечи — по каталогу NGK 2025–2026 для мотоциклов,
+   клапаны — по руководствам владельца (Benelli TRK 251, Imperiale 400, Zontes ZT310-T) и мануалу Kawasaki EX500.
+   Свеча-запчасть пересобирается под новую свечу (как в fixSpark выше). */
+(function () {
+  var FIX = {
+  "V803D": {"spark": "NGK DCPR8E", "gap": "0.7 мм"},
+  "T1200TR": {"spark": "NGK LMAR8A-9", "gap": "0.9 мм"},
+  "I4_1000K": {"spark": "NGK CR9EIA-9", "gap": "0.9 мм"},
+  "I4_1000E": {"spark": "NGK LMAR9FI-10G (2019+); 2009–2018 — LMAR9D-J", "gap": "1.0 мм (2009–2018 — 0.8 мм)"},
+  "I3_890Y": {"spark": "NGK LMAR9A-9", "gap": "0.9 мм"},
+  "M125": {"spark": "NGK CR8E (MT-125 2015–2019 — CR9E)", "gap": "0.7 мм"},
+  "V1000S": {"spark": "NGK CR8EK (V-Strom 1000 с 2013 — CR8EIA-9)", "gap": "0.7 мм (CR8EIA-9 — 0.9 мм)"},
+  "I4_600C": {"spark": "NGK CR9E", "gap": "0.7 мм"},
+  "I3_900T": {"spark": "NGK CR9EK", "gap": "0.7 мм"},
+  "TR2T": {"spark": "NGK BR7ES (Beta Evo) / BPR5ES (GasGas TXT) / BP5ES (Sherco ST)", "gap": "0.6 мм"},
+  "TR125": {"spark": "NGK BR7ES (Beta Evo 125) / BPR5ES (GasGas TXT 125) / BP5ES (Sherco)", "gap": "0.6 мм"},
+  "TR200": {"spark": "NGK BR7ES", "gap": "0.6 мм"},
+  "AM6": {"spark": "NGK BR9ES (на части Rieju RS1/MRT — BR8ES)", "gap": "0.6 мм"},
+  "S125K": {"spark": "NGK LKAR8A-9", "gap": "0.9 мм"},
+  "V250LF": {"spark": "NGK CR6HSA", "gap": "0.7 мм"},
+  "T500K": {"spark": "NGK DR9EA", "gap": "0.7 мм", "valveIn": "0.13–0.18 мм", "valveEx": "0.18–0.23 мм"},
+  "V1200D": {"spark": "NGK MAR10A-J (2010–2012 — MAR9A-J)", "gap": "0.8 мм"},
+  "I3_765T": {"spark": "NGK CR9EIA-9", "gap": "0.9 мм"},
+  "T300B": {"spark": "NGK CR9EB", "gap": "0.7 мм"},
+  "V950Y": {"spark": "NGK CPR7EA-9", "gap": "0.9 мм"},
+  "S200BJ": {"spark": "NGK CPR8EA-9 + LKAR8A-9 (третья свеча)", "gap": "0.9 мм"},
+  "I3_1200T": {"spark": "NGK CR8EK", "gap": "0.7 мм"},
+  "T321Y": {"spark": "NGK LMAR8A-9 (до 2017 — CR8E)", "gap": "0.9 мм (CR8E — 0.8 мм)"},
+  "V400Y": {"spark": "NGK DPR7EA-9", "gap": "0.9 мм"},
+  "I4_400S": {"spark": "NGK CR9EK (1991–1992 — CR8EK)", "gap": "0.7 мм"},
+  "V450A": {"spark": "NGK CR8EKB", "gap": "0.7 мм"},
+  "I4_750S": {"spark": "NGK CR9E (1996–2007)", "gap": "0.7 мм"},
+  "I4_400K": {"spark": "NGK LMAR9G", "gap": "0.8 мм"},
+  "V650Y": {"spark": "NGK DPR7EA-9 (XV535 Virago — BPR7ES)", "gap": "0.9 мм"},
+  "V900K": {"spark": "NGK CPR7EA-9", "gap": "0.9 мм"},
+  "TR4RT": {"spark": "NGK CR6EH-9", "gap": "0.9 мм"},
+  "I4_400Y": {"spark": "NGK CR9E", "gap": "0.7 мм"},
+  "T1200Y": {"spark": "NGK CPR8EB-9", "gap": "0.9 мм"},
+  "T900Y": {"spark": "NGK DPR8EA-9", "gap": "0.9 мм"},
+  "S800S": {"spark": "NGK DPR9EA-9 ×2", "gap": "0.9 мм"},
+  "S250QJ": {"spark": "NGK CR8E", "gap": "0.7–0.8 мм", "valveIn": "0.13–0.15 мм", "valveEx": "0.15–0.17 мм"},
+  "S374BN": {"spark": "NGK BR7ES / CR7HSA", "gap": "0.6–0.7 мм", "valveIn": "0.08–0.12 мм", "valveEx": "0.10–0.14 мм"},
+  "Z312": {"spark": "Torch LDK8RTIP", "gap": "0.7–0.9 мм", "valveIn": "0.11–0.20 мм", "valveEx": "0.18–0.30 мм"},
+  "S300C": {"spark": "NGK CR8EI", "gap": "0.7–0.9 мм"},
+  };
+  Object.keys(FIX).forEach(function (id) {
+    var e = ENGINES[id], f = FIX[id];
+    if (!e) return;
+    Object.keys(f).forEach(function (k) { e[k] = f[k]; });
+    if (f.spark) {
+      PARTS.forEach(function (p) { if (p.kind === "spark" && p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (x) { return x !== id; }); });
+      var mine = PARTS.find(function (p) { return p.id === id + "-spark"; });
+      if (mine) mine.name = "Свеча " + f.spark.split(" (")[0].split(" /")[0].split(" +")[0];
+    }
+  });
+})();
 /* у каждого мотора с известной свечой — своя свеча в запчастях */
 Object.keys(ENGINES).forEach(function (id) { var s = ENGINES[id].spark; if (s && !/мануал/i.test(s) && !partByKind("spark", ENGINES[id])) { delete (ensureSpark.has || {})[id]; ensureSpark(id, 1); } });
