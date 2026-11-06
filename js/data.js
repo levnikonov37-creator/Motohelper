@@ -10824,15 +10824,22 @@ function startTags(e) {
    клапаны — по руководствам владельца (Benelli TRK 251, Imperiale 400, Zontes ZT310-T) и мануалу Kawasaki EX500.
    Свеча-запчасть пересобирается под новую свечу (как в fixSpark выше). */
 function fixExact(FIX) {
+  /* свечи выбираем из ~27 тысяч деталей один раз на вызов, а не на каждый мотор */
+  var sparks = PARTS.filter(function (p) { return p.kind === "spark"; }), own = {};
+  sparks.forEach(function (p) { if (!own[p.id]) own[p.id] = p; });
   Object.keys(FIX).forEach(function (id) {
     var e = ENGINES[id], f = FIX[id];
     if (!e) return;
     Object.keys(f).forEach(function (k) { e[k] = f[k]; });
     if (!f.spark) return;
-    PARTS.forEach(function (p) { if (p.kind === "spark" && p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (x) { return x !== id; }); });
-    var find = function () { return PARTS.find(function (p) { return p.id === id + "-spark"; }); };
-    var mine = find();
-    if (!mine) { if (ensureSpark.has) delete ensureSpark.has[id]; ensureSpark(id, 1); mine = find(); }
+    sparks.forEach(function (p) { if (p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (x) { return x !== id; }); });
+    var mine = own[id + "-spark"];
+    if (!mine) {
+      if (ensureSpark.has) delete ensureSpark.has[id];
+      ensureSpark(id, 1);
+      mine = PARTS.find(function (p) { return p.id === id + "-spark"; });
+      if (mine) { sparks.push(mine); own[mine.id] = mine; }
+    }
     if (mine) mine.name = "Свеча " + f.spark.split(" (")[0].split(" /")[0].split(" +")[0].split(" ×")[0];
   });
 }
@@ -10905,5 +10912,15 @@ fixExact({
   "HD_RMAX1250T": {"spark": "H-D 31600190 (2 на цилиндр)", "gap": "заводской", "sparkTorque": "16–24 Н·м"},
   "HD_RMAX975T": {"spark": "H-D 31600190 (2 на цилиндр)", "gap": "заводской", "sparkTorque": "16–24 Н·м"}
 });
-/* у каждого мотора с известной свечой — своя свеча в запчастях */
-Object.keys(ENGINES).forEach(function (id) { var s = ENGINES[id].spark; if (s && !/мануал/i.test(s) && !partByKind("spark", ENGINES[id])) { delete (ensureSpark.has || {})[id]; ensureSpark(id, 1); } });
+/* у каждого мотора с известной свечой — своя свеча в запчастях.
+   Какие моторы и группы уже закрыты свечами, считаем один раз: partByKind на каждый из ~1000 моторов
+   перебирал все ~27 тысяч деталей — на слабом телефоне это секунды при каждом открытии сайта. */
+(function () {
+  var cov = {}, any = false;
+  PARTS.forEach(function (p) { if (p.kind !== "spark" || p.need) return; if (!p.fit) any = true; else p.fit.forEach(function (f) { cov[f] = 1; }); });
+  Object.keys(ENGINES).forEach(function (id) {
+    var e = ENGINES[id], s = e.spark;
+    if (!s || /мануал/i.test(s) || any || cov[id] || e.groups.some(function (g) { return cov[g]; })) return;
+    delete (ensureSpark.has || {})[id]; ensureSpark(id, 1);
+  });
+})();
