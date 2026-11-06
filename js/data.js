@@ -10823,8 +10823,20 @@ function startTags(e) {
 /* ===== Точные значения вместо «по мануалу» (часть 1): свечи — по каталогу NGK 2025–2026 для мотоциклов,
    клапаны — по руководствам владельца (Benelli TRK 251, Imperiale 400, Zontes ZT310-T) и мануалу Kawasaki EX500.
    Свеча-запчасть пересобирается под новую свечу (как в fixSpark выше). */
-(function () {
-  var FIX = {
+function fixExact(FIX) {
+  Object.keys(FIX).forEach(function (id) {
+    var e = ENGINES[id], f = FIX[id];
+    if (!e) return;
+    Object.keys(f).forEach(function (k) { e[k] = f[k]; });
+    if (!f.spark) return;
+    PARTS.forEach(function (p) { if (p.kind === "spark" && p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (x) { return x !== id; }); });
+    var find = function () { return PARTS.find(function (p) { return p.id === id + "-spark"; }); };
+    var mine = find();
+    if (!mine) { if (ensureSpark.has) delete ensureSpark.has[id]; ensureSpark(id, 1); mine = find(); }
+    if (mine) mine.name = "Свеча " + f.spark.split(" (")[0].split(" /")[0].split(" +")[0].split(" ×")[0];
+  });
+}
+fixExact({
   "V803D": {"spark": "NGK DCPR8E", "gap": "0.7 мм"},
   "T1200TR": {"spark": "NGK LMAR8A-9", "gap": "0.9 мм"},
   "I4_1000K": {"spark": "NGK CR9EIA-9", "gap": "0.9 мм"},
@@ -10863,18 +10875,35 @@ function startTags(e) {
   "S250QJ": {"spark": "NGK CR8E", "gap": "0.7–0.8 мм", "valveIn": "0.13–0.15 мм", "valveEx": "0.15–0.17 мм"},
   "S374BN": {"spark": "NGK BR7ES / CR7HSA", "gap": "0.6–0.7 мм", "valveIn": "0.08–0.12 мм", "valveEx": "0.10–0.14 мм"},
   "Z312": {"spark": "Torch LDK8RTIP", "gap": "0.7–0.9 мм", "valveIn": "0.11–0.20 мм", "valveEx": "0.18–0.30 мм"},
-  "S300C": {"spark": "NGK CR8EI", "gap": "0.7–0.9 мм"},
-  };
-  Object.keys(FIX).forEach(function (id) {
-    var e = ENGINES[id], f = FIX[id];
-    if (!e) return;
-    Object.keys(f).forEach(function (k) { e[k] = f[k]; });
-    if (f.spark) {
-      PARTS.forEach(function (p) { if (p.kind === "spark" && p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (x) { return x !== id; }); });
-      var mine = PARTS.find(function (p) { return p.id === id + "-spark"; });
-      if (mine) mine.name = "Свеча " + f.spark.split(" (")[0].split(" /")[0].split(" +")[0];
-    }
-  });
-})();
+  "S300C": {"spark": "Torch CR8EI (≈ NGK CR8E)", "gap": "0.7–0.9 мм"}
+});
+/* часть 2: по руководствам владельца — Yamaha MT-25 / MT-15, Aprilia RS 457, Royal Enfield Hunter 350, TVS RTR 200 4V,
+   Bajaj NS160 / Pulsar 150 / Dominar 400 / Pulsar 250 (+ учебные материалы Bajaj по N250 — клапаны), CFMOTO 250NK/300NK,
+   Zontes ZT350-T и ZT125-U, Benelli Leoncino 800 и TRK 702, Suzuki GW250 (тот же мотор, что GSX250R), Haojue DL160;
+   свеча CFMOTO 675 — техкарта CFMOTO Italia, зазор — руководство 450SR с той же свечой; Triumph Tiger 800 — каталог NGK;
+   Harley-Davidson Revolution Max — каталожный номер свечи и момент затяжки из сервисной документации H-D */
+fixExact({
+  "T250Y": {"spark": "NGK LMAR8A-9", "gap": "0.8–0.9 мм"},
+  "Y155": {"spark": "NGK MR8E-9", "gap": "0.8–0.9 мм"},
+  "T457A": {"spark": "NGK MR9DI-7 (иридиевая)", "gap": "0.7–0.8 мм"},
+  "S350RE": {"spark": "Bosch YR7MES", "gap": "0.7–0.8 мм"},
+  "S200TV": {"spark": "Bosch UR4KE", "gap": "0.8–0.9 мм"},
+  "S160BJ": {"spark": "Bosch UR4AC ×2", "gap": "0.7–0.8 мм"},
+  "S180BJ": {"spark": "Champion RG4HC ×2", "gap": "0.7–0.8 мм"},
+  "S400BJ": {"spark": "NGK LKAR8A-9 (центральная) + CPR8EA-9 ×2 (боковые)", "gap": "0.8–0.9 мм"},
+  "S250BJ": {"gap": "0.8–0.9 мм (2 свечи)", "valveIn": "0.03–0.07 мм", "valveEx": "0.06–0.10 мм"},
+  "I3_800T": {"spark": "NGK CR9EK", "gap": "0.7 мм"},
+  "S250C": {"spark": "Torch CR8EI (≈ NGK CR8E)", "gap": "0.8–0.9 мм", "sparkTorque": "15 Н·м"},
+  "S350Z": {"spark": "Torch LDK8RTAIP (в жару — LDK9RTIP)", "gap": "0.7–0.9 мм", "sparkTorque": "20 Н·м", "valveIn": "0.11–0.20 мм", "valveEx": "0.18–0.30 мм"},
+  "S125Z": {"spark": "Torch CR8EI (в жару — CR9EI)", "gap": "0.7–0.9 мм", "sparkTorque": "14 Н·м", "valveIn": "0.10–0.15 мм", "valveEx": "0.20–0.25 мм"},
+  "I3_675C": {"spark": "Torch BN8RTI", "gap": "0.8–1.0 мм", "sparkTorque": "12–15 Н·м"},
+  "T750BN": {"spark": "NGK CR8E", "gap": "0.7–0.8 мм"},
+  "T700BN": {"spark": "NGK CR8E", "gap": "0.7–0.8 мм", "sparkTorque": "12 Н·м"},
+  "T250S": {"spark": "NGK CR7E / Denso U22ESR-N", "gap": "0.7–0.8 мм"},
+  "S160HJ": {"spark": "NGK CPR8EA (в жару — CPR9EA)", "gap": "0.8–0.9 мм"},
+  "HD_RMAX1250": {"spark": "H-D 31600190 (2 на цилиндр)", "gap": "заводской", "sparkTorque": "16–24 Н·м"},
+  "HD_RMAX1250T": {"spark": "H-D 31600190 (2 на цилиндр)", "gap": "заводской", "sparkTorque": "16–24 Н·м"},
+  "HD_RMAX975T": {"spark": "H-D 31600190 (2 на цилиндр)", "gap": "заводской", "sparkTorque": "16–24 Н·м"}
+});
 /* у каждого мотора с известной свечой — своя свеча в запчастях */
 Object.keys(ENGINES).forEach(function (id) { var s = ENGINES[id].spark; if (s && !/мануал/i.test(s) && !partByKind("spark", ENGINES[id])) { delete (ensureSpark.has || {})[id]; ensureSpark(id, 1); } });
