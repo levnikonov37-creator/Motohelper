@@ -241,7 +241,9 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv }) {
 <meta name="theme-color" content="#000000" />
 <link rel="icon" href="/img/icon-192.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@500;600&family=Fira+Sans:wght@400;500;600&family=Unbounded:wght@600;700&display=swap" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@500;600&family=Fira+Sans:wght@400;500;600&family=Unbounded:wght@600;700&display=swap" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@500;600&family=Fira+Sans:wght@400;500;600&family=Unbounded:wght@600;700&display=swap" /></noscript>
 <link rel="stylesheet" href="/m/m.css" />
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
