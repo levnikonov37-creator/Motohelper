@@ -1,23 +1,48 @@
-// Проверка базы (js/data.js) без браузера: node tests/check-data.js
+// Проверка базы (js/data.js — каталог, js/kb.js — инструкции и диагностика) без браузера: node tests/check-data.js
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 
 const root = path.join(__dirname, "..");
 const ctx = {};
+// каталог должен работать и без базы знаний: сайт показывает первый экран до того, как она загрузится.
+// Поэтому js/data.js не читает и не меняет то, что объявлено в js/kb.js, — следим за каждым обращением.
+const KB_NAMES = ["GUIDES", "DIAG", "CAUSES", "SYMPTOMS", "CONDITIONS", "FAULTS", "OBD", "REF", "WIRE", "WIRING", "NO_CVT_GUIDES"];
+const kbVal = {}, kbReads = [];
+let inData = true;
+for (const k of KB_NAMES) Object.defineProperty(ctx, k, { configurable: true, enumerable: true,
+  get() { if (inData) kbReads.push(k + " — " + ((new Error().stack || "").split("\n").find((l) => l.includes("js/data.js")) || "").trim()); return kbVal[k]; },
+  set(v) { kbVal[k] = v; } });
 vm.createContext(ctx);
-try {
-  vm.runInContext(fs.readFileSync(path.join(root, "js/data.js"), "utf8"), ctx, { filename: "js/data.js" });
-} catch (x) {
-  const at = (x.stack || "").split("\n").find((l) => l.includes("js/data.js"));
-  console.error("js/data.js не загрузился: " + x.message + (at ? "\n  " + at.trim() : ""));
-  console.error("Частая причина — модель ссылается на двигатель, которого нет в ENGINES.");
-  process.exit(1);
+let kbBefore = null;
+for (const f of ["js/data.js", "js/kb.js"]) {
+  try {
+    vm.runInContext(fs.readFileSync(path.join(root, f), "utf8"), ctx, { filename: f });
+  } catch (x) {
+    const at = (x.stack || "").split("\n").find((l) => l.includes(f));
+    console.error(f + " не загрузился: " + x.message + (at ? "\n  " + at.trim() : ""));
+    if (f === "js/data.js") console.error("Частая причина — модель ссылается на двигатель, которого нет в ENGINES.");
+    else console.error("js/kb.js выполняется после js/data.js: проверь, что нужное ему из каталога там есть.");
+    process.exit(1);
+  }
+  if (f === "js/data.js") { inData = false; kbBefore = KB_NAMES.map((k) => [k, JSON.stringify(kbVal[k])]); }
 }
 const { ENGINES, BIKES, PARTS, GUIDES, TUNING, TUNE_GUIDE } = ctx;
 
 const errors = [];
 const fail = (msg) => errors.push(msg);
+
+// марки в списке — в порядке русской сортировки (sortBikes сортирует своей функцией brandSortKey, без Intl)
+{
+  const brands = [...new Set(BIKES.map((b) => b.brand))].filter((b) => b !== "Любая модель");
+  const ru = brands.slice().sort(new Intl.Collator("ru").compare);
+  const at = ru.findIndex((b, i) => b !== brands[i]);
+  if (at >= 0) fail("Порядок марок не как у русской сортировки: «" + brands[at] + "» вместо «" + ru[at] + "» — поправь brandSortKey в js/data.js");
+}
+
+// js/data.js не трогает базу знаний: до загрузки js/kb.js в ней пустые заготовки
+for (const [k, v] of kbBefore) if (!["[]", "{}"].includes(v)) fail("js/data.js меняет " + k + " — это база знаний, её место в js/kb.js");
+for (const r of kbReads.slice(0, 5)) fail("js/data.js читает базу знаний (" + r + ") — до загрузки js/kb.js там пусто; перенеси этот код в js/kb.js");
 
 // Типы мотоциклов, которые понимает интерфейс (BF_TYPES в js/app.js)
 const app = fs.readFileSync(path.join(root, "js/app.js"), "utf8");

@@ -928,7 +928,7 @@ function Parts({
   /* деталей десятки тысяч: категории и «подходит к мотору» считаем один раз, показываем порциями */
   const cats = useMemo(() => ["Все"].concat(Array.from(new Set(PARTS.map(p => p.cat)))), []);
   const mine = useMemo(() => PARTS.filter(p => fits(p, eng)), [eng]);
-  const myGuides = useMemo(() => guidesFor(eng), [eng]);
+  const myGuides = useMemo(() => guidesFor(eng), [eng, GUIDES.length]);
   useEffect(() => setLim(60), [q, cat, onlyFit, eng]);
   /* слова в любом порядке, русская раскладка вместо латиницы, код мотора («174», «182») */
   const toks = srTokens(q);
@@ -11904,6 +11904,48 @@ const RV_TITLE = {
   buy: "Проверка б/у перед покупкой",
   season: "Зима и весна"
 };
+/* id инструкции из ссылки или кнопки. Пока база знаний (js/kb.js) не пришла, сверить не с чем —
+   инструкцией считаем всё, что не раздел «Ремонта»; неизвестный id потом откроет начало раздела */
+function guideArg(arg) {
+  const id = GUIDE_ALIAS[arg] || arg;
+  if (GUIDES.find(g => g.id === id)) return id;
+  if (window.MH_KB || typeof arg !== "string" || !arg || arg.indexOf(":") >= 0 || RV_TITLE[arg] || ["hub", "faults", "codes"].indexOf(arg) >= 0) return null;
+  return id;
+}
+/* база знаний: инструкции, диагностика, справочник — отдельный файл, приходит сразу после первого экрана */
+function useKb() {
+  const [st, setSt] = useState(() => window.MH_KB ? "ok" : "wait");
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (window.MH_KB) {
+      setSt("ok");
+      return;
+    }
+    let live = true;
+    const on = () => live && setSt("ok");
+    window.addEventListener("mh-kb", on);
+    if (window.mhLoadKb) window.mhLoadKb().then(on, () => live && !window.MH_KB && setSt("err"));
+    return () => {
+      live = false;
+      window.removeEventListener("mh-kb", on);
+    };
+  }, [n]);
+  return [st, () => {
+    setSt("wait");
+    setN(n + 1);
+  }];
+}
+function KbWait({
+  st,
+  retry
+}) {
+  return /*#__PURE__*/React.createElement("section", {
+    className: "page kb-wait"
+  }, st === "err" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", null, "Не загрузились инструкции и диагностика. Проверь интернет."), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: retry
+  }, "Попробовать ещё раз")) : /*#__PURE__*/React.createElement("p", null, "Загрузка инструкций…"));
+}
 function diagFor(eng) {
   return DIAG.filter(d => !d.only || d.only.some(g => eng.groups.indexOf(g) >= 0));
 }
@@ -11953,6 +11995,7 @@ function App() {
     }
   });
   const [page, setPage] = useState(() => guideFromHash() || diagFromHash() ? "repair" : aiFromHash() ? "ai" : "home");
+  const [kb, kbRetry] = useKb();
   const [bikeTab, setBikeTab] = useState("overview");
   const [rv, setRv] = useState(() => guideFromHash() ? "guide:" + guideFromHash() : diagFromHash() ? "tree:" + diagFromHash() : "hub");
   const [partsQ, setPartsQ] = useState(null);
@@ -12244,7 +12287,7 @@ function App() {
       rv: arg ? "tree:" + arg : "find"
     });else if (t === "repair") navTo({
       page: "repair",
-      rv: !arg ? "hub" : GUIDES.find(g => g.id === (GUIDE_ALIAS[arg] || arg)) ? "guide:" + (GUIDE_ALIAS[arg] || arg) : arg === "faults" || arg === "codes" ? "ref" : arg
+      rv: !arg ? "hub" : guideArg(arg) ? "guide:" + guideArg(arg) : arg === "faults" || arg === "codes" ? "ref" : arg
     });else if (t === "parts" || t === "estimate") {
       setPartsQ(arg && arg.q ? {
         q: arg.q,
@@ -12569,7 +12612,10 @@ function App() {
     setChat: setChat,
     draft: aiDraft,
     clearDraft: () => setAiDraft(null)
-  })), page === "repair" && /*#__PURE__*/React.createElement(RepairPage, _extends({}, ctx, {
+  })), page === "repair" && kb !== "ok" && /*#__PURE__*/React.createElement(KbWait, {
+    st: kb,
+    retry: kbRetry
+  }), page === "repair" && kb === "ok" && /*#__PURE__*/React.createElement(RepairPage, _extends({}, ctx, {
     rv: rv,
     setRv: v => navTo({
       page: "repair",
@@ -17675,7 +17721,7 @@ function bikeFromHash() {
 function diagFromHash() {
   try {
     const d = new URLSearchParams(String(location.hash || "").replace(/^#/, "")).get("d");
-    return d && DIAG.find(x => x.id === d) ? d : null;
+    return d && (!window.MH_KB || DIAG.find(x => x.id === d)) ? d : null;
   } catch (e) {
     return null;
   }
@@ -17688,7 +17734,7 @@ function guideFromHash() {
   try {
     const g = new URLSearchParams(String(location.hash || "").replace(/^#/, "")).get("g");
     const id = g && (GUIDE_ALIAS[g] || g);
-    return id && GUIDES.find(x => x.id === id) ? id : null;
+    return id && (!window.MH_KB || GUIDES.find(x => x.id === id)) ? id : null;
   } catch (e) {
     return null;
   }
@@ -18011,6 +18057,7 @@ function AiChat({
     setBusy(true);
     const c = new AbortController();
     ctl.current = c;
+    if (!window.MH_KB && window.mhLoadKb) await window.mhLoadKb().catch(() => {});
     const context = AI_RULES + (ai.provider === "worker" ? "\nВсегда отвечай только на русском языке." : "") + "\n\n=== КАРТОЧКА МОТОЦИКЛА ===\n" + aiCard(eng, bike, ver, cu, mt) + "\n\n=== КАТАЛОГ ЗАПЧАСТЕЙ (ID|название|цена ₽) ===\n" + aiCatalog(eng, ai.provider === "worker" ? 40 : 220) + aiLookup(history.slice(-3).filter(m => m.role === "user").map(m => m.text).join(" ")) + aiKnowledge(text, eng);
     const turns = [{
       role: "user",

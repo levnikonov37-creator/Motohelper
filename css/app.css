@@ -2897,3 +2897,7 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
   .phero-act .btn .ico, .phero-act .btn svg { display: none; }
   .tabbar .tab { font-size: 10px !important; letter-spacing: -.02em; white-space: nowrap; }
 }
+
+/* раздел ждёт базу знаний (js/kb.js) — она приходит сразу после первого экрана */
+.kb-wait { padding: 56px 16px; text-align: center; color: var(--muted); }
+.kb-wait p { margin: 0 0 16px; }
