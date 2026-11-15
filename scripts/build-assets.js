@@ -2,7 +2,7 @@
 //   node scripts/build-assets.js          — собрать (её же запускает scripts/build-pages.js)
 //   node scripts/build-assets.js --check  — только проверить, что сборка свежая (для тестов)
 //
-// Правишь js/data.js, js/app.js, js/motion.js или css/app.css — потом запускай сборку.
+// Правишь js/data.js, js/kb.js, js/app.js, js/motion.js или css/app.css — потом запускай сборку.
 // Что она делает:
 //   1) сжимает эти файлы (esbuild) в *.min.js / app.min.css — браузеру меньше качать и разбирать;
 //   2) в index.html ставит ссылки вида js/app.min.js?v=<хэш>: у каждой версии файла свой адрес,
@@ -26,6 +26,7 @@ const check = process.argv.includes("--check");
 const MIN = [
   ["css/app.css", "css/app.min.css"],
   ["js/data.js", "js/data.min.js"],
+  ["js/kb.js", "js/kb.min.js"], // база знаний: грузится после первого экрана (data-src в index.html)
   ["js/app.js", "js/app.min.js"],
   ["js/motion.js", "js/motion.min.js"],
 ];
@@ -35,6 +36,9 @@ const VENDOR = ["vendor/react.production.min.js", "vendor/react-dom.production.m
 const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
 const hash = (s) => crypto.createHash("sha256").update(s).digest("hex").slice(0, 10);
 
+// каталог качается первым и один; первой строкой он зовёт mhBoot() из index.html — тот ставит в очередь React и приложение,
+// и они качаются, пока каталог выполняется (на слабом телефоне это ~0.8 с)
+const PRE = { "js/data.min.js": 'typeof window!="undefined"&&window.mhBoot&&window.mhBoot();' };
 const out = {}; // путь → новое содержимое
 const ver = {};
 for (const [src, dst] of MIN) {
@@ -48,8 +52,8 @@ for (const [src, dst] of MIN) {
     target: css ? ["chrome87", "safari14", "firefox78"] : "es2019",
     logLevel: "silent",
   });
-  out[dst] = r.code;
-  ver[dst] = hash(r.code);
+  out[dst] = (PRE[dst] || "") + r.code;
+  ver[dst] = hash(out[dst]);
 }
 for (const f of VENDOR) ver[f] = hash(fs.readFileSync(path.join(ROOT, f)));
 const url = (f) => f + "?v=" + ver[f];

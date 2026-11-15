@@ -48,6 +48,9 @@ const server = http.createServer((req, res) => {
     await page.route(/mm\.bing\.net\/th/, fakePhoto);
     await page.goto(base, { waitUntil: "load" });
     await page.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 20000 });
+    // база знаний (js/kb.js: инструкции, диагностика) приходит сразу после первого экрана
+    const kbOk = await page.waitForFunction(() => window.MH_KB === true && GUIDES.length > 100 && CAUSES.length > 50, null, { timeout: 10000 }).then(() => true, () => false);
+    if (!kbOk) errors.push("База знаний (js/kb.js) не загрузилась после первого экрана");
 
     const counts = await page.evaluate(() => ({ bikes: BIKES.length, engines: Object.keys(ENGINES).length }));
     if (counts.bikes < 1000) errors.push("Слишком мало моделей: " + counts.bikes);
@@ -240,6 +243,18 @@ const server = http.createServer((req, res) => {
       if (!backUnit) errors.push("«Назад» после поиска не вернул на прошлый экран");
     }
 
+    // Ссылки со страниц поиска: #g= — инструкция, #d= — проверка. База знаний грузится сразу, до неё — «Загрузка инструкций…»
+    for (const [hash, sel, what] of [["#g=spark", ".g-steps", "инструкция"], ["#g=compression-test", ".g-steps", "инструкция по старому id"], ["#d=start", ".wizard .wz-q", "проверка"]]) {
+      const dl = await browser.newPage({ viewport: { width: 420, height: 900 } });
+      dl.on("pageerror", (e) => errors.push("Ошибка JS (" + hash + "): " + e.message));
+      await dl.addInitScript(() => { localStorage.setItem("mh2-onboarded", "true"); sessionStorage.setItem("mh-intro", "1"); });
+      await dl.goto(base + hash, { waitUntil: "load" });
+      const ok = await dl.locator(sel).first().waitFor({ timeout: 10000 }).then(() => true, () => false);
+      if (!ok) errors.push("Ссылка " + hash + ": не открылась " + what);
+      if (hash === "#d=start" && ok && (await dl.locator(".rhub").count())) errors.push("Ссылка #d=start открыла начало раздела, а не проверку");
+      await dl.close();
+    }
+
     // Пользователь со старыми сохранениями (до объединения поколений) — ключи должны перенестись
     const old = await browser.newPage({ viewport: { width: 420, height: 900 } });
     old.on("pageerror", (e) => errors.push("Ошибка JS (старые сохранения): " + e.message));
@@ -307,6 +322,7 @@ const server = http.createServer((req, res) => {
     await off.reload({ waitUntil: "load" });
     const offOk = await off.waitForFunction(() => document.getElementById("root").dataset.ok === "1", null, { timeout: 15000 }).then(() => true, () => false);
     if (!offOk) errors.push("Без интернета сайт не открылся");
+    else if (!(await off.waitForFunction(() => window.MH_KB === true, null, { timeout: 10000 }).then(() => true, () => false))) errors.push("Без интернета не загрузились инструкции и диагностика (js/kb.js)");
     else {
       await off.getByRole("button", { name: "Мотоцикл" }).last().click();
       await off.locator(".view-toggle button", { hasText: /^Мотор$/ }).first().click();
