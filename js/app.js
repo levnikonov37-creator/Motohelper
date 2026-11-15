@@ -14165,7 +14165,16 @@ function Passport({
     type: "button",
     className: "link pp-more",
     onClick: () => go("bike", "overview")
-  }, "Все характеристики →"));
+  }, "Все характеристики →"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "link pp-more pp-check",
+    onClick: () => {
+      try {
+        sessionStorage.setItem("mh-fb-open", "1");
+      } catch (e) {}
+      go("bike", "overview");
+    }
+  }, "Сверить с мануалом: всё совпадает?"));
 }
 /* Каталог моделей (страницы /m/ для поисковиков) — с главной, с популярными марками */
 const CAT_TR = {
@@ -17284,13 +17293,45 @@ function FeedbackBox({
   ai,
   flash
 }) {
-  const [open, setOpen] = useState(false);
+  /* открыть сразу — пришёл по ссылке «Сверить с мануалом» из паспорта на главной */
+  const [open, setOpen] = useState(() => {
+    try {
+      if (sessionStorage.getItem("mh-fb-open")) {
+        sessionStorage.removeItem("mh-fb-open");
+        return "link";
+      }
+    } catch (e) {}
+    return false;
+  });
+  const boxRef = useRef(null);
+  useEffect(() => {
+    if (open === "link" && boxRef.current) boxRef.current.scrollIntoView({
+      block: "start",
+      behavior: "smooth"
+    });
+  }, [open]);
   const [text, setText] = useState("");
   const [contact, setContact] = useState("");
   const [st, setSt] = useState("");
+  /* сверка владельцем: по каждому значению «верно» / «не так» + как у него и откуда знает */
+  const [marks, setMarks] = useState({});
+  const [vals, setVals] = useState({});
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    setMarks({});
+    setVals({});
+  }, [eng.id]);
+  const has = v => v && v !== "—";
+  const rows = [["Масло", eng.oil], ["Объём масла", eng.oilVol], ["Свеча", eng.spark], ["Зазор свечи", eng.gap], ["Клапаны, впуск", eng.valveIn], ["Клапаны, выпуск", eng.valveEx], ["Карбюратор", eng.carb], ["Главный жиклёр", eng.jetMain], ["Жиклёр холостого хода", eng.jetPilot], ["Игла", eng.needle], ["Холостые обороты", eng.idle]].filter(r => has(r[1]));
+  const marked = rows.filter(r => marks[r[0]]);
   const info = (bike.brand === "Любая модель" ? "" : bike.brand + " " + bike.name) + (ver && ver.years ? " (" + ver.years + ")" : "");
+  function report() {
+    const lines = marked.map(r => marks[r[0]] === "ok" ? "✓ " + r[0] + ": " + r[1] : "✗ " + r[0] + ": на сайте «" + r[1] + "», у меня «" + (vals[r[0]] || "?").trim() + "»");
+    return (lines.length ? "Сверка владельцем" + (src ? " (источник: " + src + ")" : "") + ":\n" + lines.join("\n") + (text.trim() ? "\n\n" : "") : "") + text.trim();
+  }
   async function send() {
-    if (!text.trim()) return;
+    const body = report();
+    if (!body) return;
     setSt("busy");
     let ep = ai && ai.endpoint;
     try {
@@ -17308,8 +17349,8 @@ function FeedbackBox({
         body: JSON.stringify({
           feedback: {
             bike: info,
-            engine: eng.code,
-            text: text,
+            engine: eng.code + (eng.id && eng.id !== eng.code ? " [" + eng.id + "]" : ""),
+            text: body,
             contact: contact,
             page: location.href
           }
@@ -17319,6 +17360,8 @@ function FeedbackBox({
       if (j.ok) {
         setSt("ok");
         setText("");
+        setMarks({});
+        setVals({});
         flash && flash("Спасибо! Сообщение отправлено");
       } else setSt("fail");
     } catch (e) {
@@ -17326,7 +17369,7 @@ function FeedbackBox({
     }
   }
   function copy() {
-    const t = "MotoHelper: " + info + ", мотор " + eng.code + "\n" + text;
+    const t = "MotoHelper: " + info + ", мотор " + eng.code + "\n" + report();
     try {
       navigator.clipboard.writeText(t);
       flash && flash("Текст скопирован");
@@ -17338,16 +17381,53 @@ function FeedbackBox({
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "edit",
     s: 17
-  }), "Нашёл неточность? Сообщи");
+  }), "Сверить с мануалом или сообщить о неточности");
   return /*#__PURE__*/React.createElement("div", {
-    className: "panel fb-box"
-  }, /*#__PURE__*/React.createElement("h3", null, "Что не так с ", info || eng.code, "?"), /*#__PURE__*/React.createElement("p", {
+    className: "panel fb-box",
+    ref: boxRef
+  }, /*#__PURE__*/React.createElement("h3", null, "Сверь данные ", info || eng.code, " со своим мотоциклом"), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, "Например: «у моего другой мотор», «свеча не та», «объём масла 1.3 л». Модель и мотор подставятся сами."), /*#__PURE__*/React.createElement("textarea", {
+  }, "Отметь, что совпадает с мануалом, наклейкой или тем, что стоит у тебя, и что нет. Модель и мотор подставятся сами — по таким отметкам данные и уточняются."), rows.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "fb-rows"
+  }, rows.map(r => /*#__PURE__*/React.createElement("div", {
+    key: r[0],
+    className: "fb-row" + (marks[r[0]] ? " " + marks[r[0]] : "")
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "fb-k"
+  }, r[0]), /*#__PURE__*/React.createElement("b", {
+    className: "fb-v"
+  }, nbv(r[1])), /*#__PURE__*/React.createElement("span", {
+    className: "fb-btns"
+  }, [["ok", "Верно"], ["no", "Не так"]].map(m => /*#__PURE__*/React.createElement("button", {
+    key: m[0],
+    type: "button",
+    className: "chip" + (marks[r[0]] === m[0] ? " on" : ""),
+    "aria-pressed": marks[r[0]] === m[0],
+    onClick: () => setMarks(o => Object.assign({}, o, {
+      [r[0]]: o[r[0]] === m[0] ? undefined : m[0]
+    }))
+  }, m[1]))), marks[r[0]] === "no" && /*#__PURE__*/React.createElement("input", {
+    className: "fb-val",
+    value: vals[r[0]] || "",
+    maxLength: 120,
+    placeholder: "Как у тебя",
+    onChange: e => setVals(o => Object.assign({}, o, {
+      [r[0]]: e.target.value
+    }))
+  })))), marked.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "fb-src"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "muted small"
+  }, "Откуда знаешь:"), ["мануал", "наклейка или сервисная книжка", "сервис или дилер", "свой опыт"].map(x => /*#__PURE__*/React.createElement("button", {
+    key: x,
+    type: "button",
+    className: "chip" + (src === x ? " on" : ""),
+    onClick: () => setSrc(src === x ? "" : x)
+  }, x))), /*#__PURE__*/React.createElement("textarea", {
     value: text,
     rows: 4,
     maxLength: 2000,
-    placeholder: "Что неверно и как правильно",
+    placeholder: rows.length ? "Ещё что-то не так? Например: «у моего другой мотор»" : "Что неверно и как правильно",
     onChange: e => setText(e.target.value)
   }), /*#__PURE__*/React.createElement("input", {
     value: contact,
@@ -17358,7 +17438,7 @@ function FeedbackBox({
     className: "row-gap"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
-    disabled: st === "busy" || !text.trim(),
+    disabled: st === "busy" || !text.trim() && !marked.length || marked.some(r => marks[r[0]] === "no" && !(vals[r[0]] || "").trim()),
     onClick: send
   }, st === "busy" ? "Отправляю…" : "Отправить"), /*#__PURE__*/React.createElement("button", {
     className: "btn",

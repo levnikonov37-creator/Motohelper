@@ -255,6 +255,22 @@ const server = http.createServer((req, res) => {
       await dl.close();
     }
 
+    // Сверка владельцем: из паспорта на главной — список значений мотора с «Верно» / «Не так»
+    {
+      const fbp = await browser.newPage({ viewport: { width: 420, height: 900 } });
+      fbp.on("pageerror", (e) => errors.push("Ошибка JS (сверка данных): " + e.message));
+      await fbp.addInitScript(() => { localStorage.setItem("mh2-onboarded", "true"); sessionStorage.setItem("mh-intro", "1"); });
+      await fbp.goto(base, { waitUntil: "load" });
+      await fbp.locator(".pp-check").click({ timeout: 10000 }).catch(() => errors.push("Сверка данных: на главной нет ссылки «Сверить с мануалом»"));
+      const rowsOk = await fbp.locator(".fb-box .fb-row").nth(4).waitFor({ timeout: 8000 }).then(() => true, () => false);
+      if (!rowsOk) errors.push("Сверка данных: нет списка значений с «Верно» / «Не так»");
+      else {
+        await fbp.locator(".fb-row").first().getByRole("button", { name: "Не так" }).click();
+        if (!(await fbp.locator(".fb-box .btn.primary").isDisabled())) errors.push("Сверка данных: «Не так» без своего значения можно отправить");
+      }
+      await fbp.close();
+    }
+
     // Пользователь со старыми сохранениями (до объединения поколений) — ключи должны перенестись
     const old = await browser.newPage({ viewport: { width: 420, height: 900 } });
     old.on("pageerror", (e) => errors.push("Ошибка JS (старые сохранения): " + e.message));

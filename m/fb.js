@@ -1,0 +1,7 @@
+(function(){var box=document.querySelector(".fbk");if(!box)return;var f=box.querySelector("form"),msg=box.querySelector(".fbk-msg"),ep=null;
+fetch("/ai-config.json").then(function(r){return r.json()}).then(function(j){ep=j.endpoint}).catch(function(){});
+function send(text){if(!ep){msg.textContent="Сервер сайта сейчас недоступен — попробуй позже.";return}var bs=f.querySelectorAll("button");for(var i=0;i<bs.length;i++)bs[i].disabled=true;msg.textContent="Отправляю…";
+fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({feedback:{bike:box.dataset.bike,engine:box.dataset.engine,text:text,contact:f.elements.c.value,page:location.href}})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw 0;f.reset();msg.textContent="Спасибо! Проверим и поправим — по таким сообщениям данные и уточняются.";if(window.ym)try{ym(113844391,"reachGoal","page_fix")}catch(x){}})
+.catch(function(){msg.textContent="Не получилось отправить — попробуй позже."}).then(function(){for(var i=0;i<bs.length;i++)bs[i].disabled=false})}
+f.addEventListener("submit",function(e){e.preventDefault();var t=f.elements.t.value.trim();if(t.length<3)return;var k=f.elements.k.value;send((k?"✗ "+k+": ":"")+t)});
+box.querySelector(".fbk-ok").addEventListener("click",function(){send("✓ Данные страницы совпадают с мануалом / мотоциклом владельца"+(f.elements.t.value.trim()?": "+f.elements.t.value.trim():""))})})();

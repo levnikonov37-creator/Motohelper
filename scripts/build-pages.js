@@ -64,7 +64,8 @@ const abc = (a, b) => (cyr(a) - cyr(b)) || COLL.compare(a, b);
 const plural = (n, a, b, c) => (n % 10 === 1 && n % 100 !== 11 ? a : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? b : c);
 const ENG_N = new Set(BIKES.flatMap((b) => b.versions.map((v) => v.engine))).size;
 
-const CSS = `:root{color-scheme:dark;--bg:#000000;--card:#0E0E0E;--card2:#151515;--line:rgba(255,255,255,0.132);--ink:#F2F2F2;--muted:#9A9A9A;--acc:#FFFFFF;--acc2:#E6E6E6;--pink:#8F8F8F;
+const CSS = `.fbk{margin:18px 0 8px}.fbk summary{cursor:pointer;display:inline-block;padding:10px 14px;border:1px solid var(--line);border-radius:12px;font:600 15px var(--cond)}.fbk form{display:grid;gap:8px;margin-top:10px}.fbk select,.fbk input,.fbk textarea{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:15px var(--body);min-width:0}.fbk textarea{resize:vertical}.fbk-btns{display:flex;flex-wrap:wrap;gap:8px}.fbk button{padding:12px 16px;border:1px solid var(--line);border-radius:8px;background:var(--card2);color:var(--ink);font:600 15px var(--cond);cursor:pointer}.fbk button[type=submit]{background:#fff;color:#000;border-color:#fff}.fbk button:disabled{opacity:.5}.fbk-msg{margin:8px 0 0;color:var(--muted)}
+:root{color-scheme:dark;--bg:#000000;--card:#0E0E0E;--card2:#151515;--line:rgba(255,255,255,0.132);--ink:#F2F2F2;--muted:#9A9A9A;--acc:#FFFFFF;--acc2:#E6E6E6;--pink:#8F8F8F;
 --display:"Russo One","Arial Black",Impact,sans-serif;--cond:"Fira Sans Condensed","Arial Narrow",Arial,sans-serif;--body:"Fira Sans","Segoe UI",Roboto,Arial,sans-serif}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);
 background-image:radial-gradient(70% 40% at 85% -5%,rgba(255,255,255,0.154),transparent 70%),radial-gradient(50% 30% at 0% 10%,rgba(255,255,255,0.049),transparent 70%);background-repeat:no-repeat}
@@ -203,6 +204,17 @@ f.addEventListener("submit",function(e){e.preventDefault();if(!ep)return;var b=f
 fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({review:{slug:box.dataset.slug,model:box.dataset.model,name:f.elements.name.value,km:f.elements.km.value,text:f.elements.text.value}})}).then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})}).then(function(o){
 if(o.j.published){var e=list.querySelector(".rv-empty");if(e)e.remove();list.insertBefore(item(o.j.item),list.firstChild);f.reset();msg.textContent="Спасибо! Отзыв опубликован.";if(window.ym)try{ym(113844391,"reachGoal","review")}catch(x){}}
 else msg.textContent=o.s===429?"Сегодня больше отзывов отправить нельзя.":o.j.error==="short"?"Напиши чуть подробнее — хотя бы пару предложений.":"Спасибо! Отзыв не прошёл автоматическую проверку: без ссылок, контактов и мата, пожалуйста."}).catch(function(){msg.textContent="Не получилось отправить — попробуй позже."}).then(function(){b.disabled=false})})})();`;
+/* «Значение не совпадает?» — владелец сообщает, что на странице не так (или что всё сходится с мануалом).
+   Сообщение уходит на сервер сайта (как «Сообщить о неточности» в приложении); скрипт — m/fb.js */
+const fbBlock = (bike, engine, keys) => `<details class="fbk" data-bike="${esc(bike)}" data-engine="${esc(engine)}"><summary>Значение не совпадает с мануалом? Сообщи</summary>
+<form><select name="k"><option value="">Что не так</option>${keys.map((k) => `<option>${esc(k)}</option>`).join("")}<option>Другое</option></select><textarea name="t" rows="3" maxlength="2000" required placeholder="Как у тебя и откуда: «по мануалу объём масла 1.3 л», «на наклейке другая свеча»"></textarea><input name="c" maxlength="120" placeholder="Как с тобой связаться (необязательно)" /><div class="fbk-btns"><button type="submit">Отправить</button><button type="button" class="fbk-ok">Всё совпадает с мануалом</button></div></form><p class="fbk-msg" role="status"></p></details>`;
+const FB_JS = `(function(){var box=document.querySelector(".fbk");if(!box)return;var f=box.querySelector("form"),msg=box.querySelector(".fbk-msg"),ep=null;
+fetch("/ai-config.json").then(function(r){return r.json()}).then(function(j){ep=j.endpoint}).catch(function(){});
+function send(text){if(!ep){msg.textContent="Сервер сайта сейчас недоступен — попробуй позже.";return}var bs=f.querySelectorAll("button");for(var i=0;i<bs.length;i++)bs[i].disabled=true;msg.textContent="Отправляю…";
+fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({feedback:{bike:box.dataset.bike,engine:box.dataset.engine,text:text,contact:f.elements.c.value,page:location.href}})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw 0;f.reset();msg.textContent="Спасибо! Проверим и поправим — по таким сообщениям данные и уточняются.";if(window.ym)try{ym(113844391,"reachGoal","page_fix")}catch(x){}})
+.catch(function(){msg.textContent="Не получилось отправить — попробуй позже."}).then(function(){for(var i=0;i<bs.length;i++)bs[i].disabled=false})}
+f.addEventListener("submit",function(e){e.preventDefault();var t=f.elements.t.value.trim();if(t.length<3)return;var k=f.elements.k.value;send((k?"✗ "+k+": ":"")+t)});
+box.querySelector(".fbk-ok").addEventListener("click",function(){send("✓ Данные страницы совпадают с мануалом / мотоциклом владельца"+(f.elements.t.value.trim()?": "+f.elements.t.value.trim():""))})})();`;
 const askBlock = (about) => `<section class="ask" data-ctx="${esc(about)}"><h2>Спроси механика</h2><form><textarea name="q" rows="2" maxlength="600" placeholder="Например: не заводится на холодную — что проверить?" required></textarea><button type="submit">Спросить</button></form><div class="ask-out" aria-live="polite"></div><p class="note">Отвечает ИИ по базе MotoHelper — сверяйся с мануалом. Подробный разговор с фото — в <a href="/#ai=1">ИИ-механике MotoHelper</a>.</p></section>`;
 const ASK_JS = `(function(){var box=document.querySelector(".ask");if(!box)return;var f=box.querySelector("form"),out=box.querySelector(".ask-out"),btn=f.querySelector("button"),ep=null;
 fetch("/ai-config.json").then(function(r){return r.json()}).then(function(j){ep=j.endpoint}).catch(function(){});
@@ -221,7 +233,7 @@ const pickTitle = (base, tails) => { const t = tails.map((x) => base + x).find((
   let b = base.slice(0, 62).replace(/[\s,/:;–—-]+\S*$/, ""); if ((b.match(/\(/g) || []).length > (b.match(/\)/g) || []).length) b = b.replace(/[\s,/:;–—-]+$/, "") + ")"; return b + tails[tails.length - 1]; };
 const fitTitle = (t) => (t.length > 70 ? t.replace(/ \| MotoHelper$/, "") : t);
 const fitDesc = (d) => { if (d.length <= 220) return d; const cut = d.slice(0, 220), i = Math.max(cut.lastIndexOf(", "), cut.lastIndexOf(". "), cut.lastIndexOf("; ")); return (i > 120 ? cut.slice(0, i) : cut.replace(/\s+\S*$/, "")).replace(/[,;:\s—–-]+$/, "") + "."; };
-function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv }) {
+function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb }) {
   title = fitTitle(title);
   desc = fitDesc(desc);
   return `<!doctype html>
@@ -262,6 +274,7 @@ ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть �
 ${js ? `<script>${js}</script>` : ""}
 ${ask ? `<script src="/m/ask.js" defer></script>` : ""}
 ${rv ? `<script src="/m/rv.js" defer></script>` : ""}
+${fb ? `<script src="/m/fb.js" defer></script>` : ""}
 ${METRIKA}
 </body>
 </html>
@@ -404,12 +417,13 @@ ${vers}
 ${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>` : ""}
 ${probBikes.has(b) ? "" : `<h2>Если что-то не так</h2><div class="chips">${probsFor(b).slice(0, 8).map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>`}
 ${faqHtml}
+${fbBlock(full, e0.code, ["Масло", "Объём масла", "Свеча", "Зазоры клапанов", "Карбюратор и жиклёры", "Мотор", "Мощность"])}
 ${twins.length ? `<h2>Этот же мотор ${esc(e0.code)} стоит на</h2><div class="chips">${twins.map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div><p><a class="chip" href="/m/motor/${engSlug[b.versions[0].engine]}/">Всё о моторе ${esc(e0.code)} →</a></p>` : ""}
 ${rvBlock(slug, full, b.name)}
 ${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
   const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${e0.oil || "—"}${e0.oilVol ? " " + e0.oilVol : ""}, свеча ${e0.spark || "—"}, зазоры клапанов ${e0.valveIn || "—"} / ${e0.valveEx || "—"}. Слабые места и ремонт.`;
   const descRu = fullRu ? desc.replace(full + ":", full + " (" + fullRu + "):") : desc;
-  files.set("m/" + slug + "/index.html", page({ rv: true, ask: full + " (мотор " + e0.code + ")", title: pickTitle(full, [...(fullRu ? [" (" + ru + ") — масло, свечи, зазоры клапанов, слабые места", " (" + ru + ") — масло, свечи, зазоры клапанов"] : []), " — масло, свечи, зазоры клапанов, слабые места | MotoHelper", " — масло, свечи, зазоры клапанов, слабые места", " — масло, свечи, зазоры клапанов", ": масло, свечи, клапаны"]), desc: descRu, canon, crumbs, body, sticky: appLink(b, 0),
+  files.set("m/" + slug + "/index.html", page({ rv: true, fb: true, ask: full + " (мотор " + e0.code + ")", title: pickTitle(full, [...(fullRu ? [" (" + ru + ") — масло, свечи, зазоры клапанов, слабые места", " (" + ru + ") — масло, свечи, зазоры клапанов"] : []), " — масло, свечи, зазоры клапанов, слабые места | MotoHelper", " — масло, свечи, зазоры клапанов, слабые места", " — масло, свечи, зазоры клапанов", ": масло, свечи, клапаны"]), desc: descRu, canon, crumbs, body, sticky: appLink(b, 0),
     ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: full, alternateName: fullRu || undefined, url: canon, inLanguage: "ru", description: descRu },
       { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] }));
 });
@@ -482,9 +496,10 @@ ${aka.length ? `<div class="chips">${aka.slice(0, 8).map((x) => `<span class="ch
 ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(d.title)}</a>`).join("")}</div>` : ""}
 ${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="chips">${gs.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>` : ""}
 ${faqHtml}
+${fbBlock("", e.code + " [" + id + "]", ["Масло", "Объём масла", "Свеча", "Зазоры клапанов", "Карбюратор и жиклёры", "Слабые места", "На каких моделях стоит"])}
 <div class="chips"><a class="chip" href="/m/maslo/">Масло для других моторов</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>`;
   const desc = `Мотор ${dupCode[e.code] > 1 && e.name ? e.name : engTitle(e)}${e.cc ? ", " + e.cc + " см³" : ""}: масло ${e.oil || "—"}${e.oilVol ? " " + e.oilVol : ""}, свеча ${e.spark || "—"}${e.gap ? " (зазор " + e.gap + ")" : ""}, клапаны ${e.valveIn || "—"} / ${e.valveEx || "—"}. На каких мотоциклах стоит, слабые места, ремонт.`;
-  files.set("m/motor/" + slug + "/index.html", page({ ask: "мотор " + tName, title: pickTitle(tName, [" — масло и объём, свеча, зазоры клапанов | MotoHelper", " — масло, свеча, зазоры клапанов", ": масло, свеча, клапаны"]), desc, canon, crumbs, body, sticky: appLink(b0, 0),
+  files.set("m/motor/" + slug + "/index.html", page({ fb: true, ask: "мотор " + tName, title: pickTitle(tName, [" — масло и объём, свеча, зазоры клапанов | MotoHelper", " — масло, свеча, зазоры клапанов", ": масло, свеча, клапаны"]), desc, canon, crumbs, body, sticky: appLink(b0, 0),
     ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: "Мотор " + e.code, url: canon, inLanguage: "ru", description: desc }]
       .concat(faq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] : []) }));
 });
@@ -750,6 +765,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 files.set("m/m.css", CSS + "\n");
 files.set("m/ask.js", ASK_JS + "\n");
 files.set("m/rv.js", RV_JS + "\n");
+files.set("m/fb.js", FB_JS + "\n");
 /* сводные таблицы по моторам: /m/maslo/, /m/svechi/, /m/klapany/ — под общие запросы («какое масло заливать в мотоцикл»,
    «свеча на питбайк», «зазоры клапанов таблица»). Значения — из базы, «по мануалу» не показываем. */
 const HUBS = [];

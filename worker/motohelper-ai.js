@@ -301,6 +301,14 @@ async function saveFeedback(env, f) {
   await env.FEEDBACK.put(item.t + "-" + Math.random().toString(36).slice(2, 8), JSON.stringify(item), { expirationTtl: 60 * 60 * 24 * 365 });
   return json({ ok: true });
 }
+/* сообщения о неточностях за промежуток [from, to) — ключи начинаются с времени ISO */
+async function feedbackSince(env, from, to) {
+  if (!env.FEEDBACK) return [];
+  const prefixes = [...new Set([from.slice(0, 10), to.slice(0, 10)])];
+  const keys = [].concat(...(await Promise.all(prefixes.map((p) => env.FEEDBACK.list({ prefix: p, limit: 1000 }).then((r) => r.keys.map((k) => k.name))))))
+    .filter((k) => k >= from && k < to).sort();
+  return Promise.all(keys.slice(0, 50).map(async (k) => JSON.parse((await env.FEEDBACK.get(k)) || "{}")));
+}
 async function listFeedback(env, token) {
   if (!env.FEEDBACK) return json({ ok: false, error: "no_kv" }, 501);
   if (!env.FEEDBACK_TOKEN || token !== env.FEEDBACK_TOKEN) return json({ ok: false, error: "token" }, 403);
@@ -400,6 +408,8 @@ async function dailyReport(env, dry) {
     const mskMidnight = new Date(Date.parse(mskDay() + "T00:00:00Z") - 3 * 3600e3).toISOString();
     const qs = await questionStats(env, 1, mskMidnight).catch(() => null);
     const wm = await webmasterStats(env).catch(() => null);
+    // сообщения владельцев о неточностях за вчера (приложение и страницы каталога: «Сверить с мануалом», «Значение не совпадает?»)
+    const fb = await feedbackSince(env, new Date(Date.parse(mskMidnight) - 864e5).toISOString(), mskMidnight).catch(() => null);
     let health = null;
     try {
       health = env.FEEDBACK && JSON.parse((await env.FEEDBACK.get("health")) || "null");
@@ -420,6 +430,7 @@ async function dailyReport(env, dry) {
       subs != null ? "📣 Подписчиков канала: " + n(subs) : "",
       wm ? "🔎 В поиске Яндекса: " + n(wm.searchable) + " страниц" + (wm.excluded ? " (исключено " + n(wm.excluded) + ")" : "") + (wm.sqi != null ? ", ИКС " + n(wm.sqi) : "") + (wm.problems ? "\n⚠️ Проблемы сайта в Вебмастере: " + wm.problems : "") : "",
       qs ? "🤖 Вопросов ИИ-механику: " + n(qs.total) + (qs.tg ? " (сайт " + n(qs.site) + ", Telegram " + n(qs.tg) + ")" : "") + (qs.top.length ? "\nО чём спрашивали: " + qs.top.join(", ") : "") : "",
+      fb && fb.length ? "✍️ Владельцы сверили данные: " + n(fb.length) + "\n" + fb.slice(0, 8).map((x) => "• " + [x.bike, x.engine].filter(Boolean).join(", ") + ": " + String(x.text || "").replace(/\s+/g, " ").slice(0, 160)).join("\n") + (fb.length > 8 ? "\n… все — ?feedback=1&token=<FEEDBACK_TOKEN>" : "") : "",
       health ? (health.ai && health.ai.ok ? "✅ ИИ-механик работает" : "⚠️ ИИ-механик не ответил на проверке: " + ((health.ai && health.ai.error) || "?").slice(0, 120)) + (health.tg && !health.tg.ok ? "\n⚠️ Пост в канал не вышел: " + health.tg.error : "") : "",
       "",
       (src.data || []).length ? "Откуда пришли:\n" + src.data.map((d) => "• " + d.dimensions[0].name + " — " + n(d.metrics[0])).join("\n") : "",

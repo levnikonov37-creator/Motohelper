@@ -2901,3 +2901,16 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 /* раздел ждёт базу знаний (js/kb.js) — она приходит сразу после первого экрана */
 .kb-wait { padding: 56px 16px; text-align: center; color: var(--muted); }
 .kb-wait p { margin: 0 0 16px; }
+
+/* сверка данных владельцем: «верно» / «не так» у каждого значения */
+.fb-rows { display: grid; gap: 6px; }
+.fb-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface2); }
+.fb-row .fb-k { grid-column: 1; font-size: 13px; color: var(--muted); }
+.fb-row .fb-v { grid-column: 1; font-weight: 600; overflow-wrap: anywhere; }
+.fb-row .fb-btns { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 6px; }
+.fb-row .fb-val { grid-column: 1 / -1; }
+.fb-row.ok { border-color: var(--ok); }
+.fb-row.no { border-color: var(--danger); }
+.fb-btns .chip.on, .fb-src .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.fb-src { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pp-check { display: block; margin-top: 4px; }
