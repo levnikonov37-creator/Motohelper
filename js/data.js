@@ -8743,6 +8743,15 @@ CL("NB350", "NB300", { code: "NB350", name: "Zongshen NB350 (315 см³)", cc: 3
   addBike("Voge", "R625", "Нейкед", "VOG_581");
   addBike("Voge", "CU625", "Чоппер", "VOG_581");
   addBike("Voge", "900DS", "Тур-эндуро", "F900");
+  /* Kayo: питбайки из каталога auto.ru, мотор — в названии модели (как у уже заведённых Basic / Evolution / Big-Mini) */
+  var P = "Питбайк";
+  addBike("Kayo", "Basic YX140EM", P, "YX140", { approx: true });
+  addBike("Kayo", "Basic TT125EA", P, "154FMI", { approx: true });
+  addBike("Kayo", "Big-Mini K125EM", P, "154FMI");
+  addBike("Kayo", "Big-Mini Lux K140EM", P, "YX140");
+  addBike("Kayo", "PRO YX160", P, "1P60FMK", { approx: true });
+  addBike("Kayo", "PRO 190", P, "Z190", { approx: true });
+  addBike("Kayo", "GP1-SM YX160", "Мотард", "1P60FMK", { approx: true });
 })();
 (function () {
   var ids = Object.keys(ENGINES);
