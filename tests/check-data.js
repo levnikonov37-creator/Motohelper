@@ -32,6 +32,14 @@ const { ENGINES, BIKES, PARTS, GUIDES, TUNING, TUNE_GUIDE } = ctx;
 const errors = [];
 const fail = (msg) => errors.push(msg);
 
+// марки в списке — в порядке русской сортировки (sortBikes сортирует своей функцией brandSortKey, без Intl)
+{
+  const brands = [...new Set(BIKES.map((b) => b.brand))].filter((b) => b !== "Любая модель");
+  const ru = brands.slice().sort(new Intl.Collator("ru").compare);
+  const at = ru.findIndex((b, i) => b !== brands[i]);
+  if (at >= 0) fail("Порядок марок не как у русской сортировки: «" + brands[at] + "» вместо «" + ru[at] + "» — поправь brandSortKey в js/data.js");
+}
+
 // js/data.js не трогает базу знаний: до загрузки js/kb.js в ней пустые заготовки
 for (const [k, v] of kbBefore) if (!["[]", "{}"].includes(v)) fail("js/data.js меняет " + k + " — это база знаний, её место в js/kb.js");
 for (const r of kbReads.slice(0, 5)) fail("js/data.js читает базу знаний (" + r + ") — до загрузки js/kb.js там пусто; перенеси этот код в js/kb.js");

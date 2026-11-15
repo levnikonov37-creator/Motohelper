@@ -322,14 +322,28 @@ function addVersion(brand, name, eng, years, extra) {
   b.versions.push(Object.assign({ engine: eng, years: years, label: years + " · " + e.code + ", " + e.cc + " см³" }, extra || {}));
 }
 /* Порядок списка: марки по алфавиту, внутри марки — порядок добавления, «Любая модель» в конце */
+/* порядок марок — как у русской сортировки (Intl.Collator("ru")): пробел, дефис, цифры, кириллица, латиница,
+   без учёта регистра. Своя функция вместо Intl: его первый запуск на слабом телефоне — около 50 мс до первого экрана.
+   tests/check-data.js сверяет порядок с Intl.Collator("ru") */
+function brandSortKey(s) {
+  s = String(s).toLowerCase();
+  var o = "";
+  for (var i = 0; i < s.length; i++) {
+    var c = s[i];
+    if (c === "ё") c = "е\u0001";
+    o += c === " " ? "00" : c === "-" ? "01" : /[0-9]/.test(c) ? "1" + c : /[а-я]/.test(c[0]) ? "2" + c : /[a-z]/.test(c) ? "3" + c : "02" + c;
+  }
+  return o + "\u0000" + s;
+}
 function sortBikes() {
   var any = BIKES.filter(function (b) { return b.brand === "Любая модель"; }), rest = BIKES.filter(function (b) { return b.brand !== "Любая модель"; });
-  var coll = new Intl.Collator("ru"), key = {};
-  rest.forEach(function (b, i) { if (!(b.brand in key)) key[b.brand] = 0; b.__i = i; });
-  var brands = Object.keys(key).sort(coll.compare);
+  /* место модели в списке — в отдельной таблице: временное поле у самих моделей (b.__i + delete) переводило
+     все 2700 объектов в медленный режим, и потом любое обращение к моделям на сайте шло дольше */
+  var key = {}, pos = new Map();
+  rest.forEach(function (b, i) { if (!(b.brand in key)) key[b.brand] = 0; pos.set(b, i); });
+  var brands = Object.keys(key).sort(function (a, b) { var x = brandSortKey(a), y = brandSortKey(b); return x < y ? -1 : x > y ? 1 : 0; });
   brands.forEach(function (x, i) { key[x] = i; });
-  rest.sort(function (a, b) { return key[a.brand] - key[b.brand] || a.__i - b.__i; });
-  rest.forEach(function (b) { delete b.__i; });
+  rest.sort(function (a, b) { return key[a.brand] - key[b.brand] || pos.get(a) - pos.get(b); });
   BIKES.length = 0; rest.concat(any).forEach(function (b) { BIKES.push(b); });
 }
 (function () {
