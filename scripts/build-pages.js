@@ -351,8 +351,13 @@ const FLAGSHIP = ["Motoland TT250", "Kayo T2 250", "Regulmoto Sport-003 PR", "Av
 const PROB = { start: "{M} не заводится", cold: "{M} глохнет на холодную", hot: "{M} глохнет на горячую", idle: "{M} не держит холостые", smoke: "{M} дымит",
   knock: "Стучит мотор {M}", power: "{M} не тянет", overheat: "{M} перегревается", "stall-gear": "{M} глохнет при включении передачи", charge: "На {M} садится аккумулятор" };
 const probBikes = new Set(BIKES.filter((b) => FLAGSHIP.indexOf(b.brand + " " + b.name) >= 0));
-const topE = new Set(popular.slice(0, 40));
+/* частые моторы — те, что стоят хотя бы на 10 моделях. Порог, а не «первые 40»: при пополнении базы рейтинг сдвигается,
+   и страницы «модель + поломка» у моделей на моторе, выпавшем из топа, пропадали бы из поиска. С порогом они только добавляются */
+const topE = new Set(popular.filter((id) => bikesOf[id].length >= 10));
 PROB_BRANDS.forEach((br) => BIKES.filter((b) => b.brand === br && topE.has(b.versions[0].engine)).sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name)).slice(0, CMP_BRANDS.indexOf(br) >= 0 ? 8 : 4).forEach((b) => probBikes.add(b)));
+/* страницы, которые уже есть (в репозитории), не убираем: новая модель может вытеснить старую из «первых 4 / 8 марки»,
+   а удалённая страница выпадает из поиска. Пропадают они, только если модель убрали из базы */
+BIKES.forEach((b) => { if (fs.existsSync(path.join(OUT, bikeSlug.get(b), "start", "index.html"))) probBikes.add(b); });
 // первая буква строчная, остальное как есть: «Слишком жирная смесь 2T» → «слишком жирная смесь 2T»
 const lc1 = (t) => (/^[А-ЯЁ][а-яё]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t);
 const probsFor = (b) => { const e = ENGINES[b.versions[0].engine]; return DIAG.filter((d) => PROB[d.id] && (!d.only || d.only.some((g) => (e.groups || []).indexOf(g) >= 0))); };
@@ -628,10 +633,15 @@ const podName = (k) => { const [t, c] = k.split("|"); return (TYPE_MANY[t] || t)
 /* сравнения: в классе (тип + объём) по одной модели от популярной марки — та, у которой больше поколений; до 6 марок, все пары */
 const compareByGroup = {}, compares = [];
 /* самые продаваемые модели — в сравнениях их класса они выбираются первыми */
+/* модели, у которых уже есть страницы сравнений (в репозитории), при прочих равных остаются в сравнениях:
+   новая модель марки с более коротким названием не должна вытеснять их — иначе старые страницы пропали бы из поиска */
+const OLD_CMP = new Set();
+try { fs.readdirSync(path.join(OUT, "sravnenie"), { withFileTypes: true }).filter((d) => d.isDirectory()).forEach((d) => d.name.split("-vs-").forEach((x) => OLD_CMP.add(x))); } catch (e) {}
 Object.keys(groups).forEach((k) => {
   const pick = {};
   groups[k].filter((b) => CMP_BRANDS.indexOf(b.brand) >= 0).forEach((b) => { const p = pick[b.brand]; const fl = (x) => FLAGSHIP.indexOf(x.brand + " " + x.name) >= 0;
-    if (!p || fl(b) > fl(p) || (fl(b) === fl(p) && (b.versions.length > p.versions.length || (b.versions.length === p.versions.length && b.name.length < p.name.length)))) pick[b.brand] = b; });
+    const st = (x) => (OLD_CMP.has(bikeSlug.get(x)) ? 1 : 0);
+    if (!p || fl(b) > fl(p) || (fl(b) === fl(p) && (st(b) > st(p) || (st(b) === st(p) && (b.versions.length > p.versions.length || (b.versions.length === p.versions.length && b.name.length < p.name.length)))))) pick[b.brand] = b; });
   const reps = Object.values(pick).sort((a, b) => CMP_BRANDS.indexOf(a.brand) - CMP_BRANDS.indexOf(b.brand)).slice(0, 6);
   for (let i = 0; i < reps.length; i++) for (let j = i + 1; j < reps.length; j++) {
     const c = { a: reps[i], b: reps[j], k, slug: bikeSlug.get(reps[i]) + "-vs-" + bikeSlug.get(reps[j]), title: reps[i].brand + " " + reps[i].name + " или " + reps[j].brand + " " + reps[j].name };

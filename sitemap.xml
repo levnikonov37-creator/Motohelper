@@ -1840,6 +1840,13 @@
   <url><loc>https://motohelper.ru/m/kayo-k7-a-300-road/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-k2-pro-300-road/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-m125em/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-basic-yx140em/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-basic-tt125ea/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-big-mini-k125em/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-big-mini-lux-k140em/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-pro-yx160/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-pro-190/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kayo-gp1-sm-yx160/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/keeway-rkv-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/keeway-rkf-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/keeway-superlight-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2129,6 +2136,8 @@
   <url><loc>https://motohelper.ru/m/motoland-250-enduro-crf-lt/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motoland-smx300-s5-pro-nb300f/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motoland-smx300-s3-pro-yb300h/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-xf300-a-enduro-st/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motoland-xf300-a-enduro-lt/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/mv-agusta-brutale-675/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/mv-agusta-brutale-800/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/mv-agusta-brutale-800-rr/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2353,6 +2362,16 @@
   <url><loc>https://motohelper.ru/m/regulmoto-v-bob-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/regulmoto-sk200-6/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/regulmoto-sport-003-pr-300-6-st/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-six-days/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-crosstrec-nb350/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-z-350/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-legend-pro/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-holeshot-300-pro/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-zz-pr-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-cr-x-pro/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-grizzly-pr300pro/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-lanza-2t/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/regulmoto-nibbi-te-n300-sr-2t/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/rieju-mr-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/rieju-mrt-50/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/rieju-mrt-50-sm/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2772,6 +2791,15 @@
   <url><loc>https://motohelper.ru/m/voge-ds800x-rally/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-cu525/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-rr660s/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-300act/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-300rr/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-525ac/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-525ds/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-525rr/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-rr500s/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-r625/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-cu625/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-900ds/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/wels-mzk-250-enduro/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/wels-mzk-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/wels-enduro-150/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3537,6 +3565,7 @@
   <url><loc>https://motohelper.ru/m/motor/mz-125-ts-etz/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mz-150-ts-etz/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mz-250-ts-etz/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/nb350/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc23e/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc26e/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc30e/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4006,13 +4035,13 @@
   <url><loc>https://motohelper.ru/m/podborka/neyked-1200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/enduro-450/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/neyked-900/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/podborka/tur-enduro-1200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/neyked-600/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/podborka/tur-enduro-1200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/pitbayk-150/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/tur-enduro-900/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/tur-enduro-600/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/podborka/sport-1200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/pitbayk-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/podborka/sport-1200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/skuter-50/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/neyked-450/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/chopper-900/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4032,9 +4061,9 @@
   <url><loc>https://motohelper.ru/m/podborka/kross-enduro-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/chopper-450/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/klassika-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/podborka/tur-enduro-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/klassika-600/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/chopper-600/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/podborka/tur-enduro-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/kross-enduro-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/tur-enduro-450/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/legkiy-enduro-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4048,10 +4077,10 @@
   <url><loc>https://motohelper.ru/m/podborka/motard-600/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/tur-enduro-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/motard-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/podborka/pitbayk-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/moped-110/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/klassika-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/legkiy-enduro-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/podborka/pitbayk-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/legkiy-enduro-150/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/turer-900/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/skuter-150/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4064,13 +4093,13 @@
   <url><loc>https://motohelper.ru/m/podborka/motard-450/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/neyked-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/skuter-110/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/podborka/sport-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/kross-enduro-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/moped-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/enduro-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/enduro-50/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/skuter-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/motard-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/podborka/sport-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/skuter-600/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/pitbayk-50/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/skuter-450/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4078,8 +4107,8 @@
   <url><loc>https://motohelper.ru/m/podborka/chopper-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/kross-enduro-70/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/skuter-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/podborka/motard-50/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/klassika-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/podborka/motard-50/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/motard-1200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/turer-600/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/trial-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -5595,6 +5624,16 @@
   <url><loc>https://motohelper.ru/m/promax-k1-pr300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/promax-k1-pr300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/promax-k1-pr300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-rx1-cb300rl/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/promax-touring-pr300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/promax-touring-pr300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/promax-touring-pr300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -5615,16 +5654,6 @@
   <url><loc>https://motohelper.ru/m/promax-blackout-nb300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/promax-blackout-nb300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/promax-blackout-nb300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/xmotos-xb155/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/xmotos-xb155/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/xmotos-xb155/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -5759,4 +5788,14 @@
   <url><loc>https://motohelper.ru/m/minsk-c4-250/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/minsk-c4-250/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/minsk-c4-250/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/start/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/cold/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/hot/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/idle/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/smoke/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/knock/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/power/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/overheat/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/stall-gear/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/promax-blackout-ybs300/charge/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
