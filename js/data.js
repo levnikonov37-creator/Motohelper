@@ -7469,7 +7469,8 @@ var SEASON = {
   addBike("Motoland", "R1 250", SP, "165FMM", { hp: 18 });
   addBike("Motoland", "Fighter 250", NK, "167FMM", { approx: true });
   G("Motoland", "300 Enduro Garet", AD, [["PR300", "2024+", { approx: true, hp: 25 }]]);
-  G("Motoland", "300 Enduro ST Neon", E, [["PR300", "2024+", { approx: true, hp: 25 }]]);
+  /* официальный магазин Motoland: мотор «175 FMM PR5» (175FMM), 24 л.с., PZ34, 5 передач, балансир, электро + кик */
+  G("Motoland", "300 Enduro ST Neon", E, [["175FMM", "2024+", { hp: 24, carb: "PZ34" }]]);
   addBike("Motoland", "250 Enduro GL250", E, "172FMM-5");
   G("Motoland", "500 Enduro Norton", AD, [["VOGE525", "2023+", { approx: true }]]);
   addBike("Motoland", "FX 300", E, "CBS300", { hp: 26 });
@@ -8702,6 +8703,47 @@ setEngine("Kayo", "TS90", 0, "1P50FMG", { approx: true });
   }
 })();
 /* ===================== v31: после всех моторов — вариатор, цепи по размеру, фильтр китайских DOHC только им ===================== */
+/* ===================== Regulmoto 2025–2026: модели с официального сайта regulmoto.ru (мотор — из характеристик модели) =====================
+   NB350 — новый мотор Zongshen (315 см³, жидкостное охлаждение) на Six Days, Crosstrec NB350, CR-Z 350. Заводских данных
+   (масло, зазоры, жиклёры) в открытом доступе нет — значения по NB300 (ZS174MN-5), с пометкой «≈». */
+CL("NB350", "NB300", { code: "NB350", name: "Zongshen NB350 (315 см³)", cc: 315, hp: 32, torque: "≈ 28 Н·м", compression: "≈ 12–14 бар",
+  carb: "NIBBI PWK34", jetMain: "≈ 140–152", jetPilot: "≈ 42–45", needle: "≈ 3–4 канавка", valveIn: "≈ 0.07 мм", valveEx: "≈ 0.08 мм",
+  oilVol: "≈ 1.5 л", coolant: "≈ 1.1–1.3 л",
+  issues: [
+    { t: "Новый мотор: заводские данные не опубликованы", sev: "low", fix: "Масло, свеча и зазоры здесь — по NB300; точные — в сервисной книжке мотоцикла или у дилера." },
+    { t: "Помпа и термостат", sev: "high", fix: "Антифриз раз в сезон, контроль утечек." },
+    { t: "Клапаны регулируются винтами коромысел — зазоры уходят, мотор начинает цокать", sev: "med", fix: "Проверка щупом на холодную каждые 5000 км или 50 моточасов." }
+  ] }, 1.1);
+(function () {
+  var E = "Эндуро";
+  addBike("Regulmoto", "Six Days", E, "NB350", { hp: 31 });
+  addBike("Regulmoto", "Crosstrec NB350", E, "NB350", { hp: 32 });
+  addBike("Regulmoto", "CR-Z 350", E, "NB350");
+  addBike("Regulmoto", "Legend Pro", E, "YBS300", { hp: 29.3 });
+  addBike("Regulmoto", "Holeshot 300 Pro", E, "FIXCN_PR300PRO", { hp: 25, carb: "NIBBI PWK34" });
+  addBike("Regulmoto", "ZZ PR 300", E, "FIXCN_PR300PRO", { hp: 25, carb: "NIBBI PE30" });
+  addBike("Regulmoto", "CR-X Pro", E, "FIXCN_CB300RL_6", { hp: 26, carb: "NIBBI PE30" });
+  /* в названии PR300PRO, а в характеристиках — 271.3 см³ и 5 передач, как у PR300 */
+  addBike("Regulmoto", "Grizzly PR300PRO", E, "FIXCN_PR300_5", { hp: 22, approx: true });
+  addBike("Regulmoto", "Lanza 2T", E, "FIXCN_LON_MT250", { hp: 35 });
+  /* «двигатель на базе KTM», 2T, 49 л.с., PWK40 */
+  addBike("Regulmoto", "Nibbi TE N300-SR 2T", E, "2T300", { hp: 49, approx: true, carb: "NIBBI PWK40" });
+  /* Motoland XF300-A — самая продаваемая модель 2025 г. в РФ; в магазинах это «300 Enduro ST / LT»: 175FMM, 24 л.с., PZ34, 5 передач.
+     ST — перевёрнутая вилка, LT — обычная телескопическая */
+  addBike("Motoland", "XF300-A Enduro ST", E, "175FMM", { hp: 24, carb: "PZ34" });
+  addBike("Motoland", "XF300-A Enduro LT", E, "175FMM", { hp: 24, carb: "PZ34" });
+  /* Voge (№2 по продажам в РФ в 2026 г.): модели из каталога auto.ru, которых не было в базе. Моторы — те же, что у моделей
+     этих серий: 300 — Loncin LX300 (292 см³), 500 — LX471, 525 — LX525 (494), 625 — LX 581, 900 — BMW F900 */
+  addBike("Voge", "300ACT", "Классика", "VOGE300");
+  addBike("Voge", "300RR", "Спорт", "VOGE300");
+  addBike("Voge", "525AC", "Классика", "VOGE525");
+  addBike("Voge", "525DS", "Тур-эндуро", "VOGE525");
+  addBike("Voge", "525RR", "Спорт", "VOGE525");
+  addBike("Voge", "RR500S", "Спорт", "VOGE500");
+  addBike("Voge", "R625", "Нейкед", "VOG_581");
+  addBike("Voge", "CU625", "Чоппер", "VOG_581");
+  addBike("Voge", "900DS", "Тур-эндуро", "F900");
+})();
 (function () {
   var ids = Object.keys(ENGINES);
   ids.forEach(function (id) { var e = ENGINES[id]; if (e.cvt && e.groups.indexOf("cvt") < 0) e.groups.push("cvt"); });
