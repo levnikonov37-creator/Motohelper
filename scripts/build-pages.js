@@ -633,10 +633,15 @@ const podName = (k) => { const [t, c] = k.split("|"); return (TYPE_MANY[t] || t)
 /* сравнения: в классе (тип + объём) по одной модели от популярной марки — та, у которой больше поколений; до 6 марок, все пары */
 const compareByGroup = {}, compares = [];
 /* самые продаваемые модели — в сравнениях их класса они выбираются первыми */
+/* модели, у которых уже есть страницы сравнений (в репозитории), при прочих равных остаются в сравнениях:
+   новая модель марки с более коротким названием не должна вытеснять их — иначе старые страницы пропали бы из поиска */
+const OLD_CMP = new Set();
+try { fs.readdirSync(path.join(OUT, "sravnenie"), { withFileTypes: true }).filter((d) => d.isDirectory()).forEach((d) => d.name.split("-vs-").forEach((x) => OLD_CMP.add(x))); } catch (e) {}
 Object.keys(groups).forEach((k) => {
   const pick = {};
   groups[k].filter((b) => CMP_BRANDS.indexOf(b.brand) >= 0).forEach((b) => { const p = pick[b.brand]; const fl = (x) => FLAGSHIP.indexOf(x.brand + " " + x.name) >= 0;
-    if (!p || fl(b) > fl(p) || (fl(b) === fl(p) && (b.versions.length > p.versions.length || (b.versions.length === p.versions.length && b.name.length < p.name.length)))) pick[b.brand] = b; });
+    const st = (x) => (OLD_CMP.has(bikeSlug.get(x)) ? 1 : 0);
+    if (!p || fl(b) > fl(p) || (fl(b) === fl(p) && (st(b) > st(p) || (st(b) === st(p) && (b.versions.length > p.versions.length || (b.versions.length === p.versions.length && b.name.length < p.name.length)))))) pick[b.brand] = b; });
   const reps = Object.values(pick).sort((a, b) => CMP_BRANDS.indexOf(a.brand) - CMP_BRANDS.indexOf(b.brand)).slice(0, 6);
   for (let i = 0; i < reps.length; i++) for (let j = i + 1; j < reps.length; j++) {
     const c = { a: reps[i], b: reps[j], k, slug: bikeSlug.get(reps[i]) + "-vs-" + bikeSlug.get(reps[j]), title: reps[i].brand + " " + reps[i].name + " или " + reps[j].brand + " " + reps[j].name };
