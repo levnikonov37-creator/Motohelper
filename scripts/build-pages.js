@@ -283,6 +283,8 @@ function hoursEvery(km, kind, e, b) {
   const h = kind === "oil" ? (km <= 1000 ? 10 : 15) : Math.max(15, Math.min(30, Math.round(km / 500) * 5));
   return "каждые " + h + "\u00a0моточ. · ≈\u00a0" + (h * 50).toLocaleString("ru-RU").replace(/\u00a0/g, " ") + "\u00a0км";
 }
+/* слабые места для ответа «Какие слабые места у …?» — без служебной пометки «цифры типовые, смотри мануал» */
+const weak = (e) => (e.issues || []).filter((x) => !/^Цифры по модели — типовые/.test(x.t));
 function kmh(km, e, b) {
   const t = b && b.type || "";
   const k = /Питбайк|Кросс|Эндуро|Мотард|Триал/i.test(t) ? 50 : /Скутер|Мопед/i.test(t) || e.cvt ? 40 : t ? 60 : e.cc > 300 ? 60 : 50;
@@ -391,7 +393,7 @@ BIKES.forEach((b) => {
     okv(e0.spark) && ["Какая свеча на " + full + "?", e0.spark + (okv(e0.gap) ? ", зазор " + e0.gap : "") + multi],
     okv(e0.valveIn) && okv(e0.valveEx) && ["Какие зазоры клапанов на " + full + "?", "Впуск " + e0.valveIn + ", выпуск " + e0.valveEx + ", на холодном моторе" + multi],
     ["Какой мотор стоит на " + full + "?", (e0.name && e0.name.indexOf(e0.code) >= 0 ? e0.name : e0.code + (e0.name ? " (" + e0.name + ")" : "")) + (e0.cc ? ", " + Math.round(e0.cc) + " см³" : "") + ((v0.hp || e0.hp) ? ", " + (v0.hp || e0.hp) + " л.с." : "") + multi],
-    (e0.issues || []).length && ["Какие слабые места у " + full + "?", e0.issues.slice(0, 3).map((x) => x.t + (x.fix ? " — " + lc(x.fix.replace(/\.$/, "")) : "")).join("; ")],
+    weak(e0).length && ["Какие слабые места у " + full + "?", weak(e0).slice(0, 3).map((x) => x.t + (x.fix ? " — " + lc(x.fix.replace(/\.$/, "")) : "")).join("; ")],
   ].filter(Boolean).map((q) => [q[0], dot(q[1])]);
   const faqHtml = `<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>`;
   const ru = BRAND_RU[b.brand], fullRu = ru ? ru + " " + b.name : "";
@@ -432,7 +434,7 @@ ${types.length > 1 ? `<div class="chips"><button class="chip on" data-f="*">Вс
   const body = `<section class="hero"><div class="kick">Справочник</div><h1>Каталог мотоциклов</h1>
 <p class="lead">Мотоциклы, питбайки и мопеды: мотор, масло и сколько заливать, свечи, зазоры клапанов, жиклёры и слабые места.</p>
 <div class="chips"><span class="chip">${BIKES.length} ${plural(BIKES.length, "модель", "модели", "моделей")}</span><span class="chip">${brands.length} ${plural(brands.length, "марка", "марки", "марок")}</span><span class="chip">${ENG_N} ${plural(ENG_N, "мотор", "мотора", "моторов")}</span></div></section>
-<div class="grid" style="margin-bottom:14px"><a class="card big" href="/m/polomka/"><b>Неисправности</b></a><a class="card big" href="/m/remont/"><b>Инструкции</b></a><a class="card big" href="/m/motor/"><b>Моторы</b></a><a class="card big" href="/m/podborka/"><b>Подборки</b></a><a class="card big" href="/m/sravnenie/"><b>Сравнения</b></a></div>
+<div class="grid" style="margin-bottom:14px"><a class="card big" href="/m/polomka/"><b>Неисправности</b></a><a class="card big" href="/m/remont/"><b>Инструкции</b></a><a class="card big" href="/m/motor/"><b>Моторы</b></a><a class="card big" href="/m/maslo/"><b>Масло по моторам</b></a><a class="card big" href="/m/svechi/"><b>Свечи по моторам</b></a><a class="card big" href="/m/klapany/"><b>Зазоры клапанов</b></a><a class="card big" href="/m/podborka/"><b>Подборки</b></a><a class="card big" href="/m/sravnenie/"><b>Сравнения</b></a></div>
 <div class="search">${SEARCH_ICON}<input id="q" type="search" placeholder="Найти модель: «Kayo T2», «CRF250», «174»" autocomplete="off" aria-label="Поиск модели" /></div>
 <div id="res" class="grid models res"></div>
 ${showcase()}
@@ -451,6 +453,26 @@ engIds.forEach((id) => {
   const groups = `<div class="groups">${specGroups(e, {}, b0).map((g) => `<div class="grp"><h3>${g.title}</h3><dl>${g.rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl></div>`).join("")}</div>`;
   const iss = (e.issues || []).length ? `<h2>Слабые места ${esc(e.code)}</h2><ul class="iss">${e.issues.map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
   const gs = guidesOf(e), ds = diagOf(e);
+  const tName = dupCode[e.code] > 1 && e.name && e.name !== e.code ? e.name : e.code;
+  /* вопрос-ответ по мотору: так спрашивают в поиске («какое масло в 172FMM», «зазор клапанов NB300») — видимым блоком и разметкой FAQPage */
+  const okv = (x) => x && x !== "—" && !/мануал/i.test(x);
+  const dot = (t) => (/[.!?]$/.test(t) ? t : t + ".");
+  const lc = (t) => t.charAt(0).toLowerCase() + t.slice(1);
+  const oilEvery = e.oilInt ? (hoursEvery(e.oilInt, "oil", e, b0) || kmh(e.oilInt, e, b0)).replace(/\u00a0/g, " ") : "";
+  const valveEvery = e.valveInt ? (hoursEvery(e.valveInt, "valve", e, b0) || kmh(e.valveInt, e, b0)).replace(/\u00a0/g, " ") : "";
+  const carbOk = okv(e.carb) && !/впрыск|инжектор|efi|tpi/i.test(e.carb);
+  const jets = [okv(e.jetMain) && "главный жиклёр " + e.jetMain, okv(e.jetPilot) && "жиклёр холостого хода " + e.jetPilot, okv(e.needle) && "игла: " + e.needle].filter(Boolean);
+  const names = list.slice(0, 8).map((x) => x.brand === "Любая модель" ? x.name : x.brand + " " + x.name);
+  const faq = [
+    okv(e.oil) && ["Какое масло заливать в мотор " + tName + "?", e.oil + (okv(e.oilVol) ? ", объём " + e.oilVol : "") + (oilEvery ? ". Замена " + oilEvery : "")],
+    okv(e.spark) && ["Какая свеча стоит на " + tName + "?", e.spark + (okv(e.gap) ? ", зазор " + e.gap : "")],
+    okv(e.valveIn) && okv(e.valveEx) && ["Какие зазоры клапанов у " + tName + "?", "Впуск " + e.valveIn + ", выпуск " + e.valveEx + ", на холодном моторе" + (valveEvery ? ". Проверять " + valveEvery : "")],
+    carbOk && ["Какой карбюратор и жиклёры у " + tName + "?", e.carb + (jets.length ? "; " + jets.join(", ") : "") + ". Это базовая настройка — по высоте, погоде и выхлопу подбирают по свече"],
+    okv(e.fuel) && ["Какой бензин заливать в " + tName + "?", e.fuel],
+    names.length && ["На каких мотоциклах стоит " + tName + "?", names.join(", ") + (list.length > names.length ? " и ещё " + (list.length - names.length) + " " + plural(list.length - names.length, "модель", "модели", "моделей") : "")],
+    weak(e).length && ["Какие слабые места у " + tName + "?", weak(e).slice(0, 3).map((x) => x.t + (x.fix ? " — " + lc(x.fix.replace(/\.$/, "")) : "")).join("; ")],
+  ].filter(Boolean).map((q) => [q[0], dot(q[1])]);
+  const faqHtml = faq.length ? `<h2>Частые вопросы о ${esc(tName)}</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>` : "";
   const body = `<section class="hero"><div class="kick">Мотор${e.cc ? " · " + e.cc + " см³" : ""}${e.stroke ? " · " + esc(e.stroke) : ""}</div><h1>${esc(e.code)}</h1>
 <p class="lead">${esc(e.name || e.code)}: какое масло и сколько заливать, свеча и зазор, зазоры клапанов, жиклёры, слабые места. Стоит на ${list.length} ${plural(list.length, "модели", "моделях", "моделях")}.</p>
 ${aka.length ? `<div class="chips">${aka.slice(0, 8).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>` : ""}</section>
@@ -458,11 +480,13 @@ ${aka.length ? `<div class="chips">${aka.slice(0, 8).map((x) => `<span class="ch
 <a class="cta" href="${appLink(b0, b0.versions.findIndex((v) => v.engine === id))}">Ремонт, запчасти и ИИ-механик для ${esc(e.code)} →</a></section>
 <h2>Мотоциклы с мотором ${esc(e.code)}</h2><div class="grid models">${list.slice(0, 60).map((x) => modelCard(x, true)).join("")}</div>
 ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(d.title)}</a>`).join("")}</div>` : ""}
-${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="chips">${gs.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>` : ""}`;
+${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="chips">${gs.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>` : ""}
+${faqHtml}
+<div class="chips"><a class="chip" href="/m/maslo/">Масло для других моторов</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>`;
   const desc = `Мотор ${dupCode[e.code] > 1 && e.name ? e.name : engTitle(e)}${e.cc ? ", " + e.cc + " см³" : ""}: масло ${e.oil || "—"}${e.oilVol ? " " + e.oilVol : ""}, свеча ${e.spark || "—"}${e.gap ? " (зазор " + e.gap + ")" : ""}, клапаны ${e.valveIn || "—"} / ${e.valveEx || "—"}. На каких мотоциклах стоит, слабые места, ремонт.`;
-  const tName = dupCode[e.code] > 1 && e.name && e.name !== e.code ? e.name : e.code;
   files.set("m/motor/" + slug + "/index.html", page({ ask: "мотор " + tName, title: pickTitle(tName, [" — масло и объём, свеча, зазоры клапанов | MotoHelper", " — масло, свеча, зазоры клапанов", ": масло, свеча, клапаны"]), desc, canon, crumbs, body, sticky: appLink(b0, 0),
-    ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: "Мотор " + e.code, url: canon, inLanguage: "ru", description: desc }] }));
+    ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: "Мотор " + e.code, url: canon, inLanguage: "ru", description: desc }]
+      .concat(faq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] : []) }));
 });
 {
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Моторы", null]];
@@ -470,6 +494,7 @@ ${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="ch
   engIds.forEach((id) => { const l = String(ENGINES[id].code)[0].toUpperCase(); (byLetter[l] = byLetter[l] || []).push(id); });
   const card = (id) => { const e = ENGINES[id]; return `<a class="card" href="/m/motor/${engSlug[id]}/"><b>${esc(e.code)}</b><small>${[e.cc ? e.cc + " см³" : "", bikesOf[id].length + " " + plural(bikesOf[id].length, "модель", "модели", "моделей")].filter(Boolean).join(" · ")}</small></a>`; };
   const body = `<section class="hero"><div class="kick">Справочник</div><h1>Моторы</h1><p class="lead">${engIds.length} ${plural(engIds.length, "мотор", "мотора", "моторов")}: масло и объём, свечи, зазоры клапанов, жиклёры, слабые места и на каких мотоциклах стоят.</p></section>
+<div class="chips"><a class="chip" href="/m/maslo/">Масло: таблица по моторам</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>
 <h2>Самые распространённые</h2><div class="grid">${popular.slice(0, 24).map(card).join("")}</div>
 <h2>Все моторы</h2>${Object.keys(byLetter).sort(abc).map((l) => `<div class="letter">${esc(l)}</div><div class="grid">${byLetter[l].map(card).join("")}</div>`).join("")}`;
   files.set("m/motor/index.html", page({ title: "Моторы мотоциклов и питбайков: масло, свечи, зазоры клапанов | MotoHelper", desc: `${engIds.length} моторов — 172FMM, 174MN, PR300, NC250 и другие: масло и объём, свечи, зазоры клапанов, слабые места.`, canon: SITE + "m/motor/", crumbs, body, ld: [crumbLd(crumbs)] }));
@@ -725,10 +750,77 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 files.set("m/m.css", CSS + "\n");
 files.set("m/ask.js", ASK_JS + "\n");
 files.set("m/rv.js", RV_JS + "\n");
+/* сводные таблицы по моторам: /m/maslo/, /m/svechi/, /m/klapany/ — под общие запросы («какое масло заливать в мотоцикл»,
+   «свеча на питбайк», «зазоры клапанов таблица»). Значения — из базы, «по мануалу» не показываем. */
+const HUBS = [];
+{
+  const okv = (x) => x && x !== "—" && !/мануал/i.test(x);
+  const REG = [["cn", "Китайские, корейские и тайваньские моторы"], ["jp", "Японские моторы"], ["eu", "Европейские и американские моторы"], ["in", "Индийские моторы"], ["ru", "Моторы СССР и России"]];
+  const regOf = (e) => { const g = e.groups || []; return g.indexOf("jp") >= 0 ? "jp" : g.indexOf("eu") >= 0 || /Harley|Buell|Indian|Victory/i.test(e.maker || "") ? "eu" : g.indexOf("in") >= 0 ? "in" : g.indexOf("ru") >= 0 ? "ru" : "cn"; };
+  const LIMIT = { cn: 80, jp: 60, eu: 50, in: 20, ru: 20 };
+  const engCell = (id) => { const e = ENGINES[id]; return `<td><a href="/m/motor/${engSlug[id]}/">${esc(e.code)}</a><br><small>${[e.cc ? Math.round(e.cc) + " см³" : "", e.stroke || "", bikesOf[id].length + " " + plural(bikesOf[id].length, "модель", "модели", "моделей")].filter(Boolean).join(" · ")}</small></td>`; };
+  /* самое частое значение среди моторов, подходящих под условие: «чаще всего — 10W-40 (у 120 из 180)» */
+  const mostOf = (ids, f) => { const c = {}; ids.forEach((id) => { const v = f(ENGINES[id]); if (v) c[v] = (c[v] || 0) + 1; }); const top = Object.keys(c).sort((a, b) => c[b] - c[a])[0];
+    return top && c[top] >= ids.length / 3 ? [top, c[top], ids.length] : null; }; // редкое «самое частое» — не ответ
+  /* «из 121 китайского мотора» / «из 75 китайских моторов» (родительный падеж после «из N») */
+  const ofN = (n, one, many) => n + " " + (n % 10 === 1 && n % 100 !== 11 ? one : many);
+  /* объём масла: от–до у большинства (без крайних 10 %) и типичный */
+  const volRange = (ids) => { const v = ids.map((id) => parseFloat(String(ENGINES[id].oilVol).replace(",", ".").replace(/^[^\d]*/, ""))).filter((x) => x > 0 && x < 10).sort((a, b) => a - b);
+    if (v.length < 10) return null; const q = (k) => v[Math.min(v.length - 1, Math.floor(k * v.length))]; return [q(0.1), q(0.5), q(0.9), v.length]; };
+  const oilBase = (o) => { const m = String(o).match(/\b\d{1,2}W-?\d{2}\b/); return m ? m[0].replace(/W(\d)/, "W-$1") : ""; };
+  const defs = [
+    { slug: "maslo", kick: "Масло", h1: "Какое масло заливать в мотоцикл", title: "Какое масло заливать в мотоцикл и питбайк: таблица по моторам | MotoHelper",
+      lead: "Масло, объём и интервал замены для популярных моторов — китайских, японских, европейских. Нажми на мотор — там свеча, клапаны, жиклёры и слабые места.",
+      cols: ["Масло", "Объём", "Замена"], has: (e) => okv(e.oil) && okv(e.oilVol),
+      row: (e, id) => [e.oil, e.oilVol, e.oilInt ? (hoursEvery(e.oilInt, "oil", e, bikesOf[id][0]) || kmh(e.oilInt, e, bikesOf[id][0])).replace(/^каждые /, "") : "—"],
+      faq: (ids) => { const cn4 = ids.filter((id) => regOf(ENGINES[id]) === "cn" && ENGINES[id].stroke !== "2T" && ENGINES[id].cc >= 100 && ENGINES[id].cc <= 300);
+        const t = mostOf(cn4, (e) => oilBase(e.oil)), v = volRange(cn4.filter((id) => ENGINES[id].cc >= 240));
+        return [t && ["Какое масло заливать в китайский мотоцикл или питбайк?", `Чаще всего — ${t[0]} для мотоциклов (JASO MA / MA2, с мокрым сцеплением): так у ${t[1]} из ${ofN(t[2], "китайского 4-тактного мотора", "китайских 4-тактных моторов")} 100–300 см³ в базе. Точное масло своего мотора — в строке таблицы.`],
+          v && ["Сколько масла заливать в мотор 250–300 см³?", `Обычно от ${v[0]} до ${v[2]} л, типично около ${v[1]} л (по ${v[3]} ${v[3] % 10 === 1 && v[3] % 100 !== 11 ? "китайскому мотору" : "китайским моторам"} 240–300 см³ в базе). Точный объём своего мотора — в таблице; уровень после замены проверяй по щупу или окошку.`],
+          ["Можно ли заливать автомобильное масло в мотоцикл?", "В мотор с мокрым сцеплением (почти все мотоциклы и питбайки) — нет: антифрикционные присадки автомобильного масла заставляют сцепление проскальзывать. Нужно мотоциклетное масло с допуском JASO MA или MA2."]].filter(Boolean); } },
+    { slug: "svechi", kick: "Свечи", h1: "Свечи зажигания для мотоциклов и питбайков", title: "Свечи зажигания для мотоциклов и питбайков: таблица по моторам | MotoHelper",
+      lead: "Какая свеча стоит и какой у неё зазор — для популярных моторов. Аналоги NGK, Denso, Torch — на странице мотора и в приложении.",
+      cols: ["Свеча", "Зазор"], has: (e) => okv(e.spark), row: (e) => [e.spark, okv(e.gap) ? e.gap : "—"],
+      faq: (ids) => { const pit = ids.filter((id) => regOf(ENGINES[id]) === "cn" && ENGINES[id].cc >= 100 && ENGINES[id].cc <= 160 && (ENGINES[id].groups || []).indexOf("horiz") >= 0);
+        const t = mostOf(pit, (e) => e.spark), g = mostOf(ids.filter((id) => regOf(ENGINES[id]) === "cn"), (e) => okv(e.gap) ? e.gap : "");
+        return [t && ["Какая свеча стоит на питбайке 125–150?", `Чаще всего — ${t[0]}: так у ${t[1]} из ${ofN(t[2], "горизонтального мотора", "горизонтальных моторов")} 100–160 см³ в базе.`],
+          g && ["Какой зазор свечи на китайском мотоцикле?", `Чаще других — ${g[0]} (у ${g[1]} из ${ofN(g[2], "китайского мотора", "китайских моторов")} в базе). Зазор проверяют круглым щупом, у иридиевых свечей электрод не подгибают.`]].filter(Boolean); } },
+    { slug: "klapany", kick: "Клапаны", h1: "Зазоры клапанов: таблица по моторам", title: "Зазоры клапанов мотоцикла и питбайка: таблица по моторам | MotoHelper",
+      lead: "Тепловые зазоры впускных и выпускных клапанов на холодном моторе и как часто их проверять. Как регулировать — в инструкции.",
+      cols: ["Впуск", "Выпуск", "Проверка"], has: (e) => okv(e.valveIn) && okv(e.valveEx) && e.stroke !== "2T",
+      row: (e, id) => [e.valveIn, e.valveEx, e.valveInt ? (hoursEvery(e.valveInt, "valve", e, bikesOf[id][0]) || kmh(e.valveInt, e, bikesOf[id][0])).replace(/^каждые /, "") : "—"],
+      faq: (ids) => { const c = ids.filter((id) => regOf(ENGINES[id]) === "cn" && /SOHC/i.test(ENGINES[id].cam || "") && (ENGINES[id].groups || []).indexOf("horiz") >= 0);
+        const t = mostOf(c, (e) => e.valveIn + " / " + e.valveEx);
+        return [t && ["Какие зазоры клапанов на питбайке с горизонтальным мотором?", `Чаще всего впуск / выпуск ${t[0]}: так у ${t[1]} из ${ofN(t[2], "горизонтального мотора", "горизонтальных моторов")} в базе. Мерить на холодном моторе в ВМТ такта сжатия.`],
+          ["Как понять, что пора регулировать клапаны?", "Мотор цокает на холостых, хуже заводится на горячую, падает компрессия. Зажатый клапан опаснее стучащего: он прогорает. Проверяй по интервалу из таблицы, на холодном моторе."]].filter(Boolean); } },
+  ];
+  defs.forEach((d) => {
+    const ids = popular.filter((id) => d.has(ENGINES[id]));
+    const seen = new Set();
+    const sections = REG.map(([rg, rt]) => {
+      const list = ids.filter((id) => regOf(ENGINES[id]) === rg && !seen.has(ENGINES[id].code + "|" + ENGINES[id].cc) && seen.add(ENGINES[id].code + "|" + ENGINES[id].cc)).slice(0, LIMIT[rg]);
+      return list.length ? `<h2>${rt}</h2><div class="tblw"><table class="tbl"><tr><th>Мотор</th>${d.cols.map((c) => `<th>${c}</th>`).join("")}</tr>${list.map((id) => `<tr>${engCell(id)}${d.row(ENGINES[id], id).map((v) => `<td>${esc(v || "—")}</td>`).join("")}</tr>`).join("")}</table></div>` : "";
+    }).join("\n");
+    const faq = d.faq(ids).map((q) => [q[0], /[.!?]$/.test(q[1]) ? q[1] : q[1] + "."]);
+    const other = defs.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/${x.slug}/">${esc(x.h1)}</a>`).join("");
+    const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], [d.kick, null]];
+    const body = `<section class="hero"><div class="kick">${d.kick}</div><h1>${d.h1}</h1><p class="lead">${d.lead}</p>
+<div class="chips"><a class="chip" href="/m/motor/">Все моторы →</a>${other}</div></section>
+<p class="note">Не нашёл свой мотор — открой <a href="/m/motor/">список моторов</a> или найди модель в <a href="/m/">каталоге</a>. Данные справочные: перед работой сверься с мануалом своего мотоцикла.</p>
+${sections}
+${faq.length ? `<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>` : ""}`;
+    const canon = SITE + "m/" + d.slug + "/";
+    HUBS.push(canon);
+    files.set("m/" + d.slug + "/index.html", page({ title: d.title, desc: d.lead, canon, crumbs, body, ask: d.kick.toLowerCase() + " мотоцикла",
+      ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: d.h1, url: canon, inLanguage: "ru", description: d.lead }]
+        .concat(faq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] : []) }));
+  });
+}
+
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),
-  [SITE + "m/podborka/", SITE + "m/sravnenie/"], podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
+  [SITE + "m/podborka/", SITE + "m/sravnenie/"], HUBS, podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
 const hi = 5 + brands.length + GUIDES.length + DIAG.length;
 files.set("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${u}</loc><changefreq>${i ? "monthly" : "weekly"}</changefreq><priority>${i === 0 ? "1.0" : i < hi ? "0.7" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
 
