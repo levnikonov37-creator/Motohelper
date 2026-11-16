@@ -2950,3 +2950,5 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 :root[data-bright] .symchip, :root[data-bright] .chip { border-width: 2px; font-size: 16px !important; }
 :root[data-bright] .btn { border-width: 2px; }
 :root[data-bright] .fx-orb, :root[data-bright] .fx-circuit, :root[data-bright] .cursor-glow, :root[data-bright] .hero-glow, :root[data-bright] .float-gear { display: none !important; }
+/* Значок «MH» в шапке — как новый значок сайта: фирменный градиент, чёрные буквы */
+.brand-mark { background: linear-gradient(135deg, #3AF2CF 0%, #4E95FF 38%, #9B6BFF 68%, #FF6FD0 100%) !important; color: #0A0A0A !important; font-weight: 900; border-radius: 9px !important; box-shadow: 0 6px 18px -8px rgba(155, 107, 255, .8) !important; }

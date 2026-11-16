@@ -114,4 +114,5 @@ h1{font-weight:700!important}h2{font-weight:600!important;font-size:19px!importa
 .grp[id],h2[id]{scroll-margin-top:72px}
 .note.src{font-size:14px}
 footer a{display:inline-block;padding:12px 0}
+.logo i{background:linear-gradient(135deg,#3AF2CF 0%,#4E95FF 38%,#9B6BFF 68%,#FF6FD0 100%);color:#0A0A0A;border-radius:9px;font-weight:900;box-shadow:0 6px 18px -8px rgba(155,107,255,.8)}
 @media (prefers-contrast:more){:root{--muted:#d0d0d0}.grp,.tile{border-color:#fff!important}.grp dt{color:#e6e6e6}}

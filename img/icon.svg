@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#1B1F23"/>
-  <rect x="76" y="148" width="360" height="216" rx="52" fill="#E5E7EB"/>
-  <text x="256" y="300" text-anchor="middle" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="150" fill="#15181C" letter-spacing="-4">MH</text>
+  <defs><linearGradient id="h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3AF2CF"/><stop offset=".38" stop-color="#4E95FF"/><stop offset=".68" stop-color="#9B6BFF"/><stop offset="1" stop-color="#FF6FD0"/></linearGradient></defs>
+  <rect width="512" height="512" rx="112" fill="url(#h)"/>
+  <text x="248" y="318" text-anchor="middle" font-family="Inter Display, Arial Black, Arial, Helvetica, sans-serif" font-style="italic" font-weight="900" font-size="256" fill="#0A0A0A" letter-spacing="-10">MH</text>
 </svg>
