@@ -2922,3 +2922,31 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .mix-btn { min-width: 64px; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2, transparent); color: var(--ink); font: 600 17px var(--cond, inherit); cursor: pointer; }
 .mix-btn.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .mix-out { font: 700 30px/1.2 var(--display, inherit); margin: 6px 0 8px; }
+
+/* Под палец в перчатке: всё, что нажимают, — не ниже 44 px (замер: на ключевых экранах было 151 мелкий элемент из 288) */
+.symchip, .chip:not(.static), .tz-tab, .pbuy-t, .vlink, .gb-add { min-height: 44px; }
+.btn { min-height: 44px; }
+.link:not(.inline) { min-height: 44px; display: inline-flex; align-items: center; }
+.ic-close { width: 44px; height: 44px; }
+.brand { min-height: 44px; }
+/* «Компактно» (v61) сжимал кнопки на телефоне до 36 px — шрифт и отступы оставляем компактными, а зону нажатия возвращаем к 44 px */
+@media (max-width: 600px) {
+  .chip:not(.static), .symchip, .seg button, .btn, .ctl, .schip, .phero-act .btn, .tabs button { min-height: 44px !important; }
+}
+.btn.sm, .hero-cta .btn, .tz-foot .btn.sm, .pj-fix .btn.sm { min-height: 44px !important; }
+.ic-close { width: 44px !important; height: 44px !important; }
+/* Кнопки в шапке — тоже под палец */
+.icon-btn { width: 44px; height: 44px; }
+.icon-btn.on, .icon-btn.dark.on { background: #F2F2F2 !important; color: #050505 !important; border-color: #F2F2F2 !important; }
+
+/* Режим «Гараж» (кнопка с полукругом в шапке): ярче второстепенный текст, контрастнее рамки, крупнее цифры,
+   без декоративного свечения — читается на солнце, под переноской и с телефона в масле */
+:root[data-bright] { --muted: #DADADA; --line: #6E6E6E; --stage-muted: #DADADA; }
+:root[data-bright] body { font-size: 17px; }
+:root[data-bright] .muted, :root[data-bright] .small, :root[data-bright] .note { color: #E8E8E8 !important; }
+:root[data-bright] .adj-block td, :root[data-bright] .adj-block td .val, :root[data-bright] .specs dd { font-size: 18px !important; font-weight: 700; color: #FFFFFF; }
+:root[data-bright] .adj-block th, :root[data-bright] .specs dt { font-size: 16px !important; color: #E8E8E8; }
+:root[data-bright] .adj-block h3, :root[data-bright] h2 { color: #FFFFFF; }
+:root[data-bright] .symchip, :root[data-bright] .chip { border-width: 2px; font-size: 16px !important; }
+:root[data-bright] .btn { border-width: 2px; }
+:root[data-bright] .fx-orb, :root[data-bright] .fx-circuit, :root[data-bright] .cursor-glow, :root[data-bright] .hero-glow, :root[data-bright] .float-gear { display: none !important; }

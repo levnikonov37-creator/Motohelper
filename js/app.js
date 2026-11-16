@@ -12193,6 +12193,8 @@ function App() {
     return () => window.removeEventListener("keydown", h);
   }, []);
   const theme = "dark";
+  /* режим «Гараж» (кнопка в шапке): ярче текст, контрастнее рамки, крупнее цифры — для экрана на солнце и под переноской */
+  const [bright, setBright] = useState(() => !!load("bright", false));
   const [toast, setToast] = useState("");
   const [cart, setCart] = useState(() => load("cart", []));
   const [projects, setProjects] = useState(() => load("projects", {}));
@@ -12218,6 +12220,10 @@ function App() {
     save("theme", theme);
     document.documentElement.setAttribute("data-theme", "dark");
   }, [theme]);
+  useEffect(() => {
+    save("bright", bright);
+    if (bright) document.documentElement.setAttribute("data-bright", "1");else document.documentElement.removeAttribute("data-bright");
+  }, [bright]);
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -12572,6 +12578,18 @@ function App() {
     onClick: openSearch
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "search",
+    s: 18
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn dark" + (bright ? " on" : ""),
+    "aria-label": "Режим «Гараж»: ярче и крупнее",
+    title: "Режим «Гараж»: ярче и крупнее",
+    "aria-pressed": bright,
+    onClick: () => {
+      setBright(!bright);
+      flash(bright ? "Обычный режим" : "Режим «Гараж»: ярче и крупнее");
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "theme",
     s: 18
   })), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn dark",
