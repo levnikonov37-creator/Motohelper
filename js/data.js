@@ -7433,6 +7433,23 @@ var SEASON = {
     groups: ["air", "efi", "4t", "big"], hp: 25, ignition: "ЭБУ (EFI)", carb: "Инжектор (Bosch)", jetMain: "—", jetPilot: "—", needle: "—",
     issues: [{ t: "Перегрев в пробках", sev: "med", fix: "Маслорадиатор, масло по уровню." },
       { t: "Ошибки датчиков после мойки", sev: "med", fix: "Сушить разъёмы, диэлектрическая смазка." }] }, 1.1);
+  /* Loncin FE300 (LX176FMM) и YB250R — по заводским мануалам Loncin (перевод Rockot по соглашению с Loncin) */
+  CL("LON_FE300", "LON_FE250", { code: "LX176FMM (FE300)", name: "Loncin FE300 (LX176FMM) · воздушно-масляный, 6 ст.", maker: "Loncin",
+    groups: ["air", "carb", "4t", "big", "estart"], cam: "SOHC (верхний распредвал); 76 × 66 мм, степень сжатия 9.3 : 1", start: "Электро",
+    cc: 299, hp: 24.7, torque: "26 Н·м при 5500 об/мин (заводские данные Loncin)", compression: "≈ 10.5 бар (1050 кПа)", gearbox: "6 ст.",
+    carb: "Карбюратор (тип — по модели мотоцикла)", jetMain: "—", jetPilot: "—", needle: "—",
+    valveIn: "0.02–0.08 мм (0.05 ± 0.03)", valveEx: "0.02–0.08 мм (0.05 ± 0.03)", spark: "NGK LMAR9J-9E", gap: "0.9 мм",
+    oil: "10W-40, API SJ и выше, JASO MA", oilVol: "1.8 л при замене и после разборки",
+    issues: [{ t: "Маслорадиатор забивается грязью — мотор греется в пробках", sev: "med", fix: "Мыть соты маслорадиатора, масло по уровню в окошке." },
+      { t: "Маленькие зазоры клапанов (0.05 мм) быстро «садятся»", sev: "med", fix: "Проверка щупом на холодную при каждом втором ТО." }] }, 1.1);
+  CL("LON_YB250R", "LON_YB300H", { code: "YB250R", name: "Loncin YB250R · воздушный, 5 ст.", maker: "Loncin",
+    groups: ["air", "carb", "4t", "big", "estart", "kick"], cam: "OHC (верхний распредвал); 71 × 63 мм, степень сжатия 9.5 : 1",
+    cc: 249, hp: 23, torque: "21.5 Н·м при 7000 об/мин (заводские данные Loncin)", compression: "10–14 бар (1000–1400 кПа при прокрутке > 1200 об/мин; предел — 9 бар)",
+    gearbox: "5 ст.", start: "Электро + кик", ignition: "DC-CDI", carb: "Карбюратор (тип — по модели мотоцикла)", jetMain: "—", jetPilot: "—", needle: "—",
+    valveIn: "0.03–0.05 мм", valveEx: "0.03–0.05 мм", spark: "NGK LMAR8J-9E", gap: "0.8–0.9 мм", sparkTorque: "12–16 Н·м",
+    oil: "10W-40, API SJ и выше, JASO MA", oilVol: "1.0 л при замене (без снятия крышек), 1.1 л после разборки",
+    issues: [{ t: "Очень маленькие зазоры клапанов (0.03–0.05 мм)", sev: "med", fix: "Регулировать строго на холодную, щупом 0.04 мм." },
+      { t: "Перегрев в медленной езде (воздушное охлаждение)", sev: "low", fix: "Не стоять долго на месте с работающим мотором, масло по уровню." }] }, 1.0);
 
   /* Voge DS625X — рядная двойка 581, 270° */
   RE("VOG_581", { region: "cn", code: "LX 581", name: "Voge 581 (рядная двойка 270°: DS625X)", maker: "Loncin (Voge)", layout: "twin", crankPhase: 270,
@@ -7563,6 +7580,8 @@ var SEASON = {
   G("Fuego", "Rambolor 250 Air", CLS, [["LON_FE250", "2025+"]]);
   G("Fuego", "Discovery 300", AD, [["NB300", "2025+", { hp: 26 }]]);
   G("Fuego", "Evo 450", AD, [["NC450", "2025+"]]);
+  /* Rockot Hound 250 — турэндуро на Loncin FE250 (171YMM), по мануалу двигателя Rockot */
+  G("Rockot", "Hound 250", AD, [["LON_FE250", "2024+"]]);
 
   /* Hasky */
   addBike("Hasky", "F6 Racing", E, "PR300", { hp: 25 });
@@ -8372,6 +8391,8 @@ var SEASON = {
   addBike("Любая модель", "с мотором ZS175FMN PR5 EFI", E, "PR300E");
   addBike("Любая модель", "с мотором Loncin LX176FMN (YB300H)", E, "LON_YB300H");
   addBike("Любая модель", "с мотором Loncin LX171YMM (FE250)", E, "LON_FE250");
+  addBike("Любая модель", "с мотором Loncin LX176FMM (FE300)", E, "LON_FE300");
+  addBike("Любая модель", "с мотором Loncin YB250R", E, "LON_YB250R");
 
   /* --- Indian Motorcycle --- */
   G("Indian", "Chief", CH, [["X26_IND_TS111", "2014–2021"], ["X26_IND_TS116", "2022+"]]);
@@ -9635,6 +9656,9 @@ fixExact({
   /* по заводскому мануалу YBS300 КПП 5-ступенчатая; у Gen 2 и у части мотоциклов продавцы указывают 6 ст. */
   ENGINES.YBS300.gearbox = "5 ст. по заводским данным Loncin (у части мотоциклов продавцы пишут 6 ст. — сверяйте)";
   ENGINES.YBS300.ex.gearbox = 1;
+  /* новые моторы Loncin заведены сразу по заводским мануалам — отмечаем их цифры как сверенные */
+  ["cc", "hp", "torque", "compression", "gearbox", "valveIn", "valveEx", "spark", "gap", "oilVol", "oil"].forEach(function (k) { (ENGINES.LON_FE300.ex || (ENGINES.LON_FE300.ex = {}))[k] = 1; });
+  ["cc", "hp", "torque", "compression", "gearbox", "valveIn", "valveEx", "spark", "gap", "sparkTorque", "oilVol", "oil"].forEach(function (k) { (ENGINES.LON_YB250R.ex || (ENGINES.LON_YB250R.ex = {}))[k] = 1; });
   /* моменты затяжки из тех же руководств */
   var HEAD = "Гайки головки цилиндра", DRAIN = "Сливная пробка масла", COVER = "Крышка клапанов";
   var TQ = {
