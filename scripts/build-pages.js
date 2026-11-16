@@ -319,7 +319,10 @@ function specGroups(e, v, b) {
 }
 /* «Гаражные» блоки страницы мотора и модели: быстрые переходы, ✓ у цифр из руководства, моменты затяжки, смесь для 2T */
 const VF = `<i class="vf" title="Сверено с руководством">✓</i>`;
-const ddv = (e, r) => `<dd>${esc(r[1])}${r[2] && e.ex && e.ex[r[2]] ? VF : ""}</dd>`;
+const TYP = `<i class="typ" title="Типовое значение для мотора такого класса — сверь с мануалом">типовое</i>`;
+/* у объёма масла и зазоров клапанов без сверки — видимая пометка «типовое» прямо у цифры: сноску внизу страницы в гараже не читают */
+const RISKY = ["oilVol", "valveIn", "valveEx"];
+const ddv = (e, r) => `<dd>${esc(r[1])}${r[2] && e.ex && e.ex[r[2]] ? VF : r[2] && RISKY.indexOf(r[2]) >= 0 && /\d/.test(r[1]) ? TYP : ""}</dd>`;
 const grpHtml = (g, e, pfx) => `<div class="grp" id="${pfx}${g.id}"><h3>${g.title}</h3><dl>${g.rows.map((r) => `<dt>${esc(r[0])}</dt>${ddv(e, r)}`).join("")}</dl></div>`;
 const premix = (e) => e.stroke === "2T" && /premix/i.test(e.oil || "");
 function mixHtml(e, pfx) {
@@ -340,8 +343,8 @@ function torqueHtml(e, b, pfx) {
 const srcNote = (e) => e.ex && Object.keys(e.ex).length
   ? `<p class="note src">✓ — цифра сверена с руководством (завода или официального дилера). Без отметки — типовое значение для мотора такого класса: перед работой сверь со своим мануалом.</p>`
   : `<p class="note src">Цифры по этому мотору — типовые для его класса: заводских данных в базе пока нет. Перед работой сверь со своим мануалом, а если знаешь точные — отправь ниже, проверим и исправим.</p>`;
-function jumpNav(e, pfx, hasIss, hasCross) {
-  const L = [["maslo", "Масло"], ["svecha", "Свеча и клапаны"], ["momenty", "Моменты"], hasCross && ["analogi", "Аналоги запчастей"], premix(e) && ["smes", "Смесь 2T"], hasIss && ["slabye", "Слабые места"]].filter(Boolean);
+function jumpNav(e, pfx, hasIss, hasCross, hasBuy) {
+  const L = [["maslo", "Масло"], ["svecha", "Свеча и клапаны"], ["momenty", "Моменты"], hasCross && ["analogi", "Аналоги запчастей"], hasBuy && ["kupit", "Где купить"], premix(e) && ["smes", "Смесь 2T"], hasIss && ["slabye", "Слабые места"]].filter(Boolean);
   return `<nav class="jump" aria-label="Быстрый переход">${L.map((x) => `<a href="#${pfx}${x[0]}">${x[1]}</a>`).join("")}</nav>`;
 }
 /* кнопки в инструменты приложения — сразу в нужный раздел для этого мотоцикла (см. rvFromHash в js/app.js) */
@@ -357,9 +360,59 @@ function crossHtml(b, pfx) {
   return `<div class="grp" id="${pfx}analogi"><h3>Аналоги расходников</h3><dl>${rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl>
 <p class="small">Номера HiFlo, K&amp;N, EBC, Yuasa и оригинальные (OEM) — по каталогам производителей. Перед покупкой сверь по году выпуска и по старой детали.</p></div>`;
 }
-const garageGroups = (e, v, b, pfx, cross) => `<div class="groups">${specGroups(e, v, b).map((g) => grpHtml(g, e, pfx)).join("")}${torqueHtml(e, b, pfx)}${cross ? crossHtml(b, pfx) : ""}${mixHtml(e, pfx)}</div>${srcNote(e)}`;
-const tiles = (e, v) => [["Объём", e.cc ? e.cc + " см³" : ""], ["Мощность", (v.hp || e.hp) ? (v.hp || e.hp) + " л.с." : ""], ["Масло", e.oilVol ? String(e.oilVol).replace(/\s*\(.*\)/, "") : ""], ["Свеча", e.spark ? String(e.spark).split(/\s*\/\s*/)[0] : ""]]
-  .filter((t) => t[1]).map((t) => `<div class="tile"><span>${t[0]}</span><b>${esc(t[1])}</b></div>`).join("");
+/* «Где купить»: поиск точного номера расходника на площадках (те же магазины и партнёрские ссылки, что в приложении — ai-config.json) */
+const SHOPS = [["Ozon", "https://www.ozon.ru/search/?text="], ["WB", "https://www.wildberries.ru/catalog/0/search.aspx?search="], ["Маркет", "https://market.yandex.ru/search?text="], ["Авито", "https://www.avito.ru/rossiya?q="], ["AliExpress", "https://aliexpress.ru/wholesale?SearchText="]];
+function shopLink(sh, q) {
+  const url = sh[1] + encodeURIComponent(q), a = SITE_CFG.aff && SITE_CFG.aff[sh[0]];
+  const aff = typeof a === "string" && /^https:\/\//.test(a);
+  const href = aff ? (a.indexOf("{url}") >= 0 ? a.replace("{url}", encodeURIComponent(url)) : a + encodeURIComponent(url)) : url;
+  const erid = aff && /[?&]erid=([^&]+)/.exec(a);
+  return `<a href="${esc(href)}" target="_blank" rel="nofollow noopener${aff ? " sponsored" : ""}"${aff ? ` title="Реклама. ${sh[0]}${erid ? ", erid: " + esc(decodeURIComponent(erid[1])) : ""}"` : ""}>${sh[0]}${aff ? "<small> реклама</small>" : ""}</a>`;
+}
+function buyItems(e, b) {
+  const L = [];
+  const sp = String(e.spark || "").split(/\s*[\/(;,]/)[0].trim();
+  if (sp && /[A-Z]{1,5}\d/.test(sp)) L.push(["Свеча", sp, "свеча " + sp]);
+  const grade = String(e.oil || "").split(/[,(;]/)[0].trim();
+  if (/\d+W-?\d+/i.test(grade)) L.push(["Масло", grade + (/JASO|MA2?\b/.test(String(e.oil)) ? " JASO MA" : ""), "моторное масло " + grade.match(/\d+W-?\d+/i)[0] + " мото 4T"]);
+  (b ? ctx.crossRows(b) : []).forEach((r) => {
+    const code = String(r[1]).split(" · ")[0].replace(/\s*\([^)]*\)/g, "").split(" / ")[0].trim();
+    if (code && /\d/.test(code)) L.push([r[0], code, code]);
+  });
+  return L;
+}
+function buyHtml(e, b, pfx) {
+  const L = buyItems(e, b);
+  if (!L.length) return "";
+  return `<div class="grp buy" id="${pfx}kupit"><h3>Где купить</h3>${L.map((x) => `<div class="buyrow"><b>${esc(x[0])}: ${esc(x[1])}</b><span>${SHOPS.map((sh) => shopLink(sh, x[2])).join("")}</span></div>`).join("")}
+<p class="small">Ищем точный номер на площадках. Перед покупкой сверь номер со старой деталью.</p></div>`;
+}
+const garageGroups = (e, v, b, pfx, cross) => `<div class="groups">${specGroups(e, v, b).map((g) => grpHtml(g, e, pfx)).join("")}${torqueHtml(e, b, pfx)}${cross ? crossHtml(b, pfx) : ""}${buyHtml(e, cross ? b : null, pfx)}${mixHtml(e, pfx)}</div>${srcNote(e)}`;
+/* шпаргалка — первое, что видно на телефоне: масло, свеча, клапаны крупно, у каждой цифры — откуда она (✓ мануал или «типовое»);
+   плитка ведёт к своему блоку с подробностями */
+const RNG = /\d+(?:[.,]\d+)?(?:\s*[–-]\s*\d+(?:[.,]\d+)?)?/;
+const real = (x) => x != null && String(x).trim() && String(x) !== "—" && !/мануал/i.test(String(x)) && /\d/.test(String(x));
+function cheat(e, v, pfx) {
+  const ex = (k) => !!(e.ex && e.ex[k]);
+  const T = [];
+  if (real(e.oilVol)) {
+    const ov = String(e.oilVol).replace(/≈\s*/g, ""), m = ov.match(/\d+(?:[.,]\d+)?(?:\s*[–-]\s*\d+(?:[.,]\d+)?)?\s*(?:мл|л)(?![а-яё])/);
+    const big = m ? m[0] : ov.split(/[(;,]/)[0];
+    const rest = m ? ov.slice(m.index + m[0].length).split(/[(;]/)[0].replace(/^[\s,.—-]+/, "").trim() : "";
+    const grade = real(e.oil) || /\w/.test(String(e.oil || "")) ? String(e.oil || "").split(/[,(;]/)[0].trim() : "";
+    T.push([e.stroke === "2T" ? "Масло КПП" : "Масло", big, [grade, rest.length <= 48 ? rest : ""].filter(Boolean).join(" · "), ex("oilVol"), "maslo"]);
+  }
+  if (real(e.spark) || /[A-Z]{1,4}\d/.test(String(e.spark || ""))) {
+    const sp = String(e.spark).split(/\s*[\/(;,]/)[0].trim(), gap = real(e.gap) ? String(e.gap).split(/\s*\(/)[0] : "";
+    if (sp) T.push(["Свеча", sp, gap ? "зазор " + gap : "", ex("spark"), "svecha"]);
+  }
+  const vi = String(e.valveIn || "").match(RNG), ve = String(e.valveEx || "").match(RNG);
+  if (e.stroke !== "2T" && vi && ve && /мм/.test(String(e.valveIn) + String(e.valveEx)))
+    T.push(["Клапаны", vi[0].replace(/\s+/g, "") + " / " + ve[0].replace(/\s+/g, ""), "впуск / выпуск, мм, на холодном", ex("valveIn") && ex("valveEx"), "svecha", 1]);
+  if (premix(e)) { const r = String(e.oil).match(/1\s*:\s*\d{2,3}/); if (r) T.push(["Смесь 2T", r[0].replace(/\s+/g, ""), "бензин : масло", false, "smes"]); }
+  if (e.cc) T.push(["Объём", Math.round(e.cc * 10) / 10 + " см³", (v.hp || e.hp) ? (v.hp || e.hp) + " л.с." : "", null, "motor"]);
+  return T.map((t) => `<a class="tile k${t[5] ? " wide" : ""}" href="#${pfx}${t[4]}"><span>${t[0]}</span><b>${esc(t[1])}</b>${t[2] ? `<small>${esc(t[2])}</small>` : ""}${t[3] === true ? `<em class="src ok">✓ по мануалу</em>` : t[3] === false ? `<em class="src">типовое — сверь</em>` : ""}</a>`).join("");
+}
 
 const files = new Map(); // путь относительно корня → содержимое
 const SEV = { high: "серьёзно", med: "важно", low: "мелочь" };
@@ -441,7 +494,7 @@ BIKES.forEach((b) => {
     const iss = weak(e).length ? `<h2 id="${pfx}slabye">Слабые места</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const keyG = guidesOf(e).filter((g) => KEY_GUIDES.indexOf(g.id) >= 0);
     const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
-    return `<section class="ver">${head}${jumpNav(e, pfx, weak(e).length, cross)}<div class="tiles">${tiles(e, v)}</div>${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${more}
+    return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${more}
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a></section>`;
   }).join("\n");
   const others = BIKES.filter((x) => x.brand === b.brand && x !== b).slice(0, 12);
@@ -541,7 +594,7 @@ engIds.forEach((id) => {
   const body = `<section class="hero"><div class="kick">Мотор${e.cc ? " · " + e.cc + " см³" : ""}${e.stroke ? " · " + esc(e.stroke) : ""}</div><h1>${esc(e.code)}</h1>
 <p class="lead">${esc(e.name || e.code)}: какое масло и сколько заливать, свеча и зазор, зазоры клапанов, жиклёры, слабые места. Стоит на ${list.length} ${plural(list.length, "модели", "моделях", "моделях")}.</p>
 ${aka.length ? `<div class="chips">${aka.slice(0, 8).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>` : ""}</section>
-<section class="ver">${jumpNav(e, "", weak(e).length)}<div class="tiles">${tiles(e, {})}</div>${toolsNav(e, appLink(b0, b0.versions.findIndex((v) => v.engine === id)))}${groups}${iss}
+<section class="ver"><div class="tiles">${cheat(e, {}, "")}</div>${jumpNav(e, "", weak(e).length, false, buyItems(e, null).length > 0)}${toolsNav(e, appLink(b0, b0.versions.findIndex((v) => v.engine === id)))}${groups}${iss}
 <a class="cta" href="${appLink(b0, b0.versions.findIndex((v) => v.engine === id))}">Ремонт, запчасти и ИИ-механик для ${esc(e.code)} →</a></section>
 <h2>Мотоциклы с мотором ${esc(e.code)}</h2><div class="grid models">${list.slice(0, 60).map((x) => modelCard(x, true)).join("")}</div>
 ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(d.title)}</a>`).join("")}</div>` : ""}
@@ -832,7 +885,15 @@ const GARAGE_CSS = `.chip{display:inline-flex;align-items:center;min-height:44px
 .note.src{font-size:14px}
 footer a{display:inline-block;padding:12px 0}
 .logo i{background:linear-gradient(135deg,#3AF2CF 0%,#4E95FF 38%,#9B6BFF 68%,#FF6FD0 100%);color:#0A0A0A;border-radius:9px;font-weight:900;box-shadow:0 6px 18px -8px rgba(155,107,255,.8)}
-@media (prefers-contrast:more){:root{--muted:#d0d0d0}.grp,.tile{border-color:#fff!important}.grp dt{color:#e6e6e6}}`;
+.tile.k{display:block;color:inherit;text-decoration:none;min-height:44px}.tile.k:active{transform:scale(.98)}
+.tile.k b{font-size:24px;line-height:1.15;margin-top:4px}.tile.k.wide{grid-column:1/-1}.tile.k small{display:block;margin-top:4px;font:500 14px/1.3 var(--body);color:var(--muted)}
+.tile .src{display:inline-block;margin-top:6px;font:600 12px var(--cond);font-style:normal;letter-spacing:.04em;text-transform:uppercase;color:#f5b041}.tile .src.ok{color:#3ddc84}
+.typ{font-style:normal;margin-left:8px;padding:1px 6px;border-radius:6px;border:1px solid rgba(245,176,65,.6);color:#f5b041;font:600 11px var(--cond);letter-spacing:.04em;text-transform:uppercase;vertical-align:2px;white-space:nowrap}
+.buyrow{padding:10px 0;border-top:1px solid var(--line)}.buyrow:first-of-type{border-top:0}.buyrow b{display:block;font:600 16px var(--body)}
+.buyrow span{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;margin-top:8px;padding-bottom:2px;scrollbar-width:none}.buyrow span::-webkit-scrollbar{display:none}.buyrow a{flex:0 0 auto}.buyrow a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.28);color:#fff;font:600 15px var(--cond);text-decoration:none}
+.buyrow a small{margin-left:6px;font-size:11px;color:var(--muted)}
+@media (max-width:600px){.mphoto{padding:2% 4%}.mphoto img{max-height:190px;width:auto;max-width:100%}.hero .lead{font-size:15px;margin-bottom:6px}.tiles{grid-template-columns:1fr 1fr}}
+@media (prefers-contrast:more){:root{--muted:#d0d0d0}.grp,.tile{border-color:#fff!important}.grp dt{color:#e6e6e6}.tile .src{color:#ffc65c}}`;
 files.set("m/m.css", CSS + "\n" + GARAGE_CSS + "\n");
 files.set("m/ask.js", ASK_JS + "\n");
 files.set("m/rv.js", RV_JS + "\n");

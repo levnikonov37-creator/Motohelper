@@ -273,13 +273,19 @@ function nbv(v) {
 function Val({
   v,
   stock,
-  ok
+  ok,
+  risky
 }) {
   const changed = stock != null && String(v) !== String(stock);
+  /* у объёма масла и зазоров клапанов без сверки — видимая пометка «типовое»: от этих цифр зависит жизнь мотора */
+  const typ = risky && !ok && !changed && /\d/.test(String(v || ""));
   return /*#__PURE__*/React.createElement("span", {
     className: changed ? "val changed" : "val",
     title: changed ? "С завода: " + stock : undefined
-  }, nbv(v), changed && /*#__PURE__*/React.createElement("small", null, "с завода ", stock), ok && !changed && /*#__PURE__*/React.createElement(Vf, null));
+  }, nbv(v), changed && /*#__PURE__*/React.createElement("small", null, "с завода ", stock), ok && !changed && /*#__PURE__*/React.createElement(Vf, null), typ && /*#__PURE__*/React.createElement("i", {
+    className: "typ",
+    title: "Типовое значение для мотора такого класса — сверь с мануалом"
+  }, "типовое"));
 }
 /* ✓ — цифра сверена с руководством (завода или официального дилера), см. e.ex в data.js */
 function Vf() {
@@ -14153,7 +14159,13 @@ function Passport({
     setPhOk = v => setSt(o => Object.assign({}, o, {
       [ph]: v
     }));
-  const rows = [["Масло", eng.oil, ok(eng.oilVol) ? eng.oilVol : ""], ["Свеча", eng.spark, ok(eng.gap) ? "зазор " + eng.gap : ""], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", ""] : ["Клапаны", ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", "впуск / выпуск, мм"], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : ""]];
+  /* четвёртый элемент — откуда цифра: true — сверено с мануалом (✓), false — типовое значение (пометка «типовое»), null — без пометки */
+  const src = (...k) => k.every(x => isEx(eng, x)) ? true : false;
+  /* в паспорте — коротко: пояснения в скобках (откуда цифра) заменяет пометка ✓ / «типовое», полностью — во «Всех характеристиках» */
+  const sh = x => String(x == null ? "" : x).replace(/\s*\([^)]*\)/g, "").trim();
+  const rng = x => (String(x || "").match(/\d+(?:[.,]\d+)?(?:\s*[–-]\s*\d+(?:[.,]\d+)?)?/) || [""])[0].replace(/\s+/g, "");
+  const vNum = ok(eng.valveIn) && rng(eng.valveIn) && rng(eng.valveEx);
+  const rows = [["Масло", sh(eng.oil), ok(eng.oilVol) ? sh(eng.oilVol) : "", ok(eng.oilVol) ? src("oilVol") : null], ["Свеча", sh(eng.spark), ok(eng.gap) ? "зазор " + sh(eng.gap) : "", ok(eng.spark) ? src("spark") : null], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", "", null] : ["Клапаны", vNum ? rng(eng.valveIn) + " / " + rng(eng.valveEx) : ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", vNum ? "впуск / выпуск, мм, на холодном" : "впуск / выпуск, мм", vNum ? src("valveIn", "valveEx") : null], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : "", null]];
   return /*#__PURE__*/React.createElement("div", {
     className: "panel passport" + (ph && phOk >= 0 ? " has-ph" : ""),
     "aria-label": "Паспорт мотора"
@@ -14198,7 +14210,13 @@ function Passport({
     className: "pp-name"
   }, /*#__PURE__*/React.createElement("small", null, bike.brand), /*#__PURE__*/React.createElement("b", null, bike.name))), rows.map(r => /*#__PURE__*/React.createElement("div", {
     key: r[0]
-  }, /*#__PURE__*/React.createElement("span", null, r[0]), /*#__PURE__*/React.createElement("b", null, nbv(r[1]) || "—"), r[2] && /*#__PURE__*/React.createElement("small", null, nbv(r[2])))), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("span", null, r[0]), /*#__PURE__*/React.createElement("b", null, nbv(r[1]) || "—"), r[2] && /*#__PURE__*/React.createElement("small", null, nbv(r[2])), r[3] === true ? /*#__PURE__*/React.createElement("em", {
+    className: "pp-src ok",
+    title: "Сверено с руководством"
+  }, "\u2713 по мануалу") : r[3] === false ? /*#__PURE__*/React.createElement("em", {
+    className: "pp-src",
+    title: "Типовое значение для мотора такого класса — сверь с мануалом"
+  }, "типовое — сверь") : null)), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "link pp-more",
     onClick: () => go("bike", "overview")
@@ -17607,11 +17625,13 @@ function Overview({
     r: eng.stroke === "2T" ? [["Клапаны", "нет (2T)"]] : [["Впуск", /*#__PURE__*/React.createElement(Val, {
       v: eng.valveIn,
       stock: S.valveIn,
-      ok: isEx(eng, "valveIn")
+      ok: isEx(eng, "valveIn"),
+      risky: true
     })], ["Выпуск", /*#__PURE__*/React.createElement(Val, {
       v: eng.valveEx,
       stock: S.valveEx,
-      ok: isEx(eng, "valveEx")
+      ok: isEx(eng, "valveEx"),
+      risky: true
     })], ["Интервал", eng.valveInt ? kmHours(eng.valveInt, eng, bike) : "—"]]
   }, {
     h: "Зажигание и масло",
@@ -17633,7 +17653,8 @@ function Overview({
     })], ["Объём", /*#__PURE__*/React.createElement(Val, {
       v: eng.oilVol,
       stock: S.oilVol,
-      ok: isEx(eng, "oilVol")
+      ok: isEx(eng, "oilVol"),
+      risky: true
     })]]).concat(eng.coolant ? [["Антифриз", /*#__PURE__*/React.createElement(Val, {
       v: eng.coolant,
       ok: isEx(eng, "coolant")
