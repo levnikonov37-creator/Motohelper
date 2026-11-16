@@ -9531,6 +9531,51 @@ fixExact({
   "KAW_KLR650E": {"oilVol": "1.9 л при замене, 2.0 л с фильтром (2.1 л — сухой мотор)", "coolant": "1.5 л"},
   "T650K": {"oilVol": "Ninja 650 / Z650RS 2017+: 1.6 л при замене, 1.8 л с фильтром (2.3 л — сухой мотор); ER-6f / Ninja 650R 2006–2008: 1.7 л при замене, 1.9 л с фильтром (2.4 л — сухой мотор)"}
 });
+/* часть 19: «≈» → руководства владельца Indian, Benelli TRK 502 / Leoncino 500, Aprilia RS 125 / RS4 125 / RS 50, Beta 2014–2024
+   (у Beta 4T моторное масло и масло КПП раздельные; у триала Beta Evo — объём ОЖ в сухую / в слитую систему) */
+fixExact({
+  "X26_IND_TS111": {"oilVol": "5.2 л с фильтром (Chief / Chieftain / Roadmaster 2014–2019)"},
+  "X26_IND_TS116": {"oilVol": "5.7 л с фильтром (Chief / Springfield / Chieftain / Roadmaster 2024)"},
+  "X26_IND_PP108": {"oilVol": "4.7 л (Challenger / Pursuit 2024)", "coolant": "2.3 л в радиаторе (Challenger / Pursuit 2024)"},
+  "X26_IND_SCOUT1250": {"oilVol": "4.26 л с фильтром (4.97 л — сухой мотор; Scout 2025)"},
+  "TRK502": {"oilVol": "2.9 л при замене, 3.0 л с фильтром", "coolant": "2.4 л + 0.3 л в бачке (TRK 502 2021)"},
+  "APR_RS125": {"oilVol": "КПП 0.6 л (RS 125 2002)", "coolant": "0.8 л (RS 125 2002)"},
+  "APR_125_4T": {"oilVol": "1.2 л (RS4 125)", "coolant": "0.78 л + 0.23 л в бачке (RS4 125)"},
+  "AM6": {"coolant": "0.9 л (Aprilia RS 50 2004)"},
+  "BETA125": {"oilVol": "КПП 0.69 л (RR 125 2024)", "coolant": "1.3 л (RR 125 2024)"},
+  "BETA200": {"oilVol": "КПП 0.69 л (RR 200 2024)", "coolant": "1.3 л (RR 200 2024)"},
+  "BETA250": {"oilVol": "КПП 0.8 л (RR 250 2024)", "coolant": "1.3 л (RR 250 2024)"},
+  "BETA300": {"oilVol": "КПП 0.8 л (RR 300 / Xtrainer 300 2024)", "coolant": "1.3 л (RR 300 / Xtrainer 300 2024)"},
+  "BETA4T": {"oilVol": "мотор 0.75 л + КПП 0.75 л (по 0.8 л после переборки) — RR 4T 2024", "coolant": "1.3 л (RR 4T 2024)"},
+  "BETA_350": {"oilVol": "мотор 0.75 л + КПП 0.75 л (по 0.8 л после переборки) — RR 4T 2024", "coolant": "1.3 л (RR 4T 2024)"},
+  "BETA_390": {"oilVol": "мотор 0.75 л + КПП 0.75 л (по 0.8 л после переборки) — RR 4T 2024", "coolant": "1.3 л (RR 4T 2024)"},
+  "BETA_480": {"oilVol": "мотор 0.75 л + КПП 0.75 л (по 0.8 л после переборки) — RR 4T 2024", "coolant": "1.3 л (RR 4T 2024)"},
+  "BETA_400": {"oilVol": "мотор 0.85 л + КПП 0.85 л (RR 4T 2014)", "coolant": "1.3 л (RR 4T 2014)"},
+  "BETA_450": {"oilVol": "мотор 0.85 л + КПП 0.85 л (RR 4T 2014)", "coolant": "1.3 л (RR 4T 2014)"},
+  "BETA_498": {"oilVol": "мотор 0.85 л + КПП 0.85 л (RR 4T 2014)", "coolant": "1.3 л (RR 4T 2014)"},
+  "TR2T": {"oilVol": "КПП 0.4–0.5 л (Beta Evo 250 / 300 2024 — 0.55 л)", "coolant": "Beta Evo 250 / 300 2024: 0.53 л в сухую систему, 0.42 л после слива"},
+  "TR125": {"oilVol": "КПП 0.4 л (Beta Evo 125 2024 — 0.55 л)", "coolant": "Beta Evo 125 2024: 0.63 л в сухую систему, 0.53 л после слива"},
+  "BETA_EVO4T": {"oilVol": "0.9 л (Evo 4T 2024)", "coolant": "0.6 л (Evo 4T 2024)"},
+  "BETA_EVO4T250": {"oilVol": "0.9 л (Evo 4T 2024)", "coolant": "0.6 л (Evo 4T 2024)"}
+});
+/* часть 20: Ducati — ещё руководства владельца 2000–2023 (картер с фильтром, охлаждающая жидкость); где мотор общий — модель и год в скобках */
+fixExact({
+  "DUC_SQ1199": {"oilVol": "3.7 л с фильтром (Panigale 1199 R 2016)", "coolant": "2.3 л"},
+  "DUC_SQ1299": {"oilVol": "3.7 л с фильтром (Panigale 1299 2015)", "coolant": "2.3 л"},
+  "DUC_V4": {"oilVol": "3.8 л с фильтром (Panigale V4 2018); 3.4 л (Streetfighter V4 2020)", "coolant": "2.05 л (Panigale V4 2018); 2.5 л (Streetfighter V4 2020)"},
+  "DUC_V4G": {"oilVol": "4.9 л с фильтром (Multistrada V4 2021, Diavel V4 2023)", "coolant": "2.74 л (Multistrada V4 2021); 2.065 л (Diavel V4 2023)"},
+  "DUC_MONO": {"oilVol": "2.3 л (Hypermotard 698 Mono 2024)", "coolant": "1.26 л"},
+  "DUC_DVT1200": {"oilVol": "4.1 л с фильтром (Multistrada 1200 2016)", "coolant": "2.5 л"},
+  "V1200D": {"oilVol": "3.7 л с фильтром (Monster 1200 2015)", "coolant": "2.5 л (Monster 1200 2015)"},
+  "DUC_1079": {"oilVol": "3.4 л с фильтром (Scrambler 1100 2020)"},
+  "DUC_748": {"oilVol": "3.4 л с фильтром (748 / 748S 2000)"},
+  "DUC_996": {"oilVol": "3.8 л с фильтром (996 2000)"},
+  "DUC_620": {"oilVol": "3.3 л с фильтром (Supersport 620 2003)"},
+  "V803D": {"oilVol": "3.4 л с фильтром (Scrambler 800 2020, Monster 797 2019); 3.7 л (Monster 796 2011); 3.3 л (Monster S2R 800)"},
+  "DESERTX": {"oilVol": "3.1 л с фильтром (Monster 937 2021, DesertX 2023); 3.2 л (SuperSport 950 2021); 3.35 л (SuperSport 939, Hypermotard 950 2019); 3.4 л (Multistrada 950 2017)", "coolant": "2.05 л (DesertX 2023); 2.2 л (Hypermotard 950); 2.25 л (Monster 937); 2.3 л (SuperSport 939 / 950); 2.4 л (Multistrada 950)"},
+  "V955D": {"oilVol": "3.8 л с фильтром (Panigale 959 2018, Panigale V2 2020)", "coolant": "2.3 л"},
+  "DUC_DVT1262": {"oilVol": "4.2 л с фильтром (XDiavel 2016, Diavel 1260 2019, Multistrada 1260 2018)", "coolant": "2.5 л"}
+});
 /* у каждого мотора с известной свечой — своя свеча в запчастях.
    Какие моторы и группы уже закрыты свечами, считаем один раз: partByKind на каждый из ~1000 моторов
    перебирал все ~27 тысяч деталей — на слабом телефоне это секунды при каждом открытии сайта. */
