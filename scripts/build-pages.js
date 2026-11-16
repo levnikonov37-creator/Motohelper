@@ -343,8 +343,8 @@ function torqueHtml(e, b, pfx) {
 const srcNote = (e) => e.ex && Object.keys(e.ex).length
   ? `<p class="note src">✓ — цифра сверена с руководством (завода или официального дилера). Без отметки — типовое значение для мотора такого класса: перед работой сверь со своим мануалом.</p>`
   : `<p class="note src">Цифры по этому мотору — типовые для его класса: заводских данных в базе пока нет. Перед работой сверь со своим мануалом, а если знаешь точные — отправь ниже, проверим и исправим.</p>`;
-function jumpNav(e, pfx, hasIss, hasCross, hasBuy) {
-  const L = [["maslo", "Масло"], ["svecha", "Свеча и клапаны"], ["momenty", "Моменты"], hasCross && ["analogi", "Аналоги запчастей"], hasBuy && ["kupit", "Где купить"], premix(e) && ["smes", "Смесь 2T"], hasIss && ["slabye", "Слабые места"]].filter(Boolean);
+function jumpNav(e, pfx, hasIss, hasCross, hasBuy, hasFork) {
+  const L = [["maslo", "Масло"], ["svecha", "Свеча и клапаны"], ["momenty", "Моменты"], hasCross && ["analogi", "Аналоги запчастей"], hasFork && ["vilka", "Вилка"], hasBuy && ["kupit", "Где купить"], premix(e) && ["smes", "Смесь 2T"], hasIss && ["slabye", "Слабые места"]].filter(Boolean);
   return `<nav class="jump" aria-label="Быстрый переход">${L.map((x) => `<a href="#${pfx}${x[0]}">${x[1]}</a>`).join("")}</nav>`;
 }
 /* кнопки в инструменты приложения — сразу в нужный раздел для этого мотоцикла (см. rvFromHash в js/app.js) */
@@ -359,6 +359,19 @@ function crossHtml(b, pfx) {
   if (!rows.length) return "";
   return `<div class="grp" id="${pfx}analogi"><h3>Аналоги расходников</h3><dl>${rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl>
 <p class="small">Номера HiFlo, K&amp;N, EBC, Yuasa и оригинальные (OEM) — по каталогам производителей. Перед покупкой сверь по году выпуска и по старой детали.</p></div>`;
+}
+/* «Вилка»: объём масла на перо, марка и уровень — из мануала модели (FORK в data.js); если данных нет — честно и ссылка на инструкцию */
+function forkHtml(b, pfx) {
+  const rows = b ? ctx.forkRows(b) : [];
+  const L = b && ctx.FORK ? ctx.FORK[b.brand + "|" + b.name] || [] : [];
+  if (!rows.length) return `<div class="grp" id="${pfx}vilka"><h3>Вилка</h3><p class="small">Заводского объёма масла в вилке для этой модели в базе пока нет. Меняй по уровню: одинаково в обоих перьях, по мануалу своей вилки.</p><p><a class="chip" href="/m/remont/fork-oil/">Как поменять масло в вилке →</a></p></div>`;
+  const src = Array.from(new Set(L.map((x) => x[4]))).join("; ");
+  const lvl = (x) => x + (/трубы|штока/.test(x) ? "" : " от верха трубы, перо сжато, без пружины");
+  /* несколько поколений — по строке на каждое: объём крупно, масло и уровень под ним */
+  const dl = L.length > 1 ? L.map((x) => `<dt>${esc(x[0] || "Все годы")}</dt><dd><b>${esc(x[2])}</b>${VF}${x[1] ? `<br><span class="small">масло: ${esc(x[1])}</span>` : ""}${x[3] ? `<br><span class="small">уровень: ${esc(lvl(x[3]))}</span>` : ""}</dd>`).join("")
+    : rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}${VF}</dd>`).join("");
+  return `<div class="grp" id="${pfx}vilka"><h3>Вилка${L.length === 1 && L[0][0] ? " · " + esc(L[0][0]) : ""}</h3><dl>${dl}</dl>
+<p class="small">Источник: ${esc(src)}. «В сухую» — после разборки и просушки пера, «при замене» — после слива.</p><p><a class="chip" href="/m/remont/fork-oil/">Как поменять масло в вилке →</a></p></div>`;
 }
 /* «Где купить»: поиск точного номера расходника на площадках (те же магазины и партнёрские ссылки, что в приложении — ai-config.json) */
 const SHOPS = [["Ozon", "https://www.ozon.ru/search/?text="], ["WB", "https://www.wildberries.ru/catalog/0/search.aspx?search="], ["Маркет", "https://market.yandex.ru/search?text="], ["Авито", "https://www.avito.ru/rossiya?q="], ["AliExpress", "https://aliexpress.ru/wholesale?SearchText="]];
@@ -387,12 +400,12 @@ function buyHtml(e, b, pfx) {
   return `<div class="grp buy" id="${pfx}kupit"><h3>Где купить</h3>${L.map((x) => `<div class="buyrow"><b>${esc(x[0])}: ${esc(x[1])}</b><span>${SHOPS.map((sh) => shopLink(sh, x[2])).join("")}</span></div>`).join("")}
 <p class="small">Ищем точный номер на площадках. Перед покупкой сверь номер со старой деталью.</p></div>`;
 }
-const garageGroups = (e, v, b, pfx, cross) => `<div class="groups">${specGroups(e, v, b).map((g) => grpHtml(g, e, pfx)).join("")}${torqueHtml(e, b, pfx)}${cross ? crossHtml(b, pfx) : ""}${buyHtml(e, cross ? b : null, pfx)}${mixHtml(e, pfx)}</div>${srcNote(e)}`;
+const garageGroups = (e, v, b, pfx, cross, first) => `<div class="groups">${specGroups(e, v, b).map((g) => grpHtml(g, e, pfx)).join("")}${torqueHtml(e, b, pfx)}${cross ? crossHtml(b, pfx) : ""}${first && b ? forkHtml(b, pfx) : ""}${buyHtml(e, cross ? b : null, pfx)}${mixHtml(e, pfx)}</div>${srcNote(e)}`;
 /* шпаргалка — первое, что видно на телефоне: масло, свеча, клапаны крупно, у каждой цифры — откуда она (✓ мануал или «типовое»);
    плитка ведёт к своему блоку с подробностями */
 const RNG = /\d+(?:[.,]\d+)?(?:\s*[–-]\s*\d+(?:[.,]\d+)?)?/;
 const real = (x) => x != null && String(x).trim() && String(x) !== "—" && !/мануал/i.test(String(x)) && /\d/.test(String(x));
-function cheat(e, v, pfx) {
+function cheat(e, v, pfx, b) {
   const ex = (k) => !!(e.ex && e.ex[k]);
   const T = [];
   if (real(e.oilVol)) {
@@ -410,6 +423,12 @@ function cheat(e, v, pfx) {
   if (e.stroke !== "2T" && vi && ve && /мм/.test(String(e.valveIn) + String(e.valveEx)))
     T.push(["Клапаны", vi[0].replace(/\s+/g, "") + " / " + ve[0].replace(/\s+/g, ""), "впуск / выпуск, мм, на холодном", ex("valveIn") && ex("valveEx"), "svecha", 1]);
   if (premix(e)) { const r = String(e.oil).match(/1\s*:\s*\d{2,3}/); if (r) T.push(["Смесь 2T", r[0].replace(/\s+/g, ""), "бензин : масло", false, "smes"]); }
+  const fk = b ? ctx.forkShort(b) : null;
+  if (fk && fk.vol) {
+    const tot = fk.vol.match(/всего (\d+)\s*(см³|мл)/), ca = fk.vol.match(/картридж (\d+)/), ou = fk.vol.match(/наружная камера (\d+)/), one = fk.vol.match(/\d+(?:[.,]\d+)?(?:\s*±\s*\d+(?:[.,]\d+)?)?\s*(?:см³|мл)/);
+    const big = tot ? tot[1] + " " + tot[2] : ca && ou ? ca[1] + " + " + ou[1] + " мл" : one ? one[0] : "";
+    if (big) T.push(["Вилка, на перо", big, [String(fk.oil || "").split(/\s*\(/)[0], fk.n > 1 && fk.years ? fk.years : ""].filter(Boolean).join(" · "), true, "vilka"]);
+  }
   if (e.cc) T.push(["Объём", Math.round(e.cc * 10) / 10 + " см³", (v.hp || e.hp) ? (v.hp || e.hp) + " л.с." : "", null, "motor"]);
   return T.map((t) => `<a class="tile k${t[5] ? " wide" : ""}" href="#${pfx}${t[4]}"><span>${t[0]}</span><b>${esc(t[1])}</b>${t[2] ? `<small>${esc(t[2])}</small>` : ""}${t[3] === true ? `<em class="src ok">✓ по мануалу</em>` : t[3] === false ? `<em class="src">типовое — сверь</em>` : ""}</a>`).join("");
 }
@@ -490,11 +509,11 @@ BIKES.forEach((b) => {
     const approx = v.approx ? `<p class="note">≈ Мотор подобран по похожей модели — сверь код на картере.</p>` : "";
     const pfx = b.versions.length > 1 ? "v" + (vi + 1) + "-" : "";
     const cross = vi === 0 && ctx.crossRows(b).length > 0;
-    const groups = garageGroups(e, v, b, pfx, cross);
+    const groups = garageGroups(e, v, b, pfx, cross, vi === 0);
     const iss = weak(e).length ? `<h2 id="${pfx}slabye">Слабые места</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const keyG = guidesOf(e).filter((g) => KEY_GUIDES.indexOf(g.id) >= 0);
     const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
-    return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${more}
+    return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${more}
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a></section>`;
   }).join("\n");
   const others = BIKES.filter((x) => x.brand === b.brand && x !== b).slice(0, 12);
