@@ -2756,7 +2756,7 @@ function wiringType(e) {
 function torqueFor(e, bike) {
   var big = e.cc >= 450, small = e.cc <= 150 || (bike && bike.type === "Питбайк");
   var r = [
-    ["Свеча (" + String(e.spark || "").split(" /")[0] + ")", e.sparkTorque || "12–18 Н·м"],
+    ["Свеча (" + String(e.spark || "").split(/\s*[\/(;,]/)[0].trim() + ")", e.sparkTorque || "12–18 Н·м"],
     ["Сливная пробка масла", big ? "20–30 Н·м" : "18–25 Н·м"],
     ["Крышка клапанов, крышки двигателя М6", "8–10 Н·м"]
   ];
@@ -2775,6 +2775,14 @@ function torqueFor(e, bike) {
   r.push(["Крепления двигателя к раме", big ? "M10: 45–55 Н·м" : "M8–M10: 35–45 Н·м"]);
   r.push(["Болты амортизатора", "M10: 40–45 Н·м"]);
   r.push(["Спицы", "3–5 Н·м, равномерно по кругу"]);
+  /* моменты из руководства этого мотора (e.torq: [начало названия узла, значение, своё название]) — заменяют типовую строку с тем же началом или встают первыми;
+     третий элемент строки — true, если цифра сверена с руководством */
+  if (e.ex && e.ex.sparkTorque) r[0] = [r[0][0], r[0][1], true];
+  (e.torq || []).slice().reverse().forEach(function (t) {
+    var i = -1;
+    r.forEach(function (x, j) { if (i < 0 && x[0].indexOf(t[0]) === 0) i = j; });
+    if (i >= 0) r[i] = [t[2] || r[i][0], t[1], true]; else r.unshift([t[2] || t[0], t[1], true]);
+  });
   return r;
 }
 /* Общая таблица «болт в алюминий / в сталь» — если нужного узла нет выше */
@@ -9091,7 +9099,8 @@ function fixExact(FIX) {
   Object.keys(FIX).forEach(function (id) {
     var e = ENGINES[id], f = FIX[id];
     if (!e) return;
-    Object.keys(f).forEach(function (k) { e[k] = f[k]; });
+    /* e.ex — какие поля сверены с руководством (завода или официального дилера): на сайте рядом с ними ✓ */
+    Object.keys(f).forEach(function (k) { e[k] = f[k]; (e.ex || (e.ex = {}))[k] = 1; });
     if (!f.spark) return;
     sparks.forEach(function (p) { if (p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (x) { return x !== id; }); });
     var mine = own[id + "-spark"];
@@ -9625,6 +9634,19 @@ fixExact({
     "LON_YB300H": YB300H, "LON_YB300HE": YB300H, "FIXCN_YB300H_6": YB300H, "LON_FE250": FE250, "LON_FE250E": FE250, "NC250": NC250});
   /* по заводскому мануалу YBS300 КПП 5-ступенчатая; у Gen 2 и у части мотоциклов продавцы указывают 6 ст. */
   ENGINES.YBS300.gearbox = "5 ст. по заводским данным Loncin (у части мотоциклов продавцы пишут 6 ст. — сверяйте)";
+  ENGINES.YBS300.ex.gearbox = 1;
+  /* моменты затяжки из тех же руководств */
+  var HEAD = "Гайки головки цилиндра", DRAIN = "Сливная пробка масла", COVER = "Крышка клапанов";
+  var TQ = {
+    "NC300": [[HEAD, "M10: 55–60 Н·м, крест-накрест (Zongshen ZS182MN)", "Болты головки цилиндра"], ["Постель распредвалов", "наживить 5 Н·м, затем 10 Н·м"]],
+    "NC450": [[HEAD, "55–60 Н·м, крест-накрест (Zongshen ZS194MQ)", "Болты головки цилиндра"], [DRAIN, "25 Н·м (Kayo 2022)"]],
+    "YBS300": [[HEAD, "M10: 50–55 Н·м, резьбу и шайбу смазать маслом (Loncin)", "Болты головки цилиндра"], [DRAIN, "M12: 20–25 Н·м (Loncin)"]],
+    "LON_YB300H": [[HEAD, "M8: 36–40 Н·м, резьбу смазать маслом (Loncin)", "Болты головки цилиндра"], [DRAIN, "M12: 20–25 Н·м (Loncin)"], [COVER, "M6: 8–12 Н·м (Loncin)"]],
+    "LON_FE250": [[HEAD, "M10: 39 Н·м, торец гайки смазать маслом (Loncin)"], [COVER, "M6: 10 Н·м (Loncin)"]],
+    "NC250": [[DRAIN, "25 Н·м (Kayo 2022)"]]
+  };
+  TQ.NB300E = TQ.NC300; TQ.NC450C = TQ.NC450; TQ.YBS300G2 = TQ.YBS300; TQ.LON_YB300HE = TQ.LON_YB300H; TQ.FIXCN_YB300H_6 = TQ.LON_YB300H; TQ.LON_FE250E = TQ.LON_FE250;
+  Object.keys(TQ).forEach(function (id) { if (ENGINES[id]) ENGINES[id].torq = TQ[id]; });
 })();
 /* у каждого мотора с известной свечой — своя свеча в запчастях.
    Какие моторы и группы уже закрыты свечами, считаем один раз: partByKind на каждый из ~1000 моторов
