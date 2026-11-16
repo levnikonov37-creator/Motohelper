@@ -272,14 +272,26 @@ function nbv(v) {
 }
 function Val({
   v,
-  stock
+  stock,
+  ok
 }) {
   const changed = stock != null && String(v) !== String(stock);
   return /*#__PURE__*/React.createElement("span", {
     className: changed ? "val changed" : "val",
     title: changed ? "С завода: " + stock : undefined
-  }, nbv(v), changed && /*#__PURE__*/React.createElement("small", null, "с завода ", stock));
+  }, nbv(v), changed && /*#__PURE__*/React.createElement("small", null, "с завода ", stock), ok && !changed && /*#__PURE__*/React.createElement(Vf, null));
 }
+/* ✓ — цифра сверена с руководством (завода или официального дилера), см. e.ex в data.js */
+function Vf() {
+  return /*#__PURE__*/React.createElement("i", {
+    className: "vf",
+    title: "Сверено с руководством",
+    "aria-label": "сверено с руководством"
+  }, "\u2713");
+}
+const isEx = (eng, k) => !!(eng && eng.ex && eng.ex[k]);
+/* смесь для двухтактника: только где масло льют в бензин (premix), а не в бачок */
+const isPremix = eng => eng.stroke === "2T" && /premix/i.test(eng.oil || "");
 function Field({
   label,
   k,
@@ -11900,7 +11912,7 @@ const RV_TITLE = {
   guides: "Все инструкции",
   ref: "Справочник",
   wiring: "Схема электрики",
-  specs: "Шины и моменты затяжки",
+  specs: "Моменты затяжки и шины",
   buy: "Проверка б/у перед покупкой",
   season: "Зима и весна"
 };
@@ -14875,7 +14887,7 @@ function RepairHub(props) {
 /* плитки раздела «Ремонт» по группам: [заголовок, [[иконка, название, вид, подпись, класс]]] */
 function RHUB_GROUPS(eng) {
   const se = seasonNow();
-  return [["Что-то не так", [["diag", "Что сломалось?", "find", "Найти причину по симптомам", " act-main"], ["ai", "Спросить ИИ", "ai", "Опиши проблему словами или фото"], ["list", "Коды ошибок", "ref", "Неисправности и справка"]]], ["Обслуживание", [["list", "ТО по пробегу", "to", "Что и когда менять"], ["theme", se === "spring" ? "Весна: к сезону" : "Зима: консервация", "season", se === "spring" ? "Чек-лист после зимы" : "Чек-лист перед хранением"]]], ["Как сделать", [["book", "Все инструкции", "guides", (n => n + " " + plural(n, "инструкция", "инструкции", "инструкций") + " со схемами")(guidesFor(eng).length)], ["engine", "Узлы мотоцикла", "units", "Всё по узлу на одной странице"], ["bolt", "Схема электрики", "wiring", "Провода и что куда идёт"], ["tire", "Шины и затяжка", "specs", "Давление и моменты"], ["check", "Проверка б/у", "buy", "Перед покупкой"]]]];
+  return [["Что-то не так", [["diag", "Что сломалось?", "find", "Найти причину по симптомам", " act-main"], ["ai", "Спросить ИИ", "ai", "Опиши проблему словами или фото"], ["list", "Коды ошибок", "ref", "Неисправности и справка"]]], ["Обслуживание", [["list", "ТО по пробегу", "to", "Что и когда менять"], ["theme", se === "spring" ? "Весна: к сезону" : "Зима: консервация", "season", se === "spring" ? "Чек-лист после зимы" : "Чек-лист перед хранением"]]], ["Как сделать", [["book", "Все инструкции", "guides", (n => n + " " + plural(n, "инструкция", "инструкции", "инструкций") + " со схемами")(guidesFor(eng).length)], ["engine", "Узлы мотоцикла", "units", "Всё по узлу на одной странице"], ["bolt", "Схема электрики", "wiring", "Провода и что куда идёт"], ["tire", "Затяжка и шины", "specs", eng && isPremix(eng) ? "Моменты, давление, смесь 2T" : "Моменты затяжки, давление"], ["check", "Проверка б/у", "buy", "Перед покупкой"]]]];
 }
 /* какой сезон сейчас: октябрь–февраль — зима, март–май — весна, лето — null */
 function seasonNow(d) {
@@ -15905,6 +15917,37 @@ function BuyCheckView({
     q: "как проверить б/у " + (eng.jp && bike.brand !== "Любая модель" ? bike.brand + " " + bike.name : eng.code) + " перед покупкой"
   })));
 }
+/* ===== Смесь бензин : масло для двухтактника — крупные кнопки, без клавиатуры ===== */
+function MixCalc({
+  eng
+}) {
+  const m = String(eng.oil || "").match(/1\s*:\s*(\d{2,3})|(\d{2,3})\s*:\s*1/),
+    own = m ? Number(m[1] || m[2]) : 0;
+  const [r, setR] = useState(own || 50);
+  const [l, setL] = useState(5);
+  const ml = Math.round(l * 1000 / r);
+  const pick = (list, cur, set, fmt) => /*#__PURE__*/React.createElement("div", {
+    className: "mix-row"
+  }, list.map(x => /*#__PURE__*/React.createElement("button", {
+    key: x,
+    type: "button",
+    className: "mix-btn" + (x === cur ? " on" : ""),
+    "aria-pressed": x === cur,
+    onClick: () => set(x)
+  }, fmt(x))));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "adj-block mix"
+  }, /*#__PURE__*/React.createElement("h3", null, "Смесь бензин : масло"), /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, "Бензина в канистре"), pick([1, 5, 10, 20], l, setL, x => x + " л"), /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, "Пропорция", own ? " (для этого мотора — 1:" + own + ")" : ""), pick([25, 33, 40, 50], r, setR, x => "1:" + x), /*#__PURE__*/React.createElement("div", {
+    className: "mix-out",
+    "aria-live": "polite"
+  }, ml, " мл масла"), /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, own ? "" : "Пропорцию смотри на банке масла и в мануале: чаще всего 1:40–1:50 для синтетики. ", "На обкатке — гуще, 1:25–1:30. Масло лей в канистру до бензина и взбалтывай."));
+}
 /* ===== Шины и моменты затяжки под свой мотоцикл ===== */
 function SpecsView({
   eng,
@@ -15914,10 +15957,13 @@ function SpecsView({
   const tq = torqueFor(eng, bike);
   const tbl = rows => /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("tbody", null, rows.map((r, i) => /*#__PURE__*/React.createElement("tr", {
     key: i
-  }, /*#__PURE__*/React.createElement("th", null, r[0]), /*#__PURE__*/React.createElement("td", null, r[1])))));
+  }, /*#__PURE__*/React.createElement("th", null, r[0]), /*#__PURE__*/React.createElement("td", null, r[1], r[2] && /*#__PURE__*/React.createElement(Vf, null))))));
+  const tqOwn = tq.some(r => r[2]);
   return /*#__PURE__*/React.createElement("div", {
     className: "refs"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, isPremix(eng) && /*#__PURE__*/React.createElement(MixCalc, {
+    eng: eng
+  }), /*#__PURE__*/React.createElement("div", {
     className: "adj-block"
   }, /*#__PURE__*/React.createElement("h3", null, "Шины ", bike.brand === "Любая модель" ? "" : bike.brand + " " + bike.name), tbl([["Перед", tr.front], ["Зад", tr.rear]]), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
@@ -15927,7 +15973,7 @@ function SpecsView({
     className: "adj-block"
   }, /*#__PURE__*/React.createElement("h3", null, "Моменты затяжки ", eng.code), tbl(tq), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, eng.jp ? "Типовые значения. Точные для своей модели — в сервис-мануале." : "Типовые значения для китайских моторов такого класса. Резьбу в алюминии не перетягивай — сорвать её легко.")), /*#__PURE__*/React.createElement("div", {
+  }, tqOwn ? "\u2713 — из руководства этого мотора, остальное — типовые значения по резьбе. " : "", eng.jp ? "Типовые значения. Точные для своей модели — в сервис-мануале." : "Типовые значения для китайских моторов такого класса. Резьбу в алюминии не перетягивай — сорвать её легко.")), /*#__PURE__*/React.createElement("div", {
     className: "adj-block"
   }, /*#__PURE__*/React.createElement("h3", null, "Если узла нет в списке — по резьбе"), /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Резьба"), /*#__PURE__*/React.createElement("th", null, "В алюминий"), /*#__PURE__*/React.createElement("th", null, "В сталь"))), /*#__PURE__*/React.createElement("tbody", null, TORQUE_BY_SIZE.map(r => /*#__PURE__*/React.createElement("tr", {
     key: r[0]
@@ -17000,6 +17046,27 @@ function aiCardBase(eng, bike, ver, cu, mt) {
   if (inst.length) L.push("Установлено владельцем: " + inst.join(", ") + ".");
   if (cu.notes) L.push("Заметки владельца: " + cu.notes);
 
+  const exNames = {
+    oilVol: "объём масла",
+    coolant: "антифриз",
+    spark: "свеча",
+    gap: "зазор свечи",
+    sparkTorque: "затяжка свечи",
+    valveIn: "зазор впуска",
+    valveEx: "зазор выпуска",
+    torque: "крутящий момент",
+    compression: "компрессия",
+    jetMain: "главный жиклёр",
+    jetPilot: "жиклёр ХХ",
+    needle: "игла",
+    carb: "карбюратор",
+    idle: "холостые",
+    gearbox: "КПП"
+  };
+  const ex = Object.keys(exNames).filter(k => isEx(eng, k) && (!S || String(eng[k]) === String(S[k]))).map(k => exNames[k]);
+  L.push(ex.length ? "Сверено с руководством производителя или официального дилера: " + ex.join(", ") + ". Остальные цифры — типовые для мотора такого класса: так и говори, когда их называешь." : "Цифры по этому мотору — типовые для его класса, заводских данных в базе нет: когда называешь цифру, говори, что она типовая, и советуй сверить с мануалом.");
+  if (eng.torq && eng.torq.length) L.push("Моменты затяжки из руководства этого мотора: " + eng.torq.map(t => (t[2] || t[0]) + " — " + t[1]).join("; ") + ".");
+  if (isPremix(eng)) L.push("Смазка смесью (premix): на 1 л бензина при 1:50 — 20 мл масла, 1:40 — 25 мл, 1:33 — 30 мл.");
   L.push("Известные слабые места этого мотора: " + eng.issues.map(i => i.t + " (" + i.fix + ")").join("; "));
   return L.join("\n");
 }
@@ -17470,7 +17537,13 @@ function Overview({
   const main = [["Объём", eng.cc + " см³"], ["Мощность", /*#__PURE__*/React.createElement(Val, {
     v: eng.hp + " л.с.",
     stock: S.hp + " л.с."
-  })], ["Крутящий момент", eng.torque], ["Схема", eng.stroke + ", " + eng.cam], ["Охлаждение", eng.cooling], ["Компрессия", eng.compression], ["Топливо", /*#__PURE__*/React.createElement(Val, {
+  })], ["Крутящий момент", /*#__PURE__*/React.createElement(Val, {
+    v: eng.torque,
+    ok: isEx(eng, "torque")
+  })], ["Схема", eng.stroke + ", " + eng.cam], ["Охлаждение", eng.cooling], ["Компрессия", /*#__PURE__*/React.createElement(Val, {
+    v: eng.compression,
+    ok: isEx(eng, "compression")
+  })], ["Топливо", /*#__PURE__*/React.createElement(Val, {
     v: eng.fuel,
     stock: S.fuel
   })], ["Зажигание", eng.ignition], ["Привод ГРМ", eng.timing], ["КПП", eng.gearbox]];
@@ -17479,47 +17552,65 @@ function Overview({
     h: "Питание",
     r: efi ? [["Система", eng.carb], ["Холостой ход", /*#__PURE__*/React.createElement(Val, {
       v: eng.idle,
-      stock: S.idle
+      stock: S.idle,
+      ok: isEx(eng, "idle")
     })]] : [["Карбюратор", /*#__PURE__*/React.createElement(Val, {
       v: eng.carb,
-      stock: S.carb
+      stock: S.carb,
+      ok: isEx(eng, "carb")
     })], ["Главный жиклёр", /*#__PURE__*/React.createElement(Val, {
       v: eng.jetMain,
-      stock: S.jetMain
+      stock: S.jetMain,
+      ok: isEx(eng, "jetMain")
     })], ["Холостой жиклёр", /*#__PURE__*/React.createElement(Val, {
       v: eng.jetPilot,
-      stock: S.jetPilot
+      stock: S.jetPilot,
+      ok: isEx(eng, "jetPilot")
     })], ["Игла", /*#__PURE__*/React.createElement(Val, {
       v: eng.needle,
-      stock: S.needle
+      stock: S.needle,
+      ok: isEx(eng, "needle")
     })], ["Холостой ход", /*#__PURE__*/React.createElement(Val, {
       v: eng.idle,
-      stock: S.idle
+      stock: S.idle,
+      ok: isEx(eng, "idle")
     })]]
   }, {
     h: "Клапаны, на холодную",
     r: eng.stroke === "2T" ? [["Клапаны", "нет (2T)"]] : [["Впуск", /*#__PURE__*/React.createElement(Val, {
       v: eng.valveIn,
-      stock: S.valveIn
+      stock: S.valveIn,
+      ok: isEx(eng, "valveIn")
     })], ["Выпуск", /*#__PURE__*/React.createElement(Val, {
       v: eng.valveEx,
-      stock: S.valveEx
+      stock: S.valveEx,
+      ok: isEx(eng, "valveEx")
     })], ["Интервал", eng.valveInt ? kmHours(eng.valveInt, eng, bike) : "—"]]
   }, {
     h: "Зажигание и масло",
     r: [["Свеча", /*#__PURE__*/React.createElement(Val, {
       v: eng.spark,
-      stock: S.spark
+      stock: S.spark,
+      ok: isEx(eng, "spark")
     })], ["Зазор", /*#__PURE__*/React.createElement(Val, {
       v: eng.gap,
-      stock: S.gap
-    })]].concat(sparkCross(eng.spark).length ? [["Аналоги свечи", sparkCross(eng.spark).map(x => x.join(" = ")).join("; ")]] : [], [["Затяжка", eng.sparkTorque], ["Масло", /*#__PURE__*/React.createElement(Val, {
+      stock: S.gap,
+      ok: isEx(eng, "gap")
+    })]].concat(sparkCross(eng.spark).length ? [["Аналоги свечи", sparkCross(eng.spark).map(x => x.join(" = ")).join("; ")]] : [], [["Затяжка", /*#__PURE__*/React.createElement(Val, {
+      v: eng.sparkTorque,
+      ok: isEx(eng, "sparkTorque")
+    })], ["Масло", /*#__PURE__*/React.createElement(Val, {
       v: eng.oil,
-      stock: S.oil
+      stock: S.oil,
+      ok: isEx(eng, "oil")
     })], ["Объём", /*#__PURE__*/React.createElement(Val, {
       v: eng.oilVol,
-      stock: S.oilVol
-    })]]).concat(eng.coolant ? [["Антифриз", eng.coolant]] : [])
+      stock: S.oilVol,
+      ok: isEx(eng, "oilVol")
+    })]]).concat(eng.coolant ? [["Антифриз", /*#__PURE__*/React.createElement(Val, {
+      v: eng.coolant,
+      ok: isEx(eng, "coolant")
+    })]] : [])
   }];
   const inst = TUNING.filter(t => eng.installed.indexOf(t.id) >= 0);
   function card() {
