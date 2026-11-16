@@ -12006,10 +12006,10 @@ function App() {
       return false;
     }
   });
-  const [page, setPage] = useState(() => guideFromHash() || diagFromHash() ? "repair" : aiFromHash() ? "ai" : "home");
+  const [page, setPage] = useState(() => guideFromHash() || diagFromHash() || rvFromHash() && rvFromHash() !== "tune" ? "repair" : rvFromHash() === "tune" ? "bike" : aiFromHash() ? "ai" : "home");
   const [kb, kbRetry] = useKb();
-  const [bikeTab, setBikeTab] = useState("overview");
-  const [rv, setRv] = useState(() => guideFromHash() ? "guide:" + guideFromHash() : diagFromHash() ? "tree:" + diagFromHash() : "hub");
+  const [bikeTab, setBikeTab] = useState(() => rvFromHash() === "tune" ? "tuning" : "overview");
+  const [rv, setRv] = useState(() => guideFromHash() ? "guide:" + guideFromHash() : diagFromHash() ? "tree:" + diagFromHash() : rvFromHash() && rvFromHash() !== "tune" ? rvFromHash() : "hub");
   const [partsQ, setPartsQ] = useState(null);
   /* направление выезда раздела: перешёл вправо по меню — выезжает справа, влево — слева */
   const pageDir = useRef({
@@ -12034,13 +12034,20 @@ function App() {
       const s = bikeFromHash();
       if (s) setSel(s);
       const g = guideFromHash(),
-        d = diagFromHash();
+        d = diagFromHash(),
+        r = rvFromHash();
       if (g) navTo({
         page: "repair",
         rv: "guide:" + g
       });else if (d) navTo({
         page: "repair",
         rv: "tree:" + d
+      });else if (r) navTo(r === "tune" ? {
+        page: "bike",
+        tab: "tuning"
+      } : {
+        page: "repair",
+        rv: r
       });else if (aiFromHash()) navTo({
         page: "ai"
       });
@@ -17893,6 +17900,16 @@ function diagFromHash() {
   try {
     const d = new URLSearchParams(String(location.hash || "").replace(/^#/, "")).get("d");
     return d && (!window.MH_KB || DIAG.find(x => x.id === d)) ? d : null;
+  } catch (e) {
+    return null;
+  }
+}
+/* «…/#bike=…&r=wiring» — сразу открыть раздел «Ремонта» (схема электрики, моменты и шины, ТО, поломки…);
+   «&r=tune» — тюнинг мотоцикла (жиклёры под погоду, звёзды и скорость). Ссылки — с кнопок на страницах каталога */
+function rvFromHash() {
+  try {
+    const r = new URLSearchParams(String(location.hash || "").replace(/^#/, "")).get("r");
+    return r && (RV_TITLE[r] || r === "tune") ? r : null;
   } catch (e) {
     return null;
   }

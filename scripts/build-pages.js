@@ -340,6 +340,12 @@ function jumpNav(e, pfx, hasIss) {
   const L = [["maslo", "Масло"], ["svecha", "Свеча и клапаны"], ["momenty", "Моменты"], premix(e) && ["smes", "Смесь 2T"], hasIss && ["slabye", "Слабые места"]].filter(Boolean);
   return `<nav class="jump" aria-label="Быстрый переход">${L.map((x) => `<a href="#${pfx}${x[0]}">${x[1]}</a>`).join("")}</nav>`;
 }
+/* кнопки в инструменты приложения — сразу в нужный раздел для этого мотоцикла (см. rvFromHash в js/app.js) */
+function toolsNav(e, link) {
+  const carb = !/впрыск|инжектор|efi|tpi/i.test(String(e.carb || "")) && (e.groups || []).indexOf("efi") < 0;
+  const L = [["r=find", "Что сломалось?"], ["r=wiring", "Схема электрики"], ["r=specs", "Моменты и шины"], ["r=tune", carb ? "Жиклёры и звёзды" : "Звёзды и скорость"], ["r=to", "ТО по пробегу"], ["ai=1", "Спросить ИИ"]];
+  return `<nav class="tools" aria-label="Инструменты в приложении"><span>В приложении:</span>${L.map((x) => `<a href="${link}&${x[0]}">${x[1]}</a>`).join("")}</nav>`;
+}
 const garageGroups = (e, v, b, pfx) => `<div class="groups">${specGroups(e, v, b).map((g) => grpHtml(g, e, pfx)).join("")}${torqueHtml(e, b, pfx)}${mixHtml(e, pfx)}</div>${srcNote(e)}`;
 const tiles = (e, v) => [["Объём", e.cc ? e.cc + " см³" : ""], ["Мощность", (v.hp || e.hp) ? (v.hp || e.hp) + " л.с." : ""], ["Масло", e.oilVol ? String(e.oilVol).replace(/\s*\(.*\)/, "") : ""], ["Свеча", e.spark ? String(e.spark).split(/\s*\/\s*/)[0] : ""]]
   .filter((t) => t[1]).map((t) => `<div class="tile"><span>${t[0]}</span><b>${esc(t[1])}</b></div>`).join("");
@@ -423,7 +429,7 @@ BIKES.forEach((b) => {
     const iss = weak(e).length ? `<h2 id="${pfx}slabye">Слабые места</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const keyG = guidesOf(e).filter((g) => KEY_GUIDES.indexOf(g.id) >= 0);
     const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
-    return `<section class="ver">${head}${jumpNav(e, pfx, weak(e).length)}<div class="tiles">${tiles(e, v)}</div>${approx}${groups}${iss}${more}
+    return `<section class="ver">${head}${jumpNav(e, pfx, weak(e).length)}<div class="tiles">${tiles(e, v)}</div>${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${more}
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a></section>`;
   }).join("\n");
   const others = BIKES.filter((x) => x.brand === b.brand && x !== b).slice(0, 12);
@@ -523,7 +529,7 @@ engIds.forEach((id) => {
   const body = `<section class="hero"><div class="kick">Мотор${e.cc ? " · " + e.cc + " см³" : ""}${e.stroke ? " · " + esc(e.stroke) : ""}</div><h1>${esc(e.code)}</h1>
 <p class="lead">${esc(e.name || e.code)}: какое масло и сколько заливать, свеча и зазор, зазоры клапанов, жиклёры, слабые места. Стоит на ${list.length} ${plural(list.length, "модели", "моделях", "моделях")}.</p>
 ${aka.length ? `<div class="chips">${aka.slice(0, 8).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>` : ""}</section>
-<section class="ver">${jumpNav(e, "", weak(e).length)}<div class="tiles">${tiles(e, {})}</div>${groups}${iss}
+<section class="ver">${jumpNav(e, "", weak(e).length)}<div class="tiles">${tiles(e, {})}</div>${toolsNav(e, appLink(b0, b0.versions.findIndex((v) => v.engine === id)))}${groups}${iss}
 <a class="cta" href="${appLink(b0, b0.versions.findIndex((v) => v.engine === id))}">Ремонт, запчасти и ИИ-механик для ${esc(e.code)} →</a></section>
 <h2>Мотоциклы с мотором ${esc(e.code)}</h2><div class="grid models">${list.slice(0, 60).map((x) => modelCard(x, true)).join("")}</div>
 ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(d.title)}</a>`).join("")}</div>` : ""}
@@ -807,6 +813,8 @@ const GARAGE_CSS = `.chip{display:inline-flex;align-items:center;min-height:44px
 .jump a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:12px;background:#fff;color:#000;font:600 16px var(--cond);text-decoration:none}
 .jump a:active{transform:scale(.97)}
 .vf{font-style:normal;font-weight:700;color:#3ddc84;margin-left:6px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.tools span{width:100%;font:600 13px var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tools a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.28);color:#fff;font:600 15px var(--cond);text-decoration:none}
 .grp .small{font-size:13px;color:var(--muted);margin:8px 0 0}
 .grp[id],h2[id]{scroll-margin-top:72px}
 .note.src{font-size:14px}

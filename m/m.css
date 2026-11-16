@@ -108,6 +108,8 @@ h1{font-weight:700!important}h2{font-weight:600!important;font-size:19px!importa
 .jump a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:12px;background:#fff;color:#000;font:600 16px var(--cond);text-decoration:none}
 .jump a:active{transform:scale(.97)}
 .vf{font-style:normal;font-weight:700;color:#3ddc84;margin-left:6px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.tools span{width:100%;font:600 13px var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tools a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.28);color:#fff;font:600 15px var(--cond);text-decoration:none}
 .grp .small{font-size:13px;color:var(--muted);margin:8px 0 0}
 .grp[id],h2[id]{scroll-margin-top:72px}
 .note.src{font-size:14px}
