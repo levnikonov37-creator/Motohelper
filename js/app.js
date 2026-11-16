@@ -17073,6 +17073,8 @@ function aiCardBase(eng, bike, ver, cu, mt) {
   const ex = Object.keys(exNames).filter(k => isEx(eng, k) && (!S || String(eng[k]) === String(S[k]))).map(k => exNames[k]);
   L.push(ex.length ? "Сверено с руководством производителя или официального дилера: " + ex.join(", ") + ". Остальные цифры — типовые для мотора такого класса: так и говори, когда их называешь." : "Цифры по этому мотору — типовые для его класса, заводских данных в базе нет: когда называешь цифру, говори, что она типовая, и советуй сверить с мануалом.");
   if (eng.torq && eng.torq.length) L.push("Моменты затяжки из руководства этого мотора: " + eng.torq.map(t => (t[2] || t[0]) + " — " + t[1]).join("; ") + ".");
+  const cr = crossRows(bike);
+  if (cr.length) L.push("Аналоги расходников этой модели (каталоги HiFlo, K&N, EBC, Yuasa; называй номер и советуй сверить по году): " + cr.map(r => r[0] + " — " + r[1]).join("; ") + ".");
   if (isPremix(eng)) L.push("Смазка смесью (premix): на 1 л бензина при 1:50 — 20 мл масла, 1:40 — 25 мл, 1:33 — 30 мл.");
   L.push("Известные слабые места этого мотора: " + eng.issues.map(i => i.t + " (" + i.fix + ")").join("; "));
   return L.join("\n");
@@ -17618,7 +17620,10 @@ function Overview({
       v: eng.coolant,
       ok: isEx(eng, "coolant")
     })]] : [])
-  }];
+  }].concat(crossRows(bike).length ? [{
+    h: "Аналоги расходников",
+    r: crossRows(bike)
+  }] : []);
   const inst = TUNING.filter(t => eng.installed.indexOf(t.id) >= 0);
   function card() {
     const L = [(cu.nick ? cu.nick + ": " : "") + bike.brand + " " + bike.name, "Двигатель: " + eng.name + (eng.swapped ? " (свап)" : ""), "Мощность: " + eng.hp + " л.с.", "Карбюратор: " + eng.carb + ", гл. " + eng.jetMain + ", хол. " + eng.jetPilot + ", игла " + eng.needle, "Клапаны: " + eng.valveIn + " / " + eng.valveEx, "Свеча: " + eng.spark + ", зазор " + eng.gap, "Масло: " + eng.oil + ", " + eng.oilVol];
