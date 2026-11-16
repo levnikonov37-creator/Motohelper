@@ -253,7 +253,10 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 <meta property="og:url" content="${canon}" />
 <meta property="og:image" content="${SITE}img/og.jpg" />
 <meta name="theme-color" content="#000000" />
-<link rel="icon" href="/img/icon-192.png" />
+<link rel="icon" href="/favicon.ico" sizes="48x48" />
+<link rel="icon" type="image/png" sizes="120x120" href="/img/favicon-120.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@500;600&family=Fira+Sans:wght@400;500;600&family=Unbounded:wght@600;700&display=swap" media="print" onload="this.media='all'" />
@@ -827,6 +830,7 @@ const GARAGE_CSS = `.chip{display:inline-flex;align-items:center;min-height:44px
 .grp[id],h2[id]{scroll-margin-top:72px}
 .note.src{font-size:14px}
 footer a{display:inline-block;padding:12px 0}
+.logo i{background:linear-gradient(135deg,#3AF2CF 0%,#4E95FF 38%,#9B6BFF 68%,#FF6FD0 100%);color:#0A0A0A;border-radius:9px;font-weight:900;box-shadow:0 6px 18px -8px rgba(155,107,255,.8)}
 @media (prefers-contrast:more){:root{--muted:#d0d0d0}.grp,.tile{border-color:#fff!important}.grp dt{color:#e6e6e6}}`;
 files.set("m/m.css", CSS + "\n" + GARAGE_CSS + "\n");
 files.set("m/ask.js", ASK_JS + "\n");
