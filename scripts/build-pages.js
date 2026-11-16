@@ -322,7 +322,8 @@ const VF = `<i class="vf" title="Сверено с руководством">✓
 const TYP = `<i class="typ" title="Типовое значение для мотора такого класса — сверь с мануалом">типовое</i>`;
 /* у объёма масла и зазоров клапанов без сверки — видимая пометка «типовое» прямо у цифры: сноску внизу страницы в гараже не читают */
 const RISKY = ["oilVol", "valveIn", "valveEx"];
-const ddv = (e, r) => `<dd>${esc(r[1])}${r[2] && e.ex && e.ex[r[2]] ? VF : r[2] && RISKY.indexOf(r[2]) >= 0 && /\d/.test(r[1]) ? TYP : ""}</dd>`;
+const DIS = `<i class="typ" title="Руководства дают разные значения — сверь со своим мануалом">мануалы расходятся</i>`;
+const ddv = (e, r) => `<dd>${esc(r[1])}${r[2] && e.dis && e.dis[r[2]] ? DIS : r[2] && e.ex && e.ex[r[2]] ? VF : r[2] && RISKY.indexOf(r[2]) >= 0 && /\d/.test(r[1]) ? TYP : ""}</dd>`;
 const grpHtml = (g, e, pfx) => `<div class="grp" id="${pfx}${g.id}"><h3>${g.title}</h3><dl>${g.rows.map((r) => `<dt>${esc(r[0])}</dt>${ddv(e, r)}`).join("")}</dl></div>`;
 const premix = (e) => e.stroke === "2T" && /premix/i.test(e.oil || "");
 function mixHtml(e, pfx) {
@@ -421,7 +422,7 @@ function cheat(e, v, pfx, b) {
   }
   const vi = String(e.valveIn || "").match(RNG), ve = String(e.valveEx || "").match(RNG);
   if (e.stroke !== "2T" && vi && ve && /мм/.test(String(e.valveIn) + String(e.valveEx)))
-    T.push(["Клапаны", vi[0].replace(/\s+/g, "") + " / " + ve[0].replace(/\s+/g, ""), "впуск / выпуск, мм, на холодном", ex("valveIn") && ex("valveEx"), "svecha", 1]);
+    T.push(["Клапаны", vi[0].replace(/\s+/g, "") + " / " + ve[0].replace(/\s+/g, ""), e.dis && e.dis.note ? e.dis.note + " — мм, на холодном" : "впуск / выпуск, мм, на холодном", e.dis && e.dis.valveIn ? "dis" : ex("valveIn") && ex("valveEx"), "svecha", 1]);
   if (premix(e)) { const r = String(e.oil).match(/1\s*:\s*\d{2,3}/); if (r) T.push(["Смесь 2T", r[0].replace(/\s+/g, ""), "бензин : масло", false, "smes"]); }
   const fk = b ? ctx.forkShort(b) : null;
   if (fk && fk.vol) {
@@ -430,7 +431,7 @@ function cheat(e, v, pfx, b) {
     if (big) T.push(["Вилка, на перо", big, [String(fk.oil || "").split(/\s*\(/)[0], fk.n > 1 && fk.years ? fk.years : ""].filter(Boolean).join(" · "), true, "vilka"]);
   }
   if (e.cc) T.push(["Объём", Math.round(e.cc * 10) / 10 + " см³", (v.hp || e.hp) ? (v.hp || e.hp) + " л.с." : "", null, "motor"]);
-  return T.map((t) => `<a class="tile k${t[5] ? " wide" : ""}" href="#${pfx}${t[4]}"><span>${t[0]}</span><b>${esc(t[1])}</b>${t[2] ? `<small>${esc(t[2])}</small>` : ""}${t[3] === true ? `<em class="src ok">✓ по мануалу</em>` : t[3] === false ? `<em class="src">типовое — сверь</em>` : ""}</a>`).join("");
+  return T.map((t) => `<a class="tile k${t[5] ? " wide" : ""}" href="#${pfx}${t[4]}"><span>${t[0]}</span><b>${esc(t[1])}</b>${t[2] ? `<small>${esc(t[2])}</small>` : ""}${t[3] === true ? `<em class="src ok">✓ по мануалу</em>` : t[3] === "dis" ? `<em class="src">мануалы расходятся — сверь со своим</em>` : t[3] === false ? `<em class="src">типовое — сверь</em>` : ""}</a>`).join("");
 }
 
 const files = new Map(); // путь относительно корня → содержимое

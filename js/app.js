@@ -274,15 +274,19 @@ function Val({
   v,
   stock,
   ok,
-  risky
+  risky,
+  dis
 }) {
   const changed = stock != null && String(v) !== String(stock);
   /* у объёма масла и зазоров клапанов без сверки — видимая пометка «типовое»: от этих цифр зависит жизнь мотора */
-  const typ = risky && !ok && !changed && /\d/.test(String(v || ""));
+  const typ = risky && !ok && !changed && !dis && /\d/.test(String(v || ""));
   return /*#__PURE__*/React.createElement("span", {
     className: changed ? "val changed" : "val",
     title: changed ? "С завода: " + stock : undefined
-  }, nbv(v), changed && /*#__PURE__*/React.createElement("small", null, "с завода ", stock), ok && !changed && /*#__PURE__*/React.createElement(Vf, null), typ && /*#__PURE__*/React.createElement("i", {
+  }, nbv(v), changed && /*#__PURE__*/React.createElement("small", null, "с завода ", stock), ok && !changed && !dis && /*#__PURE__*/React.createElement(Vf, null), dis && !changed && /*#__PURE__*/React.createElement("i", {
+    className: "typ",
+    title: "Руководства дают разные значения — сверь со своим мануалом"
+  }, "мануалы расходятся"), typ && /*#__PURE__*/React.createElement("i", {
     className: "typ",
     title: "Типовое значение для мотора такого класса — сверь с мануалом"
   }, "типовое"));
@@ -14165,7 +14169,7 @@ function Passport({
   const sh = x => String(x == null ? "" : x).replace(/\s*\([^)]*\)/g, "").trim();
   const rng = x => (String(x || "").match(/\d+(?:[.,]\d+)?(?:\s*[–-]\s*\d+(?:[.,]\d+)?)?/) || [""])[0].replace(/\s+/g, "");
   const vNum = ok(eng.valveIn) && rng(eng.valveIn) && rng(eng.valveEx);
-  const rows = [["Масло", sh(eng.oil), ok(eng.oilVol) ? sh(eng.oilVol) : "", ok(eng.oilVol) ? src("oilVol") : null], ["Свеча", sh(eng.spark), ok(eng.gap) ? "зазор " + sh(eng.gap) : "", ok(eng.spark) ? src("spark") : null], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", "", null] : ["Клапаны", vNum ? rng(eng.valveIn) + " / " + rng(eng.valveEx) : ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", vNum ? "впуск / выпуск, мм, на холодном" : "впуск / выпуск, мм", vNum ? src("valveIn", "valveEx") : null], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : "", null]];
+  const rows = [["Масло", sh(eng.oil), ok(eng.oilVol) ? sh(eng.oilVol) : "", ok(eng.oilVol) ? src("oilVol") : null], ["Свеча", sh(eng.spark), ok(eng.gap) ? "зазор " + sh(eng.gap) : "", ok(eng.spark) ? src("spark") : null], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", "", null] : ["Клапаны", vNum ? rng(eng.valveIn) + " / " + rng(eng.valveEx) : ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", vNum ? eng.dis && eng.dis.note ? eng.dis.note + " — мм, на холодном" : "впуск / выпуск, мм, на холодном" : "впуск / выпуск, мм", vNum ? eng.dis && eng.dis.valveIn ? "dis" : src("valveIn", "valveEx") : null], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : "", null]];
   return /*#__PURE__*/React.createElement("div", {
     className: "panel passport" + (ph && phOk >= 0 ? " has-ph" : ""),
     "aria-label": "Паспорт мотора"
@@ -14213,7 +14217,10 @@ function Passport({
   }, /*#__PURE__*/React.createElement("span", null, r[0]), /*#__PURE__*/React.createElement("b", null, nbv(r[1]) || "—"), r[2] && /*#__PURE__*/React.createElement("small", null, nbv(r[2])), r[3] === true ? /*#__PURE__*/React.createElement("em", {
     className: "pp-src ok",
     title: "Сверено с руководством"
-  }, "\u2713 по мануалу") : r[3] === false ? /*#__PURE__*/React.createElement("em", {
+  }, "\u2713 по мануалу") : r[3] === "dis" ? /*#__PURE__*/React.createElement("em", {
+    className: "pp-src",
+    title: "Руководства дают разные значения — открой «Все характеристики»"
+  }, "мануалы расходятся") : r[3] === false ? /*#__PURE__*/React.createElement("em", {
     className: "pp-src",
     title: "Типовое значение для мотора такого класса — сверь с мануалом"
   }, "типовое — сверь") : null)), /*#__PURE__*/React.createElement("button", {
@@ -17742,12 +17749,14 @@ function Overview({
       v: eng.valveIn,
       stock: S.valveIn,
       ok: isEx(eng, "valveIn"),
-      risky: true
+      risky: true,
+      dis: !!(eng.dis && eng.dis.valveIn)
     })], ["Выпуск", /*#__PURE__*/React.createElement(Val, {
       v: eng.valveEx,
       stock: S.valveEx,
       ok: isEx(eng, "valveEx"),
-      risky: true
+      risky: true,
+      dis: !!(eng.dis && eng.dis.valveEx)
     })], ["Интервал", eng.valveInt ? kmHours(eng.valveInt, eng, bike) : "—"]]
   }, {
     h: "Зажигание и масло",
