@@ -264,6 +264,29 @@ const server = http.createServer((req, res) => {
       await dl.close();
     }
 
+    // Режим «Гараж» — единственный: крупно и контрастно сразу, без переключателя в шапке; в инструкции — большая
+    // кнопка «Начать пошагово»: шаг на экран, таймер у шага со временем («прогрей 3–5 минут»), «Сделано, дальше»
+    {
+      const gp = await browser.newPage({ viewport: { width: 420, height: 900 } });
+      gp.on("pageerror", (e) => errors.push("Ошибка JS (режим «Гараж»): " + e.message));
+      await gp.addInitScript(() => { localStorage.setItem("mh2-onboarded", "true"); sessionStorage.setItem("mh-intro", "1"); });
+      await gp.goto(base + "#g=oil", { waitUntil: "load" });
+      await gp.locator(".g-start").first().waitFor({ timeout: 10000 }).catch(() => errors.push("Инструкция: нет кнопки «Начать пошагово»"));
+      if ((await gp.evaluate(() => document.documentElement.getAttribute("data-bright"))) !== "1") errors.push("Режим «Гараж» не включён сразу");
+      if (await gp.locator('[aria-label^="Режим «Гараж»"]').count()) errors.push("В шапке остался переключатель режима «Гараж»");
+      if (await gp.locator(".g-start").count()) {
+        await gp.locator(".g-start").first().click();
+        const gm = await gp.locator(".gmode .gm-body").waitFor({ timeout: 5000 }).then(() => true, () => false);
+        if (!gm) errors.push("«Начать пошагово» не открыл пошаговый режим");
+        else {
+          if (!(await gp.locator(".gm-tbtn").count())) errors.push("Пошаговый режим: у шага «прогрей 3–5 минут» нет таймера");
+          await gp.locator(".gm-next").click();
+          if (!/Шаг 2/i.test(await gp.locator(".gm-num").innerText().catch(() => ""))) errors.push("Пошаговый режим: «Сделано, дальше» не перешёл к шагу 2");
+        }
+      }
+      await gp.close();
+    }
+
     // Сверка владельцем: из паспорта на главной — список значений мотора с «Верно» / «Не так»
     {
       const fbp = await browser.newPage({ viewport: { width: 420, height: 900 } });

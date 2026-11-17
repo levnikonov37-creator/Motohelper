@@ -3026,3 +3026,15 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .tcarb .chips { margin-top: 4px; }
 :root[data-bright] .tgoal small, :root[data-bright] .tr-r small, :root[data-bright] .tc-rules { color: #E8E8E8; }
 :root[data-bright] .tr-body .tr-spec, :root[data-bright] .tc-card .tr-spec { color: #BFE6FF; }
+/* пошаговый режим: голос и таймер шага */
+.gmode .gm-voice.on { background: var(--g-acc, #8A8CFF) !important; color: var(--g-acc-ink, #0B0D18) !important; border-color: transparent !important; }
+.gm-timer { display: flex; align-items: center; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+.gm-timer .gm-tbtn { min-height: 56px; padding: 0 22px; font-size: 19px; font-weight: 700; background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.28); color: #fff; }
+.gm-timer.run b { font: 700 clamp(40px, 12vw, 64px)/1 var(--cond); color: #FFD166; font-variant-numeric: tabular-nums; }
+.gm-timer.run span { color: var(--stage-muted, #DADADA); font-size: 15px; }
+.gm-timer.run .btn { min-height: 48px; }
+/* инструкция: главная кнопка — пошаговый режим «Гараж» */
+.g-start { display: flex !important; align-items: center; justify-content: flex-start; gap: 14px; width: 100%; min-height: 64px; margin: 12px 0 14px; padding: 10px 18px !important; text-align: left; }
+.g-start span { display: flex; flex-direction: column; gap: 2px; }
+.g-start b { font-size: 18px; line-height: 1.2; }
+.g-start small { font-size: 13px; font-weight: 500; opacity: .85; }

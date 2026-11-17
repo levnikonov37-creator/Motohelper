@@ -12209,8 +12209,6 @@ function App() {
     return () => window.removeEventListener("keydown", h);
   }, []);
   const theme = "dark";
-  /* режим «Гараж» (кнопка в шапке): ярче текст, контрастнее рамки, крупнее цифры — для экрана на солнце и под переноской */
-  const [bright, setBright] = useState(() => !!load("bright", false));
   const [toast, setToast] = useState("");
   const [cart, setCart] = useState(() => load("cart", []));
   const [projects, setProjects] = useState(() => load("projects", {}));
@@ -12236,10 +12234,14 @@ function App() {
     save("theme", theme);
     document.documentElement.setAttribute("data-theme", "dark");
   }, [theme]);
+  /* режим «Гараж» — единственный: ярче текст, контрастнее рамки, крупнее цифры и кнопки — для экрана на солнце,
+     под переноской и в перчатках. Отдельного «обычного» режима больше нет (атрибут ставит и index.html до загрузки) */
   useEffect(() => {
-    save("bright", bright);
-    if (bright) document.documentElement.setAttribute("data-bright", "1");else document.documentElement.removeAttribute("data-bright");
-  }, [bright]);
+    document.documentElement.setAttribute("data-bright", "1");
+    try {
+      localStorage.removeItem("mh2-bright");
+    } catch (e) {}
+  }, []);
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -12596,18 +12598,6 @@ function App() {
     onClick: openSearch
   }, /*#__PURE__*/React.createElement(Icon, {
     n: "search",
-    s: 18
-  })), /*#__PURE__*/React.createElement("button", {
-    className: "icon-btn dark" + (bright ? " on" : ""),
-    "aria-label": "Режим «Гараж»: ярче и крупнее",
-    title: "Режим «Гараж»: ярче и крупнее",
-    "aria-pressed": bright,
-    onClick: () => {
-      setBright(!bright);
-      flash(bright ? "Обычный режим" : "Режим «Гараж»: ярче и крупнее");
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    n: "theme",
     s: 18
   })), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn dark",
@@ -15491,7 +15481,50 @@ function TickBtn({
     s: 20
   }));
 }
-/* пошаговый режим: один шаг на экран, крупно, экран не гаснет */
+/* время из текста шага: «подожди 10 минут», «5–10 мин», «30 сек» — для кнопки таймера; секунды или 0 */
+function stepTimerSec(t) {
+  const m = String(t || "").match(/(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))?\s*(секунд[аыу]?|сек|минут[аыу]?|мин|час(?:а|ов)?|ч)(?![а-яё])/i);
+  if (!m) return 0;
+  const v = parseFloat((m[2] || m[1]).replace(",", ".")),
+    u = m[3].toLowerCase();
+  const sec = u.indexOf("сек") === 0 ? v : u.indexOf("мин") === 0 ? v * 60 : v * 3600;
+  return sec >= 10 && sec <= 3 * 3600 ? Math.round(sec) : 0;
+}
+const fmtSec = s => (s >= 3600 ? Math.floor(s / 3600) + ":" + String(Math.floor(s % 3600 / 60)).padStart(2, "0") : Math.floor(s / 60)) + ":" + String(s % 60).padStart(2, "0");
+/* озвучка шага: русский голос телефона (speechSynthesis), без сети */
+function sayRu(text) {
+  try {
+    const ss = window.speechSynthesis;
+    if (!ss) return;
+    ss.cancel();
+    const u = new SpeechSynthesisUtterance(String(text || "").replace(/[«»"]/g, "").replace(/\s*·\s*/g, ", "));
+    u.lang = "ru-RU";
+    const v = (ss.getVoices() || []).find(x => /^ru/i.test(x.lang));
+    if (v) u.voice = v;
+    u.rate = 0.95;
+    ss.speak(u);
+  } catch (e) {}
+}
+function beep() {
+  try {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return;
+    const c = new C();
+    [0, 0.35, 0.7].forEach(t => {
+      const o = c.createOscillator(),
+        g = c.createGain();
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.25, c.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + t + 0.28);
+      o.connect(g).connect(c.destination);
+      o.start(c.currentTime + t);
+      o.stop(c.currentTime + t + 0.3);
+    });
+    setTimeout(() => c.close(), 1500);
+  } catch (e) {}
+}
+/* пошаговый режим (гараж): один шаг на экран, крупно, экран не гаснет; шаг можно прочитать вслух (руки в масле),
+   листать свайпом, а если в шаге есть время («подожди 10 минут») — запустить таймер */
 function GarageMode({
   guide,
   eng,
@@ -15502,6 +15535,13 @@ function GarageMode({
 }) {
   const n = guide.steps.length;
   const close = () => setI(-1);
+  const text = sub(guide.steps[i], eng);
+  const canSay = typeof window !== "undefined" && !!window.speechSynthesis;
+  const [voice, setVoice] = useState(() => canSay && !!load("gmVoice", false));
+  const [tm, setTm] = useState(null); // { end, total, step } — таймер идёт, даже если листаешь шаги
+  const [, tick] = useState(0);
+  const touch = useRef(null);
+  const tSec = stepTimerSec(text);
   useEffect(() => {
     let lock = null,
       alive = true;
@@ -15529,12 +15569,45 @@ function GarageMode({
       if (lock) lock.release().catch(() => {});
     };
   }, [i]);
+  /* вслух: каждый новый шаг читается сам, пока включено */
+  useEffect(() => {
+    if (voice) sayRu("Шаг " + (i + 1) + ". " + text);
+  }, [i, voice]);
+  useEffect(() => () => {
+    try {
+      window.speechSynthesis && window.speechSynthesis.cancel();
+    } catch (e) {}
+  }, []);
+  useEffect(() => {
+    if (!tm) return;
+    const id = setInterval(() => {
+      if (Date.now() >= tm.end) {
+        clearInterval(id);
+        setTm(null);
+        beep();
+        try {
+          navigator.vibrate && navigator.vibrate([400, 200, 400, 200, 400]);
+        } catch (e) {}
+        sayRu("Время вышло. Шаг " + (tm.step + 1) + ".");
+      } else tick(x => x + 1);
+    }, 500);
+    return () => clearInterval(id);
+  }, [tm]);
   const last = i === n - 1;
   const next = () => {
     if (!done[i]) mark(i, true);
     if (last) close();
     else setI(i + 1);
   };
+  const toggleVoice = () => {
+    const v = !voice;
+    setVoice(v);
+    save("gmVoice", v);
+    if (!v) try {
+      window.speechSynthesis.cancel();
+    } catch (e) {}
+  };
+  const left = tm ? Math.max(0, Math.ceil((tm.end - Date.now()) / 1000)) : 0;
   return /*#__PURE__*/React.createElement("div", {
     className: "gmode",
     role: "dialog",
@@ -15544,7 +15617,16 @@ function GarageMode({
     className: "gm-top"
   }, /*#__PURE__*/React.createElement("span", {
     className: "gm-title"
-  }, guide.title), /*#__PURE__*/React.createElement("button", {
+  }, guide.title), canSay && /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn gm-voice" + (voice ? " on" : ""),
+    "aria-pressed": voice,
+    "aria-label": voice ? "Не читать вслух" : "Читать шаги вслух",
+    title: voice ? "Не читать вслух" : "Читать шаги вслух",
+    onClick: toggleVoice
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: voice ? "sound" : "mute",
+    s: 22
+  })), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     "aria-label": "Закрыть",
     onClick: close
@@ -15560,10 +15642,38 @@ function GarageMode({
     onClick: () => setI(j)
   }))), /*#__PURE__*/React.createElement("div", {
     className: "gm-body",
-    key: i
+    key: i,
+    onTouchStart: e => {
+      const t = e.touches[0];
+      touch.current = [t.clientX, t.clientY];
+    },
+    onTouchEnd: e => {
+      const s0 = touch.current,
+        t = e.changedTouches[0];
+      touch.current = null;
+      if (!s0) return;
+      const dx = t.clientX - s0[0],
+        dy = t.clientY - s0[1];
+      if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      if (dx < 0) next();else if (i > 0) setI(i - 1);
+    }
   }, /*#__PURE__*/React.createElement("span", {
     className: "gm-num"
-  }, "Шаг ", i + 1, " из ", n, done[i] && /*#__PURE__*/React.createElement("i", null, " · сделано")), /*#__PURE__*/React.createElement("p", null, sub(guide.steps[i], eng))), /*#__PURE__*/React.createElement("div", {
+  }, "Шаг ", i + 1, " из ", n, done[i] && /*#__PURE__*/React.createElement("i", null, " · сделано")), /*#__PURE__*/React.createElement("p", null, text), (tSec > 0 || tm) && /*#__PURE__*/React.createElement("div", {
+    className: "gm-timer" + (tm ? " run" : "")
+  }, tm ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("b", null, fmtSec(left)), /*#__PURE__*/React.createElement("span", null, "таймер шага ", tm.step + 1), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn sm",
+    onClick: () => setTm(null)
+  }, "Стоп")) : /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn gm-tbtn",
+    onClick: () => setTm({
+      end: Date.now() + tSec * 1000,
+      total: tSec,
+      step: i
+    })
+  }, "⏱ Таймер ", fmtSec(tSec)))), /*#__PURE__*/React.createElement("div", {
     className: "gm-nav"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn gm-prev",
@@ -15578,9 +15688,9 @@ function GarageMode({
   }, last ? "Готово" : "Сделано, дальше", /*#__PURE__*/React.createElement(Icon, {
     n: last ? "check" : "next",
     s: 20
-  }))), navigator.wakeLock && /*#__PURE__*/React.createElement("p", {
+  }))), /*#__PURE__*/React.createElement("p", {
     className: "gm-hint"
-  }, "Экран не погаснет, пока открыт этот режим."));
+  }, navigator.wakeLock ? "Экран не погаснет. " : "", "Листай шаги свайпом", canSay ? "; 🔊 — читать вслух, если руки в масле." : "."));
 }
 function GuideView({
   eng,
@@ -15633,7 +15743,17 @@ function GuideView({
     style: {
       width: doneN / guide.steps.length * 100 + "%"
     }
-  })), guide.fig && /*#__PURE__*/React.createElement(GuideFig, {
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn primary g-start",
+    onClick: () => {
+      const f = guide.steps.findIndex((_, i) => !done[i]);
+      setFocus(f < 0 ? 0 : f);
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    n: "play",
+    s: 22
+  }), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, doneN > 0 && doneN < guide.steps.length ? "Продолжить с шага " + (guide.steps.findIndex((_, i) => !done[i]) + 1) : "Начать пошагово"), /*#__PURE__*/React.createElement("small", null, "Крупно, экран не гаснет", guide.steps.some(t => stepTimerSec(sub(t, eng)) > 0) ? ", таймер" : "", typeof window !== "undefined" && window.speechSynthesis ? ", читает вслух" : ""))), guide.fig && /*#__PURE__*/React.createElement(GuideFig, {
     id: guide.fig,
     eng: eng
   }), /*#__PURE__*/React.createElement("div", {
