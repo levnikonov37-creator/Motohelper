@@ -1295,13 +1295,6 @@ function enginePeak(e) {
 ].forEach(function (x) { PARTS.push(P(x[0], x[1], x[2], "Поход", "trip")); });
 
 /* --- цели для конструктора тюнинга --- */
-var GOALS = [
-  { id: "power", t: "Больше мощности" },
-  { id: "reliable", t: "Надёжность" },
-  { id: "forest", t: "Лес и грязь" },
-  { id: "speed", t: "Скорость и трасса" },
-  { id: "comfort", t: "Удобство" }
-];
 TUNING.push(
   { id: "sparkarrest", cat: "Выпуск", title: "Глушитель с искрогасителем", stage: 1, power: 0, price: 7500, diff: "просто", rating: 4.4, fit: ["4t"], body: "Не поджигает сухую траву в лесу, тише штатного прямотока." },
   { id: "hotstart", cat: "Впуск", title: "Кнопка горячего старта", stage: 1, power: 0, price: 2500, diff: "средне", rating: 4.3, fit: ["NC450C","dohc"], deny: { efi: "На инжекторе не нужна — ЭБУ сам." }, body: "Лёгкий запуск горячего мотора после падения." },
@@ -1314,26 +1307,7 @@ TUNING.push(
   { id: "chainguide", cat: "Защита", title: "Направляющая и слайдер цепи усиленные", stage: 1, power: 0, price: 2400, diff: "просто", rating: 4.5, fit: ["big"], body: "Цепь не слетает на камнях и колеях." },
   { id: "radbrace", cat: "Охлаждение", title: "Радиатор увеличенный + защита", stage: 2, power: 0, price: 9000, diff: "средне", rating: 4.4, fit: ["liquid"], body: "Запас охлаждения для медленной хард-эндуро езды." }
 );
-var GOAL_W = {
-  power: function (t) { return t.power * 1.2; },
-  reliable: function (t) {
-    var m = { oilcool: 10, fan: 10, "oil-temp": 7, clutch: 6, "x-ring": 6, breather: 6, snorkel: 6, iridium: 3, hourmeter: 5, battswitch: 4, radbrace: 8, radguard: 6, skid: 6, chainguide: 5, jets: 7, lithium: 3, "coil-hp": 3, heatshield: 2 };
-    return (m[t.id] || 0) - t.power * 0.25;
-  },
-  forest: function (t) {
-    var m = { "sp-tq": 9, "rear-sp": 9, tires: 10, mousse: 8, rimlock: 7, levers: 7, hand: 8, skid: 8, fork: 6, revalve: 7, damper: 4, pegs: 6, "flywheel-w": 7, fatbar: 4, radguard: 6, frameguard: 4, breather: 6, snorkel: 5, sparkarrest: 5, shiftlever: 6, chainguide: 6, hotstart: 5, seatlow: 4, radbrace: 6, fan: 5, oilcool: 4, "aux-light": 3 };
-    return m[t.id] || 0;
-  },
-  speed: function (t) {
-    var m = { "sp-sp": 9, full: 6, slip: 4, pwk: 5, pe30: 4, pwk28: 4, filter: 3, damper: 6, bigdisc: 6, pads: 5, hose: 4, led: 3, "aux-light": 3, ecu: 4, "fork-cart": 4, "shock-adj": 4 };
-    return (m[t.id] || 0) + t.power * 0.3;
-  },
-  comfort: function (t) {
-    var m = { risers: 7, seatlow: 6, quickthr: 3, fatbar: 6, pegs: 5, levers: 4, usb: 5, led: 5, lithium: 4, "shock-adj": 5, revalve: 6, fork: 4, lowlink: 4, damper: 3 };
-    return m[t.id] || 0;
-  }
-};
-var TUNE_EXCL = [["cdi", "cdi-prog"], ["sp-tq", "sp-sp"], ["pe30", "pwk", "pwk28"], ["slip", "full"], ["swap-z190", "bore-yx"], ["swap-pr300", "cam", "bore300"], ["mousse", "tube"], ["flywheel-l", "flywheel-w"]];
+var TUNE_EXCL = [["cdi", "cdi-prog"], ["sp-tq", "sp-sp"], ["pe30", "pwk", "pwk28", "carb-pz22", "carb-pz26", "carb-nibbi30", "carb-pwk30", "carb-pwk32"], ["slip", "full"], ["swap-z190", "bore-yx"], ["swap-pr300", "bore300"], ["swap-pr300", "cam"], ["bore-139", "bore-152"], ["mousse", "tube"], ["flywheel-l", "flywheel-w"]];
 
 
 /* --- проверка перед выездом --- */
@@ -1435,7 +1409,6 @@ TUNING.push(
   { id: "dash-gps", cat: "Электрика", title: "Держатель телефона и навигация", stage: 1, power: 0, price: 1800, diff: "просто", rating: 4.3, body: "Маршрут и трек всегда перед глазами." },
   { id: "chain-tensioner", cat: "Трансмиссия", title: "Ролик-успокоитель цепи с подшипником", stage: 1, power: 0, price: 1200, diff: "просто", rating: 4.2, fit: ["big"], body: "Меньше шума и износа цепи на кочках." }
 );
-(function () { var m = { "fork-guards": 4, "seat-gripper": 2 }; var f = GOAL_W.forest; GOAL_W.forest = function (t) { return f(t) + (m[t.id] || 0); }; var c = GOAL_W.comfort; var cm = { "seat-gripper": 4, "dash-gps": 5, "chain-tensioner": 1 }; GOAL_W.comfort = function (t) { return c(t) + (cm[t.id] || 0); }; var r = GOAL_W.reliable; var rm = { "fork-guards": 3, "chain-tensioner": 3 }; GOAL_W.reliable = function (t) { return r(t) + (rm[t.id] || 0); }; })();
 
 /* ===================== v6: модельные ряды, CB300F, советы, достижения ===================== */
 ENGINES["175FMM"] = { id: "175FMM", code: "ZS175FMM", name: "Zongshen CB300F (ZS175FMM)", maker: "Zongshen", groups: ["cb", "air", "carb", "4t", "big"],
@@ -1737,7 +1710,6 @@ TUNING.push(
   { id: "jp-bigtank", cat: "Рама", title: "Увеличенный бак", stage: 1, power: 0, price: 32000, diff: "средне", rating: 4.6, fit: ["DR650","KLR650","XR650L","CRF250L","CRF300L","WR250R","DRZ400","XT250"], body: "Запас хода для туризма и дальних выездов." },
   { id: "jp-ecu", cat: "Электроника", title: "Тюнинг-модуль / прошивка ЭБУ", stage: 2, power: 6, price: 18000, diff: "средне", rating: 4.5, fit: ["CRF250L","CRF300L","WR250R","KLX230","XT660"], body: "Убирает «провалы» и бедную смесь стока, особенно после выпуска." }
 );
-(function () { var f = GOAL_W.power, r = GOAL_W.reliable, c = GOAL_W.comfort; GOAL_W.reliable = function (t) { return r(t) + ({ "jp-doohickey": 12 }[t.id] || 0); }; GOAL_W.comfort = function (t) { return c(t) + ({ "jp-bigtank": 6 }[t.id] || 0); }; })();
 
 /* --- мотоциклы --- */
 (function () {
@@ -9082,6 +9054,101 @@ var TUNE_SAVES = {
   radguard: "Радиатор цел после падения — мотор не закипит.",
   clutch: "Сцепление не буксует и не перегревает масло после прироста мощности."
 };
+/* ===================== v41: тюнинг — карбюратор побольше и бигбор для мопедных моторов ===================== */
+/* Карбюраторы-доработки: mm — диффузор, carb — id из CARBS (стартовые жиклёры). withBore — карбюратор имеет смысл
+   только вместе с этим бигбором (на стоковом объёме слишком велик: провал снизу) */
+(function () {
+  var byId = function (id) { return TUNING.find(function (t) { return t.id === id; }); };
+  var pe30 = byId("pe30"), pwk28 = byId("pwk28"), pwk = byId("pwk");
+  /* старые карточки — под те моторы, где это действительно шаг вверх от заводского */
+  Object.assign(pe30, { title: "Карбюратор PE30 вместо PZ27", mm: 30, carb: "pe30", fit: ["165FMM", "167FMM", "CG200"],
+    body: "Диффузор 30 мм вместо 27: мотор бодрее на средних и верхах, отклик на газ чётче. Нужен патрубок (переходник) впуска под 30 мм.",
+    notes: { "165FMM": "Нужна проставка-переходник впуска.", "167FMM": "Проверь посадочный диаметр патрубка.", "CG200": "Патрубок впуска под 30 мм; главный жиклёр 115–125 по свече." } });
+  Object.assign(pwk28, { title: "Карбюратор PWK28 / PE28", mm: 28, carb: "pwk28", fit: ["YX140", "FIXCN_YX140E", "Z155", "1P56FMJ", "CG150", "1P60FMK", "FIXCN_1P60FMK_4K"],
+    body: "Диффузор 28 мм вместо 24–26: питбайк резче подхватывает и лучше крутится вверх. Для 140–160 см³ это предел — больше уже провал снизу.",
+    notes: { "1P60FMK": "Если с завода уже PWK28 — карбюратор не трогай, дело в жиклёрах.", "CG150": "Нужен патрубок впуска под 28 мм." } });
+  Object.assign(pwk, { title: "Карбюратор PWK32–34", mm: 34, carb: "pwk34",
+    body: "Плоский золотник: острый отклик на газ и верхи. Капризнее в настройке, чем PE, — жиклёры подбирать по свече обязательно." });
+  TUNING.push(
+    { id: "carb-pz22", cat: "Впуск", title: "Карбюратор PZ22 вместо PZ19", stage: 2, power: 5, price: 1500, diff: "просто", rating: 4.7, mm: 22, carb: "pz22",
+      fit: ["147FMD", "1P50FMG", "152FMH"],
+      body: "Самая частая доработка мопедов Альфа и Дельта: диффузор 22 мм вместо 19 — бодрее разгон и в горку, без потери тяги снизу. Патрубок и тросик — штатные или из комплекта.",
+      notes: { "152FMH": "Главный жиклёр 90–100, дальше по свече.", "147FMD": "Главный жиклёр 82–90, дальше по свече.", "1P50FMG": "Главный жиклёр 85–92, дальше по свече." } },
+    { id: "carb-pz26", cat: "Впуск", title: "Карбюратор PZ26 / PE26 вместо PZ19", stage: 2, power: 6, price: 1800, diff: "средне", rating: 4.6, mm: 26, carb: "pz26",
+      fit: ["154FMI"],
+      body: "Главная доработка питбайка 125 после фильтра: 26 мм вместо 19 — мотор резче и охотнее крутится. Больше 26 мм на 125 не ставь — пропадёт низ. Нужен патрубок под 26 мм.",
+      notes: { "154FMI": "Главный жиклёр 105–112, холостой 38, дальше по свече." } },
+    { id: "carb-nibbi30", cat: "Впуск", title: "Карбюратор NIBBI PE30 Racing", stage: 2, power: 3, price: 4200, diff: "средне", rating: 4.6, mm: 30, carb: "nibbi-pe30",
+      fit: ["Z190", "FIXCN_Z190_4", "172FMM", "172FMM-3A", "172FMM-5", "FIXCN_PR250_5", "FIXCN_JYZ250", "175FMM"],
+      body: "Тот же размер 30 мм, что у штатного PZ30, но лучше распыл и стабильнее смесь: чище отклик на газ, без провалов при резком открытии. Если уже стоит NIBBI — менять нечего.",
+      notes: { "172FMM": "Больше 30 мм на стоковые 250 см³ не нужно — провалится низ. Под 300 см³ — PWK32.", "Z190": "PWK30 — то же, но острее и капризнее в настройке." } },
+    { id: "carb-pwk30", cat: "Впуск", title: "Карбюратор PWK30 под цилиндр 160+", stage: 3, power: 3, price: 2500, diff: "средне", rating: 4.3, mm: 30, carb: "pwk30", withBore: "bore-yx",
+      fit: ["1P60FMK", "FIXCN_1P60FMK_4K"],
+      body: "Под увеличенный цилиндр штатного 26–28 мм уже мало. На стоковом объёме 30 мм велик — ставить вместе с цилиндром." },
+    { id: "carb-pwk32", cat: "Впуск", title: "Карбюратор PWK32 под бигбор", stage: 3, power: 4, price: 3200, diff: "средне", rating: 4.5, mm: 32, carb: "pwk32", withBore: "bore300|bore-z212",
+      fit: ["Z190", "FIXCN_Z190_4", "172FMM", "172FMM-3A", "172FMM-5", "FIXCN_PR250_5", "FIXCN_JYZ250", "FIXCN_172FMM7"],
+      body: "После бигбора штатные 30 мм душат мотор — нужен 32. На стоковом объёме PWK32 избыточен: мотор теряет низ. Главный жиклёр — по свече после обкатки.",
+      notes: { "172FMM": "Под 300 см³: главный 125–135, холостой 40–42.", "Z190": "Под 212 см³: главный 125–132, холостой 40." } },
+    { id: "bore-139", cat: "Двигатель", title: "ЦПГ 72 см³ (Ø47) для 139FMB", stage: 3, power: 30, price: 2600, diff: "сложно", rating: 4.5, fit: ["139FMB"],
+      body: "Цилиндр Ø47 мм с поршнем, кольцами, пальцем и прокладками — 50 → 72 см³ на том же коленвале (ход 41.4 мм). Мопед заметно бодрее, особенно с пассажиром и в горку.",
+      notes: { "139FMB": "Карбюратор PZ19 остаётся, главный жиклёр +5…+10 к штатному. Обкатка 300–500 км. С 72 см³ это по закону уже не мопед: нужны права A1 и регистрация в ГИБДД." } },
+    { id: "bore-152", cat: "Двигатель", title: "ЦПГ 125 см³ (Ø56.5) для 152FMH", stage: 3, power: 12, price: 4500, diff: "сложно", rating: 4.3, fit: ["152FMH"],
+      body: "Цилиндр Ø56.5 мм (как у 154FMI) на ход 49.5 мм: 107 → 124 см³. Мягкий вариант — ЦПГ 115 см³ (Ø54). Бери комплект именно под 152FMH и под свой палец.",
+      notes: { "152FMH": "Вместе с карбюратором PZ22: PZ19 на 125 см³ уже мал. Главный 95–105 по свече, обкатка 300–500 км." } }
+  );
+  Object.assign(TUNE_PRICES, { "carb-pz22": [1000, 2500], "carb-pz26": [1200, 3000], "carb-nibbi30": [3000, 6000], "carb-pwk30": [1800, 4000],
+    "carb-pwk32": [2200, 5000], "bore-139": [2000, 3500], "bore-152": [3000, 6500] });
+  Object.assign(TUNE_WEAR, {
+    "bore-139": [20, 30, "ЦПГ и коленвал", "Тот же коленвал и картер тянут почти в полтора раза больший объём: больше тепла и нагрузки на подшипники."],
+    "bore-152": [20, 30, "ЦПГ и коленвал", "Тонкие стенки гильзы и больше тепла у воздушного мотора — масло менять чаще."]
+  });
+  ["carb-pz22", "carb-pz26", "carb-nibbi30", "carb-pwk30", "carb-pwk32"].forEach(function (id) {
+    TUNE_RISK[id] = "Карбюратор нужно настроить под свой мотор: бедная смесь (белая свеча) — перегрев и прогар клапана.";
+    TUNE_GUIDE[id] = "carb-pwk-install";
+  });
+  TUNE_GUIDE["bore-139"] = TUNE_GUIDE["bore-152"] = TUNE_GUIDE["bore-z212"] = TUNE_GUIDE["bore-nb350"] = "compression";
+})();
+/* Карбюратор побольше: что ставят вместо заводского — по мотору.
+   up — «резвее»: на шаг крупнее (или того же размера, но лучше), мотор не вскрывать; upNote — почему так / почему не надо;
+   bore — бигбор этого мотора (TUNING), boreCarb — карбюратор под него (null — штатный справится), boreNote — что сделать с карбюратором */
+var CARB_UP = [
+  { eng: ["139FMB"], up: null, upNote: "На 50 см³ штатного PZ19 хватает с запасом: карбюратор крупнее даст только провал снизу. Резвее — фильтр и главный жиклёр +2…+5 по свече.",
+    bore: "bore-139", boreCarb: null, boreNote: "С ЦПГ 72 см³ PZ19 остаётся — меняют только главный жиклёр: +5…+10 к штатному, по свече." },
+  { eng: ["147FMD", "1P50FMG"], up: "carb-pz22", upNote: "PZ22 вместо PZ19 — мотор бодрее подхватывает с места и тянет в горку." },
+  { eng: ["152FMH"], up: "carb-pz22", upNote: "Самая частая доработка Альфы: PZ22 вместо PZ19 — резвее разгон, тяга снизу не теряется.",
+    bore: "bore-152", boreCarb: "carb-pz22", boreNote: "С ЦПГ 125 см³ PZ19 уже душит мотор — PZ22 обязателен. Главный 95–105 по свече." },
+  { eng: ["154FMI"], up: "carb-pz26", upNote: "PZ26 вместо PZ19 — главная доработка питбайка 125 после фильтра. Больше 26 мм на 125 не ставь — пропадёт низ." },
+  { eng: ["YX140", "FIXCN_YX140E", "Z155", "1P56FMJ", "CG150"], up: "pwk28", upNote: "PWK28 / PE28 вместо 24–26 мм — резче отклик и лучше верхи. Для этого объёма 28 мм — предел." },
+  { eng: ["1P60FMK", "FIXCN_1P60FMK_4K"], up: "pwk28", upNote: "Если стоит PZ26 — PWK28 / PE28 даст отклик и верхи. Если с завода уже PWK28 — карбюратор не трогай.",
+    bore: "bore-yx", boreCarb: "carb-pwk30", boreNote: "Под цилиндр 160+ — PWK30, главный 120–128 по свече." },
+  { eng: ["Z190", "FIXCN_Z190_4"], up: "carb-nibbi30", upNote: "Если стоит PZ30 — NIBBI PE30 Racing: тот же размер, но чётче отклик и ровнее смесь. PWK30 — острее, но капризнее.",
+    bore: "bore-z212", boreCarb: "carb-pwk32", boreNote: "Под 212 см³ — PWK32: главный 125–132, холостой 40, по свече." },
+  { eng: ["CG200"], up: "pe30", upNote: "PE30 вместо PZ27 — бодрее на средних; нужен патрубок впуска под 30 мм.",
+    bore: "bore-cg", boreCarb: "pe30", boreNote: "После расточки PZ27 мал — PE30, главный 120–128 по свече." },
+  { eng: ["165FMM", "167FMM"], up: "pe30", upNote: "PE30 вместо PZ27 — заметно бодрее на средних; нужен патрубок под 30 мм." },
+  { eng: ["172FMM", "172FMM-3A", "172FMM-5", "FIXCN_PR250_5", "FIXCN_JYZ250", "175FMM"], up: "carb-nibbi30",
+    upNote: "Если стоит PZ30 — NIBBI PE30 Racing: тот же размер, но лучше распыл и отклик. Больше 30 мм на сток не нужно — провалится низ.",
+    bore: "bore300", boreCarb: "carb-pwk32", boreNote: "Под 300 см³ штатных 30 мм мало — PWK32: главный 125–135, холостой 40–42, по свече." },
+  { eng: ["PR300", "FIXCN_PR300_5", "FIXCN_PR300_6", "FIXCN_PR300PRO"], up: "pwk", upNote: "Если стоит PE30 — NIBBI PWK32–34: самая заметная доработка PR300 вместе с выпуском. Если уже PWK — карбюратор не трогай." },
+  { eng: ["CBS300", "FIXCN_CBS300_5"], up: "pwk", upNote: "Если стоит PE30 — PWK34, как на NB300.",
+    bore: "bore-nb350", boreCarb: "pwk", boreNote: "Под 350 см³ — PWK34: главный +8…+12 к штатному, по свече." },
+  { eng: ["NB300", "FIXCN_NB300_5", "NC300", "YBS300", "NC250", "FIXCN_172FMM7", "FIXCN_CB300RL_6"], up: null,
+    upNote: "С завода уже PWK34 — больше карбюратор не нужен. Резвее сделают фильтр, выпуск и подбор жиклёров.",
+    bore: "bore-nb350", boreCarb: null, boreNote: "PWK34 справляется и с 350 см³ — меняют только жиклёры: главный +8…+12 к штатному, по свече." }
+];
+/* «диффузор и стартовые жиклёры» карбюратора-доработки для этого мотора: своя заметка мотора с жиклёрами — точнее
+   общей таблицы CARBS (PZ22 на 72 см³ требует меньший главный, чем на 125) */
+function tuneCarbJets(t, e) {
+  var c = t && t.carb && CARBS.find(function (x) { return x.id === t.carb; });
+  if (!c) return "";
+  var n = t.notes && e && Object.keys(t.notes).find(function (k) { return k === e.id || e.groups.indexOf(k) >= 0; });
+  var own = n && /главный/i.test(t.notes[n]) ? t.notes[n].replace(/\.$/, "") : "";
+  return "диффузор " + (t.mm || c.mm) + " мм · " + (own ? own.charAt(0).toLowerCase() + own.slice(1) : "главный " + c.main + ", холостой " + c.pilot + " — для старта, дальше по свече");
+}
+function carbUpFor(e) {
+  if (!e || e.groups.indexOf("carb") < 0) return null;
+  return CARB_UP.find(function (r) { return r.eng.indexOf(e.id) >= 0; }) || null;
+}
 /* ===== Тюнинг: прибавка мощности по одной доработке, % к заводской мощности (при правильной настройке смеси) =====
    Пересмотрено вниз: жиклёры сами мощности не добавляют (без них не будет прибавки от остального), облегчённый
    маховик даёт приёмистость, а не лошадиные силы; CDI без ограничителя — обороты (rpm), а не силы.
