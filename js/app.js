@@ -17181,7 +17181,7 @@ function Tuning({
     go: go,
     flash: fl,
     onEdit: onEdit
-  }), proj, h(Fold, {
+  }), proj, hasChain(eng) && h(Fold, {
     title: "Звёзды: разгон или скорость",
     sub: "Что даст другая пара звёзд"
   }, h(Sprockets, {

@@ -976,9 +976,13 @@ var TUNING = [
     body: "Минус 1.5–2 кг, уверенный запуск в холод." }
 ];
 
+/* привод цепью? Нет — у вариатора (скутеры), кардана (BMW GS, Moto Guzzi, Drag Star) и ремня (Harley-Davidson) */
+function hasChain(e) { return !!e && !e.cvt && !/ремень|кардан|вариатор/i.test(e.gearbox || ""); }
+var TUNE_CHAIN = ["sp-tq", "sp-sp", "rear-sp", "x-ring", "chain-tensioner", "chainguide"];
 /* bike — необязательно: с ним учитывается класс мотоцикла (t.cls, TUNE_CLS): защита картера не для дорожного спорта */
 function tuningFor(t, eng, bike) {
   var deny = null;
+  if (TUNE_CHAIN.indexOf(t.id) >= 0 && !hasChain(eng)) deny = eng.cvt ? "У вариатора нет звёзд и цепи." : "Здесь не цепь, а " + (/кардан/i.test(eng.gearbox || "") ? "кардан." : "ремень.");
   if (t.deny) Object.keys(t.deny).forEach(function (k) { if (k === eng.id || eng.groups.indexOf(k) >= 0) deny = t.deny[k]; });
   if (!deny && t.cls && (!t.cls.length || (bike && t.cls.indexOf(tuneClassOf(bike)) < 0))) deny = t.cls.length ? "Не для класса «" + TUNE_CLASS_T[tuneClassOf(bike)] + "»." : "Заменено конкретными вариантами.";
   var ok = fits(t, eng) && !deny;
@@ -9168,8 +9172,8 @@ function tuneNode(t) {
       body: "Самый дешёвый вариант: громче и легче штатного, прибавка мощности — на уровне погрешности. Ставится на штатный коллектор через переходник или хомут — сверь диаметр трубы (обычно 38, 51 или 60 мм). После установки — главный жиклёр +2…+5 и проверка свечи." },
     { id: "ex-cn-fmf", cat: "Выпуск", title: "Глушитель — копия FMF Powercore / Q4 (Китай)", stage: 2, power: 2, price: 5000, diff: "просто", rating: 4.2, fit: ["4t"], eff: "громче · чуть бодрее на верхах",
       body: "Сделан аккуратнее самых дешёвых банок, набивка разборная. Прибавка — 1–3% и только с подбором жиклёров. Копии Q4 тише и часто с искрогасителем." },
-    { id: "ex-fmf", cat: "Выпуск", title: "Глушитель FMF Powercore 4 / Q4 — оригинал", stage: 2, power: 3, price: 17000, diff: "средне", rating: 4.6, fit: ["4t"], eff: "служит годами · тише копий · +2–4% с жиклёрами",
-      body: "Оригинал: нержавейка и алюминий, набивку меняют. Делается под японские и европейские модели — на китайский мотоцикл нужен переходник на коллектор. Q4 — тихий, с искрогасителем для леса." },
+    { id: "ex-fmf", cat: "Выпуск", title: "Глушитель FMF Powercore 4 / Q4 — оригинал", stage: 2, power: 3, price: 30000, diff: "средне", rating: 4.6, fit: ["4t"], eff: "служит годами · б/у от 15 тыс., новый 25–60 тыс.",
+      body: "Оригинал: нержавейка и алюминий, набивку меняют. Новый — 25–60 тыс. ₽ (в США $230–450, у дилеров KTM — около 60 тыс.), б/у на Авито — от 15 тыс. Делается под японские и европейские модели — на китайский мотоцикл нужен переходник на коллектор. Q4 — тихий, с искрогасителем для леса." },
     { id: "ex-road-cn", cat: "Выпуск", title: "Банка — копия Akrapovič / SC-Project (Китай)", stage: 2, power: 1, price: 5000, diff: "просто", rating: 3.9, fit: ["4t"], eff: "громче · −2–4 кг",
       body: "Ставится на штатный коллектор через переходник 51 или 60 мм. Часто без вставки-глушителя (dB-killer) — очень громко. На инжекторе без прошивки мощность почти не меняется." },
     { id: "ex-road-orig", cat: "Выпуск", title: "Банка Akrapovič / SC-Project / Yoshimura — оригинал", stage: 2, power: 2, price: 50000, diff: "просто", rating: 4.6, fit: ["4t"], eff: "−3–5 кг · +2–3% с прошивкой",
@@ -9196,7 +9200,7 @@ function tuneNode(t) {
     "ex-cruise-cn": ["cruise"], "ex-cruise-vh": ["cruise"], "ex-moped": ["moped"],
     sliders: ["road", "sm"], crashbars: ["cruise", "adv"], "moped-bars": ["moped"], tankpad: ["road", "sm"], "road-tires": ["road", "sm", "cruise"], screen: ["road", "adv", "cruise", "moped"]
   });
-  Object.assign(TUNE_PRICES, { "ex-cn-akra": [1500, 3000], "ex-cn-fmf": [4000, 6500], "ex-fmf": [15000, 22000], "ex-road-cn": [3000, 9000], "ex-road-orig": [35000, 90000],
+  Object.assign(TUNE_PRICES, { "ex-cn-akra": [1500, 3000], "ex-cn-fmf": [4000, 9000], "ex-fmf": [15000, 60000], "ex-road-cn": [3000, 9000], "ex-road-orig": [35000, 90000],
     "ex-road-full": [80000, 250000], "ex-cruise-cn": [6000, 15000], "ex-cruise-vh": [40000, 120000], "ex-moped": [1200, 3000],
     sliders: [2500, 8000], crashbars: [4000, 15000], "moped-bars": [1500, 3500], tankpad: [800, 3000], "road-tires": [12000, 30000], screen: [3000, 12000] });
   ["ex-cn-akra", "ex-cn-fmf", "ex-fmf", "ex-road-cn", "ex-moped"].forEach(function (id) { TUNE_RISK[id] = "Без подбора жиклёров смесь станет бедной: перегрев, прогар выпускного клапана и поршня."; TUNE_GUIDE[id] = "exhaust-install"; });
@@ -9208,8 +9212,8 @@ function tuneNode(t) {
     { id: "carb-pz20", cat: "Впуск", title: "Карбюратор PZ20", stage: 2, power: 3, price: 1500, diff: "просто", rating: 4.4, mm: 20, carb: "pz19", fit: ["147FMD", "152FMH"], eff: "мягкий шаг · низ не теряется",
       body: "Чуть крупнее PZ19: на части 110-кубовых Альф стоит с завода. Встаёт на штатный патрубок и тросик, мотор немного бодрее, расход почти тот же.",
       notes: { "152FMH": "Главный жиклёр 82–90, дальше по свече.", "147FMD": "Главный жиклёр 78–85, дальше по свече." } },
-    { id: "carb-nibbi22", cat: "Впуск", title: "Карбюратор NIBBI Racing под 22 мм", stage: 2, power: 6, price: 4500, diff: "средне", rating: 4.6, mm: 22, carb: "pz22", fit: ["152FMH", "154FMI"], eff: "как PZ22, но ровнее смесь · дороже",
-      body: "Тот же размер, что PZ22, но лучше обработка каналов и стабильнее смесь — меньше возни с настройкой. Дороже обычного PZ22 в 2–3 раза.",
+    { id: "carb-nibbi22", cat: "Впуск", title: "Карбюратор NIBBI PE22", stage: 2, power: 6, price: 4500, diff: "средне", rating: 4.6, mm: 22, carb: "pz22", fit: ["152FMH", "154FMI"], eff: "как PZ22, но ровнее смесь · дороже",
+      body: "NIBBI PE22 (PE22FL) — тот же размер, что PZ22, но лучше обработка каналов и стабильнее смесь: меньше возни с настройкой. Дороже обычного PZ22 в 2–3 раза; на рынке много подделок — бери у проверенного продавца.",
       notes: { "152FMH": "Главный жиклёр 92–100, дальше по свече." } },
     { id: "carb-vm22", cat: "Впуск", title: "Карбюратор Mikuni VM22 — китайская копия", stage: 2, power: 7, price: 2800, diff: "средне", rating: 4.4, mm: 22, carb: "pz22", fit: ["152FMH", "154FMI"], eff: "тяга со дна ↑ · нужен патрубок",
       body: "Диффузор 22 мм, выход на мотор — 26 мм. На штатный патрубок 22 мм — только с плавной проточкой ступеньки (или патрубок под 26). Настоящий Mikuni стоит в разы дороже — под Альфу продают копии.",
@@ -9234,7 +9238,7 @@ function tuneNode(t) {
   /* запрос в магазин — как ищут люди */
   var Q = { "ex-cn-akra": "глушитель akrapovic питбайк эндуро", "ex-cn-fmf": "глушитель fmf powercore питбайк", "ex-fmf": "FMF Powercore 4 глушитель", "ex-road-cn": "глушитель akrapovic мотоцикл 51 мм",
     "ex-road-orig": "Akrapovic slip-on", "ex-road-full": "выхлопная система Akrapovic", "ex-cruise-cn": "глушители vance hines", "ex-cruise-vh": "Vance & Hines", "ex-moped": "прямоток глушитель мопед альфа",
-    "carb-pz20": "карбюратор PZ20", "carb-pz22": "карбюратор PZ22", "carb-nibbi22": "карбюратор NIBBI 22", "carb-vm22": "карбюратор Mikuni VM22", "carb-pz26": "карбюратор PZ26",
+    "carb-pz20": "карбюратор PZ20", "carb-pz22": "карбюратор PZ22", "carb-nibbi22": "карбюратор NIBBI PE22", "carb-vm22": "карбюратор Mikuni VM22", "carb-pz26": "карбюратор PZ26",
     "carb-nibbi30": "карбюратор NIBBI PE30", "carb-pwk30": "карбюратор PWK30", "carb-pwk32": "карбюратор PWK32", pwk: "карбюратор PWK34 NIBBI", pwk28: "карбюратор PWK28", pe30: "карбюратор PE30",
     "bore-139": "ЦПГ 72 139FMB 47 мм", "bore-152": "ЦПГ 125 152FMH 56.5", sliders: "слайдеры рамы мотоцикла", crashbars: "дуги безопасности мотоцикла", "moped-bars": "дуги мопед альфа",
     tankpad: "танкпад наклейка на бак", "road-tires": "мотошины спорт турист", screen: "ветровое стекло мотоцикла" };
@@ -10461,3 +10465,9 @@ function crossRows(bike) {
     delete (ensureSpark.has || {})[id]; ensureSpark(id, 1);
   });
 })();
+
+/* признаки мотора без повторов: «копии» моторов (CL) по цепочке добавляли тот же признак ещё раз (jp ×20) */
+Object.keys(ENGINES).forEach(function (id) {
+  var g = ENGINES[id].groups;
+  if (g && g.length) ENGINES[id].groups = g.filter(function (x, i) { return g.indexOf(x) === i; });
+});
