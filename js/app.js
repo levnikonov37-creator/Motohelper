@@ -14169,7 +14169,7 @@ function Passport({
   const sh = x => String(x == null ? "" : x).replace(/\s*\([^)]*\)/g, "").trim();
   const rng = x => (String(x || "").match(/\d+(?:[.,]\d+)?(?:\s*[–-]\s*\d+(?:[.,]\d+)?)?/) || [""])[0].replace(/\s+/g, "");
   const vNum = ok(eng.valveIn) && rng(eng.valveIn) && rng(eng.valveEx);
-  const rows = [["Масло", sh(eng.oil), ok(eng.oilVol) ? sh(eng.oilVol) : "", ok(eng.oilVol) ? src("oilVol") : null], ["Свеча", sh(eng.spark), ok(eng.gap) ? "зазор " + sh(eng.gap) : "", ok(eng.spark) ? src("spark") : null], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", "", null] : ["Клапаны", vNum ? rng(eng.valveIn) + " / " + rng(eng.valveEx) : ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", vNum ? eng.dis && eng.dis.note ? eng.dis.note + " — мм, на холодном" : "впуск / выпуск, мм, на холодном" : "впуск / выпуск, мм", vNum ? eng.dis && eng.dis.valveIn ? "dis" : src("valveIn", "valveEx") : null], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : "", null]];
+  const rows = [["Масло", sh(eng.oil), ok(eng.oilVol) ? sh(eng.oilVol) : "", ok(eng.oilVol) ? eng.dis && eng.dis.oilVol ? "dis" : src("oilVol") : null], ["Свеча", sh(eng.spark), ok(eng.gap) ? "зазор " + sh(eng.gap) : "", ok(eng.spark) ? eng.dis && eng.dis.spark ? "dis" : src("spark") : null], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", "", null] : ["Клапаны", vNum ? rng(eng.valveIn) + " / " + rng(eng.valveEx) : ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", vNum ? eng.dis && eng.dis.note ? eng.dis.note + " — мм, на холодном" : "впуск / выпуск, мм, на холодном" : "впуск / выпуск, мм", vNum ? eng.dis && (eng.dis.valveIn || eng.dis.valveEx) ? "dis" : src("valveIn", "valveEx") : null], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : "", null]];
   return /*#__PURE__*/React.createElement("div", {
     className: "panel passport" + (ph && phOk >= 0 ? " has-ph" : ""),
     "aria-label": "Паспорт мотора"
@@ -17763,7 +17763,8 @@ function Overview({
     r: [["Свеча", /*#__PURE__*/React.createElement(Val, {
       v: eng.spark,
       stock: S.spark,
-      ok: isEx(eng, "spark")
+      ok: isEx(eng, "spark"),
+      dis: !!(eng.dis && eng.dis.spark)
     })], ["Зазор", /*#__PURE__*/React.createElement(Val, {
       v: eng.gap,
       stock: S.gap,
@@ -17779,6 +17780,7 @@ function Overview({
       v: eng.oilVol,
       stock: S.oilVol,
       ok: isEx(eng, "oilVol"),
+      dis: !!(eng.dis && eng.dis.oilVol),
       risky: true
     })]]).concat(eng.coolant ? [["Антифриз", /*#__PURE__*/React.createElement(Val, {
       v: eng.coolant,

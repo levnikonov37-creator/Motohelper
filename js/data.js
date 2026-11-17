@@ -9912,6 +9912,46 @@ fixExact({
   };
   Object.keys(DIS).forEach(function (id) { if (ENGINES[id]) ENGINES[id].dis = { valveIn: 1, valveEx: 1, note: DIS[id] }; });
 })();
+/* часть 29: питбайковые и 300-кубовые моторы по руководствам официальных дистрибьюторов.
+   ZS175FMM (CB300F) — руководство Kayo по эксплуатации мотоциклов (kayo.ru): клапаны 0.04 / 0.06, D8EA, масло около 1.1–1.2 л;
+   YX140 (1P56FMJ), YX160 (1P60FMK), Zongshen 155 (ZS1P60YMJ) — руководства Kayo по питбайкам 2022–2026 и руководство Thumpstar
+   (австралийская марка на моторах YX и Zongshen); Zongshen 190 (ZS1P62YML-2, он же W190) — руководство Daytona Anima 190F
+   (оригинальный мотор, по лицензии которого сделан W190) и Thumpstar. Где источники спорят — пометка «мануалы расходятся» */
+(function () {
+  fixExact({
+    "175FMM": {"valveIn": "0.04 мм на холодном (руководство Kayo, мотор CB300F / ZS175FMM)", "valveEx": "0.06 мм на холодном",
+      "spark": "D8EA (руководство Kayo)", "oilVol": "около 1.1–1.2 л, по смотровому окну (руководство Kayo)"},
+    "YX140": {"valveIn": "0.08 мм на холодном (руководство Kayo по питбайкам; Thumpstar — 0.003″ = 0.08 мм)", "oilVol": "около 1 л (Kayo), 0.95 л (Thumpstar)",
+      "spark": "A7TC (NGK C7HSA) — руководство Thumpstar", "idle": "1400–1600 (1500 ± 100, Kayo)", "oil": "10W-40"},
+    "1P60FMK": {"valveIn": "0.08 мм на холодном (руководство Kayo по питбайкам; Thumpstar — 0.003″)", "oilVol": "около 1 л (Kayo), 0.95 л (Thumpstar)",
+      "spark": "A7TC (NGK C7HSA) — руководство Thumpstar", "idle": "1400–1600 (1500 ± 100, Kayo)", "oil": "10W-40"},
+    "Z155": {"valveIn": "0.08 мм на холодном (руководство Kayo, TT160 с мотором ZS1P60YMJ; Thumpstar — 0.003″)", "oilVol": "около 1 л (Kayo), 0.95 л (Thumpstar)",
+      "idle": "1400–1600 (1500 ± 100, Kayo)", "oil": "10W-40"},
+    "Z190": {"cc": 187.2, "cam": "SOHC, 2 клапана, масляный радиатор; 62 × 62 мм, степень сжатия 12.1 (Daytona Anima 190F)",
+      "oil": "10W-40, API SG и выше (Daytona)", "gap": "0.6–0.7 мм"}
+  });
+  /* спорные значения: пишем все источники, без зелёной галочки */
+  var D = function (id, fields, note) { var e = ENGINES[id]; if (!e) return; Object.keys(fields).forEach(function (k) { e[k] = fields[k]; }); e.dis = Object.assign(e.dis || {}, note); };
+  D("YX140", {"valveEx": "0.09 мм по руководству Kayo; 0.13 мм (0.005″) по руководству Thumpstar"}, {valveEx: 1, note: "впуск 0.08 у обоих · выпуск: Kayo 0.09, Thumpstar 0.13"});
+  D("1P60FMK", {"valveEx": "0.09 мм по руководству Kayo; 0.13 мм (0.005″) по руководству Thumpstar"}, {valveEx: 1, note: "впуск 0.08 у обоих · выпуск: Kayo 0.09, Thumpstar 0.13"});
+  D("Z155", {"valveEx": "0.09 мм по руководству Kayo; 0.13 мм (0.005″) по руководству Thumpstar"}, {valveEx: 1, note: "впуск 0.08 у обоих · выпуск: Kayo 0.09, Thumpstar 0.13"});
+  D("Z190", {"valveIn": "0.05–0.07 мм по руководству Daytona Anima 190F; 0.08 мм (0.003″) по Thumpstar", "valveEx": "0.05–0.07 мм по Daytona; 0.13 мм (0.005″) по Thumpstar",
+    "oilVol": "0.60 л при замене, 0.65 л с фильтром, 0.70 л всего (Daytona; с маслорадиатором — больше); Thumpstar — 0.95 л. Доливай по смотровому окну",
+    "spark": "NGK ER9EH (руководство Daytona Anima 190F); у части W190 стоит CR8E — смотри старую свечу"},
+    {valveIn: 1, valveEx: 1, oilVol: 1, spark: 1, note: "Daytona: 0.05–0.07 · Thumpstar: 0.08 / 0.13"});
+  D("154FMI", {"valveIn": "0.05–0.07 мм по руководству Patron Junior 125; 0.08 мм по руководству Kayo по питбайкам", "valveEx": "0.05–0.07 мм по Patron; 0.09 мм по Kayo"},
+    {valveIn: 1, valveEx: 1, note: "Patron: 0.05–0.07 · Kayo: 0.08 / 0.09"});
+  /* варианты тех же моторов (другая КПП или стартер) — те же цифры обслуживания */
+  [["FIXCN_YX140E", "YX140"], ["FIXCN_1P60FMK_4K", "1P60FMK"], ["FIXCN_Z190_4", "Z190"]].forEach(function (x) {
+    var e = ENGINES[x[0]], b = ENGINES[x[1]]; if (!e || !b) return;
+    ["valveIn", "valveEx", "oilVol", "spark", "gap", "idle", "oil", "cc", "cam"].forEach(function (k) { if (b[k] != null && (k !== "cc" || x[1] === "Z190")) e[k] = b[k]; });
+    e.ex = Object.assign({}, b.ex || {}); if (b.dis) e.dis = Object.assign({}, b.dis);
+  });
+  ["PR300", "FIXCN_PR300_5", "FIXCN_PR300_6"].forEach(function (id) {
+    D(id, {"valveIn": "0.10–0.15 мм по заводскому сервис-мануалу Kayo T4 300; 0.03 мм (в другой таблице — 0.01) по руководству Kayo по мотоциклам", "valveEx": "0.15–0.20 мм по сервис-мануалу T4 300; 0.05 мм (в другой таблице — 0.03) по руководству Kayo"},
+      {valveIn: 1, valveEx: 1, note: "сервис-мануал T4 300: 0.10–0.15 / 0.15–0.20 · руководство Kayo: 0.03 / 0.05"});
+  });
+})();
 /* Аналоги расходников по моделям: масляный и воздушный фильтр, тормозные колодки, аккумулятор.
    Номера HiFlo (фильтры), K&N (воздушные фильтры), EBC (колодки), Yuasa (АКБ) и оригинальные (OEM) — по каталогам производителей,
    подбор сверен с maintenanceschedule.com. y — годы выпуска, к которым относится запись (пусто — для всех лет модели).

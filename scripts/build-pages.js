@@ -414,15 +414,15 @@ function cheat(e, v, pfx, b) {
     const big = m ? m[0] : ov.split(/[(;,]/)[0];
     const rest = m ? ov.slice(m.index + m[0].length).split(/[(;]/)[0].replace(/^[\s,.—-]+/, "").trim() : "";
     const grade = real(e.oil) || /\w/.test(String(e.oil || "")) ? String(e.oil || "").split(/[,(;]/)[0].trim() : "";
-    T.push([e.stroke === "2T" ? "Масло КПП" : "Масло", big, [grade, rest.length <= 48 ? rest : ""].filter(Boolean).join(" · "), ex("oilVol"), "maslo"]);
+    T.push([e.stroke === "2T" ? "Масло КПП" : "Масло", big, [grade, rest.length <= 48 ? rest : ""].filter(Boolean).join(" · "), e.dis && e.dis.oilVol ? "dis" : ex("oilVol"), "maslo"]);
   }
   if (real(e.spark) || /[A-Z]{1,4}\d/.test(String(e.spark || ""))) {
     const sp = String(e.spark).split(/\s*[\/(;,]/)[0].trim(), gap = real(e.gap) ? String(e.gap).split(/\s*\(/)[0] : "";
-    if (sp) T.push(["Свеча", sp, gap ? "зазор " + gap : "", ex("spark"), "svecha"]);
+    if (sp) T.push(["Свеча", sp, gap ? "зазор " + gap : "", e.dis && e.dis.spark ? "dis" : ex("spark"), "svecha"]);
   }
   const vi = String(e.valveIn || "").match(RNG), ve = String(e.valveEx || "").match(RNG);
   if (e.stroke !== "2T" && vi && ve && /мм/.test(String(e.valveIn) + String(e.valveEx)))
-    T.push(["Клапаны", vi[0].replace(/\s+/g, "") + " / " + ve[0].replace(/\s+/g, ""), e.dis && e.dis.note ? e.dis.note + " — мм, на холодном" : "впуск / выпуск, мм, на холодном", e.dis && e.dis.valveIn ? "dis" : ex("valveIn") && ex("valveEx"), "svecha", 1]);
+    T.push(["Клапаны", vi[0].replace(/\s+/g, "") + " / " + ve[0].replace(/\s+/g, ""), e.dis && e.dis.note ? e.dis.note + " — мм, на холодном" : "впуск / выпуск, мм, на холодном", e.dis && (e.dis.valveIn || e.dis.valveEx) ? "dis" : ex("valveIn") && ex("valveEx"), "svecha", 1]);
   if (premix(e)) { const r = String(e.oil).match(/1\s*:\s*\d{2,3}/); if (r) T.push(["Смесь 2T", r[0].replace(/\s+/g, ""), "бензин : масло", false, "smes"]); }
   const fk = b ? ctx.forkShort(b) : null;
   if (fk && fk.vol) {
