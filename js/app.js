@@ -16263,7 +16263,8 @@ const TUNE_SWAP = {
   "swap-z190": "Z190",
   "swap-pr300": "PR300"
 };
-const TUNE_BORE = ["bore300", "bore-nb350", "bore-z212", "bore-yx", "bore-cg", "bore-139", "bore-152"];
+/* бигборы и карбюраторы-доработки — из данных: новые позиции сразу считаются правильно */
+const TUNE_BORE = TUNING.filter(t => /^bore/.test(t.id)).map(t => t.id);
 const TUNE_ELEC = ["cdi", "cdi-prog", "ecu", "jp-ecu"];
 function tuneMixOk(items, eng) {
   const has = id => items.some(t => t.id === id),
@@ -16712,7 +16713,7 @@ function tuneExcl(id) {
   });
   return out;
 }
-const TUNE_CARB_IDS = ["pe30", "pwk", "pwk28", "carb-pz20", "carb-pz22", "carb-nibbi22", "carb-vm22", "carb-pz26", "carb-nibbi30", "carb-pwk30", "carb-pwk32"];
+const TUNE_CARB_IDS = TUNING.filter(t => /^carb-|^(pe30|pwk|pwk28)$/.test(t.id)).map(t => t.id);
 /* строка «диффузор и жиклёры» для карбюратора-доработки */
 function tuneCarbSpec(t, eng) {
   return typeof tuneCarbJets === "function" ? tuneCarbJets(t, eng) : "";
@@ -16756,7 +16757,7 @@ function tuneRecipe(eng, goal, bike) {
     carb = g("carb"),
     two = g("2t");
   const exh = () => two ? T("pipe") : first(TUNE_EXHAUST[cls] || []);
-  const cool = () => g("air") ? add(T("oilcool"), "обязательно", "больше мощности — больше тепла") : g("liquid") && !two ? add(T("fan"), "обязательно", "запас охлаждения") : null;
+  const cool = () => g("cvt") ? null : g("air") ? add(T("oilcool"), "обязательно", "больше мощности — больше тепла") : g("liquid") && !two ? add(T("fan"), "обязательно", "запас охлаждения") : null;
   const upT = row && row.up && T(row.up),
     upFree = upT && eng.installed.indexOf(upT.id) < 0 && !tuneStockInstalled(upT.id, eng.carb);
   if (goal === "quick") {
@@ -16766,6 +16767,10 @@ function tuneRecipe(eng, goal, bike) {
     if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "смесь после фильтра и карбюратора — по свече");
     if (two) add(T("reed"), "по желанию");
     add(T("sp-tq"), "по желанию", "разгон бодрее, максималка −5–7%");
+    /* скутер: характер задаёт вариатор */
+    add(T("cvt-unlock"), "главное", "заводской ограничитель держит 45 км/ч");
+    add(T("cvt-rollers"), steps.some(s => s.role === "главное") ? "по желанию" : "главное", "ролики легче — разгон и в горку бодрее");
+    add(T("cvt-spring"), "по желанию");
   } else if (goal === "power") {
     const bore = row && T(row.bore) || first(TUNE_BORE);
     const swap = !bore && first(["swap-z190", "swap-pr300"]);
@@ -16780,13 +16785,21 @@ function tuneRecipe(eng, goal, bike) {
     add(T("filter"), "по желанию");
     cool();
     if (g("big") && (bore || swap)) add(T("clutch"), "обязательно", "иначе сцепление начнёт буксовать");
+    if (bore && g("cvt")) {
+      add(T("carb-2t-175"), "обязательно", "штатный 12–14 мм душит ЦПГ 70");
+      add(T("cvt-rollers"), "обязательно", "под новый мотор ролики подбирают заново");
+      add(T("cvt-kit"), "по желанию");
+    }
   } else if (goal === "speed") {
     add(T("sp-sp"), "главное", "длиннее передачи, если мотору хватает силы");
+    add(T("cvt-unlock"), "главное", "заводской ограничитель держит 45 км/ч");
+    add(T("cvt-kit"), steps.some(s => s.role === "главное") ? "по желанию" : "главное", "шире диапазон вариатора — выше максималка");
+    add(T("cvt-rollers"), "по желанию", "ролики тяжелее — выше скорость, разгон спокойнее");
     add(exh(), "по желанию");
     add(T("filter"), "по желанию");
     if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "на газу в пол смесь должна быть чуть богаче");
     if (efi) add(T("ecu") || T("jp-ecu"), "по желанию", "снимает ограничение скорости, если оно есть");
-    info.push("Максималка упирается в мощность и сопротивление воздуха: звезда +1 без прибавки мощности даёт скорость только на ровной трассе без ветра.");
+    info.push(g("cvt") ? "Максималка скутера упирается в мощность и вариатор: без ограничителя и с вариатором шире — быстрее, но ремень и ролики изнашиваются чаще." : "Максималка упирается в мощность и сопротивление воздуха: звезда +1 без прибавки мощности даёт скорость только на ровной трассе без ветра.");
   } else {
     const main = cls === "off" || cls === "adv" ? T("skid") : cls === "moped" ? T("moped-bars") : cls === "cruise" ? T("crashbars") : T("sliders");
     add(main, "главное");
@@ -17111,7 +17124,7 @@ function Tuning({
   /* чего не хватает проекту: коротко и с кнопкой «Добавить» */
   const BREATH = ["filter", "slip", "full", "header", "pipe", "cam", "porting"].concat(TUNE_BORE, TUNE_CARB_IDS, TUNING.filter(t => /^ex-/.test(t.id)).map(t => t.id));
   const fixes = [];
-  if (gainAll > 0 && isAir && !has("oilcool") && eng.groups.indexOf("big") >= 0) fixes.push(["Нужен маслорадиатор — иначе перегрев", "oilcool"]);
+  if (gainAll > 0 && isAir && eng.groups.indexOf("2t") < 0 && !has("oilcool") && eng.groups.indexOf("big") >= 0) fixes.push(["Нужен маслорадиатор — иначе перегрев", "oilcool"]);
   if (gainAll > 0 && isLiq && !has("fan") && eng.stroke !== "2T") fixes.push(["Нужен вентилятор радиатора", "fan"]);
   if (isCarb && chosen.some(t => BREATH.indexOf(t.id) >= 0) && !has("jets")) fixes.push(["Нужен подбор жиклёров — без него прибавки почти нет", "jets"]);
   if (gainAll >= 12 && eng.groups.indexOf("big") >= 0 && !has("clutch")) fixes.push(["Нужны усиленные пружины сцепления", "clutch"]);
@@ -17120,6 +17133,7 @@ function Tuning({
     if (!t.withBore) return;
     if (!t.withBore.split("|").some(id => has(id))) fixes.push([t.title.replace(/\s*\(.*?\)/g, "") + " — только вместе с бигбором, на стоке пропадёт низ", null]);
   });
+  if (eng.groups.indexOf("cvt") >= 0 && chosen.some(t => TUNE_BORE.indexOf(t.id) >= 0) && !has("cvt-rollers")) fixes.push(["Ролики вариатора подобрать заново — иначе мотор не выйдет на обороты мощности", "cvt-rollers"]);
   if (chosen.some(t => t.id === "filter")) fixes.push(["Нулевик пропитывать и чистить после 2–3 пыльных выездов", null]);
   if (wear.hi >= 25) fixes.push(["Масло менять в 1,5–2 раза чаще", null]);
   const fixItem = id => {

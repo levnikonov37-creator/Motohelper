@@ -1022,7 +1022,7 @@ const TUNE_PAGES = [];
   const pr = (t) => (t.hi === 0 ? "своими руками" : t.lo != null ? (t.lo === t.hi ? "" : t.lo.toLocaleString("ru-RU") + "–") + t.hi.toLocaleString("ru-RU") + " ₽" : t.price ? t.price.toLocaleString("ru-RU") + " ₽" : "");
   const sum = (list) => { const lo = list.reduce((s, t) => s + (t.svc ? 0 : t.lo != null ? t.lo : t.price || 0), 0), hi = list.reduce((s, t) => s + (t.svc ? 0 : t.hi != null ? t.hi : t.price || 0), 0); return (lo === hi ? "" : lo.toLocaleString("ru-RU") + "–") + hi.toLocaleString("ru-RU") + " ₽"; };
   const note = (t, e) => { const k = t.notes && Object.keys(t.notes).find((x) => x === e.id || (e.groups || []).indexOf(x) >= 0); return k ? t.notes[k] : ""; };
-  const NODES = [["engine", "Цилиндр и мотор"], ["fuel", "Карбюратор"], ["exhaust", "Выхлоп"], ["filter", "Воздушный фильтр и впуск"], ["ign", "Зажигание"], ["cool", "Охлаждение"], ["drive", "Звёзды и сцепление"]];
+  const NODES = [["engine", "Цилиндр и мотор"], ["cvt", "Вариатор и сцепление"], ["fuel", "Карбюратор"], ["exhaust", "Выхлоп"], ["filter", "Воздушный фильтр и впуск"], ["ign", "Зажигание"], ["cool", "Охлаждение"], ["drive", "Звёзды и сцепление"]];
   const isBore = (t) => /^bore/.test(t.id), isSwap = (t) => /^swap/.test(t.id);
   const ids = engIds.filter(tuneEligible);
   ids.forEach((id) => {
@@ -1039,10 +1039,12 @@ const TUNE_PAGES = [];
     const bores = (by.engine || []).filter(isBore), swaps = (by.engine || []).filter(isSwap);
     const tF = (x) => ok.find((t) => t.id === x);
     /* две готовые ступени */
-    const quick = [lad[Math.min(1, lad.length - 1)] || (row && tF(row.up)), tF("filter"), tF("jets"), tF("airbox")].filter(Boolean);
+    /* скутер: «резвее» — ролики, пружины и ограничители; «мощнее» — ЦПГ Ø47 с карбюратором и роликами под неё */
+    const cvt = (e.groups || []).indexOf("cvt") >= 0;
+    const quick = (cvt ? [tF("cvt-unlock"), tF("cvt-rollers"), tF("cvt-spring"), tF("filter"), tF("jets")] : [lad[Math.min(1, lad.length - 1)] || (row && tF(row.up)), tF("filter"), tF("jets"), tF("airbox")]).filter(Boolean);
     const boreMain = (row && tF(row.bore)) || bores.sort((a, b) => b.power - a.power)[0];
     const exh = (by.exhaust || []).filter((t) => /^ex-|^pipe$|^full$/.test(t.id)).sort((a, b) => (a.lo || a.price) - (b.lo || b.price))[0];
-    const power = [boreMain || swaps[0], row && boreMain && tF(row.boreCarb), tF("jets"), exh, tF("oilcool") || tF("fan"), (e.groups || []).indexOf("big") >= 0 && tF("clutch")].filter(Boolean)
+    const power = (cvt ? [boreMain, tF("carb-2t-175"), tF("jets"), exh, tF("cvt-rollers"), tF("cvt-kit")] : [boreMain || swaps[0], row && boreMain && tF(row.boreCarb), tF("jets"), exh, tF("oilcool") || tF("fan"), (e.groups || []).indexOf("big") >= 0 && tF("clutch")]).filter(Boolean)
       .filter((t, i, a) => a.indexOf(t) === i);
     const ccTxt = (t) => { const m = /Ø(\d+(?:\.\d+)?)/.exec(t.title); const cc = m && ctx.boreCc(id, parseFloat(m[1])); return cc ? " (≈ " + cc + " см³)" : ""; };
     const item = (t) => `<div class="tu-item"><div class="tu-top"><b>${esc(t.title)}</b><span class="cu-price">${esc(pr(t))}</span></div>${t.eff ? `<span class="cu-eff">${esc(t.eff)}</span>` : ""}${t.body ? `<p>${esc(t.body)}</p>` : ""}${note(t, e) ? `<p class="cu-spec">${esc(note(t, e))}</p>` : ""}${ctx.TUNE_GUIDE[t.id] ? `<a class="tu-g" href="/m/remont/${ctx.TUNE_GUIDE[t.id]}/">Как поставить →</a>` : ""}</div>`;
@@ -1050,12 +1052,19 @@ const TUNE_PAGES = [];
     const stock = [e.cc ? Math.round(e.cc) + " см³" : "", e.hp ? e.hp + " л.с." : "", e.carb ? "карбюратор " + String(e.carb).replace(/\s*\(.*$/, "") : "", geom ? "диаметр × ход " + geom[0] + " × " + geom[1] + " мм" : ""].filter(Boolean).join(" · ");
     /* как мотор называют люди: «NB300 (ZS174MN-5)», «NC250 (ZS177MM)» — так и ищут */
     const pop = String(AKA[id] || "").split(/\s+/).find((x) => /^[a-z]{2,3}\d{3}$/i.test(x) && String(e.code).toLowerCase().indexOf(x.toLowerCase()) < 0);
-    const name = pop ? pop.toUpperCase() + " (" + String(e.code).replace(/^ZS\s+/, "") + ")" : e.code;
+    /* скутеры ищут по модели: «тюнинг дио», «тюнинг джога» — в имени семейство моделей и код мотора */
+    const fams = {};
+    list.forEach((b) => { const f = b.brand + " " + String(b.name).split(/\s+/)[0]; fams[f] = (fams[f] || 0) + 1; });
+    const fam = Object.keys(fams).filter((f) => !/Любая/i.test(f)).sort((a, b) => fams[b] - fams[a]).slice(0, 2);
+    const famTxt = fam.length === 2 && fam[0].split(" ")[0] === fam[1].split(" ")[0] ? fam[0] + ", " + fam[1].split(" ").slice(1).join(" ") : fam.join(", ");
+    const name = cvt && (e.groups || []).indexOf("cn") >= 0 ? "скутера " + e.code : cvt && fam.length ? famTxt + " (" + String(e.code).replace(/\s*\(.*\)$/, "") + ")" : pop ? pop.toUpperCase() + " (" + String(e.code).replace(/^ZS\s+/, "") + ")" : e.code;
     const faq = [
       bores.length && ["Какой бигбор поставить на " + name + "?", bores.map((t) => t.title + ccTxt(t) + ", " + pr(t)).join("; ") + ". Объём посчитан по штатному ходу поршня: «300» или «350» в названии у продавцов — не объём."],
       lad.length && ["Какой карбюратор поставить на " + name + ", чтобы был резвее?", "По порядку: " + lad.map((t) => t.title.replace(/^Карбюратор\s*/, "")).join(" → ") + ". " + ((row.nuance || [])[0] || row.tip || "")],
       power.length && ["Сколько стоит тюнинг " + name + "?", (quick.length ? "Резвее без вскрытия мотора: " + sum(quick) + ". " : "") + "Мощнее (" + power.map((t) => t.title.replace(/\s*\(.*?\)/g, "")).join(", ") + "): " + sum(power) + " за детали, без установки."],
-      boreMain && ["Что поменять вместе с бигбором на " + name + "?", [row && row.boreNote, tF("jets") && "Подбор главного жиклёра и иглы по свече", (tF("oilcool") || tF("fan")) && "охлаждение (" + (tF("oilcool") || tF("fan")).title.toLowerCase() + ")", (e.groups || []).indexOf("big") >= 0 && "усиленные пружины сцепления", "обкатка 300–500 км"].filter(Boolean).join("; ") + "."]
+      cvt && tF("cvt-rollers") && ["Какие ролики поставить на " + name + ", чтобы был резвее?", "Легче штатных на 1–2 г — бодрее разгон и в горку, максималка чуть ниже; тяжелее — наоборот. Меняют весь комплект, вес подбирают шагом 0.5–1 г. С ЦПГ 70/72 ролики подбирают заново — обычно на 0.5–1 г тяжелее."],
+      cvt && tF("cvt-unlock") && ["Как снять ограничение скорости на " + name + "?", tF("cvt-unlock").body + " Учти: мопед по ПДД — до 50 км/ч по конструкции."],
+      boreMain && !cvt && ["Что поменять вместе с бигбором на " + name + "?", [row && row.boreNote, tF("jets") && "Подбор главного жиклёра и иглы по свече", (tF("oilcool") || tF("fan")) && "охлаждение (" + (tF("oilcool") || tF("fan")).title.toLowerCase() + ")", (e.groups || []).indexOf("big") >= 0 && "усиленные пружины сцепления", "обкатка 300–500 км"].filter(Boolean).join("; ") + "."]
     ].filter(Boolean);
     const sections = NODES.filter((n) => (by[n[0]] || []).length).map((n) => {
       let L = by[n[0]];
@@ -1068,10 +1077,10 @@ const TUNE_PAGES = [];
     const crumbs = [["MotoHelper", "/"], ["Моторы", "/m/motor/"], [name, "/m/motor/" + slug + "/"], ["Тюнинг", null]];
     const app = appLink(list[0], list[0].versions.findIndex((v) => v.engine === id)) + "&r=tune";
     const body = `<section class="hero"><div class="kick">Тюнинг мотора · ${esc(ctx.TUNE_CLASS_T[cls] || "")}</div><h1>Тюнинг ${esc(name)}</h1>
-<p class="lead">${esc(e.name || name)}: что реально ставят для прибавки мощности — ЦПГ (бигбор), карбюратор, выхлоп, фильтр, зажигание. Объём после расточки посчитан по ходу поршня, цены — за деталь без установки.</p>
+<p class="lead">${esc(e.name || name)}: ${cvt ? "что реально ставят на скутер — ролики и пружины вариатора, снятие ограничителей, ЦПГ побольше, карбюратор, выхлоп. Объём ЦПГ посчитан по ходу поршня" : "что реально ставят для прибавки мощности — ЦПГ (бигбор), карбюратор, выхлоп, фильтр, зажигание. Объём после расточки посчитан по ходу поршня"}, цены — за деталь без установки.</p>
 <p class="small">С завода: ${esc(stock)}.</p>
 <nav class="jump">${NODES.filter((n) => (by[n[0]] || []).length).map((n) => `<a href="#${n[0]}">${n[1]}</a>`).join("")}</nav></section>
-<section class="ver"><div class="tu-stages">${stage("Резвее — мотор не вскрывать", "Отклик и разгон: карбюратор, фильтр, жиклёры.", quick)}${stage("Мощнее — с бигбором", "Больше объёма и всё, что для этого нужно.", power)}</div>
+<section class="ver"><div class="tu-stages">${stage("Резвее — мотор не вскрывать", cvt ? "Разгон и скорость: вариатор, ограничители, фильтр." : "Отклик и разгон: карбюратор, фильтр, жиклёры.", quick)}${stage(cvt ? "Мощнее — ЦПГ побольше" : "Мощнее — с бигбором", "Больше объёма и всё, что для этого нужно.", power)}</div>
 ${sections}
 <p class="note">Прибавка в процентах — оценка на коленвале при правильно подобранной смеси; на колесе на 10–15% меньше. Без подбора жиклёров прибавки почти нет, а мотор перегревается.</p>
 <a class="cta" href="${app}">Собрать свой проект тюнинга в приложении →</a></section>
@@ -1079,14 +1088,14 @@ ${sections}
 <h2>Мотоциклы с мотором ${esc(name)}</h2><div class="chips">${list.slice(0, 24).map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div>
 <div class="chips"><a class="chip" href="/m/motor/${slug}/">Масло, свечи, зазоры ${esc(name)} →</a><a class="chip" href="/m/tuning/">Тюнинг других моторов</a></div>`;
     const desc = `Тюнинг ${name}: ${bores.length ? "бигбор " + bores.map((t) => (/Ø\d+/.exec(t.title) || [""])[0] + ccTxt(t)).join(", ") + ", " : ""}${lad.length ? "карбюратор " + lad.map((t) => t.title.replace(/^Карбюратор\s*/, "").replace(/\s*(вместо|под)\s.*$/, "")).slice(0, 3).join(" / ") + ", " : ""}выхлоп, фильтр${bores.length || lad.length ? "" : ", жиклёры, зажигание и охлаждение"} — что даёт и сколько стоит.`;
-    files.set("m/motor/" + slug + "/tuning/index.html", page({ title: pickTitle("Тюнинг " + name, bores.length ? [": бигбор, карбюратор, выхлоп — цены | MotoHelper", ": бигбор, карбюратор, выхлоп", " — что даёт и сколько стоит"] : [": карбюратор, выхлоп, фильтр — цены | MotoHelper", ": карбюратор, выхлоп, фильтр", " — что даёт и сколько стоит"]), desc, canon, crumbs, body, sticky: app,
+    files.set("m/motor/" + slug + "/tuning/index.html", page({ title: pickTitle("Тюнинг " + name, cvt ? [": вариатор, ЦПГ, карбюратор — цены | MotoHelper", ": вариатор, ЦПГ, карбюратор", " — что даёт и сколько стоит"] : bores.length ? [": бигбор, карбюратор, выхлоп — цены | MotoHelper", ": бигбор, карбюратор, выхлоп", " — что даёт и сколько стоит"] : [": карбюратор, выхлоп, фильтр — цены | MotoHelper", ": карбюратор, выхлоп, фильтр", " — что даёт и сколько стоит"]), desc, canon, crumbs, body, sticky: app,
       ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: "Тюнинг " + name, url: canon, inLanguage: "ru", description: desc }].concat(faq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] : []) }));
     TUNE_PAGES.push({ id, slug, name, n: list.length, bores, lad, canon });
   });
   /* каталог: /m/tuning/ */
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Тюнинг моторов", null]];
   const rows = TUNE_PAGES.slice().sort((a, b) => b.n - a.n);
-  const body = `<section class="hero"><div class="kick">Тюнинг</div><h1>Тюнинг моторов питбайков, эндуро и мопедов</h1>
+  const body = `<section class="hero"><div class="kick">Тюнинг</div><h1>Тюнинг моторов питбайков, эндуро, мопедов и скутеров</h1>
 <p class="lead">Что реально ставят на популярные моторы для прибавки мощности: бигбор (с честным объёмом по ходу поршня), карбюратор побольше, выхлоп, фильтр, зажигание — с ценами и нюансами.</p></section>
 <div class="grid models">${rows.map((r) => `<a class="card" href="/m/motor/${r.slug}/tuning/"><b>Тюнинг ${esc(r.name)}</b><small>${r.n} ${plural(r.n, "модель", "модели", "моделей")}${r.bores.length ? " · бигбор " + esc((/Ø\d+/.exec(r.bores[0].title) || [""])[0]) : ""}${r.lad.length ? " · " + esc(r.lad[0].title.replace(/^Карбюратор\s*/, "").replace(/\s*(вместо|под)\s.*$/, "")) : ""}</small></a>`).join("")}</div>`;
   files.set("m/tuning/index.html", page({ title: "Тюнинг моторов 172FMM, NB300, PR300, NC250: бигбор, карбюратор, выхлоп | MotoHelper", desc: "Тюнинг " + rows.slice(0, 6).map((r) => r.name).join(", ") + " и других моторов: бигбор с честным объёмом, карбюратор побольше, выхлоп — что даёт и сколько стоит.", canon: SITE + "m/tuning/", crumbs, body, ld: [crumbLd(crumbs)] }));
