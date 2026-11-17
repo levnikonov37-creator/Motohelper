@@ -277,7 +277,7 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 ${body}
 ${ask ? askBlock(ask) : ""}
 ${AD}
-<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a> · <a href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a></footer>
+<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/m/polomka/">Неисправности</a> · <a href="/m/remont/">Инструкции</a> · <a href="/m/motor/">Моторы</a> · <a href="/m/tuning/">Тюнинг</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a> · <a href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a></footer>
 </main>
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}
 ${js ? `<script>${js}</script>` : ""}
@@ -600,7 +600,7 @@ ${types.length > 1 ? `<div class="chips"><button class="chip on" data-f="*">Вс
   const body = `<section class="hero"><div class="kick">Справочник</div><h1>Каталог мотоциклов</h1>
 <p class="lead">Мотоциклы, питбайки и мопеды: мотор, масло и сколько заливать, свечи, зазоры клапанов, жиклёры и слабые места.</p>
 <div class="chips"><span class="chip">${BIKES.length} ${plural(BIKES.length, "модель", "модели", "моделей")}</span><span class="chip">${brands.length} ${plural(brands.length, "марка", "марки", "марок")}</span><span class="chip">${ENG_N} ${plural(ENG_N, "мотор", "мотора", "моторов")}</span></div></section>
-<div class="grid" style="margin-bottom:14px"><a class="card big" href="/m/polomka/"><b>Неисправности</b></a><a class="card big" href="/m/remont/"><b>Инструкции</b></a><a class="card big" href="/m/motor/"><b>Моторы</b></a><a class="card big" href="/m/maslo/"><b>Масло по моторам</b></a><a class="card big" href="/m/svechi/"><b>Свечи по моторам</b></a><a class="card big" href="/m/klapany/"><b>Зазоры клапанов</b></a><a class="card big" href="/m/podborka/"><b>Подборки</b></a><a class="card big" href="/m/sravnenie/"><b>Сравнения</b></a></div>
+<div class="grid" style="margin-bottom:14px"><a class="card big" href="/m/polomka/"><b>Неисправности</b></a><a class="card big" href="/m/remont/"><b>Инструкции</b></a><a class="card big" href="/m/motor/"><b>Моторы</b></a><a class="card big" href="/m/tuning/"><b>Тюнинг по моторам</b></a><a class="card big" href="/m/maslo/"><b>Масло по моторам</b></a><a class="card big" href="/m/svechi/"><b>Свечи по моторам</b></a><a class="card big" href="/m/klapany/"><b>Зазоры клапанов</b></a><a class="card big" href="/m/podborka/"><b>Подборки</b></a><a class="card big" href="/m/sravnenie/"><b>Сравнения</b></a></div>
 <div class="search">${SEARCH_ICON}<input id="q" type="search" placeholder="Найти модель: «Kayo T2», «CRF250», «174»" autocomplete="off" aria-label="Поиск модели" /></div>
 <div id="res" class="grid models res"></div>
 ${showcase()}
@@ -662,7 +662,7 @@ ${fbBlock("", e.code + " [" + id + "]", ["Масло", "Объём масла", 
   engIds.forEach((id) => { const l = String(ENGINES[id].code)[0].toUpperCase(); (byLetter[l] = byLetter[l] || []).push(id); });
   const card = (id) => { const e = ENGINES[id]; return `<a class="card" href="/m/motor/${engSlug[id]}/"><b>${esc(e.code)}</b><small>${[e.cc ? e.cc + " см³" : "", bikesOf[id].length + " " + plural(bikesOf[id].length, "модель", "модели", "моделей")].filter(Boolean).join(" · ")}</small></a>`; };
   const body = `<section class="hero"><div class="kick">Справочник</div><h1>Моторы</h1><p class="lead">${engIds.length} ${plural(engIds.length, "мотор", "мотора", "моторов")}: масло и объём, свечи, зазоры клапанов, жиклёры, слабые места и на каких мотоциклах стоят.</p></section>
-<div class="chips"><a class="chip" href="/m/maslo/">Масло: таблица по моторам</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>
+<div class="chips"><a class="chip" href="/m/maslo/">Масло: таблица по моторам</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a><a class="chip" href="/m/tuning/">Тюнинг: бигбор, карбюратор, вариатор</a></div>
 <h2>Самые распространённые</h2><div class="grid">${popular.slice(0, 24).map(card).join("")}</div>
 <h2>Все моторы</h2>${Object.keys(byLetter).sort(abc).map((l) => `<div class="letter">${esc(l)}</div><div class="grid">${byLetter[l].map(card).join("")}</div>`).join("")}`;
   files.set("m/motor/index.html", page({ title: "Моторы мотоциклов и питбайков: масло, свечи, зазоры клапанов | MotoHelper", desc: `${engIds.length} моторов — 172FMM, 174MN, PR300, NC250 и другие: масло и объём, свечи, зазоры клапанов, слабые места.`, canon: SITE + "m/motor/", crumbs, body, ld: [crumbLd(crumbs)] }));
