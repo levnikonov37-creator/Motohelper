@@ -8798,6 +8798,74 @@ CL("NB350", "NB300", { code: "NB350", name: "Zongshen NB350 (315 см³)", cc: 3
   if (c520) { c520.fit = by(0, 520); c520x.fit = by(0, 520); }
   PARTS.push(P("ch-525", "Цепь 525 X-ring (110–120 звеньев)", 6500, "Трансмиссия", "chain", by(520, 900)), P("ch-530", "Цепь 530 X-ring (110–120 звеньев)", 8500, "Трансмиссия", "chain", by(900, 3000)));
 })();
+/* ===================== v40: один мопед — одна модель ===================== */
+/* Мопед «Альфа» продают под разными названиями: Alpha 50, Alpha 110, Alpha Lux 110, Alpha RX 11, Alpha RX 125… —
+   это одна машина с разными моторами, а в поиске она стояла шестью одинаковыми строками. Теперь — одна модель,
+   версии по объёму мотора. Так же склеены Racer Alpha / Scout, Irbis Virago и Stels Delta.
+   vers: [[подпись версии, мотор, [старое название | [старое название, номер версии в старой записи]]], ...]
+   Старые ключи — в BIKE_ALIASES (старые ссылки «#bike=…») и BIKE_ALIASES_V40: по ним js/app.js переносит
+   сохранённый выбор и журнал ТО у тех, у кого перенос v19 уже прошёл. Старые названия — в b.aka, поиск их находит */
+var BIKE_ALIASES_V40 = {};
+function mergeFamily(brand, name, vers) {
+  var olds = [], at = BIKES.length, type = null, map = {};
+  vers.forEach(function (v) { v[2].forEach(function (o) { var n = typeof o === "string" ? o : o[0]; if (olds.indexOf(n) < 0) olds.push(n); }); });
+  var find = function (n) { return BIKES.findIndex(function (b) { return b.brand === brand && b.name === n; }); };
+  olds.forEach(function (n) {
+    var i = find(n);
+    if (i < 0) throw new Error("mergeFamily: нет модели " + brand + " " + n);
+    at = Math.min(at, i); type = type || BIKES[i].type;
+  });
+  var versions = vers.map(function (v, vi) {
+    if (!ENGINES[v[1]]) throw new Error("mergeFamily: нет двигателя " + v[1]);
+    var extra = null;
+    v[2].forEach(function (o) {
+      var n = typeof o === "string" ? o : o[0], ov = typeof o === "string" ? 0 : o[1], src = BIKES[find(n)].versions[ov];
+      if (!src || src.engine !== v[1]) throw new Error("mergeFamily: " + brand + " " + n + " — у версии " + ov + " другой мотор");
+      if (!extra) { extra = Object.assign({}, src); delete extra.engine; delete extra.label; delete extra.years; }
+      (map[n] = map[n] || [])[ov] = vi;
+    });
+    return Object.assign(extra || {}, { engine: v[1], label: v[0] });
+  });
+  olds.forEach(function (n) {
+    var m = map[n], b = BIKES[find(n)];
+    for (var k = 0; k < b.versions.length; k++) if (m[k] == null) throw new Error("mergeFamily: " + brand + " " + n + " — версия " + k + " никуда не попала");
+    var a = m.length > 1 ? [brand + " " + name, m[0], m] : [brand + " " + name, m[0]];
+    BIKE_ALIASES[brand + " " + n] = a; BIKE_ALIASES_V40[brand + " " + n] = a;
+  });
+  var merged = { brand: brand, name: name, type: type, versions: versions, aka: olds.filter(function (n) { return n !== name; }) };
+  var rest = BIKES.filter(function (b) { return b.brand !== brand || olds.indexOf(b.name) < 0; });
+  olds.forEach(function (n) { delete BIKE_KEYS[brand + "|" + n]; });
+  if (BIKE_KEYS[brand + "|" + name]) throw new Error("mergeFamily: модель " + brand + " " + name + " уже есть");
+  BIKES.length = 0;
+  rest.forEach(function (b, i) { if (i === at) BIKES.push(merged); BIKES.push(b); });
+  if (at >= rest.length) BIKES.push(merged);
+  BIKE_KEYS[brand + "|" + name] = true;
+}
+mergeFamily("Motoland", "Alpha", [
+  ["50 см³ · Alpha 50, RX 11", "139FMB", ["Alpha 50", ["Alpha RX11", 0]]],
+  ["72 см³ · Alpha 72", "147FMD", ["Alpha 72"]],
+  ["110 см³ · Alpha 110, Lux 110, RX 11", "152FMH", ["Alpha 110", "Alpha Lux 110", ["Alpha RX11", 1]]],
+  ["125 см³ · RX 125, RX 11", "154FMI", ["Alpha RX 125", ["Alpha RX11", 2]]]
+]);
+mergeFamily("Racer", "Alpha", [
+  ["50 см³ · RC50", "139FMB", ["Alpha RC50"]],
+  ["110 см³ · RC110N", "152FMH", ["Alpha RC110N"]],
+  ["125 см³ · RC125N", "154FMI", ["Alpha RC125N"]]
+]);
+mergeFamily("Racer", "Scout", [
+  ["50 см³ · RC50-H, Lux RC50S", "139FMB", ["Scout RC50-H", "Scout Lux RC50S"]],
+  ["110 см³ · RC110N-H", "152FMH", ["Scout RC110N-H"]]
+]);
+mergeFamily("Irbis", "Virago", [
+  ["110 см³ · Virago, Black Edition", "152FMH", ["Virago 110", "Virago Black Edition"]],
+  ["125 см³ · Virago II", "154FMI", ["Virago II 125"]]
+]);
+mergeFamily("Stels", "Delta", [
+  ["50 см³ · Delta 50", "139FMB", ["Delta 50"]],
+  ["125 см³ · Delta 125", "154FMI", ["Delta 125"]]
+]);
+/* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
+BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
 sortBikes();
 /* ===================== v26: детали 174 и 182 больше не путаются ===================== */
 /* Детали мотора подписаны его кодом. NB300 сначала по ошибке был заведён как ZS182MN, код исправили на ZS174MN-5

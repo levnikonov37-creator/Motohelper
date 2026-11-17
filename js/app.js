@@ -22,8 +22,11 @@ function save(key, val) {
 /* Перенос сохранений на новые ключи моделей (BIKE_ALIASES в js/data.js).
    Выполняется один раз на устройстве; старые записи вида «Марка Модель» и «Марка Модель|0»
    становятся «Марка НоваяМодель» и «Марка НоваяМодель|номер версии». */
-function migrateBikeKeys() {
-  var flag = "mh2-keys-v19", A = typeof BIKE_ALIASES === "object" ? BIKE_ALIASES : {};
+/* a = [новый ключ, номер версии] или [новый ключ, номер версии, [старая версия → новая]] (мопеды-«семьи» v40) */
+function aliasVi(a, vi) {
+  return a[2] && a[2][vi] != null ? a[2][vi] : a[1];
+}
+function migrateBikeKeys(flag, A) {
   try {
     if (localStorage.getItem(flag)) return;
     var str = function (s) {
@@ -33,7 +36,7 @@ function migrateBikeKeys() {
       for (var i = 0; i < p.length; i++) if (A[p[i]]) {
         var a = A[p[i]];
         p[i] = a[0];
-        if (/^\d+$/.test(p[i + 1] || "")) p[i + 1] = String(a[1]);
+        if (/^\d+$/.test(p[i + 1] || "")) p[i + 1] = String(aliasVi(a, +p[i + 1]));
       }
       return p.join("|");
     };
@@ -43,7 +46,7 @@ function migrateBikeKeys() {
       if (!v || typeof v !== "object") return v;
       var o = {};
       Object.keys(v).forEach(function (k) { o[str(k)] = walk(v[k]); });
-      if (typeof v.key === "string" && A[v.key] && "vi" in v) o.vi = A[v.key][1];
+      if (typeof v.key === "string" && A[v.key] && "vi" in v) o.vi = aliasVi(A[v.key], +v.vi || 0);
       return o;
     };
     for (var i = 0; i < localStorage.length; i++) {
@@ -57,7 +60,10 @@ function migrateBikeKeys() {
     localStorage.setItem(flag, "1");
   } catch (e) {}
 }
-migrateBikeKeys();
+migrateBikeKeys("mh2-keys-v19", typeof BIKE_ALIASES === "object" ? BIKE_ALIASES : {});
+/* второй перенос — только новые склейки: у кого v19 уже прошёл, старые ключи v19 второй раз не трогаем
+   (там есть «Honda CRF450R» → «Honda CRF450R», версия 2 — повтор испортил бы выбор) */
+migrateBikeKeys("mh2-keys-v40", typeof BIKE_ALIASES_V40 === "object" ? BIKE_ALIASES_V40 : {});
 /* «2002–2008» → «2002 2003 … 2008», «2023+» → до текущего года: чтобы поиск находил модель по году выпуска */
 function bfYears(y) {
   if (!y) return "";
@@ -1911,7 +1917,7 @@ function BikeFinder({
   const aka = id => typeof ENGINE_AKA === "object" && ENGINE_AKA[id] || "";
   const idx = useMemo(() => BIKES.map(b => ({
     b: b,
-    s: bfNorm(b.brand + " " + b.name + " " + b.type + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ") + " " + b.versions.map(v => bfYears(v.years) + " " + (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name + " " + aka(v.engine)).join(" "))
+    s: bfNorm(b.brand + " " + b.name + " " + (b.aka || []).join(" ") + " " + b.type + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ") + " " + b.versions.map(v => bfYears(v.years) + " " + (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name + " " + aka(v.engine)).join(" "))
   })), []);
   /* Моторы: сколько моделей на каждом, строка для поиска с синонимами («174», «нб300», «зонгшен») */
   const engIdx = useMemo(() => {
@@ -1993,7 +1999,7 @@ function BikeFinder({
     /* выше — модели, у которых слова запроса есть в самом названии, целыми словами («k1 300» → Kayo K1 300, а не BMW K 1300) */
     const ta = toks.map(bfAlts);
     const sc = b => {
-      const words = (b.brand + " " + b.name + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ")).toLowerCase().split(/[\s\/()+,]+/).map(bfNorm).filter(Boolean),
+      const words = (b.brand + " " + b.name + " " + (b.aka || []).join(" ") + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ")).toLowerCase().split(/[\s\/()+,]+/).map(bfNorm).filter(Boolean),
         nm = bfNorm(b.brand + " " + b.name);
       let sum = ta.reduce((sum, alts) => sum + Math.max.apply(null, alts.map(a => words.indexOf(a) >= 0 ? 4 : words.some(w => w.indexOf(a) === 0) ? 3 : words.some(w => a.indexOf(w) === 0 && w.length >= 2) ? 2 : nm.indexOf(a) >= 0 ? 1 : 0)), 0);
       /* два слова подряд вместе — одно слово названия («св 400» → CB400, «мт 09» → MT-09) */
@@ -18060,7 +18066,7 @@ function bikeFromHash() {
     const al = typeof BIKE_ALIASES === "object" && BIKE_ALIASES[key];
     if (al) {
       key = al[0];
-      vi = al[1];
+      vi = aliasVi(al, vi);
     }
     const b = BIKES.find(x => bikeKey(x) === key);
     if (!b) return null;

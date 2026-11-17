@@ -536,7 +536,7 @@ BIKES.forEach((b) => {
   const ru = BRAND_RU[b.brand], fullRu = ru ? ru + " " + b.name : "";
   const body = `<section class="hero"><div class="kick">${esc(b.brand)}${ru ? " (" + esc(ru) + ")" : ""} · ${esc(b.type)}</div><h1>${esc(b.name)}</h1>
 <p class="lead">Мотор ${esc(e0.code)}${e0.cc ? ", " + e0.cc + " см³" : ""}${e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с" : ""}. Какое масло и сколько, свеча, зазоры клапанов, жиклёры и слабые места${b.versions.length > 1 ? " — по поколениям" : ""}.</p>
-${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}${photoOf(b) ? `<figure class="mphoto"><img src="${photoOf(b)}" alt="${esc(full)}" width="800" height="500" fetchpriority="high"></figure>` : ""}</section>
+${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}${b.aka && b.aka.length ? `<p class="note">У продавцов эта модель называется по-разному: ${esc(b.aka.map((n) => b.brand + " " + n).join(", "))}. Это одна машина — версии отличаются только мотором.</p>` : ""}${photoOf(b) ? `<figure class="mphoto"><img src="${photoOf(b)}" alt="${esc(full)}" width="800" height="500" fetchpriority="high"></figure>` : ""}</section>
 ${vers}
 ${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>` : ""}
 ${probBikes.has(b) ? "" : `<h2>Если что-то не так</h2><div class="chips">${probsFor(b).slice(0, 8).map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>`}
@@ -991,6 +991,36 @@ const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "
   [SITE + "m/podborka/", SITE + "m/sravnenie/"], HUBS, podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
 const hi = 5 + brands.length + GUIDES.length + DIAG.length;
 files.set("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${u}</loc><changefreq>${i ? "monthly" : "weekly"}</changefreq><priority>${i === 0 ? "1.0" : i < hi ? "0.7" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
+
+/* склеенные модели (мопеды-«семьи», v40): старые адреса не пропадают — короткие страницы-переадресации
+   на общую модель (и на её страницы поломок, сравнения — если такие есть) */
+const A40 = ctx.BIKE_ALIASES_V40 || {}, OLD40 = {};
+Object.keys(A40).forEach((old) => {
+  const os = slugify(old), b = BIKES.find((x) => x.brand + " " + x.name === A40[old][0]);
+  if (b && !used[os]) OLD40[os] = [old, bikeSlug.get(b), b.brand + " " + b.name];
+});
+const redirect = (f, name, to, title) => files.has(f) || files.set(f, `<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8" /><title>${esc(name)} → ${esc(title)} — MotoHelper</title>
+<meta name="robots" content="noindex, follow" /><link rel="canonical" href="${SITE}${to.slice(1)}" />
+<meta http-equiv="refresh" content="0; url=${to}" /><script>location.replace(${JSON.stringify(to)} + location.hash)</script></head>
+<body><p>${esc(name)} теперь на странице <a href="${to}">${esc(title)}</a> — это одна модель, версии отличаются мотором.</p></body></html>
+`);
+const subdirs = (d) => { try { return fs.readdirSync(path.join(OUT, d), { withFileTypes: true }).filter((x) => x.isDirectory()).map((x) => x.name); } catch (e) { return []; } };
+Object.keys(OLD40).forEach((os) => {
+  const [old, ns, title] = OLD40[os];
+  redirect("m/" + os + "/index.html", old, "/m/" + ns + "/", title);
+  subdirs(os).forEach((sub) => {
+    const to = files.has("m/" + ns + "/" + sub + "/index.html") ? "/m/" + ns + "/" + sub + "/" : "/m/" + ns + "/";
+    redirect("m/" + os + "/" + sub + "/index.html", old, to, title);
+  });
+});
+subdirs("sravnenie").forEach((d) => {
+  const p = d.split("-vs-");
+  if (p.length !== 2 || !(OLD40[p[0]] || OLD40[p[1]]) || files.has("m/sravnenie/" + d + "/index.html")) return;
+  const n = p.map((x) => (OLD40[x] ? OLD40[x][1] : x)), pair = [n.join("-vs-"), n[1] + "-vs-" + n[0]].find((x) => files.has("m/sravnenie/" + x + "/index.html"));
+  const first = OLD40[p[0]] || OLD40[p[1]];
+  redirect("m/sravnenie/" + d + "/index.html", "Сравнение " + p.join(" и "), pair ? "/m/sravnenie/" + pair + "/" : "/m/" + first[1] + "/", pair ? "сравнение" : first[2]);
+});
 
 /* сверка / запись: лишние старые страницы удаляем */
 const existing = [];
