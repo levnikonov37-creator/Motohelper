@@ -1711,9 +1711,9 @@ const BF_ALIAS = {
   "фрирайд": "freeride",
   "эксцэ": "exc",
   "спортстар": "sportster",
-  "самакс": "sharmax",
+  "самакс": "samax",
+  "сэмакс": "samax",
   "шармакс": "sharmax",
-  "samax": "sharmax",
   "мотоленд": "motoland",
   "мотолэнд": "motoland",
   "прогаси": "progasi",
@@ -1804,7 +1804,10 @@ const BF_ALIAS = {
   "скайвэй": "skyway",
   "дакар": "dakar",
   "эксклюзив": "exclusive",
-  "лайт": "lite"
+  "лайт": "lite",
+  "люкс": "lux",
+  "лакс": "lux",
+  "лукс": "lux"
 };
 /* народные названия моделей: добавляются к словам поиска у подходящих моделей */
 const BF_WORDS = [[/GSX-R/i, "gixxer джиксер"], [/Hayabusa|GSX1300R/i, "хаябуса"], [/Drag ?Star/i, "dragstar драгстар"], [/V-Strom/i, "вистром"], [/Ninja/i, "ниндзя"], [/Bandit/i, "бандит"], [/Intruder/i, "интрудер"], [/Africa Twin/i, "африка"], [/Transalp/i, "трансальп"], [/Fat ?Boy/i, "фэтбой фетбой"], [/Sportster/i, "спортстер"], [/Shadow/i, "шадоу шедоу"], [/Steed/i, "стид"], [/Virago/i, "вираго"], [/Serow/i, "серов сероу"], [/Ténéré|Tenere/i, "тенере"], [/Duke/i, "дюк"], [/Monster/i, "монстр"]];
@@ -2077,15 +2080,19 @@ function BikeFinder({
       className: "bf-brand-s"
     }, b.brand, on ? " · выбран" : ""), /*#__PURE__*/React.createElement("b", null, c0.nick ? "«" + c0.nick + "» " : "", bfHl(b.name, q)), /*#__PURE__*/React.createElement("span", {
       className: "bf-meta"
-    }, e.code, v0.approx ? " ≈" : "", " \xB7 ", v0.hp || e.hp, " \u043B.\u0441. \xB7 ", e.cc, " \u0441\u043C\xB3")), /*#__PURE__*/React.createElement("span", {
+    }, b.aka && b.versions.length > 1 ? b.versions.length + " " + plural(b.versions.length, "вариант", "варианта", "вариантов") + " — выбери свой ниже" : [e.code, v0.approx ? " ≈" : "", " \xB7 ", v0.hp || e.hp, " \u043B.\u0441. \xB7 ", e.cc, " \u0441\u043C\xB3"])), /*#__PURE__*/React.createElement("span", {
       className: "bf-type"
     }, b.type), b.versions.length > 1 && /*#__PURE__*/React.createElement("div", {
       className: "bf-vers"
     }, b.versions.map((v, i) => {
       const ev = ENGINES[v.engine] || {};
+      /* вариант, который совпал с запросом («альфа рх» → версии с RX 11 / RX 125) — подсвечен */
+      const nm = bfNorm(b.brand + " " + b.name),
+        lb = bfNorm(v.label || ""),
+        hit = q && bfTokens(q).some(t => bfAlts(t).some(a => a.length >= 2 && lb.indexOf(a) >= 0 && nm.indexOf(a) < 0));
       return /*#__PURE__*/React.createElement("button", {
         key: i,
-        className: "chip",
+        className: "chip" + (hit ? " hit" : ""),
         onClick: () => pick(b, i)
       }, v.label || ev.code);
     })));
@@ -14594,17 +14601,34 @@ function siteSearch(q, ctx, opt) {
     }), "", 1, "p" + p.id, rub(p.price)));
     BIKES.forEach(b => {
       if (b.brand === "Любая модель") return;
-      const code = (ENGINES[b.versions[0].engine] || {}).code || "";
-      add("Мотоцикл", b.brand + " " + b.name, () => {
+      const open = vi => () => {
         ctx.switchBike({
           key: bikeKey(b),
-          vi: 0
+          vi: vi
         });
         window.scrollTo({
           top: 0,
           behavior: "smooth"
         });
-      }, code, 0, "b" + bikeKey(b), code);
+      };
+      const base = b.brand + " " + b.name,
+        aka = (b.aka || []).join(" ");
+      /* мопед-«семья» (Motoland Alpha: 50 / 72 / 110 / 125, Alpha Lux, RX 11…): если в запросе есть объём или название
+         варианта («альфа рх», «альфа 110», «альфа люкс») — строки именно этих версий, и открывается нужная;
+         иначе — одна строка со всеми объёмами */
+      if (b.versions.length > 1 && b.aka && b.aka.length) {
+        const rows = b.versions.map((v, vi) => ({
+          vi: vi,
+          t: base + " — " + v.label,
+          code: (ENGINES[v.engine] || {}).code || ""
+        }));
+        const sc = rows.map(r => srMatch(r.t, toks)),
+          best = Math.max.apply(null, sc);
+        if (best > srMatch(base, toks)) rows.forEach((r, i) => sc[i] === best && add("Мотоцикл", r.t, open(r.vi), r.code, 0, "b" + bikeKey(b) + "|" + r.vi, r.code));else add("Мотоцикл", base + " — " + b.versions.map(v => v.label.split(" · ")[0]).join(" / "), open(0), aka, 0, "b" + bikeKey(b), "");
+        return;
+      }
+      const code = (ENGINES[b.versions[0].engine] || {}).code || "";
+      add("Мотоцикл", base, open(0), code + (aka ? " " + aka : ""), 0, "b" + bikeKey(b), code);
     });
   }
   out.sort((a, b) => b.s - a.s);

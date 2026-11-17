@@ -104,6 +104,7 @@
   <url><loc>https://motohelper.ru/m/rockot/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://motohelper.ru/m/roliz/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://motohelper.ru/m/royal-enfield/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://motohelper.ru/m/samax/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://motohelper.ru/m/scorpa/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://motohelper.ru/m/sharmax/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://motohelper.ru/m/sherco/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -966,6 +967,8 @@
   <url><loc>https://motohelper.ru/m/fxmoto-x8-nb300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/fxmoto-pr300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/fxmoto-x7-nc300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fxmoto-storm-samax-ii-lux/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/fxmoto-storm-samax-ii-off-road/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-ec-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-ec-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-ec-250f/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2402,6 +2405,8 @@
   <url><loc>https://motohelper.ru/m/royal-enfield-continental-gt-535/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/royal-enfield-electra-350/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/royal-enfield-bullet-650/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/samax-alpha-sa-max-lux-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/samax-alpha-sa-max-offroad-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/scorpa-sc-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/scorpa-sc-250/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/scorpa-sc-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4084,6 +4089,7 @@
   <url><loc>https://motohelper.ru/m/podborka/skuter-110/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/sport-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/kross-enduro-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/podborka/moped-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/enduro-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/enduro-50/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/skuter-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -4101,7 +4107,6 @@
   <url><loc>https://motohelper.ru/m/podborka/turer-600/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/trial-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/legkiy-enduro-450/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/podborka/moped-125/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/podborka/kross-enduro-150/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sravnenie/regulmoto-sk200-6-vs-stels-sb-200/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sravnenie/motoland-xt300-hs-vs-kayo-k1-300/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
