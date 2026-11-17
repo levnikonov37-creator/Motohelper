@@ -9512,16 +9512,18 @@ function startTags(e) {
    Torch B8RC (pitland, motoprostore: «B8RC YBS300 Loncin»). Свечи-запчасти пересобираем,
    чтобы в «Запчастях» и в ТО была та же свеча, что в паспорте. */
 (function () {
+  /* свечи выбираем из ~27 тысяч деталей один раз, а не на каждый мотор */
+  var sparks = PARTS.filter(function (p) { return p.kind === "spark"; });
   function fixSpark(id, spark, gap) {
     var e = ENGINES[id];
     if (!e) return;
     e.spark = spark;
     if (gap) e.gap = gap;
-    PARTS.forEach(function (p) { if (p.kind === "spark" && p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (f) { return f !== id; }); });
-    var mine = PARTS.find(function (p) { return p.id === id + "-spark"; });
+    sparks.forEach(function (p) { if (p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (f) { return f !== id; }); });
+    var mine = sparks.find(function (p) { return p.id === id + "-spark"; });
     var name = "Свеча " + spark.split(" (")[0].split(" /")[0];
     if (mine) mine.name = name;
-    else { var p = P(id + "-spark", name, 600, "Расходники", "spark", [id]); p.info = "Под " + e.code; PARTS.unshift(p); }
+    else { var p = P(id + "-spark", name, 600, "Расходники", "spark", [id]); p.info = "Под " + e.code; PARTS.unshift(p); sparks.push(p); }
   }
   ["PR300", "FIXCN_PR300PRO", "FIXCN_PR300_5", "FIXCN_CB300RL_6"].forEach(function (id) { fixSpark(id, "NGK DR8EA", "0.6–0.7 мм"); });
   ["YX140", "1P60FMK"].forEach(function (id) { fixSpark(id, "A7TC (NGK C7HSA)", "0.6–0.7 мм"); });
@@ -9534,21 +9536,23 @@ function startTags(e) {
    Свеча-запчасть пересобирается под новую свечу (как в fixSpark выше). */
 function fixExact(FIX) {
   /* свечи выбираем из ~27 тысяч деталей один раз на вызов, а не на каждый мотор */
-  var sparks = PARTS.filter(function (p) { return p.kind === "spark"; }), own = {};
-  sparks.forEach(function (p) { if (!own[p.id]) own[p.id] = p; });
+  var sparks = PARTS.filter(function (p) { return p.kind === "spark"; }), own = {}, byFit = {};
+  /* какие свечи числятся за мотором — индекс, чтобы не перебирать все свечи на каждый мотор */
+  var index = function (p) { (p.fit || []).forEach(function (f) { (byFit[f] || (byFit[f] = [])).push(p); }); };
+  sparks.forEach(function (p) { if (!own[p.id]) own[p.id] = p; index(p); });
   Object.keys(FIX).forEach(function (id) {
     var e = ENGINES[id], f = FIX[id];
     if (!e) return;
     /* e.ex — какие поля сверены с руководством (завода или официального дилера): на сайте рядом с ними ✓ */
     Object.keys(f).forEach(function (k) { e[k] = f[k]; (e.ex || (e.ex = {}))[k] = 1; });
     if (!f.spark) return;
-    sparks.forEach(function (p) { if (p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (x) { return x !== id; }); });
+    (byFit[id] || []).forEach(function (p) { if (p.fit && p.fit.indexOf(id) >= 0 && p.id !== id + "-spark") p.fit = p.fit.filter(function (x) { return x !== id; }); });
     var mine = own[id + "-spark"];
     if (!mine) {
       if (ensureSpark.has) delete ensureSpark.has[id];
       ensureSpark(id, 1);
       mine = PARTS.find(function (p) { return p.id === id + "-spark"; });
-      if (mine) { sparks.push(mine); own[mine.id] = mine; }
+      if (mine) { sparks.push(mine); own[mine.id] = mine; index(mine); }
     }
     if (mine) mine.name = "Свеча " + f.spark.split(" (")[0].split(" /")[0].split(" +")[0].split(" ×")[0];
   });
