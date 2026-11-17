@@ -5,12 +5,12 @@
    страницу дольше 4 с, показываем сохранённую копию, а свежую кладём в кэш на следующий раз.
    ИИ-механику интернет нужен всегда. */
 // --- сборка (scripts/build-assets.js) пишет эти строки сама, руками не править ---
-const VERSION = "mh-e2b50537b9";
+const VERSION = "mh-427b2c4828";
 const BUILT = [
   "css/app.min.css?v=ff4b9b3aa6",
-  "js/data.min.js?v=2a1d19da7c",
+  "js/data.min.js?v=5430d27600",
   "js/kb.min.js?v=3a12f56961",
-  "js/app.min.js?v=609825590f",
+  "js/app.min.js?v=fc383574c4",
   "js/motion.min.js?v=ad93390c5d",
   "vendor/react.production.min.js?v=4b4969fa4e",
   "vendor/react-dom.production.min.js?v=21758ed084",

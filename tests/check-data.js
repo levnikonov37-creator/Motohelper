@@ -184,13 +184,17 @@ TUNING.forEach((t) => {
   }
 }
 
+// признаки мотора — без повторов
+for (const [id, e] of Object.entries(ENGINES)) if (new Set(e.groups).size !== e.groups.length) fail("Мотор " + id + ": повторяются признаки " + e.groups.join(","));
 // тюнинг под класс мотоцикла: защита картера — не для дорожного спорта, у мопеда — свой прямоток,
 // безымянного «slip-on» не предлагаем никому; у каждой доработки — узел из TUNE_NODES
 {
-  const by = (key) => BIKES.find((b) => b.brand + " " + b.name === key);
+  const by = (key) => BIKES.find((b) => b.brand + " " + b.name === key) || BIKES.find((b) => (b.brand + " " + b.name).indexOf(key) === 0);
   const okFor = (id, key) => { const b = by(key), t = TUNING.find((x) => x.id === id); return !!(b && t && ctx.tuningFor(t, ENGINES[b.versions[0].engine], b).ok); };
   const cases = [["skid", "Yamaha YZF-R6", false], ["skid", "Motoland XR250", true], ["sliders", "Yamaha YZF-R6", true], ["ex-moped", "Motoland Alpha", true],
-    ["ex-fmf", "Motoland Alpha", false], ["ex-cn-fmf", "Motoland XR250", true], ["slip", "Motoland XR250", false], ["mousse", "Harley-Davidson Fat Boy", false], ["crashbars", "Harley-Davidson Fat Boy", true]];
+    ["ex-fmf", "Motoland Alpha", false], ["ex-cn-fmf", "Motoland XR250", true], ["slip", "Motoland XR250", false], ["mousse", "Harley-Davidson Fat Boy", false], ["crashbars", "Harley-Davidson Fat Boy", true],
+    /* звёзды и цепь — только у цепного привода: не у вариатора, кардана и ремня */
+    ["sp-tq", "Honda PCX 125", false], ["x-ring", "BMW R 1250 GS", false], ["sp-sp", "Harley-Davidson Fat Boy", false], ["chainguide", "BMW R 1250 GS", false], ["x-ring", "Motoland XR250", true]];
   for (const [id, key, want] of cases) if (by(key) && okFor(id, key) !== want) fail("Тюнинг по классу: «" + id + "» для " + key + " — " + (want ? "должно подходить" : "не должно подходить"));
   const nodes = new Set((ctx.TUNE_NODES || []).map((n) => n[0]));
   for (const t of TUNING) if (!nodes.has(ctx.tuneNode(t))) fail("Тюнинг: у «" + t.id + "» нет узла (TUNE_NODES)");
