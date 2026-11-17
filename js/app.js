@@ -16608,191 +16608,12 @@ function tunePrice(t) {
   if (t.lo == null) return rub(t.price);
   return (t.lo === t.hi ? "" : num(t.lo) + "–") + rub(t.hi);
 }
-/* цвет категории — метка на карточке и вкладка каталога */
-const TUNE_CAT_COLOR = {
-  "Впуск": "#38BDF8",
-  "Выпуск": "#FB923C",
-  "Двигатель": "#F87171",
-  "Электроника": "#A78BFA",
-  "Электрика": "#FACC15",
-  "Охлаждение": "#22D3EE",
-  "Трансмиссия": "#FBBF24",
-  "Подвеска": "#34D399",
-  "Тормоза": "#FB7185",
-  "Колёса": "#A3E635",
-  "Защита": "#94A3B8",
-  "Управление": "#60A5FA",
-  "Рама": "#C084FC"
-};
 /* запрос в магазин: деталь для мотора ищем с кодом мотора («Бигбор 350 174MN-5»), остальное — «… мото» */
 function tuneShopQuery(t, eng) {
+  if (t.q) return t.q;
   const base = t.title.replace(/\s*\(.*?\)/g, "").replace(/\s+для\s+.*$/i, "").trim();
   /* generic — деталь не зависит от мотора (фильтр, термолента): искать без кода мотора */
   return !t.generic && ["Двигатель", "Впуск", "Выпуск", "Электроника", "Охлаждение"].indexOf(t.cat) >= 0 ? base + " " + eng.code.replace(/^ZS\s*/, "") : base + " мото";
-}
-/* Каталог доработок: вкладки по категориям, компактные карточки с приростом, ценой детали и ссылками на магазины */
-function TuneCatalog({
-  eng,
-  project,
-  toggleProject,
-  toggleInstalled,
-  go,
-  speedDelta
-}) {
-  const [cat, setCat] = useState("all");
-  const [sort, setSort] = useState("stage");
-  const [open, setOpen] = useState(null);
-  const [showNo, setShowNo] = useState(false);
-  const [more, setMore] = useState(false);
-  const all = TUNING.map(t => Object.assign({
-    t: t
-  }, tuningFor(t, eng)));
-  const fit = all.filter(r => r.ok),
-    no = all.filter(r => !r.ok);
-  const cats = ["all", "power"].concat(Array.from(new Set(fit.map(r => r.t.cat))));
-  const inCat = r => cat === "all" || (cat === "power" ? r.t.power > 0 : r.t.cat === cat);
-  const sorter = (a, b) => sort === "power" ? b.t.power - a.t.power : sort === "price" ? a.t.price - b.t.price : sort === "wear" ? (a.t.wear ? a.t.wear[1] : a.t.saves ? -1 : 0) - (b.t.wear ? b.t.wear[1] : b.t.saves ? -1 : 0) : a.t.stage - b.t.stage || (b.t.must ? 1 : 0) - (a.t.must ? 1 : 0) || b.t.power - a.t.power;
-  const list = fit.filter(inCat).sort(sorter),
-    noList = no.filter(inCat);
-  const shown = more || cat !== "all" ? list : list.slice(0, 12);
-  const card = ({
-    t,
-    ok,
-    deny,
-    note
-  }) => {
-    const inP = project.indexOf(t.id) >= 0,
-      mine = eng.installed.indexOf(t.id) >= 0,
-      stockI = !mine && tuneStockInstalled(t.id, eng.carb),
-      isOpen = open === t.id,
-      dv = ok ? speedDelta(t) : 0,
-      gp = t.power > 0 ? tuneGain([t], eng, true) : 0,
-      q = tuneShopQuery(t, eng);
-    return /*#__PURE__*/React.createElement("article", {
-      key: t.id,
-      className: "tz-card" + (ok ? "" : " no") + (inP ? " in" : "") + (mine || stockI ? " owned" : "") + (t.must && ok && !mine ? " must" : ""),
-      style: {
-        "--c": TUNE_CAT_COLOR[t.cat] || "#9CA3AF"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "tz-top"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "tz-cat"
-    }, t.cat), gp > 0 && /*#__PURE__*/React.createElement("span", {
-      className: "tz-gain"
-    }, "+", gp, "% \xB7 \u2248+", Math.round(eng.stockHp * gp / 10) / 10, " \u043B.\u0441."), dv ? /*#__PURE__*/React.createElement("span", {
-      className: "tz-speed " + (dv > 0 ? "up" : "down")
-    }, dv > 0 ? "+" : "", dv, " \u043A\u043C/\u0447") : null, t.must && ok && !mine && /*#__PURE__*/React.createElement("span", {
-      className: "tz-must"
-    }, "\u043D\u0443\u0436\u043D\u043E \u043F\u0440\u0438 \u0442\u044E\u043D\u0438\u043D\u0433\u0435"), t.wear && /*#__PURE__*/React.createElement("span", {
-      className: "tz-wear"
-    }, wearTxt(t)), t.saves && !t.wear && /*#__PURE__*/React.createElement("span", {
-      className: "tz-saves"
-    }, "бережёт мотор")), /*#__PURE__*/React.createElement("div", {
-      className: "tz-head"
-    }, /*#__PURE__*/React.createElement("h3", null, t.title), /*#__PURE__*/React.createElement("div", {
-      className: "tz-price"
-    }, /*#__PURE__*/React.createElement("b", null, tunePrice(t)), /*#__PURE__*/React.createElement("small", null, t.svc ? "работа мастера" : t.hi === 0 ? "без затрат" : "деталь"))), /*#__PURE__*/React.createElement("p", {
-      className: "tz-body" + (isOpen ? " open" : "")
-    }, t.body), isOpen && t.wear && /*#__PURE__*/React.createElement("p", {
-      className: "tz-why bad"
-    }, /*#__PURE__*/React.createElement("b", null, "Ресурс мотора ", wearTxt(t).replace("ресурс ", ""), "."), " Изнашиваются: ", t.wearOf, ". ", t.wearWhy, " ", /*#__PURE__*/React.createElement("span", {
-      className: "muted"
-    }, "Оценка — зависит от езды и обслуживания.")), isOpen && t.risk && /*#__PURE__*/React.createElement("p", {
-      className: "tz-why risk"
-    }, /*#__PURE__*/React.createElement("b", null, "Важно:"), " ", t.risk), isOpen && t.saves && /*#__PURE__*/React.createElement("p", {
-      className: "tz-why good"
-    }, /*#__PURE__*/React.createElement("b", null, "Бережёт мотор:"), " ", t.saves), isOpen && note && ok && /*#__PURE__*/React.createElement("p", {
-      className: "tc-note"
-    }, /*#__PURE__*/React.createElement("b", null, "\u0414\u043B\u044F ", eng.code, ":"), " ", note), !ok && /*#__PURE__*/React.createElement("p", {
-      className: "tc-deny"
-    }, deny), (mine || stockI) && /*#__PURE__*/React.createElement("p", {
-      className: "tc-own"
-    }, /*#__PURE__*/React.createElement(Icon, {
-      n: "check",
-      s: 16
-    }), mine ? "Уже стоит на твоём мотоцикле" : "Уже стоит: " + eng.carb), isOpen && ok && !t.svc && t.hi > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "tz-shops"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "muted small"
-    }, "\u0413\u0434\u0435 \u043A\u0443\u043F\u0438\u0442\u044C:"), SHOPS.filter(sh => sh[0] !== "Маркет").map(sh => /*#__PURE__*/React.createElement("a", {
-      key: sh[0],
-      className: "chip",
-      href: shopHref(sh, q),
-      target: "_blank",
-      rel: "noopener sponsored",
-      title: shopAd(sh) || undefined
-    }, shopLabel(sh)))), isOpen && ok && TUNE_GUIDE[t.id] && guidesFor(eng).find(g => g.id === TUNE_GUIDE[t.id]) && /*#__PURE__*/React.createElement("button", {
-      className: "link small",
-      onClick: () => go("repair", TUNE_GUIDE[t.id])
-    }, "\u041A\u0430\u043A \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u2192"), /*#__PURE__*/React.createElement("div", {
-      className: "tz-foot"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "tz-meta"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "tz-dot d-" + t.diff
-    }), t.diff), /*#__PURE__*/React.createElement("button", {
-      className: "link small",
-      "aria-expanded": isOpen,
-      onClick: () => setOpen(isOpen ? null : t.id)
-    }, isOpen ? "Свернуть" : "Подробнее"), ok && !mine && !stockI && /*#__PURE__*/React.createElement("button", {
-      className: "btn sm" + (inP ? "" : " primary"),
-      onClick: () => toggleProject(t)
-    }, inP ? "Убрать" : "В проект")), isOpen && ok && !stockI && /*#__PURE__*/React.createElement("button", {
-      className: "link small",
-      onClick: () => toggleInstalled(t.id)
-    }, mine ? "Не стоит" : "Уже стоит у меня"));
-  };
-  return /*#__PURE__*/React.createElement("section", {
-    className: "tz"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "list-head"
-  }, /*#__PURE__*/React.createElement("h2", null, "\u0414\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u0434\u043B\u044F ", eng.code), /*#__PURE__*/React.createElement("label", {
-    className: "sel"
-  }, /*#__PURE__*/React.createElement("select", {
-    value: sort,
-    "aria-label": "\u041F\u043E\u0440\u044F\u0434\u043E\u043A",
-    onChange: e => setSort(e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "stage"
-  }, "\u043F\u043E \u044D\u0442\u0430\u043F\u0430\u043C"), /*#__PURE__*/React.createElement("option", {
-    value: "power"
-  }, "\u043F\u043E \u043F\u0440\u0438\u0440\u043E\u0441\u0442\u0443"), /*#__PURE__*/React.createElement("option", {
-    value: "price"
-  }, "\u0441\u043D\u0430\u0447\u0430\u043B\u0430 \u0434\u0435\u0448\u0451\u0432\u044B\u0435"), /*#__PURE__*/React.createElement("option", {
-    value: "wear"
-  }, "бережнее к мотору")))), /*#__PURE__*/React.createElement("p", {
-    className: "muted small tz-note"
-  }, "Цены — за деталь, без установки."), /*#__PURE__*/React.createElement("div", {
-    className: "tz-tabs",
-    role: "tablist",
-    "aria-label": "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u0438"
-  }, cats.map(c => {
-    const n = c === "all" ? fit.length : fit.filter(r => c === "power" ? r.t.power > 0 : r.t.cat === c).length;
-    return /*#__PURE__*/React.createElement("button", {
-      key: c,
-      role: "tab",
-      "aria-selected": cat === c,
-      className: "tz-tab" + (cat === c ? " on" : ""),
-      style: {
-        "--c": c === "all" ? "#FFFFFF" : c === "power" ? "var(--hot)" : TUNE_CAT_COLOR[c] || "#9CA3AF"
-      },
-      onClick: () => {
-        setCat(c);
-        setOpen(null);
-      }
-    }, c === "all" ? "Все" : c === "power" ? "Мощность" : c, /*#__PURE__*/React.createElement("small", null, n));
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "tz-list"
-  }, shown.map(card)), shown.length < list.length && /*#__PURE__*/React.createElement("button", {
-    className: "btn tz-more",
-    onClick: () => setMore(true)
-  }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 ", list.length - shown.length), noList.length > 0 && /*#__PURE__*/React.createElement("button", {
-    className: "link small tz-nofit",
-    onClick: () => setShowNo(!showNo)
-  }, showNo ? "Скрыть неподходящие" : "Не подходят к " + eng.code + ": " + noList.length), showNo && /*#__PURE__*/React.createElement("div", {
-    className: "tz-list"
-  }, noList.map(card)));
 }
 /* Свёрнутый блок: заголовок и строка сути, содержимое — по нажатию (меньше текста на экране) */
 function Fold({
@@ -16814,32 +16635,29 @@ function Fold({
     className: "fold-body"
   }, children));
 }
-/* ===== Тюнинг (v41): цель → рецепт под этот мотор → проект =====
-   Человек думает не «ступенями» и не категориями, а тем, что хочет получить: резвее, мощнее, быстрее, надёжнее.
-   Под каждую цель — короткий рецепт из того, что реально ставят на этот мотор (карбюратор, бигбор, жиклёры,
-   охлаждение…), с цифрами, ценой и честным итогом. Отдельно — карбюратор: что поставить вместо заводского. */
+/* ===== Тюнинг (v42): по узлам, под класс мотоцикла =====
+   Раздел листают так, как выбирают детали: «что поставить вместо карбюратора», «какой выхлоп», «какой фильтр».
+   Каждый узел — короткий список вариантов одной строкой: название, что даёт, цена, «+». Подробности — по нажатию.
+   Что предлагать, решает класс мотоцикла: защита картера и мусс — для эндуро, слайдеры — для дорожных,
+   дуги и ветровик — для мопедов и круизеров. Быстрый подбор под цель — компактный рецепт над узлами. */
 const TUNE_GOALS2 = [{
   id: "quick",
   t: "Резвее",
-  sub: "отклик и разгон",
   ico: "bolt"
 }, {
   id: "power",
   t: "Мощнее",
-  sub: "бигбор и карбюратор",
   ico: "engine"
 }, {
   id: "speed",
   t: "Быстрее",
-  sub: "максималка",
   ico: "next"
 }, {
   id: "tough",
   t: "Надёжнее",
-  sub: "жара, лес, падения",
   ico: "check"
 }];
-/* с чем доработка несовместима в одном проекте (TUNE_EXCL: два карбюратора, две звезды, слипон и полный выпуск…) */
+/* с чем доработка несовместима в одном проекте (TUNE_EXCL: два карбюратора, две звезды, две банки…) */
 function tuneExcl(id) {
   const out = [];
   TUNE_EXCL.forEach(g => {
@@ -16847,7 +16665,7 @@ function tuneExcl(id) {
   });
   return out;
 }
-const TUNE_CARB_IDS = ["pe30", "pwk", "pwk28", "carb-pz22", "carb-pz26", "carb-nibbi30", "carb-pwk30", "carb-pwk32"];
+const TUNE_CARB_IDS = ["pe30", "pwk", "pwk28", "carb-pz20", "carb-pz22", "carb-nibbi22", "carb-vm22", "carb-pz26", "carb-nibbi30", "carb-pwk30", "carb-pwk32"];
 /* строка «диффузор и жиклёры» для карбюратора-доработки */
 function tuneCarbSpec(t, eng) {
   return typeof tuneCarbJets === "function" ? tuneCarbJets(t, eng) : "";
@@ -16859,87 +16677,82 @@ function tuneStepSpec(t, eng) {
   const n = t.notes && Object.keys(t.notes).find(k => k === eng.id || eng.groups.indexOf(k) >= 0);
   return n ? t.notes[n] : "";
 }
-/* рецепт: шаги [доработка, роль, зачем]; info — подсказки без детали (например, «карбюратор менять не нужно») */
-const TUNE_OFFROAD = ["Эндуро", "Питбайк", "Мотард", "Кросс-эндуро", "Тур-эндуро", "Лёгкий эндуро", "Кросс", "Триал"];
+/* выхлоп под класс: первый подходящий вариант — самый ходовой */
+const TUNE_EXHAUST = {
+  off: ["ex-cn-akra", "ex-cn-fmf", "ex-fmf", "full"],
+  adv: ["ex-road-cn", "ex-road-orig", "ex-road-full"],
+  sm: ["ex-cn-fmf", "ex-cn-akra", "ex-fmf", "full"],
+  road: ["ex-road-cn", "ex-road-orig", "ex-road-full"],
+  cruise: ["ex-cruise-cn", "ex-cruise-vh"],
+  moped: ["ex-moped"]
+};
+/* рецепт: шаги [доработка, роль, зачем]; info — подсказки без детали («карбюратор менять не нужно») */
 function tuneRecipe(eng, goal, bike) {
   const g = k => eng.groups.indexOf(k) >= 0;
   const T = id => {
     const t = id && TUNING.find(x => x.id === id);
-    return t && tuningFor(t, eng).ok ? t : null;
+    return t && tuningFor(t, eng, bike).ok ? t : null;
   };
   const first = ids => ids.map(T).find(Boolean) || null;
   const row = typeof carbUpFor === "function" ? carbUpFor(eng) : null;
+  const cls = tuneClassOf(bike);
   const steps = [],
     info = [];
   const add = (t, role, why) => {
     if (t && !steps.some(s => s.t.id === t.id)) steps.push({
       t: t,
       role: role,
-      why: why || t.body
+      why: why || t.eff || ""
     });
   };
   const efi = g("efi"),
     carb = g("carb"),
     two = g("2t");
-  const cool = () => g("air") ? add(T("oilcool"), "обязательно", "Больше мощности — больше тепла. Маслорадиатор держит масло на 15–20 °C холоднее.") : g("liquid") && !two ? add(T("fan"), "обязательно", "Запас охлаждения на медленной езде и в жару.") : null;
-  const genericCarb = () => first(["pwk", "pe30", "pwk28"]);
+  const exh = () => two ? T("pipe") : first(TUNE_EXHAUST[cls] || []);
+  const cool = () => g("air") ? add(T("oilcool"), "обязательно", "больше мощности — больше тепла") : g("liquid") && !two ? add(T("fan"), "обязательно", "запас охлаждения") : null;
+  const upT = row && row.up && T(row.up),
+    upFree = upT && eng.installed.indexOf(upT.id) < 0 && !tuneStockInstalled(upT.id, eng.carb);
   if (goal === "quick") {
-    if (row) {
-      if (row.up) add(T(row.up), "главное", row.upNote);else info.push(row.upNote);
-    } else if (carb) add(genericCarb(), "главное");
-    if (efi) add(T("ecu") || T("jp-ecu"), "главное", "Прошивка убирает «задушенность» заводской карты: отклик на газ чётче.");
-    add(T("filter"), carb || efi ? "обязательно" : "главное", "Мотор дышит свободнее — без этого карбюратор и выпуск не раскроются.");
-    if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "После фильтра и карбюратора смесь беднеет — подбор главного жиклёра и иглы по свече.");
+    if (upFree) add(upT, "главное");else if (row && row.tip) info.push(row.tip);
+    if (efi) add(T("ecu") || T("jp-ecu"), "главное", "чётче отклик на газ");
+    add(T("filter"), carb || efi ? "обязательно" : "главное", "мотор дышит свободнее");
+    if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "смесь после фильтра и карбюратора — по свече");
     if (two) add(T("reed"), "по желанию");
-    add(T("sp-tq"), "по желанию", "Звезда −1 зуб: разгон и подъёмы бодрее, максималка ниже на 5–7%.");
+    add(T("sp-tq"), "по желанию", "разгон бодрее, максималка −5–7%");
   } else if (goal === "power") {
-    const bore = row && T(row.bore) || first(["bore300", "bore-nb350", "bore-z212", "bore-yx", "bore-cg", "bore-139", "bore-152"]);
+    const bore = row && T(row.bore) || first(TUNE_BORE);
     const swap = !bore && first(["swap-z190", "swap-pr300"]);
-    const upT = row && row.up && T(row.up),
-      upFree = upT && eng.installed.indexOf(upT.id) < 0 && !tuneStockInstalled(upT.id, eng.carb);
-    if (bore) add(bore, "главное");else if (swap) add(swap, "главное");else if (upFree) add(upT, "главное", row.upNote);
+    if (bore) add(bore, "главное");else if (swap) add(swap, "главное");else if (upFree) add(upT, "главное");
     if (bore && row) {
       if (row.boreCarb) add(T(row.boreCarb), "обязательно", row.boreNote);else if (row.boreNote) info.push(row.boreNote);
-    } else if (upT && !upFree) info.push(row.upNote);else if (upT) add(upT, "по желанию", row.upNote);else if (carb && !row) add(genericCarb(), "по желанию");
-    if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "Без подбора смеси прибавка уходит в перегрев: главный жиклёр и игла — по свече после обкатки.");
-    if (efi) add(T("ecu") || T("jp-ecu"), "обязательно", "Карта топлива под новый впуск и выпуск, иначе смесь бедная.");
+    } else if (upFree) add(upT, "по желанию");
+    if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "без подбора смеси прибавка уходит в перегрев");
+    if (efi) add(T("ecu") || T("jp-ecu"), "обязательно", "карта топлива под новый впуск и выпуск");
     const main = !steps.some(x => x.role === "главное");
-    add(two ? T("pipe") : T("full") || T("slip"), main ? "главное" : "по желанию", two ? "Резонатор смещает полку мощности вверх." : main ? "Свободный выпуск — самая заметная прибавка без вскрытия мотора." : "Большему объёму нужен свободный выпуск.");
-    add(T("filter"), "по желанию", "Свободнее впуск — мотор лучше наполняется.");
-    if (!bore && !swap && !two && g("big")) add(T("porting") || T("cam"), "по желанию");
-    cool();
-    if (g("big") && (bore || swap)) add(T("clutch"), "обязательно", "После прибавки штатные пружины сцепления начинают буксовать.");
-  } else if (goal === "speed") {
-    add(T("sp-sp"), "главное", "Звезда +1 зуб: длиннее передачи — выше максималка, если мотору хватает силы её вытянуть.");
-    add(T("full") || T("slip") || T("pipe"), "по желанию", "Свободнее выпуск — мотор легче крутится до отсечки.");
+    add(exh(), main ? "главное" : "по желанию");
     add(T("filter"), "по желанию");
-    if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "Длинная езда на газу в пол — смесь должна быть чуть богаче, иначе прогар клапана.");
-    if (efi) add(T("ecu") || T("jp-ecu"), "по желанию", "Снимает ограничение скорости и поднимает отсечку (если оно есть в заводской прошивке).");
-    info.push("Максималка упирается в мощность и сопротивление воздуха: звезда +1 без прибавки мощности даст скорость только на ровной трассе без ветра.");
+    cool();
+    if (g("big") && (bore || swap)) add(T("clutch"), "обязательно", "иначе сцепление начнёт буксовать");
+  } else if (goal === "speed") {
+    add(T("sp-sp"), "главное", "длиннее передачи, если мотору хватает силы");
+    add(exh(), "по желанию");
+    add(T("filter"), "по желанию");
+    if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "на газу в пол смесь должна быть чуть богаче");
+    if (efi) add(T("ecu") || T("jp-ecu"), "по желанию", "снимает ограничение скорости, если оно есть");
+    info.push("Максималка упирается в мощность и сопротивление воздуха: звезда +1 без прибавки мощности даёт скорость только на ровной трассе без ветра.");
   } else {
-    const off = bike && TUNE_OFFROAD.indexOf(bike.type) >= 0;
-    if (g("air")) add(T("oilcool"), off ? "обязательно" : "главное", "Масло на 15–20 °C холоднее в жару, в пробках и на медленной езде — мотор живёт дольше.");else if (g("liquid") && !two) add(T("fan"), off ? "обязательно" : "главное", "Мотор не закипает на медленной езде и в пробках.");
-    if (g("air")) add(T("oil-temp"), "по желанию", "Перегрев видно раньше, чем он навредит.");
-    if (off) {
-      add(T("skid"), "главное", "Картер цел при ударе о камень или пень — иначе масло уйдёт на землю.");
-      add(T("hand"), "по желанию");
-      add(T("radguard"), "по желанию");
-      add(T("x-ring"), "по желанию");
-      if (carb) add(T("fuel-filter"), "по желанию");
-      add(T("breather"), "по желанию");
-    } else {
-      add(T("mosfet-rr"), "по желанию");
-      add(T("battswitch"), "по желанию");
-      add(T("hose"), "по желанию");
-    }
-    add(T("pads"), "по желанию");
+    const main = cls === "off" || cls === "adv" ? T("skid") : cls === "moped" ? T("moped-bars") : cls === "cruise" ? T("crashbars") : T("sliders");
+    add(main, "главное");
+    if (g("air")) add(T("oilcool"), "обязательно", "масло на 15–20 °C холоднее в жару и пробках");else if (g("liquid") && !two) add(T("fan"), "обязательно", "не закипает на медленной езде");
+    ["hand", "radguard", "x-ring", "fuel-filter", "breather", "mosfet-rr", "battswitch", "pads"].forEach(id => add(T(id), "по желанию"));
   }
   const ord = ["главное", "обязательно", "по желанию"];
   return {
-    steps: steps.map((s, i) => [s, i]).sort((a, b) => ord.indexOf(a[0].role) - ord.indexOf(b[0].role) || a[1] - b[1]).map(x => x[0]).slice(0, 7),
+    steps: steps.map((s, i) => [s, i]).sort((a, b) => ord.indexOf(a[0].role) - ord.indexOf(b[0].role) || a[1] - b[1]).map(x => x[0]).slice(0, 6),
     info: info
   };
 }
+/* рецепт — компактный список: шаг одной строкой, «В проект» на каждый и на весь рецепт */
 function TuneGoalRecipe({
   eng,
   bike,
@@ -16961,67 +16774,42 @@ function TuneGoalRecipe({
     sp1 = speedFor(eng, bike, cu, items).v;
   const lo = todo.reduce((s, x) => s + (x.t.svc ? 0 : x.t.lo != null ? x.t.lo : x.t.price), 0),
     hi = todo.reduce((s, x) => s + (x.t.svc ? 0 : x.t.hi != null ? x.t.hi : x.t.price), 0);
-  const wear = tuneWear(items);
   const allIn = todo.length > 0 && todo.every(s => project.indexOf(s.t.id) >= 0);
-  const G = TUNE_GOALS2.find(x => x.id === goal);
-  const res = [];
-  if (hp1 > hp0) res.push(["Мощность", hp0 + " → " + hp1, "л.с., оценка"]);
-  if (sp1 !== sp0) res.push(["Макс. скорость", sp0 + " → " + sp1, "км/ч"]);
-  if (goal === "quick" && hp1 <= hp0) res.push(["Отклик", "бодрее", "на газ и с места"]);
-  res.push(["Ресурс", wear.hi > 0 ? wearRange(wear.lo, wear.hi) : "как с завода", wear.hi > 0 ? "раньше переборка" : wear.saves.length ? "и бережём мотор" : ""]);
-  res.push(["Детали", hi ? (lo === hi ? "" : num(lo) + "–") + rub(hi) : "0 ₽", "без установки"]);
+  const sum = [hp1 > hp0 && hp0 + " → " + hp1 + " л.с.", sp1 !== sp0 && sp0 + " → " + sp1 + " км/ч", hi > 0 && (lo === hi ? "" : num(lo) + "–") + rub(hi)].filter(Boolean).join(" · ");
   return h("div", {
-    className: "panel trecipe"
-  }, h("div", {
-    className: "tr-head"
-  }, h("h2", null, "Рецепт «", G.t, "» для ", eng.code), h("p", {
-    className: "muted small"
-  }, "По порядку: сначала главное. Галочка — в проект.")), h("div", {
-    className: "tr-res"
-  }, res.map(x => h("div", {
-    key: x[0],
-    className: "tr-r"
-  }, h("span", null, x[0]), h("b", null, x[1]), x[2] && h("small", null, x[2])))), !r.steps.length ? h("p", {
+    className: "trecipe"
+  }, sum && h("p", {
+    className: "tr-sum"
+  }, sum), !r.steps.length ? h("p", {
     className: "muted"
   }, "Для этого мотора в базе нет подходящих доработок под эту цель.") : h("ol", {
     className: "tr-steps"
   }, r.steps.map((s, i) => {
     const inst = eng.installed.indexOf(s.t.id) >= 0 || tuneStockInstalled(s.t.id, eng.carb),
-      on = project.indexOf(s.t.id) >= 0,
-      spec = tuneStepSpec(s.t, eng);
+      on = project.indexOf(s.t.id) >= 0;
     return h("li", {
       key: s.t.id,
       className: "tr-step" + (on ? " on" : "") + (inst ? " done" : "")
     }, h("span", {
       className: "tr-n"
-    }, inst ? h(Icon, {
-      n: "check",
-      s: 18
-    }) : i + 1), h("div", {
+    }, i + 1), h("div", {
       className: "tr-body"
-    }, h("div", {
-      className: "tr-top"
-    }, h("b", null, s.t.title), h("span", {
+    }, h("b", null, s.t.title), h("small", null, h("i", {
       className: "tr-role r-" + (s.role === "главное" ? "main" : s.role === "обязательно" ? "must" : "opt")
-    }, inst ? "уже стоит" : s.role)), h("p", null, s.why), spec && h("p", {
-      className: "tr-spec"
-    }, spec), h("div", {
-      className: "tr-foot"
-    }, h("span", {
-      className: "price"
-    }, tunePrice(s.t)), !inst && h("button", {
+    }, inst ? "уже стоит" : s.role), s.why ? " " + s.why : "", " · ", tunePrice(s.t))), !inst && h("button", {
       type: "button",
-      className: "btn sm" + (on ? " on" : ""),
+      className: "to-btn" + (on ? " on" : ""),
       "aria-pressed": on,
+      "aria-label": (on ? "Убрать из проекта: " : "В проект: ") + s.t.title,
       onClick: () => toggleProject(s.t)
-    }, on ? h(React.Fragment, null, h(Icon, {
-      n: "check",
-      s: 14
-    }), " В проекте") : "В проект"))));
+    }, h(Icon, {
+      n: on ? "check" : "plus",
+      s: 20
+    })));
   })), r.info.map(t => h("p", {
     key: t,
     className: "callout info tr-info"
-  }, t)), todo.length > 0 && h("button", {
+  }, t)), todo.length > 1 && h("button", {
     type: "button",
     className: "btn primary tr-all",
     disabled: allIn,
@@ -17033,22 +16821,131 @@ function TuneGoalRecipe({
     }
   }, allIn ? "Весь рецепт в проекте" : "Весь рецепт в проект"));
 }
-/* Карбюратор: что ставят вместо заводского — «резвее» (без вскрытия мотора) и «под бигбор» */
-function TuneCarb({
+/* вариант доработки одной строкой: название, что даёт, цена, «+»; «Подробнее» — описание, цифры для этого мотора,
+   риски, «Уже стоит у меня», инструкция */
+function TuneOpt({
+  t,
   eng,
+  bike,
+  project,
+  toggleProject,
+  toggleInstalled,
+  go
+}) {
+  const h = React.createElement;
+  const [open, setOpen] = useState(false);
+  const on = project.indexOf(t.id) >= 0,
+    mine = eng.installed.indexOf(t.id) >= 0,
+    stock = !mine && tuneStockInstalled(t.id, eng.carb);
+  const r = tuningFor(t, eng, bike);
+  const spec = tuneStepSpec(t, eng);
+  const eff = t.eff || [t.power > 0 && "+" + tuneGain([t], eng, true) + "% мощности", t.wear && wearTxt(t), t.saves && !t.wear && "бережёт мотор"].filter(Boolean).join(" · ");
+  let guide = null;
+  try {
+    guide = TUNE_GUIDE[t.id] && guidesFor(eng).find(g => g.id === TUNE_GUIDE[t.id]);
+  } catch (e) {}
+  return h("li", {
+    className: "to" + (on ? " on" : "") + (mine || stock ? " done" : "")
+  }, h("div", {
+    className: "to-top"
+  }, h("button", {
+    type: "button",
+    className: "to-name",
+    "aria-expanded": open,
+    onClick: () => setOpen(!open)
+  }, h("b", null, t.title), eff && h("span", {
+    className: "to-eff"
+  }, eff), h("span", {
+    className: "to-price"
+  }, mine ? "стоит у тебя" : stock ? "стоит с завода" : tunePrice(t), h("i", null, open ? " · свернуть" : " · подробнее"))), !mine && !stock && h("button", {
+    type: "button",
+    className: "to-btn" + (on ? " on" : ""),
+    "aria-pressed": on,
+    "aria-label": (on ? "Убрать из проекта: " : "В проект: ") + t.title,
+    onClick: () => toggleProject(t)
+  }, h(Icon, {
+    n: on ? "check" : "plus",
+    s: 20
+  }))), open && h("div", {
+    className: "to-detail"
+  }, t.body && h("p", null, t.body), spec && spec !== t.body && h("p", {
+    className: "tr-spec"
+  }, spec), r.note && r.note !== spec && h("p", {
+    className: "tr-spec"
+  }, r.note), t.risk && h("p", {
+    className: "to-risk"
+  }, "Если сделать не так: ", t.risk), t.wear && h("p", {
+    className: "muted small"
+  }, wearTxt(t), t.wearOf ? " — изнашивается: " + t.wearOf : ""), !t.svc && t.hi !== 0 && !stock && h("div", {
+    className: "to-shops"
+  }, h("span", null, "Где купить:"), SHOPS.filter(sh => sh[0] !== "AliExpress").map(sh => h("a", {
+    key: sh[0],
+    className: "chip",
+    href: shopHref(sh, tuneShopQuery(t, eng)),
+    target: "_blank",
+    rel: "noopener sponsored",
+    title: shopAd(sh) || undefined
+  }, shopLabel(sh)))), h("div", {
+    className: "chips"
+  }, guide && h("button", {
+    type: "button",
+    className: "chip",
+    onClick: () => go("repair", guide.id)
+  }, "Как поставить"), !stock && h("button", {
+    type: "button",
+    className: "chip",
+    onClick: () => toggleInstalled(t.id)
+  }, mine ? "Убрать «стоит у меня»" : "Уже стоит у меня"))));
+}
+/* узлы: аккордеон, в каждом — варианты под этот мотор и класс */
+function TuneNodes({
+  eng,
+  bike,
   project,
   toggleProject,
   setProject,
-  flash,
+  toggleInstalled,
   go,
+  flash,
   onEdit
 }) {
   const h = React.createElement;
-  const S = eng.stock || {};
-  const T = id => {
-    const t = id && TUNING.find(x => x.id === id);
-    return t && tuningFor(t, eng).ok ? t : null;
+  const efi = eng.groups.indexOf("efi") >= 0;
+  const [open, setOpen] = useState(() => load("tuneNode", efi ? "exhaust" : "fuel"));
+  const tog = id => {
+    const v = open === id ? "" : id;
+    setOpen(v);
+    save("tuneNode", v);
   };
+  const row = !efi && typeof carbUpFor === "function" ? carbUpFor(eng) : null;
+  const ok = TUNING.filter(t => tuningFor(t, eng, bike).ok);
+  const by = {};
+  ok.forEach(t => (by[tuneNode(t)] = by[tuneNode(t)] || []).push(t));
+  /* карбюратор: сначала лестница вариантов по порядку, потом жиклёры и остальное */
+  const lad = row ? (row.ladder || []).concat(row.boreCarb ? [row.boreCarb] : []) : [];
+  const rank = t => {
+    const i = lad.indexOf(t.id);
+    return i >= 0 ? i : t.id === "jets" ? 50 : 60;
+  };
+  /* выхлоп — по цене, от дешёвой копии к оригиналу и полной системе; набивка, термозащита и прочие мелочи — в конце */
+  const exMain = t => /^ex-|^silencer2t$/.test(t.id) ? 0 : t.id === "full" ? 1 : /^(pipe|header)$/.test(t.id) ? 2 : 3,
+    lo = t => t.lo != null ? t.lo : t.price;
+  Object.keys(by).forEach(k => by[k].sort(k === "fuel" ? (a, b) => rank(a) - rank(b) : k === "exhaust" ? (a, b) => exMain(a) - exMain(b) || lo(a) - lo(b) : (a, b) => b.power - a.power || a.price - b.price));
+  const T = id => ok.find(x => x.id === id);
+  const bore = row && T(row.bore),
+    bc = bore && T(row.boreCarb);
+  const kit = bore ? [bore, bc, T("jets")].filter(Boolean).filter(t => eng.installed.indexOf(t.id) < 0 && !tuneStockInstalled(t.id, eng.carb)) : [];
+  const kitIn = kit.length > 0 && kit.every(t => project.indexOf(t.id) >= 0);
+  const opt = t => h(TuneOpt, {
+    key: t.id,
+    t: t,
+    eng: eng,
+    bike: bike,
+    project: project,
+    toggleProject: toggleProject,
+    toggleInstalled: toggleInstalled,
+    go: go
+  });
   const guide = id => {
     try {
       return guidesFor(eng).some(g => g.id === id);
@@ -17056,93 +16953,77 @@ function TuneCarb({
       return false;
     }
   };
-  const efi = eng.groups.indexOf("efi") >= 0,
-    two = eng.groups.indexOf("2t") >= 0;
-  const row = efi || typeof carbUpFor !== "function" ? null : carbUpFor(eng);
-  const rng = efi || typeof carbRange !== "function" ? null : carbRange(eng);
-  const card = (kick, t, note, extra) => h("div", {
-    className: "tc-card" + (t && project.indexOf(t.id) >= 0 ? " on" : "")
-  }, h("span", {
-    className: "tc-kick"
-  }, kick), t ? h(React.Fragment, null, h("b", {
-    className: "tc-name"
-  }, t.title), h("p", {
-    className: "tr-spec"
-  }, tuneCarbSpec(t, eng)), h("p", null, note), extra, h("div", {
-    className: "tr-foot"
-  }, h("span", {
-    className: "price"
-  }, tunePrice(t)), tuneStockInstalled(t.id, eng.carb) || eng.installed.indexOf(t.id) >= 0 ? h("span", {
-    className: "tr-role r-main"
-  }, "уже стоит") : h("button", {
-    type: "button",
-    className: "btn sm" + (project.indexOf(t.id) >= 0 ? " on" : ""),
-    onClick: () => toggleProject(t)
-  }, project.indexOf(t.id) >= 0 ? "В проекте" : "В проект"))) : h("p", null, note));
-  let body;
-  if (efi) body = h("p", {
-    className: "muted"
-  }, "Здесь инжектор — карбюратора нет. Отклик и мощность дают прошивка ЭБУ, фильтр и выпуск.");else if (row) {
-    const bore = T(row.bore);
-    /* с бигбором — комплектом: цилиндр + карбюратор под него (если штатный уже не справится) + жиклёры */
-    const kit = bore && [bore, T(row.boreCarb), T("jets")].filter(Boolean).filter(t => eng.installed.indexOf(t.id) < 0 && !tuneStockInstalled(t.id, eng.carb));
-    const kitIn = kit && kit.length > 0 && kit.every(t => project.indexOf(t.id) >= 0);
-    const kLo = kit ? kit.reduce((s, t) => s + (t.lo != null ? t.lo : t.price), 0) : 0,
-      kHi = kit ? kit.reduce((s, t) => s + (t.hi != null ? t.hi : t.price), 0) : 0;
-    const bc = bore && T(row.boreCarb);
-    body = h("div", {
-      className: "tc-cards"
-    }, card("Резвее · мотор не вскрывать", T(row.up), row.upNote), bore && h("div", {
+  const nodeSub = (id, list) => {
+    const n = list.length,
+      inP = list.filter(t => project.indexOf(t.id) >= 0).length;
+    const now = id === "fuel" && !efi ? "сейчас " + String(eng.carb || "—").replace(/\s*\(.*$/, "") + " · " : "";
+    return now + n + " " + plural(n, "вариант", "варианта", "вариантов") + (inP ? " · в проекте " + inP : "");
+  };
+  return h("div", {
+    className: "panel tnodes"
+  }, TUNE_NODES.filter(nd => (by[nd[0]] || []).length).map(nd => {
+    const id = nd[0],
+      list = by[id],
+      isOpen = open === id;
+    const title = id === "fuel" && efi ? "Впрыск и прошивка" : nd[1];
+    return h("div", {
+      key: id,
+      className: "tn" + (isOpen ? " open" : ""),
+      id: "tn-" + id
+    }, h("button", {
+      type: "button",
+      className: "tn-head",
+      "aria-expanded": isOpen,
+      onClick: () => tog(id)
+    }, h("span", null, h("b", null, title), h("small", null, nodeSub(id, list))), h("i", {
+      "aria-hidden": "true"
+    }, "▾")), isOpen && h("div", {
+      className: "tn-body"
+    }, id === "fuel" && row && row.tip && h("p", {
+      className: "callout info tn-tip"
+    }, row.tip), h("ul", {
+      className: "to-list"
+    }, list.filter(t => !bore || t.id !== row.boreCarb || lad.indexOf(t.id) < (row.ladder || []).length).map(opt)), id === "fuel" && bore && h("div", {
       className: "tc-card" + (kitIn ? " on" : "")
     }, h("span", {
       className: "tc-kick"
-    }, "Мощнее · с бигбором"), h("b", {
+    }, "Мощнее — с бигбором"), h("b", {
       className: "tc-name"
-    }, bore.title, bc ? " + " + bc.title.replace(/^Карбюратор\s*/, "").replace(/\s*(вместо|под)\s.*$/, "") : ""), bc && !/главный/i.test(row.boreNote) && h("p", {
-      className: "tr-spec"
-    }, tuneCarbSpec(bc, eng)), h("p", null, row.boreNote), h("div", {
-      className: "tr-foot"
-    }, h("span", {
-      className: "price"
-    }, (kLo === kHi ? "" : num(kLo) + "–") + rub(kHi)), kit.length > 0 ? h("button", {
+    }, bore.title, bc ? " + " + bc.title.replace(/^Карбюратор\s*/, "").replace(/\s*(вместо|под)\s.*$/, "") : ""), h("p", null, row.boreNote), kit.length > 0 ? h("button", {
       type: "button",
       className: "btn sm" + (kitIn ? " on" : ""),
       onClick: () => {
-        if (kitIn) setProject(project.filter(id => !kit.some(t => t.id === id)));else {
+        if (kitIn) setProject(project.filter(x => !kit.some(t => t.id === x)));else {
           const add = kit.filter(t => project.indexOf(t.id) < 0).map(t => t.id);
-          setProject(project.filter(id => !add.some(a => tuneExcl(a).indexOf(id) >= 0)).concat(add));
+          setProject(project.filter(x => !add.some(a => tuneExcl(a).indexOf(x) >= 0)).concat(add));
           add.forEach(() => bumpStat("tune"));
           flash("Бигбор с карбюратором — в проекте");
         }
       }
-    }, kitIn ? "Комплект в проекте" : "Комплект в проект") : h("span", {
+    }, kitIn ? "Комплект в проекте" : "Цилиндр + карбюратор + жиклёры в проект") : h("span", {
       className: "tr-role r-main"
-    }, "уже стоит"))));
-  } else body = h("p", null, two ? "У двухтакта карбюратор подбирают вместе с трубой и лепестками: сам по себе крупнее — не значит быстрее." : eng.jp || eng.groups.indexOf("eu") >= 0 ? "Штатный карбюратор подобран заводом под этот мотор. Прибавку дают джет-кит, фильтр и выпуск, а не карбюратор крупнее." : "", rng && !two ? " Для " + Math.round(eng.cc) + " см³ разумный диффузор — " + rng[0] + "–" + rng[1] + " мм. Если штатный меньше — ставят на 2 мм больше; крупнее — провал снизу." : "");
-  return h("div", {
-    className: "panel tcarb",
-    id: "tune-carb"
-  }, h("div", {
-    className: "panel-head"
-  }, h("h2", null, "Карбюратор побольше")), !efi && h("p", {
-    className: "tc-now"
-  }, "Сейчас: ", h("b", null, eng.carb || "—"), eng.carb && S.carb && eng.carb !== S.carb ? " · с завода " + S.carb : ""), body, !efi && h("ul", {
-    className: "tc-rules"
-  }, h("li", null, h("b", null, "Больше — не значит быстрее."), " Слишком большой диффузор — провал снизу и перерасход."), h("li", null, h("b", null, "После замены — жиклёры по свече."), " Светло-коричневая — норма, белая — бедно и перегрев, чёрная — богато."), h("li", null, h("b", null, "Нужны мелочи:"), " патрубок впуска под новый диаметр, тросик газа под этот карбюратор, иногда переходник фильтра.")), !efi && h("div", {
-    className: "chips"
-  }, guide("carb-pwk-install") && h("button", {
-    type: "button",
-    className: "chip",
-    onClick: () => go("repair", "carb-pwk-install")
-  }, "Как поставить карбюратор"), guide("carb-sync") && h("button", {
-    type: "button",
-    className: "chip",
-    onClick: () => go("repair", "carb-sync")
-  }, "Подбор жиклёра по свече"), onEdit && h("button", {
-    type: "button",
-    className: "chip",
-    onClick: onEdit
-  }, "Уже поставил другой — указать")));
+    }, "уже стоит")), id === "fuel" && row && row.nuance && row.nuance.length > 0 && h("details", {
+      className: "tn-nuance"
+    }, h("summary", null, "Что учесть с карбюратором · ", row.nuance.length), h("ul", null, row.nuance.map(x => h("li", {
+      key: x
+    }, x)))), id === "fuel" && !efi && h("div", {
+      className: "chips"
+    }, guide("carb-sync") && h("button", {
+      type: "button",
+      className: "chip",
+      onClick: () => go("repair", "carb-sync")
+    }, "Подбор жиклёра по свече"), guide("carb-clean") && h("button", {
+      type: "button",
+      className: "chip",
+      onClick: () => go("repair", "carb-clean")
+    }, "Чистка карбюратора"), onEdit && h("button", {
+      type: "button",
+      className: "chip",
+      onClick: onEdit
+    }, "Поставил другой — указать")), id === "exhaust" && h("p", {
+      className: "muted small tn-foot"
+    }, "Любая банка или прямоток без подбора жиклёров (на инжекторе — без прошивки) даёт громкость, а не мощность.")));
+  }));
 }
 function Tuning({
   eng,
@@ -17157,10 +17038,11 @@ function Tuning({
   onEdit
 }) {
   const h = React.createElement;
-  const [goal, setGoal] = useState(() => load("tuneGoal", "quick"));
+  const [goal, setGoal] = useState(() => load("tuneGoal2", ""));
   const pickGoal = id => {
-    setGoal(id);
-    save("tuneGoal", id);
+    const v = goal === id ? "" : id;
+    setGoal(v);
+    save("tuneGoal2", v);
   };
   const fl = flash || (() => {});
   const installedItems = TUNING.filter(t => eng.installed.indexOf(t.id) >= 0);
@@ -17170,11 +17052,6 @@ function Tuning({
     wear = tuneWear(installedItems.concat(chosen));
   const baseSp = speedFor(eng, bike, cu, installedItems),
     afterSp = speedFor(eng, bike, cu, installedItems.concat(chosen));
-  const speedDelta = t => t.power > 0 || t.rpm || ["sp-tq", "sp-sp", "rear-sp"].indexOf(t.id) >= 0 ? speedFor(eng, bike, cu, installedItems.concat([t]), {
-    tuned: true
-  }).v - speedFor(eng, bike, cu, installedItems, {
-    tuned: true
-  }).v : 0;
   const parts = chosen.filter(t => !t.svc),
     svcs = chosen.filter(t => t.svc);
   const totLo = parts.reduce((s, t) => s + (t.lo != null ? t.lo : t.price), 0),
@@ -17185,44 +17062,34 @@ function Tuning({
     isCarb = eng.groups.indexOf("carb") >= 0;
   const gainAll = tuneGain(installedItems.concat(chosen), eng);
   /* чего не хватает проекту: коротко и с кнопкой «Добавить» */
-  const BREATH = ["filter", "slip", "full", "header", "pipe", "cam", "porting"].concat(TUNE_BORE, TUNE_CARB_IDS);
+  const BREATH = ["filter", "slip", "full", "header", "pipe", "cam", "porting"].concat(TUNE_BORE, TUNE_CARB_IDS, TUNING.filter(t => /^ex-/.test(t.id)).map(t => t.id));
   const fixes = [];
-  if (gainAll > 0 && isAir && !has("oilcool")) fixes.push(["Нужен маслорадиатор — иначе перегрев", "oilcool"]);
+  if (gainAll > 0 && isAir && !has("oilcool") && eng.groups.indexOf("big") >= 0) fixes.push(["Нужен маслорадиатор — иначе перегрев", "oilcool"]);
   if (gainAll > 0 && isLiq && !has("fan") && eng.stroke !== "2T") fixes.push(["Нужен вентилятор радиатора", "fan"]);
   if (isCarb && chosen.some(t => BREATH.indexOf(t.id) >= 0) && !has("jets")) fixes.push(["Нужен подбор жиклёров — без него прибавки почти нет", "jets"]);
   if (gainAll >= 12 && eng.groups.indexOf("big") >= 0 && !has("clutch")) fixes.push(["Нужны усиленные пружины сцепления", "clutch"]);
-  if (eng.groups.indexOf("efi") >= 0 && chosen.some(t => ["filter", "full", "slip"].indexOf(t.id) >= 0) && !has("ecu")) fixes.push(["Нужна прошивка ЭБУ — иначе бедная смесь", "ecu"]);
+  if (eng.groups.indexOf("efi") >= 0 && chosen.some(t => t.id === "filter" || t.id === "full" || /^ex-/.test(t.id)) && !has("ecu") && !has("jp-ecu")) fixes.push(["Нужна прошивка ЭБУ — иначе бедная смесь", "ecu"]);
   chosen.forEach(t => {
     if (!t.withBore) return;
-    const need = t.withBore.split("|");
-    if (!need.some(id => has(id))) fixes.push([t.title.replace(/\s*\(.*?\)/g, "") + " — только вместе с бигбором, на стоке пропадёт низ", null]);
+    if (!t.withBore.split("|").some(id => has(id))) fixes.push([t.title.replace(/\s*\(.*?\)/g, "") + " — только вместе с бигбором, на стоке пропадёт низ", null]);
   });
   if (chosen.some(t => t.id === "filter")) fixes.push(["Нулевик пропитывать и чистить после 2–3 пыльных выездов", null]);
   if (wear.hi >= 25) fixes.push(["Масло менять в 1,5–2 раза чаще", null]);
   const fixItem = id => {
     const t = id && TUNING.find(x => x.id === id);
-    return t && tuningFor(t, eng).ok ? t : null;
+    return t && tuningFor(t, eng, bike).ok ? t : null;
   };
   const stat = (label, val, sub, cls) => h("div", {
     className: "pj-stat" + (cls ? " " + cls : "")
   }, h("span", null, label), h("b", null, val), sub && h("small", null, sub));
-  const tags = t => [t.power > 0 && "+" + tuneGain([t], eng, true) + "%", t.wear && wearTxt(t), t.saves && !t.wear && "бережёт мотор"].filter(Boolean).join(" · ");
-  const goals = h("div", {
-    className: "tgoals",
-    role: "radiogroup",
-    "aria-label": "Что хочешь получить"
-  }, TUNE_GOALS2.map(g => h("button", {
-    key: g.id,
-    type: "button",
-    role: "radio",
-    "aria-checked": goal === g.id,
-    className: "tgoal" + (goal === g.id ? " on" : ""),
-    onClick: () => pickGoal(g.id)
-  }, h(Icon, {
-    n: g.ico,
-    s: 26
-  }), h("b", null, g.t), h("small", null, g.sub))));
-  /* проект: стенд с цифрами и графиком, список и чего не хватает — только когда что-то выбрано */
+  const tags = t => [t.power > 0 && "+" + tuneGain([t], eng, true) + "%", t.wear && wearTxt(t)].filter(Boolean).join(" · ");
+  const toProject = () => {
+    const el = document.getElementById("tune-project");
+    if (el) el.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  };
   const proj = chosen.length > 0 && h("div", {
     className: "tstand panel has",
     id: "tune-project"
@@ -17233,7 +17100,7 @@ function Tuning({
     onClick: () => setProject([])
   }, "Сбросить")), h("div", {
     className: "pj-stats"
-  }, stat("Мощность", before.hp + " → " + after.hp, "л.с., оценка", after.gain > before.gain ? "up" : ""), stat("Макс. скорость", baseSp.v + (afterSp.v !== baseSp.v ? " → " + afterSp.v : ""), "км/ч", afterSp.v > baseSp.v ? "up" : afterSp.v < baseSp.v ? "down" : ""), stat("Ресурс мотора", wear.hi > 0 ? wearRange(wear.lo, wear.hi) : "как с завода", wear.hi > 0 ? "раньше переборка" : wear.saves.length ? "и бережём его" : "", wear.hi > 0 ? "down" : "up"), stat("Детали", (totLo === totHi ? "" : num(totLo) + "–") + rub(totHi), "без установки")), h(Dyno, {
+  }, stat("Мощность", before.hp + " → " + after.hp, "л.с., оценка", after.gain > before.gain ? "up" : ""), stat("Макс. скорость", baseSp.v + (afterSp.v !== baseSp.v ? " → " + afterSp.v : ""), "км/ч", afterSp.v > baseSp.v ? "up" : afterSp.v < baseSp.v ? "down" : ""), stat("Ресурс мотора", wear.hi > 0 ? wearRange(wear.lo, wear.hi) : "как с завода", wear.hi > 0 ? "раньше переборка" : "", wear.hi > 0 ? "down" : "up"), stat("Детали", (totLo === totHi ? "" : num(totLo) + "–") + rub(totHi), "без установки")), h(Dyno, {
     eng: eng,
     items: installedItems.concat(chosen)
   }), h("ul", {
@@ -17269,10 +17136,31 @@ function Tuning({
     className: "pj-how"
   }, h("summary", null, "Как считаем"), h("p", {
     className: "muted small"
-  }, "Мощность — на коленвале, на колесе на 10–15% меньше. Фильтр, выпуск, карбюратор и распредвал упираются в одно, поэтому вместе дают меньше суммы. Без подбора жиклёров прибавка урезана. Ресурс — насколько раньше понадобится переборка при обычной езде и вовремя сделанном ТО.")));
+  }, "Мощность — на коленвале, на колесе на 10–15% меньше. Фильтр, выпуск, карбюратор и распредвал упираются в одно, поэтому вместе дают меньше суммы. Без подбора жиклёров прибавка урезана. Цены — за деталь без установки, по магазинам РФ.")));
   return h(React.Fragment, null, h("div", {
     className: "panel tgoal-panel"
-  }, h("h2", null, "Что хочешь от ", cu.nick || bike.name, "?"), goals), h(TuneGoalRecipe, {
+  }, h("div", {
+    className: "tg-head"
+  }, h("h2", null, "Тюнинг ", cu.nick || bike.name), h("small", null, TUNE_CLASS_T[tuneClassOf(bike)])), chosen.length > 0 && h("button", {
+    type: "button",
+    className: "tg-proj",
+    onClick: toProject
+  }, "В проекте ", chosen.length, " · ", before.hp !== after.hp ? before.hp + " → " + after.hp + " л.с. · " : "", (totLo === totHi ? "" : num(totLo) + "–") + rub(totHi), " ↓"), h("p", {
+    className: "tg-q"
+  }, "Быстрый подбор под цель:"), h("div", {
+    className: "tgoals",
+    role: "group",
+    "aria-label": "Быстрый подбор под цель"
+  }, TUNE_GOALS2.map(g => h("button", {
+    key: g.id,
+    type: "button",
+    "aria-pressed": goal === g.id,
+    className: "tgoal" + (goal === g.id ? " on" : ""),
+    onClick: () => pickGoal(g.id)
+  }, h(Icon, {
+    n: g.ico,
+    s: 18
+  }), g.t))), goal && h(TuneGoalRecipe, {
     eng: eng,
     bike: bike,
     cu: cu,
@@ -17281,13 +17169,17 @@ function Tuning({
     toggleProject: toggleProject,
     setProject: setProject,
     flash: fl
-  }), isCarb && h(TuneCarb, {
+  })), h("h3", {
+    className: "ts-title"
+  }, "По узлам"), h(TuneNodes, {
     eng: eng,
+    bike: bike,
     project: project0,
     toggleProject: toggleProject,
     setProject: setProject,
-    flash: fl,
+    toggleInstalled: toggleInstalled,
     go: go,
+    flash: fl,
     onEdit: onEdit
   }), proj, h(Fold, {
     title: "Звёзды: разгон или скорость",
@@ -17302,16 +17194,6 @@ function Tuning({
     sub: "С завода главный " + eng.jetMain
   }, h(JetWeather, {
     eng: eng
-  })), h(Fold, {
-    title: "Все доработки",
-    sub: "Каталог с фильтрами: подвеска, тормоза, защита, электрика"
-  }, h(TuneCatalog, {
-    eng: eng,
-    project: project0,
-    toggleProject: toggleProject,
-    toggleInstalled: toggleInstalled,
-    go: go,
-    speedDelta: speedDelta
   })));
 }
 /* ===== Запчасти ===== */
@@ -17427,7 +17309,8 @@ function aiCardBase(eng, bike, ver, cu, mt) {
     const up = tt(cup.up),
       bore = tt(cup.bore),
       bc = tt(cup.boreCarb);
-    L.push("Карбюратор побольше (рекомендации базы): резвее — " + (up ? up.title + " (" + tuneCarbSpec(up, eng) + "). " : "") + cup.upNote + (bore ? " С бигбором (" + bore.title + "): " + (bc ? bc.title + ". " : "") + cup.boreNote : ""));
+    const lad = (cup.ladder || []).map(tt).filter(Boolean);
+    L.push("Карбюратор побольше (рекомендации базы): " + (cup.tip || "") + (lad.length ? " Варианты по порядку: " + lad.map(t => t.title + " (" + tuneCarbSpec(t, eng) + ")").join("; ") + "." : "") + (cup.nuance ? " Нюансы: " + cup.nuance.join(" ") : "") + (bore ? " С бигбором (" + bore.title + "): " + (bc ? bc.title + ". " : "") + cup.boreNote : ""));
   }
   const kick = eng.groups.indexOf("kick") >= 0,
     est = eng.groups.indexOf("estart") >= 0;
