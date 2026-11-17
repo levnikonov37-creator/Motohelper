@@ -877,9 +877,16 @@ var WORKS = [
   { name: "Консервация на зиму", price: 2000, cat: "Прочее" }
 ];
 
+/* детали карбюратора — только моторам с карбюратором; звёзды и цепь — только при цепном приводе */
+var PART_CARB_KINDS = ["carb", "carbkit", "jets", "jets2", "needle", "floatvalve", "choke"];
+var PART_CHAIN_KINDS = ["chain", "chain2", "chainlock", "chainlube", "chainclean", "chainroller", "chainguide", "chainadj", "swingslider", "sprocketF", "sprocketR", "sprocketR2", "sprocketguard", "chaintool"];
 function fits(item, eng) {
   /* need — без этого узла деталь не нужна: стартер — только при электростартере, кик — только при кике */
   if (item.need && eng && eng.groups.indexOf(item.need) < 0) return false;
+  if (item.kind && eng && eng.groups) {
+    if (PART_CARB_KINDS.indexOf(item.kind) >= 0 && eng.groups.indexOf("efi") >= 0 && eng.groups.indexOf("carb") < 0) return false;
+    if (PART_CHAIN_KINDS.indexOf(item.kind) >= 0 && typeof hasChain === "function" && !hasChain(eng)) return false;
+  }
   if (!item.fit || !eng) return true;
   return item.fit.some(function (f) { return f === eng.id || eng.groups.indexOf(f) >= 0; });
 }
@@ -10505,3 +10512,24 @@ Object.keys(ENGINES).forEach(function (id) {
   var e = ENGINES[id];
   if (/^≈\s*[\d.]+\s*бар$/.test(e.compression || "") && !(e.ex && e.ex.compression)) e.compression += " — ориентир; норму замера смотри в сервис-мануале";
 });
+
+/* Детали под класс мотоцикла: мусс, эндуро-покрышки, обтекатели и кроссовая экипировка — эндуро и питбайкам;
+   дуги — круизерам, тур-эндуро и мопедам. Без записи — подходит всем. Мотор отбирает fits(), класс — partFor() */
+var PART_CLS_ID = {
+  "af-big": ["off", "adv", "sm"], "af-twin": ["off", "adv", "sm"], "rim21": ["off", "adv"], "rim18": ["off", "adv"],
+  "tube21": ["off", "adv"], "tube18": ["off", "adv", "sm"], "tube21-hd": ["off"], "tube18-hd": ["off"], "tube19": ["off", "adv"],
+  "mask": ["off", "sm"], "shrouds": ["off", "sm"], "side-pl": ["off", "sm"], "mudguard": ["off", "sm", "adv"], "bar": ["off", "adv", "sm"],
+  "seat-cover": ["off", "sm"], "peg-wide": ["off", "adv", "sm"], "hourmeter": ["off", "moped"], "fender-f": ["off", "sm", "adv", "moped"]
+};
+var PART_CLS_KIND = { mousse: ["off"], moussegel: ["off"], rimlock: ["off"], spokes: ["off", "adv", "sm", "moped", "cruise"],
+  skid: ["off", "adv"], handguards: ["off", "adv", "sm"], handguards2: ["off", "adv", "sm"], radguard: ["off", "adv", "sm"], frameguard: ["off"],
+  swingguard: ["off"], discguard: ["off"], forkguards: ["off", "sm"], sprocketguard: ["off", "sm"], bars: ["adv", "cruise", "moped"], forkgaiters: ["off", "adv", "cruise", "moped"] };
+function partFor(p, eng, bike) {
+  if (!fits(p, eng)) return false;
+  if (!bike || (p.fit && eng && p.fit.indexOf(eng.id) >= 0)) return true;
+  var c = tuneClassOf(bike), L = PART_CLS_ID[p.id] || PART_CLS_KIND[p.kind];
+  if (!L && (p.kind === "tireF" || p.kind === "tireR")) L = /эндуро|экстрим|кросс/i.test(p.name) ? ["off", "adv", "sm"] : /питбайк/i.test(p.name) ? ["off"] : null;
+  if (!L && p.kind === "gear") L = /кроссов|эндуро|джерси|черепаха|шейная|наколенн|налокотн|шорты/i.test(p.name) ? ["off", "adv", "sm"] : null;
+  if (!L && p.kind === "trip") L = /стропа|буксировоч/i.test(p.name) ? ["off", "adv"] : null;
+  return !L || L.indexOf(c) >= 0;
+}

@@ -814,26 +814,69 @@ function shopCode(eng) {
 function engForeign(eng) {
   return !!eng.jp || (eng.groups || []).some(g => g === "eu" || g === "jp" || g === "in");
 }
+/* название детали так, как его пишут продавцы: без скобок, второго варианта и «с …»-уточнений —
+   «Масляная сетка + уплотнение» → «Масляная сетка», «Трос/рычаг подсоса» → «Трос подсоса»,
+   «Игла карбюратора с распылителем» → «Игла карбюратора». Короткий запрос магазины находят, длинный — часто нет */
+const BUY_NAME = {
+  oilfilter: "Фильтр масляный сетка",
+  spark2: "Свеча иридиевая",
+  chainroller: "Ролик цепи",
+  adjscrews: "Винт регулировки клапанов",
+  drainplug: "Болт сливной магнитный",
+  exstuds: "Шпильки выпускного коллектора",
+  exspring: "Пружина глушителя",
+  sprocketR2: "Звезда задняя стальная"
+};
+function buyName(p) {
+  let n = BUY_NAME[p.kind] || p.name;
+  /* аккумулятор — по типоразмеру («YTX9-BS»): так его и ищут */
+  const bat = p.kind === "battery" && /\b(Y[A-Z0-9]{2,}-?[A-Z0-9]*)\b/.exec(p.name);
+  if (bat) return "Аккумулятор " + bat[1];
+  n = n.replace(/\s*\([^)]*\)/g, "").split(" / ")[0].split(" + ")[0].split(":")[0].replace(/[«»"]/g, "");
+  n = n.replace(/([А-ЯЁа-яё]+)\/[А-ЯЁа-яё]+/g, "$1").replace(/\s+с\s+.*$/, "");
+  return n.replace(/\s+/g, " ").trim();
+}
+/* к какой технике: продавцы китайских запчастей пишут «питбайк», «эндуро», «мопед», а не модель */
+function buyClassWord(bike, eng) {
+  const t = bike && bike.type || "";
+  if (eng && eng.cvt || t === "Скутер") return "скутер";
+  if (t === "Мопед") return "мопед";
+  if (t === "Питбайк") return "питбайк";
+  if (/эндуро|Мотард|Триал|Кросс/i.test(t)) return "эндуро";
+  return "мотоцикл";
+}
+/* у детали стандартная маркировка (подшипник 6301-2RS, цепь 520, размер шины, свеча NGK) — она и есть запрос */
+const BUY_STD = /NGK|Denso|Bosch|Motul|Liqui|Castrol|DID|RK |\b\d{4,5}-2RS|\b\d{4,5}\b.*подшипник|подшипник.*\b\d{4,5}\b|\b4[12]\d\b|\b5[23]0\b|\d{2,3}\/\d{2,3}-\d{2}|\b12V\b|DOT|\d+W-?\d+/i;
 function buyQuery(p, eng, bike) {
   bike = bike || window.mhBike;
   const code = shopCode(eng);
-  let name = p.name;
-  if (eng.code && name.slice(-String(eng.code).length) === eng.code) name = name.slice(0, -String(eng.code).length);
-  name = name.replace(/\s*\([^)]*\)/g, "").split(" / ")[0].replace(/\s+\+\s+/g, " ").replace(/[«»"]/g, "").trim();
-  const model = shortModel(bike);
-  const moto = /мото|скутер/i.test(name) ? "" : eng.cvt ? " скутер" : " мото";
-  /* у детали своя маркировка или это расходник — модель не нужна */
-  if (BUY_PLAIN_KINDS.indexOf(p.kind) >= 0 || BUY_PLAIN_CATS.indexOf(p.cat) >= 0 || /NGK|Denso|Motul|Liqui|Castrol|DID|RK |\b\d{4}-2RS|\d{2,3}\/\d{2,3}-\d{2}|\b12V\b|DOT/.test(p.name)) return name + moto;
+  let name = buyName(p);
+  if (eng.code && name.slice(-String(eng.code).length) === eng.code) name = name.slice(0, -String(eng.code).length).trim();
+  const model = shortModel(bike),
+    foreign = engForeign(eng);
+  const moto = /мото|скутер|мопед|питбайк|эндуро/i.test(name) ? "" : eng.cvt ? " скутер" : " мото";
+  /* иридиевая свеча — по коду штатной: «Свеча иридиевая D8EA» */
+  if (p.kind === "spark2") {
+    const sp = String(eng.spark || "").replace(/^(NGK|Denso|Bosch|Champion|Torch|LDA)\s+/i, "").split(/[\s\/(;,]/)[0];
+    return sp && /\d/.test(sp) ? name + " " + sp : name + moto;
+  }
+  /* стандартная маркировка или расходник — модель не нужна; у стандартной детали и «мото» лишнее */
+  if (BUY_STD.test(p.name) || p.kind === "spark" && /\d/.test(name)) return name;
+  if (p.cat === "Инструмент" || p.cat === "Поход") return name;
+  if (BUY_PLAIN_KINDS.indexOf(p.kind) >= 0 || BUY_PLAIN_CATS.indexOf(p.cat) >= 0) return name + moto;
+  /* карбюратор и его детали — по модели карбюратора: «Жиклёры главные PZ30» */
   if (BUY_CARB_KINDS.indexOf(p.kind) >= 0) {
-    const carb = String(eng.carb || "").split(/[\/,]/)[0].replace(/^(Keihin|Mikuni|NIBBI|Dell'Orto|Dellorto)\s+/i, "").trim();
-    if (/[A-Z]{2}\s?\d{2}/.test(name)) return name + moto;
-    return /инжектор|впрыск/i.test(carb) || !carb ? name + " " + (engForeign(eng) ? model : code) : name + " " + carb + moto;
+    const carb = String(eng.carb || "").split(/[\/,]/)[0].replace(/^(Keihin|Mikuni|NIBBI|Dell'Orto|Dellorto)\s+/i, "").replace(/\s*\(.*$/, "").trim();
+    if (/[A-Z]{2,3}\s?\d{2}/.test(name)) return name;
+    return /инжектор|впрыск/i.test(carb) || !carb ? name + " " + (foreign ? model : code) : name + " " + carb;
   }
   const engineSpecific = (p.fit || []).indexOf(eng.id) >= 0;
   const enginePart = engineSpecific || p.cat === "Двигатель" || BUY_ENGINE_KINDS.indexOf(p.kind) >= 0;
-  if (BUY_BIKE_CATS.indexOf(p.cat) >= 0 && !enginePart) return model ? name + " " + model : name + moto;
-  if (enginePart) return name + " " + (engForeign(eng) && model ? model : code);
-  return model ? name + " " + model : name + " " + code + moto;
+  /* мотор: у китайских — код мотора («Цилиндр 172FMM»), у японцев и европейцев — модель */
+  if (enginePart) return name + " " + (foreign && model ? model : code);
+  /* ходовая, тормоза, рама: у японцев и европейцев — по модели, у китайской техники — «питбайк / эндуро / мопед» */
+  if (foreign && model) return name + " " + model;
+  return name + " " + buyClassWord(bike, eng);
 }
 /* «Где купить»: одна кнопка вместо четырёх ссылок на каждой детали — магазины раскрываются по нажатию */
 function BuyLinks({
@@ -955,7 +998,9 @@ function Parts({
   const [lim, setLim] = useState(60);
   /* деталей десятки тысяч: категории и «подходит к мотору» считаем один раз, показываем порциями */
   const cats = useMemo(() => ["Все"].concat(Array.from(new Set(PARTS.map(p => p.cat)))), []);
-  const mine = useMemo(() => PARTS.filter(p => fits(p, eng)), [eng]);
+  /* под мотор и под класс мотоцикла: мусс и эндуро-покрышки — не для дорожного спорта (partFor в data.js) */
+  const bk = window.mhBike;
+  const mine = useMemo(() => PARTS.filter(p => partFor(p, eng, bk)), [eng, bk]);
   const myGuides = useMemo(() => guidesFor(eng), [eng, GUIDES.length]);
   useEffect(() => setLim(60), [q, cat, onlyFit, eng]);
   /* слова в любом порядке, русская раскладка вместо латиницы, код мотора («174», «182») */
@@ -1013,7 +1058,7 @@ function Parts({
     className: "parts"
   }, list.map(p => {
     const inC = cart.find(x => x.id === p.id);
-    const ok = fits(p, eng);
+    const ok = partFor(p, eng, bk);
     const isMine = p.kind === "carb" && eng.carb.toLowerCase().indexOf(p.name.replace("Карбюратор ", "").split(" ")[0].toLowerCase()) >= 0;
     return /*#__PURE__*/React.createElement("li", {
       key: p.id,
@@ -14592,9 +14637,10 @@ function siteSearch(q, ctx, opt) {
   if (!repairOnly) {
     TUNING.filter(t => tuningFor(t, eng).ok).forEach(t => add("Тюнинг", t.title, () => go("tuning"), t.cat, 1, "t" + t.id));
     /* детали под мотор считаем один раз на мотор, а не на каждую букву */
-    if (siteSearch.eng !== eng) {
+    if (siteSearch.eng !== eng || siteSearch.bike !== window.mhBike) {
       siteSearch.eng = eng;
-      siteSearch.parts = PARTS.filter(p => fits(p, eng));
+      siteSearch.bike = window.mhBike;
+      siteSearch.parts = PARTS.filter(p => partFor(p, eng, window.mhBike));
     }
     siteSearch.parts.forEach(p => add("Запчасть", p.name, () => go("parts", {
       q: p.name
@@ -16609,11 +16655,12 @@ function tunePrice(t) {
   return (t.lo === t.hi ? "" : num(t.lo) + "–") + rub(t.hi);
 }
 /* запрос в магазин: деталь для мотора ищем с кодом мотора («Бигбор 350 174MN-5»), остальное — «… мото» */
-function tuneShopQuery(t, eng) {
+function tuneShopQuery(t, eng, bike) {
   if (t.q) return t.q;
-  const base = t.title.replace(/\s*\(.*?\)/g, "").replace(/\s+для\s+.*$/i, "").trim();
+  const base = t.title.replace(/\s*\(.*?\)/g, "").replace(/\s+для\s+.*$/i, "").replace(/\s+—\s+.*$/, "").replace(/\s+(вместо|под)\s+.*$/i, "").trim();
   /* generic — деталь не зависит от мотора (фильтр, термолента): искать без кода мотора */
-  return !t.generic && ["Двигатель", "Впуск", "Выпуск", "Электроника", "Охлаждение"].indexOf(t.cat) >= 0 ? base + " " + eng.code.replace(/^ZS\s*/, "") : base + " мото";
+  if (!t.generic && ["Двигатель", "Впуск", "Выпуск", "Электроника", "Охлаждение"].indexOf(t.cat) >= 0) return base + " " + (engForeign(eng) && bike ? shortModel(bike) : shopCode(eng));
+  return base + " " + (bike ? engForeign(eng) ? shortModel(bike) : buyClassWord(bike, eng) : "мото");
 }
 /* Свёрнутый блок: заголовок и строка сути, содержимое — по нажатию (меньше текста на экране) */
 function Fold({
@@ -16881,7 +16928,7 @@ function TuneOpt({
   }, h("span", null, "Где купить:"), SHOPS.filter(sh => sh[0] !== "AliExpress").map(sh => h("a", {
     key: sh[0],
     className: "chip",
-    href: shopHref(sh, tuneShopQuery(t, eng)),
+    href: shopHref(sh, tuneShopQuery(t, eng, bike)),
     target: "_blank",
     rel: "noopener sponsored",
     title: shopAd(sh) || undefined
@@ -17359,7 +17406,7 @@ function aiCard(eng, bike, ver, cu, mt) {
   return s;
 }
 function aiCatalog(eng, max) {
-  const list = PARTS.filter(p => fits(p, eng));
+  const list = PARTS.filter(p => partFor(p, eng, window.mhBike));
   const own = list.filter(p => p.fit && p.fit.indexOf(eng.id) >= 0);
   const rest = list.filter(p => own.indexOf(p) < 0);
   return own.concat(rest).slice(0, max || 220).map(p => p.id + "|" + p.name + "|" + p.price).join("\n");
