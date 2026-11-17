@@ -196,6 +196,13 @@ for (const [id, e] of Object.entries(ENGINES)) if (new Set(e.groups).size !== e.
     /* звёзды и цепь — только у цепного привода: не у вариатора, кардана и ремня */
     ["sp-tq", "Honda PCX 125", false], ["x-ring", "BMW R 1250 GS", false], ["sp-sp", "Harley-Davidson Fat Boy", false], ["chainguide", "BMW R 1250 GS", false], ["x-ring", "Motoland XR250", true]];
   for (const [id, key, want] of cases) if (by(key) && okFor(id, key) !== want) fail("Тюнинг по классу: «" + id + "» для " + key + " — " + (want ? "должно подходить" : "не должно подходить"));
+  /* запчасти под мотор и класс: мусс и карбюратор — не для R6, звёзды — не для вариатора и кардана */
+  const pOk = (kind, key) => { const b = by(key); if (!b) return null; const e = ENGINES[b.versions[0].engine]; return PARTS.some((p) => p.kind === kind && ctx.partFor(p, e, b)); };
+  for (const [kind, key, want] of [["mousse", "Yamaha YZF-R6", false], ["mousse", "Motoland XR250", true], ["carb", "Yamaha YZF-R6", false], ["carb", "Motoland XR250", true],
+    ["sprocketF", "Honda PCX", false], ["sprocketF", "BMW R 1250 GS", false], ["skid", "Yamaha YZF-R6", false], ["skid", "Motoland XR250", true]]) {
+    const got = pOk(kind, key);
+    if (got !== null && got !== want) fail("Запчасти под класс: «" + kind + "» для " + key + " — " + (want ? "должна быть" : "не должна быть"));
+  }
   const nodes = new Set((ctx.TUNE_NODES || []).map((n) => n[0]));
   for (const t of TUNING) if (!nodes.has(ctx.tuneNode(t))) fail("Тюнинг: у «" + t.id + "» нет узла (TUNE_NODES)");
   for (const r of ctx.CARB_UP || []) for (const id of (r.ladder || []).concat([r.up, r.bore, r.boreCarb]).filter(Boolean)) if (!TUNING.find((t) => t.id === id)) fail("CARB_UP: нет доработки «" + id + "»");
