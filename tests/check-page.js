@@ -200,7 +200,16 @@ const server = http.createServer((req, res) => {
 
     await page.getByRole("button", { name: "Мотоцикл" }).last().click();
     await page.getByRole("tab", { name: "Тюнинг" }).click();
-    // каталог тюнинга открыт сразу, цены — диапазоном за деталь («1 500–3 500 ₽»)
+    // тюнинг: цель → рецепт под мотор (шаги с ценой диапазоном), блок «Карбюратор побольше» для карбюраторного мотора (здесь DR-Z400S)
+    await page.locator(".tr-step").first().waitFor({ timeout: 5000 }).catch(() => {});
+    if ((await page.locator(".tr-step").count()) < 3) errors.push("Тюнинг: в рецепте меньше 3 шагов");
+    const trPrice = await page.locator(".tr-step .tr-foot .price").first().innerText().catch(() => "");
+    if (!/\d\s?\d{3}–\d[\d\s]*₽|\d{3}–\d[\d\s]*₽/.test(trPrice)) errors.push("Тюнинг: цена шага рецепта не диапазоном: «" + trPrice + "»");
+    if (!(await page.locator("#tune-carb").count())) errors.push("Тюнинг: нет блока «Карбюратор побольше»");
+    await page.getByRole("radio", { name: /Мощнее/ }).click();
+    if (!(await page.locator(".tr-step", { hasText: /Бигбор|Карбюратор|выпуск/i }).count())) errors.push("Тюнинг: в рецепте «Мощнее» нет бигбора, карбюратора или выпуска");
+    // полный каталог — в свёрнутом блоке «Все доработки», цены — диапазоном за деталь («1 500–3 500 ₽»)
+    await page.locator(".fold-head", { hasText: "Все доработки" }).click();
     await page.locator(".tz-card").first().waitFor({ timeout: 5000 }).catch(() => {});
     if ((await page.locator(".tz-card").count()) < 5) errors.push("Тюнинг: в каталоге меньше 5 карточек");
     const tzPrice = await page.locator(".tz-price b").first().innerText().catch(() => "");
