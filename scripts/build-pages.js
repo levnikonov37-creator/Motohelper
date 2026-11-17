@@ -345,13 +345,13 @@ const srcNote = (e) => e.ex && Object.keys(e.ex).length
   ? `<p class="note src">✓ — цифра сверена с руководством (завода или официального дилера). Без отметки — типовое значение для мотора такого класса: перед работой сверь со своим мануалом.</p>`
   : `<p class="note src">Цифры по этому мотору — типовые для его класса: заводских данных в базе пока нет. Перед работой сверь со своим мануалом, а если знаешь точные — отправь ниже, проверим и исправим.</p>`;
 function jumpNav(e, pfx, hasIss, hasCross, hasBuy, hasFork) {
-  const L = [["maslo", "Масло"], ["svecha", "Свеча и клапаны"], ["momenty", "Моменты"], hasCross && ["analogi", "Аналоги запчастей"], hasFork && ["vilka", "Вилка"], hasBuy && ["kupit", "Где купить"], premix(e) && ["smes", "Смесь 2T"], hasIss && ["slabye", "Слабые места"]].filter(Boolean);
+  const L = [["maslo", "Масло"], ["svecha", "Свеча и клапаны"], ["momenty", "Моменты"], hasCross && ["analogi", "Аналоги запчастей"], hasFork && ["vilka", "Вилка"], hasBuy && ["kupit", "Где купить"], premix(e) && ["smes", "Смесь 2T"], carbUp(e) && ["karb", "Карбюратор побольше"], hasIss && ["slabye", "Слабые места"]].filter(Boolean);
   return `<nav class="jump" aria-label="Быстрый переход">${L.map((x) => `<a href="#${pfx}${x[0]}">${x[1]}</a>`).join("")}</nav>`;
 }
 /* кнопки в инструменты приложения — сразу в нужный раздел для этого мотоцикла (см. rvFromHash в js/app.js) */
 function toolsNav(e, link) {
   const carb = !/впрыск|инжектор|efi|tpi/i.test(String(e.carb || "")) && (e.groups || []).indexOf("efi") < 0;
-  const L = [["r=find", "Что сломалось?"], ["r=wiring", "Схема электрики"], ["r=specs", "Моменты и шины"], ["r=tune", carb ? "Жиклёры и звёзды" : "Звёзды и скорость"], ["r=to", "ТО по пробегу"], ["ai=1", "Спросить ИИ"]];
+  const L = [["r=find", "Что сломалось?"], ["r=wiring", "Схема электрики"], ["r=specs", "Моменты и шины"], ["r=tune", carb ? "Тюнинг и карбюратор" : "Тюнинг и звёзды"], ["r=to", "ТО по пробегу"], ["ai=1", "Спросить ИИ"]];
   return `<nav class="tools" aria-label="Инструменты в приложении"><span>В приложении:</span>${L.map((x) => `<a href="${link}&${x[0]}">${x[1]}</a>`).join("")}</nav>`;
 }
 /* аналоги расходников модели (CROSS / crossRows в js/data.js): фильтры, колодки, АКБ */
@@ -436,6 +436,24 @@ function cheat(e, v, pfx, b) {
 
 const files = new Map(); // путь относительно корня → содержимое
 const SEV = { high: "серьёзно", med: "важно", low: "мелочь" };
+/* «Карбюратор побольше» — что ставят вместо заводского (CARB_UP в data.js, те же советы, что в разделе «Тюнинг» приложения) */
+const carbUp = (e) => {
+  const row = typeof ctx.carbUpFor === "function" ? ctx.carbUpFor(e) : null;
+  if (!row) return null;
+  const T = (id) => { const t = id && ctx.TUNING.find((x) => x.id === id); return t && ctx.tuningFor(t, e).ok ? t : null; };
+  const spec = (t) => ctx.tuneCarbJets(t, e);
+  const pr = (t) => (t.lo != null ? (t.lo === t.hi ? "" : t.lo.toLocaleString("ru-RU") + "–") + t.hi.toLocaleString("ru-RU") + " ₽" : "");
+  const up = T(row.up), bore = T(row.bore), bc = bore && T(row.boreCarb);
+  return { up, bore, bc, row, spec, pr };
+};
+const carbUpHtml = (e, pfx, link) => {
+  const c = carbUp(e);
+  if (!c) return "";
+  const card = (kick, t, note, price) => `<div class="cu-card"><span class="cu-kick">${kick}</span>${t ? `<b>${esc(t.title)}</b>` : ""}${t && c.spec(t) && !/главный/i.test(note) ? `<span class="cu-spec">${esc(c.spec(t))}</span>` : ""}<p>${esc(note)}</p>${price ? `<span class="cu-price">${esc(price)}</span>` : ""}</div>`;
+  const borePrice = c.bore ? "цилиндр " + c.pr(c.bore) + (c.bc ? " + карбюратор " + c.pr(c.bc) : "") : "";
+  return `<h2 id="${pfx}karb">Карбюратор побольше: что поставить вместо ${esc(e.carb)}</h2><div class="cu">${card("Резвее, мотор не вскрывать", c.up, c.row.upNote, c.up ? c.pr(c.up) : "")}${c.bore ? card("Мощнее — с бигбором: " + esc(c.bore.title), c.bc, c.row.boreNote, borePrice) : ""}</div>
+<p class="note">После замены карбюратора или цилиндра жиклёры подбирают по свече: светло-коричневая — норма, белая — бедно и перегрев. Слишком большой диффузор — провал снизу.${link ? ` <a href="${link}">Собрать тюнинг-проект под свой мотоцикл →</a>` : ""}</p>`;
+};
 const engShort = (b) => { const e = ENGINES[b.versions[0].engine]; return [e.code, e.cc ? e.cc + " см³" : "", (b.versions[0].hp || e.hp) ? (b.versions[0].hp || e.hp) + " л.с." : ""].filter(Boolean).join(" · "); };
 /* витрина каталога: модели с фото — по одной-две от марки, чтобы были разные */
 const showcase = () => {
@@ -514,7 +532,7 @@ BIKES.forEach((b) => {
     const iss = weak(e).length ? `<h2 id="${pfx}slabye">Слабые места</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const keyG = guidesOf(e).filter((g) => KEY_GUIDES.indexOf(g.id) >= 0);
     const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
-    return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${more}
+    return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${carbUpHtml(e, pfx, appLink(b, vi) + "&r=tune")}${more}
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a></section>`;
   }).join("\n");
   const others = BIKES.filter((x) => x.brand === b.brand && x !== b).slice(0, 12);
@@ -606,6 +624,7 @@ engIds.forEach((id) => {
     okv(e.spark) && ["Какая свеча стоит на " + tName + "?", e.spark + (okv(e.gap) ? ", зазор " + e.gap : "")],
     okv(e.valveIn) && okv(e.valveEx) && ["Какие зазоры клапанов у " + tName + "?", "Впуск " + e.valveIn + ", выпуск " + e.valveEx + ", на холодном моторе" + (valveEvery ? ". Проверять " + valveEvery : "")],
     carbOk && ["Какой карбюратор и жиклёры у " + tName + "?", e.carb + (jets.length ? "; " + jets.join(", ") : "") + ". Это базовая настройка — по высоте, погоде и выхлопу подбирают по свече"],
+    carbUp(e) && ["Какой карбюратор поставить на " + tName + ", чтобы был резвее?", (carbUp(e).up ? carbUp(e).up.title + " (" + carbUp(e).spec(carbUp(e).up) + "). " : "") + carbUp(e).row.upNote + (carbUp(e).bore ? " С бигбором: " + carbUp(e).row.boreNote : "")],
     okv(e.fuel) && ["Какой бензин заливать в " + tName + "?", e.fuel],
     names.length && ["На каких мотоциклах стоит " + tName + "?", names.join(", ") + (list.length > names.length ? " и ещё " + (list.length - names.length) + " " + plural(list.length - names.length, "модель", "модели", "моделей") : "")],
     weak(e).length && ["Какие слабые места у " + tName + "?", weak(e).slice(0, 3).map((x) => x.t + (x.fix ? " — " + lc(x.fix.replace(/\.$/, "")) : "")).join("; ")],
@@ -614,7 +633,7 @@ engIds.forEach((id) => {
   const body = `<section class="hero"><div class="kick">Мотор${e.cc ? " · " + e.cc + " см³" : ""}${e.stroke ? " · " + esc(e.stroke) : ""}</div><h1>${esc(e.code)}</h1>
 <p class="lead">${esc(e.name || e.code)}: какое масло и сколько заливать, свеча и зазор, зазоры клапанов, жиклёры, слабые места. Стоит на ${list.length} ${plural(list.length, "модели", "моделях", "моделях")}.</p>
 ${aka.length ? `<div class="chips">${aka.slice(0, 8).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>` : ""}</section>
-<section class="ver"><div class="tiles">${cheat(e, {}, "")}</div>${jumpNav(e, "", weak(e).length, false, buyItems(e, null).length > 0)}${toolsNav(e, appLink(b0, b0.versions.findIndex((v) => v.engine === id)))}${groups}${iss}
+<section class="ver"><div class="tiles">${cheat(e, {}, "")}</div>${jumpNav(e, "", weak(e).length, false, buyItems(e, null).length > 0)}${toolsNav(e, appLink(b0, b0.versions.findIndex((v) => v.engine === id)))}${groups}${iss}${carbUpHtml(e, "", appLink(b0, b0.versions.findIndex((v) => v.engine === id)) + "&r=tune")}
 <a class="cta" href="${appLink(b0, b0.versions.findIndex((v) => v.engine === id))}">Ремонт, запчасти и ИИ-механик для ${esc(e.code)} →</a></section>
 <h2>Мотоциклы с мотором ${esc(e.code)}</h2><div class="grid models">${list.slice(0, 60).map((x) => modelCard(x, true)).join("")}</div>
 ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(d.title)}</a>`).join("")}</div>` : ""}
@@ -892,7 +911,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 }
 
 /* «гаражный» режим: кнопки под палец в перчатке (не меньше 44 px), быстрые переходы, ✓ у цифр из руководства, яркость на солнце */
-const GARAGE_CSS = `.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
+const GARAGE_CSS = `.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
 .chips{gap:8px}.crumbs a{display:inline-block;padding:12px 0}
 .jump{display:flex;gap:8px;overflow-x:auto;margin:0 0 14px;padding-bottom:4px;scrollbar-width:none}.jump::-webkit-scrollbar{display:none}
 .jump a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:12px;background:#fff;color:#000;font:600 16px var(--cond);text-decoration:none}
