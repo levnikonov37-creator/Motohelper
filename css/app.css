@@ -3038,3 +3038,5 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .g-start span { display: flex; flex-direction: column; gap: 2px; }
 .g-start b { font-size: 18px; line-height: 1.2; }
 .g-start small { font-size: 13px; font-weight: 500; opacity: .85; }
+/* выбор мотоцикла: вариант модели, совпавший с запросом */
+.bf-vers .chip.hit { border-color: var(--g-acc, #8A8CFF) !important; color: #fff !important; box-shadow: inset 0 0 0 1px var(--g-acc, #8A8CFF) !important; background: rgba(138,140,255,.16) !important; }

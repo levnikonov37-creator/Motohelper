@@ -8836,6 +8836,21 @@ mergeFamily("Stels", "Delta", [
   ["50 см³ · Delta 50", "139FMB", ["Delta 50"]],
   ["125 см³ · Delta 125", "154FMI", ["Delta 125"]]
 ]);
+/* Samax: мопеды «Alpha SA Max» (полноразмерная Альфа 125, она же Alpha Lux-2 125 New / Vertigo / G3) и Fxmoto Storm Samax II.
+   У Storm Samax II в документах «139FMB, 49,9 (125) см³, 11 л.с.» — по факту горизонтальный 125, как у питбайков 1P54FMI */
+(function () {
+  var M = "Мопед", A = { approx: true };
+  var fam = function (brand, name, label, aka) {
+    addBike(brand, name, M, "154FMI", Object.assign({}, A));
+    var b = BIKES.find(function (x) { return x.brand === brand && x.name === name; });
+    b.versions[0].label = label;
+    b.aka = aka;
+  };
+  fam("Samax", "Alpha SA Max Lux 125", "125 см³ · 4 передачи", ["Alpha Lux-2 125", "Alpha Vertigo", "Alpha G3"]);
+  fam("Samax", "Alpha SA Max Offroad 125", "125 см³ · колёса 18″", ["SA Max Offroad Lux"]);
+  fam("Fxmoto", "Storm Samax II Lux", "125 см³ · в документах 49,9 см³ (139FMB)", ["Samax II Lux 125"]);
+  fam("Fxmoto", "Storm Samax II Off Road", "125 см³ · в документах 49,9 см³ (139FMB)", ["Samax II Off Road 125"]);
+})();
 /* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
 BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
 sortBikes();
