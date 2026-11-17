@@ -200,27 +200,26 @@ const server = http.createServer((req, res) => {
 
     await page.getByRole("button", { name: "Мотоцикл" }).last().click();
     await page.getByRole("tab", { name: "Тюнинг" }).click();
-    // тюнинг: цель → рецепт под мотор (шаги с ценой диапазоном), блок «Карбюратор побольше» для карбюраторного мотора (здесь DR-Z400S)
-    await page.locator(".tr-step").first().waitFor({ timeout: 5000 }).catch(() => {});
-    if ((await page.locator(".tr-step").count()) < 3) errors.push("Тюнинг: в рецепте меньше 3 шагов");
-    const trPrice = await page.locator(".tr-step .tr-foot .price").first().innerText().catch(() => "");
-    if (!/\d\s?\d{3}–\d[\d\s]*₽|\d{3}–\d[\d\s]*₽/.test(trPrice)) errors.push("Тюнинг: цена шага рецепта не диапазоном: «" + trPrice + "»");
-    if (!(await page.locator("#tune-carb").count())) errors.push("Тюнинг: нет блока «Карбюратор побольше»");
-    await page.getByRole("radio", { name: /Мощнее/ }).click();
-    if (!(await page.locator(".tr-step", { hasText: /Бигбор|Карбюратор|выпуск/i }).count())) errors.push("Тюнинг: в рецепте «Мощнее» нет бигбора, карбюратора или выпуска");
-    // полный каталог — в свёрнутом блоке «Все доработки», цены — диапазоном за деталь («1 500–3 500 ₽»)
-    await page.locator(".fold-head", { hasText: "Все доработки" }).click();
-    await page.locator(".tz-card").first().waitFor({ timeout: 5000 }).catch(() => {});
-    if ((await page.locator(".tz-card").count()) < 5) errors.push("Тюнинг: в каталоге меньше 5 карточек");
-    const tzPrice = await page.locator(".tz-price b").first().innerText().catch(() => "");
-    if (!/\d\s?\d{3}–\d[\d\s]*₽|своими руками/.test(tzPrice)) errors.push("Тюнинг: цена не диапазоном: «" + tzPrice + "»");
+    // тюнинг по узлам (здесь DR-Z400S): карбюратор, выхлоп… — варианты строками с ценой диапазоном; быстрый подбор под цель
+    await page.locator(".tn-head").first().waitFor({ timeout: 5000 }).catch(() => {});
+    if ((await page.locator(".tn-head").count()) < 5) errors.push("Тюнинг: меньше 5 узлов");
+    if (!(await page.locator(".tn-head", { hasText: "Карбюратор" }).count())) errors.push("Тюнинг: нет узла «Карбюратор» у карбюраторного мотора");
+    const exh = page.locator(".tn-head", { hasText: "Выхлоп" });
+    if (await exh.count()) {
+      if ((await exh.getAttribute("aria-expanded")) !== "true") await exh.click();
+      const exN = await page.locator("#tn-exhaust .to").count();
+      if (exN < 2) errors.push("Тюнинг: в «Выхлопе» меньше 2 вариантов");
+      const exPrice = await page.locator("#tn-exhaust .to-price").first().innerText().catch(() => "");
+      if (!/\d\s?\d{3}–\d[\d\s]*₽|\d{3}–\d[\d\s]*₽/.test(exPrice)) errors.push("Тюнинг: цена варианта не диапазоном: «" + exPrice + "»");
+      if (await page.locator("#tn-exhaust .to-name", { hasText: /slip-on/i }).count()) errors.push("Тюнинг: в выхлопе остался безымянный «slip-on»");
+    } else errors.push("Тюнинг: нет узла «Выхлоп»");
+    await page.getByRole("button", { name: /Мощнее/ }).first().click();
+    if ((await page.locator(".trecipe .tr-step").count()) < 2) errors.push("Тюнинг: в рецепте «Мощнее» меньше 2 шагов");
     // звёзды (свёрнуты): открыть, «−» у передней звезды — тяга на колесе растёт
     await page.locator(".fold-head", { hasText: "Звёзды" }).click();
     await page.locator(".sprockets .spr-steps").last().locator("button", { hasText: "−" }).first().click();
     const sprRes = await page.locator(".sprockets .spr-res").innerText().catch(() => "");
     if (!/\+\d/.test(sprRes)) errors.push("Звёзды: после «−1 спереди» нет прироста тяги: " + sprRes.replace(/\n/g, " "));
-    // у доработок нет выдуманных «звёзд»-рейтингов
-    if (await page.locator(".tz-meta", { hasText: "★" }).count()) errors.push("Тюнинг: на карточках остались звёзды-рейтинги");
     await page.getByRole("tab", { name: "Обзор" }).click();
 
     // Весь ремонт в одном разделе; кнопка «Назад» браузера возвращает на прошлый экран, а не уходит с сайта

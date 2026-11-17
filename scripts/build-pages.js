@@ -443,16 +443,16 @@ const carbUp = (e) => {
   const T = (id) => { const t = id && ctx.TUNING.find((x) => x.id === id); return t && ctx.tuningFor(t, e).ok ? t : null; };
   const spec = (t) => ctx.tuneCarbJets(t, e);
   const pr = (t) => (t.lo != null ? (t.lo === t.hi ? "" : t.lo.toLocaleString("ru-RU") + "–") + t.hi.toLocaleString("ru-RU") + " ₽" : "");
-  const up = T(row.up), bore = T(row.bore), bc = bore && T(row.boreCarb);
-  return { up, bore, bc, row, spec, pr };
+  const lad = (row.ladder || []).map(T).filter(Boolean), bore = T(row.bore), bc = bore && T(row.boreCarb);
+  return { lad, up: T(row.up), bore, bc, row, spec, pr };
 };
 const carbUpHtml = (e, pfx, link) => {
   const c = carbUp(e);
   if (!c) return "";
-  const card = (kick, t, note, price) => `<div class="cu-card"><span class="cu-kick">${kick}</span>${t ? `<b>${esc(t.title)}</b>` : ""}${t && c.spec(t) && !/главный/i.test(note) ? `<span class="cu-spec">${esc(c.spec(t))}</span>` : ""}<p>${esc(note)}</p>${price ? `<span class="cu-price">${esc(price)}</span>` : ""}</div>`;
+  const card = (kick, t, note, price) => `<div class="cu-card"><span class="cu-kick">${kick}</span>${t ? `<b>${esc(t.title)}</b>` : ""}${t && t.eff ? `<span class="cu-eff">${esc(t.eff)}</span>` : ""}${t && c.spec(t) && !/главный/i.test(note) ? `<span class="cu-spec">${esc(c.spec(t))}</span>` : ""}<p>${esc(note)}</p>${price ? `<span class="cu-price">${esc(price)}</span>` : ""}</div>`;
   const borePrice = c.bore ? "цилиндр " + c.pr(c.bore) + (c.bc ? " + карбюратор " + c.pr(c.bc) : "") : "";
-  return `<h2 id="${pfx}karb">Карбюратор побольше: что поставить вместо ${esc(e.carb)}</h2><div class="cu">${card("Резвее, мотор не вскрывать", c.up, c.row.upNote, c.up ? c.pr(c.up) : "")}${c.bore ? card("Мощнее — с бигбором: " + esc(c.bore.title), c.bc, c.row.boreNote, borePrice) : ""}</div>
-<p class="note">После замены карбюратора или цилиндра жиклёры подбирают по свече: светло-коричневая — норма, белая — бедно и перегрев. Слишком большой диффузор — провал снизу.${link ? ` <a href="${link}">Собрать тюнинг-проект под свой мотоцикл →</a>` : ""}</p>`;
+  return `<h2 id="${pfx}karb">Карбюратор побольше: что поставить вместо ${esc(e.carb)}</h2>${c.row.tip ? `<p class="note">${esc(c.row.tip)}</p>` : ""}<div class="cu">${c.lad.map((t, i) => card(c.lad.length > 1 ? "Вариант " + (i + 1) : "Резвее, мотор не вскрывать", t, t.body, c.pr(t))).join("")}${c.bore ? card("Мощнее — с бигбором: " + esc(c.bore.title), c.bc, c.row.boreNote, borePrice) : ""}</div>
+${c.row.nuance && c.row.nuance.length ? `<ul class="cu-nu">${c.row.nuance.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}<p class="note">Жиклёры после замены подбирают по свече: светло-коричневая — норма, белая — бедно и перегрев.${link ? ` <a href="${link}">Собрать тюнинг-проект под свой мотоцикл →</a>` : ""}</p>`;
 };
 const engShort = (b) => { const e = ENGINES[b.versions[0].engine]; return [e.code, e.cc ? e.cc + " см³" : "", (b.versions[0].hp || e.hp) ? (b.versions[0].hp || e.hp) + " л.с." : ""].filter(Boolean).join(" · "); };
 /* витрина каталога: модели с фото — по одной-две от марки, чтобы были разные */
@@ -624,7 +624,7 @@ engIds.forEach((id) => {
     okv(e.spark) && ["Какая свеча стоит на " + tName + "?", e.spark + (okv(e.gap) ? ", зазор " + e.gap : "")],
     okv(e.valveIn) && okv(e.valveEx) && ["Какие зазоры клапанов у " + tName + "?", "Впуск " + e.valveIn + ", выпуск " + e.valveEx + ", на холодном моторе" + (valveEvery ? ". Проверять " + valveEvery : "")],
     carbOk && ["Какой карбюратор и жиклёры у " + tName + "?", e.carb + (jets.length ? "; " + jets.join(", ") : "") + ". Это базовая настройка — по высоте, погоде и выхлопу подбирают по свече"],
-    carbUp(e) && ["Какой карбюратор поставить на " + tName + ", чтобы был резвее?", (carbUp(e).up ? carbUp(e).up.title + " (" + carbUp(e).spec(carbUp(e).up) + "). " : "") + carbUp(e).row.upNote + (carbUp(e).bore ? " С бигбором: " + carbUp(e).row.boreNote : "")],
+    carbUp(e) && ["Какой карбюратор поставить на " + tName + ", чтобы был резвее?", (carbUp(e).lad.length ? "Варианты: " + carbUp(e).lad.map((t) => t.title.replace(/^Карбюратор\s*/, "")).join(", ") + ". " : "") + (carbUp(e).row.nuance ? carbUp(e).row.nuance[0] + " " : "") + (carbUp(e).row.tip || "") + (carbUp(e).bore ? " С бигбором: " + carbUp(e).row.boreNote : "")],
     okv(e.fuel) && ["Какой бензин заливать в " + tName + "?", e.fuel],
     names.length && ["На каких мотоциклах стоит " + tName + "?", names.join(", ") + (list.length > names.length ? " и ещё " + (list.length - names.length) + " " + plural(list.length - names.length, "модель", "модели", "моделей") : "")],
     weak(e).length && ["Какие слабые места у " + tName + "?", weak(e).slice(0, 3).map((x) => x.t + (x.fix ? " — " + lc(x.fix.replace(/\.$/, "")) : "")).join("; ")],
@@ -911,7 +911,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 }
 
 /* «гаражный» режим: кнопки под палец в перчатке (не меньше 44 px), быстрые переходы, ✓ у цифр из руководства, яркость на солнце */
-const GARAGE_CSS = `.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
+const GARAGE_CSS = `.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-eff{color:#B9C2CF;font-size:14px}.cu-nu{margin:6px 0 4px;padding-left:20px;font-size:15px;line-height:1.5}.cu-nu li{margin:4px 0}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
 .chips{gap:8px}.crumbs a{display:inline-block;padding:12px 0}
 .jump{display:flex;gap:8px;overflow-x:auto;margin:0 0 14px;padding-bottom:4px;scrollbar-width:none}.jump::-webkit-scrollbar{display:none}
 .jump a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:12px;background:#fff;color:#000;font:600 16px var(--cond);text-decoration:none}
