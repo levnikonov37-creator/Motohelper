@@ -194,7 +194,11 @@ for (const [id, e] of Object.entries(ENGINES)) if (new Set(e.groups).size !== e.
   const cases = [["skid", "Yamaha YZF-R6", false], ["skid", "Motoland XR250", true], ["sliders", "Yamaha YZF-R6", true], ["ex-moped", "Motoland Alpha", true],
     ["ex-fmf", "Motoland Alpha", false], ["ex-cn-fmf", "Motoland XR250", true], ["slip", "Motoland XR250", false], ["mousse", "Harley-Davidson Fat Boy", false], ["crashbars", "Harley-Davidson Fat Boy", true],
     /* звёзды и цепь — только у цепного привода: не у вариатора, кардана и ремня */
-    ["sp-tq", "Honda PCX 125", false], ["x-ring", "BMW R 1250 GS", false], ["sp-sp", "Harley-Davidson Fat Boy", false], ["chainguide", "BMW R 1250 GS", false], ["x-ring", "Motoland XR250", true]];
+    ["sp-tq", "Honda PCX 125", false], ["x-ring", "BMW R 1250 GS", false], ["sp-sp", "Harley-Davidson Fat Boy", false], ["chainguide", "BMW R 1250 GS", false], ["x-ring", "Motoland XR250", true],
+    /* скутер: вариатор и ЦПГ под свой мотор; у 2Т нет масла в картере и клапана выпуска; у мопеда с коробкой вариатора нет */
+    ["cvt-rollers", "Honda Dio AF34", true], ["bore-2t70", "Honda Dio AF34", true], ["oilcool", "Honda Dio AF34", false], ["pv-spring", "Honda Dio AF34", false],
+    ["bore-qmb72", "Irbis Nirvana 50", true], ["cvt-unlock", "Irbis Nirvana 50", true], ["cvt-unlock", "Honda Dio AF34", false], ["bore-2t70", "Honda PCX 125", false],
+    ["cvt-rollers", "Honda PCX 125", true], ["cvt-rollers", "Motoland Alpha", false], ["oilcool", "Motoland XR250", true]];
   for (const [id, key, want] of cases) if (by(key) && okFor(id, key) !== want) fail("Тюнинг по классу: «" + id + "» для " + key + " — " + (want ? "должно подходить" : "не должно подходить"));
   /* запчасти под мотор и класс: мусс и карбюратор — не для R6, звёзды — не для вариатора и кардана */
   const pOk = (kind, key) => { const b = by(key); if (!b) return null; const e = ENGINES[b.versions[0].engine]; return PARTS.some((p) => p.kind === kind && ctx.partFor(p, e, b)); };
