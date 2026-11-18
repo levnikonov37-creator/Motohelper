@@ -421,7 +421,7 @@ function cheat(e, v, pfx, b) {
     const big = m ? m[0] : ov.split(/[(;,]/)[0];
     const rest = m ? ov.slice(m.index + m[0].length).split(/[(;]/)[0].replace(/^[\s,.—-]+/, "").trim() : "";
     const grade = real(e.oil) || /\w/.test(String(e.oil || "")) ? String(e.oil || "").split(/[,(;]/)[0].trim() : "";
-    T.push([e.stroke === "2T" ? "Масло КПП" : "Масло", big, [grade, rest.length <= 48 ? rest : ""].filter(Boolean).join(" · "), e.dis && e.dis.oilVol ? "dis" : ex("oilVol"), "maslo"]);
+    T.push([e.stroke === "2T" ? ((e.groups || []).indexOf("cvt") >= 0 ? "Масло в редуктор" : "Масло КПП") : "Масло", big, [grade, rest.length <= 48 ? rest : ""].filter(Boolean).join(" · "), e.dis && e.dis.oilVol ? "dis" : ex("oilVol"), "maslo"]);
   }
   if (real(e.spark) || /[A-Z]{1,4}\d/.test(String(e.spark || ""))) {
     const sp = String(e.spark).split(/\s*[\/(;,]/)[0].trim(), gap = real(e.gap) ? String(e.gap).split(/\s*\(/)[0] : "";
@@ -544,6 +544,7 @@ BIKES.forEach((b) => {
   const slug = bikeSlug.get(b), canon = SITE + "m/" + slug + "/";
   const full = b.brand + " " + b.name;
   const e0 = ENGINES[b.versions[0].engine];
+  const two0 = e0.stroke === "2T", cvt0 = (e0.groups || []).indexOf("cvt") >= 0, jet0 = (e0.groups || []).indexOf("carb") >= 0 ? "жиклёры" : "ТО";
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], [b.brand, "/m/" + brandSlug[b.brand] + "/"], [b.name, null]];
   const vers = b.versions.map((v, vi) => {
     const e = ENGINES[v.engine];
@@ -576,19 +577,19 @@ BIKES.forEach((b) => {
   const faqHtml = `<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>`;
   const ru = BRAND_RU[b.brand], fullRu = ru ? ru + " " + b.name : "";
   const body = `<section class="hero"><div class="kick">${esc(b.brand)}${ru ? " (" + esc(ru) + ")" : ""} · ${esc(b.type)}</div><h1>${esc(b.name)}</h1>
-<p class="lead">Мотор ${esc(e0.code)}${e0.cc ? ", " + e0.cc + " см³" : ""}${e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с" : ""}. Какое масло и сколько, свеча, зазоры клапанов, жиклёры и слабые места${b.versions.length > 1 ? " — по поколениям" : ""}.</p>
+<p class="lead">Мотор ${esc(e0.code)}${e0.cc ? ", " + e0.cc + " см³" : ""}${e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с" : ""}. ${two0 ? (cvt0 ? "Какое масло 2T и в редуктор" : "Какое масло 2T и в коробку") + ", свеча, " + jet0 + " и слабые места" : "Какое масло и сколько, свеча, зазоры клапанов, жиклёры и слабые места"}${b.versions.length > 1 ? " — по поколениям" : ""}.</p>
 ${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}${b.aka && b.aka.length ? (b.versions.length > 1 ? `<p class="note">У продавцов эта модель называется по-разному: ${esc(b.aka.map((n) => b.brand + " " + n).join(", "))}. Это одна машина — версии отличаются только мотором.</p>` : `<p class="note">Также продаётся как: ${esc(b.aka.join(", "))}.</p>`) : ""}${photoOf(b) ? `<figure class="mphoto"><img src="${photoOf(b)}" alt="${esc(full)}" width="800" height="500" fetchpriority="high"></figure>` : ""}</section>
 ${vers}
 ${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>` : ""}
 ${probBikes.has(b) ? "" : `<h2>Если что-то не так</h2><div class="chips">${probsFor(b).slice(0, 8).map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>`}
 ${faqHtml}
-${fbBlock(full, e0.code, ["Масло", "Объём масла", "Свеча", "Зазоры клапанов", "Карбюратор и жиклёры", "Мотор", "Мощность"])}
+${fbBlock(full, e0.code, two0 ? ["Масло", "Объём масла в КПП / редуктор", "Свеча", "Карбюратор и жиклёры", "Мотор", "Мощность"] : ["Масло", "Объём масла", "Свеча", "Зазоры клапанов", "Карбюратор и жиклёры", "Мотор", "Мощность"])}
 ${twins.length ? `<h2>Этот же мотор ${esc(e0.code)} стоит на</h2><div class="chips">${twins.map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div><p><a class="chip" href="/m/motor/${engSlug[b.versions[0].engine]}/">Всё о моторе ${esc(e0.code)} →</a></p>` : ""}
 ${rvBlock(slug, full, b.name)}
 ${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
-  const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${briefOil(e0.oil) || "—"}${e0.oilVol && /\d/.test(e0.oilVol) ? " " + brief(e0.oilVol).split(",")[0] : ""}, свеча ${brief(e0.spark).split(" / ")[0] || "—"}${briefValves(e0.valveIn, e0.valveEx) ? ", зазоры клапанов " + briefValves(e0.valveIn, e0.valveEx) : ""}. Слабые места и ремонт.`;
+  const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${two0 ? (briefOil(e0.oil) || "2T").replace(/^масло\s+/i, "") + (e0.oilVol && /\d/.test(e0.oilVol) ? ", " + ((v) => /редуктор|КПП|коробк/i.test(v) ? v : (cvt0 ? "в редуктор " : "в КПП ") + v)(brief(e0.oilVol).split(",")[0]) : "") : (briefOil(e0.oil) || "—") + (e0.oilVol && /\d/.test(e0.oilVol) ? " " + brief(e0.oilVol).split(",")[0] : "")}, свеча ${brief(e0.spark).split(" / ")[0] || "—"}${briefValves(e0.valveIn, e0.valveEx) ? ", зазоры клапанов " + briefValves(e0.valveIn, e0.valveEx) : ""}. Слабые места и ремонт.`;
   const descRu = fullRu ? desc.replace(full + ":", full + " (" + fullRu + "):") : desc;
-  files.set("m/" + slug + "/index.html", page({ rv: true, fb: true, ask: full + " (мотор " + e0.code + ")", title: pickTitle(full, [...(fullRu ? [" (" + ru + ") — масло, свечи, зазоры клапанов, слабые места", " (" + ru + ") — масло, свечи, зазоры клапанов"] : []), " — масло, свечи, зазоры клапанов, слабые места | MotoHelper", " — масло, свечи, зазоры клапанов, слабые места", " — масло, свечи, зазоры клапанов", ": масло, свечи, клапаны"]), desc: descRu, canon, crumbs, body, sticky: appLink(b, 0),
+  files.set("m/" + slug + "/index.html", page({ rv: true, fb: true, ask: full + " (мотор " + e0.code + ")", title: pickTitle(full, two0 ? [...(fullRu ? [" (" + ru + ") — масло 2T, свеча, " + jet0 + ", слабые места", " (" + ru + ") — масло 2T, свеча, " + jet0] : []), " — масло 2T, свеча, " + jet0 + ", слабые места | MotoHelper", " — масло 2T, свеча, " + jet0 + ", слабые места", " — масло 2T, свеча, " + jet0, ": масло 2T, свеча"] : [...(fullRu ? [" (" + ru + ") — масло, свечи, зазоры клапанов, слабые места", " (" + ru + ") — масло, свечи, зазоры клапанов"] : []), " — масло, свечи, зазоры клапанов, слабые места | MotoHelper", " — масло, свечи, зазоры клапанов, слабые места", " — масло, свечи, зазоры клапанов", ": масло, свечи, клапаны"]), desc: descRu, canon, crumbs, body, sticky: appLink(b, 0),
     ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: full, alternateName: fullRu || undefined, url: canon, inLanguage: "ru", description: descRu },
       { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] }));
 });
@@ -664,8 +665,12 @@ ${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="ch
 ${faqHtml}
 ${fbBlock("", e.code + " [" + id + "]", ["Масло", "Объём масла", "Свеча", "Зазоры клапанов", "Карбюратор и жиклёры", "Слабые места", "На каких моделях стоит"])}
 <div class="chips">${tuneEligible(id) ? `<a class="chip" href="/m/motor/${slug}/tuning/">Тюнинг ${esc(e.code)} →</a>` : ""}<a class="chip" href="/m/maslo/">Масло для других моторов</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>`;
-  const desc = `Мотор ${dupCode[e.code] > 1 && e.name ? e.name : engTitle(e)}${e.cc ? ", " + e.cc + " см³" : ""}: масло ${briefOil(e.oil) || "—"}${e.oilVol && /\d/.test(e.oilVol) ? " " + brief(e.oilVol).split(",")[0] : ""}, свеча ${brief(e.spark).split(" / ")[0] || "—"}${e.gap ? " (зазор " + brief(e.gap) + ")" : ""}${briefValves(e.valveIn, e.valveEx) ? ", клапаны " + briefValves(e.valveIn, e.valveEx) : ""}. На каких мотоциклах стоит, слабые места, ремонт.`;
-  files.set("m/motor/" + slug + "/index.html", page({ fb: true, ask: "мотор " + tName, title: pickTitle(tName, [" — масло и объём, свеча, зазоры клапанов | MotoHelper", " — масло, свеча, зазоры клапанов", ": масло, свеча, клапаны"]), desc, canon, crumbs, body, sticky: appLink(b0, 0),
+  /* 2Т: масло — в бачок или смесь, объём — в КПП или редуктор; клапанов нет */
+  const twoE = e.stroke === "2T", cvtE = (e.groups || []).indexOf("cvt") >= 0;
+  const oilE = twoE ? (briefOil(e.oil) || "2T").replace(/^масло\s+/i, "") + (e.oilVol && /\d/.test(e.oilVol) ? ", " + ((v) => /редуктор|КПП|коробк/i.test(v) ? v : (cvtE ? "в редуктор " : "в КПП ") + v)(brief(e.oilVol).split(",")[0]) : "")
+    : (briefOil(e.oil) || "—") + (e.oilVol && /\d/.test(e.oilVol) ? " " + brief(e.oilVol).split(",")[0] : "");
+  const desc = `Мотор ${dupCode[e.code] > 1 && e.name ? e.name : engTitle(e)}${e.cc ? ", " + e.cc + " см³" : ""}: масло ${oilE}, свеча ${brief(e.spark).split(" / ")[0] || "—"}${e.gap ? " (зазор " + brief(e.gap) + ")" : ""}${briefValves(e.valveIn, e.valveEx) ? ", клапаны " + briefValves(e.valveIn, e.valveEx) : ""}. На каких мотоциклах стоит, слабые места, ремонт.`;
+  files.set("m/motor/" + slug + "/index.html", page({ fb: true, ask: "мотор " + tName, title: pickTitle(tName, twoE ? [" — масло 2T, свеча, " + ((e.groups || []).indexOf("carb") >= 0 ? "жиклёры" : "ТО") + " | MotoHelper", " — масло 2T, свеча, " + ((e.groups || []).indexOf("carb") >= 0 ? "жиклёры" : "ТО"), ": масло 2T, свеча"] : [" — масло и объём, свеча, зазоры клапанов | MotoHelper", " — масло, свеча, зазоры клапанов", ": масло, свеча, клапаны"]), desc, canon, crumbs, body, sticky: appLink(b0, 0),
     ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: "Мотор " + e.code, url: canon, inLanguage: "ru", description: desc }]
       .concat(faq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] : []) }));
 });
