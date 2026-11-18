@@ -488,7 +488,7 @@ const modelCard = (b, withBrand) => { const ph = photoOf(b, true); return `<a cl
 
 /* ===== моторы, инструкции, поломки: отдельные страницы под запросы «масло 172FMM», «зазоры клапанов», «не заводится» ===== */
 const okEng = (only, e) => !only || only.some((x) => x === e.id || (e.groups || []).indexOf(x) >= 0);
-const guidesOf = (e) => GUIDES.filter((g) => okEng(g.only, e) && !(e.cvt && NO_CVT.indexOf(g.id) >= 0));
+const guidesOf = (e) => GUIDES.filter((g) => okEng(g.only, e) && !(e.cvt && NO_CVT.indexOf(g.id) >= 0) && ctx.guideOk(g, e));
 const diagOf = (e) => DIAG.filter((d) => !d.only || d.only.some((x) => (e.groups || []).indexOf(x) >= 0));
 const KEY_GUIDES = ["oil", "valves", "valves-dohc", "valves-screw", "spark", "carb-tune", "carb-clean", "chain"];
 const bikesOf = {}; // мотор → модели
@@ -685,7 +685,7 @@ ${fbBlock("", e.code + " [" + id + "]", ["Масло", "Объём масла", 
 GUIDES.forEach((g) => {
   const canon = SITE + "m/remont/" + g.id + "/";
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Инструкции", "/m/remont/"], [g.title, null]];
-  const okE = (e) => okEng(g.only, e) && !(e.cvt && NO_CVT.indexOf(g.id) >= 0);
+  const okE = (e) => okEng(g.only, e) && !(e.cvt && NO_CVT.indexOf(g.id) >= 0) && ctx.guideOk(g, e);
   const vt = valuesTable(phKeys(g.steps), okE);
   const plain = g.steps.map((x) => String(x).replace(/\{(\w+)\}/g, (m, k) => vt.keys.indexOf(k) >= 0 ? PHI[k] || "по таблице" : "по мануалу"));
   const body = `<section class="hero"><div class="kick">Инструкция</div><h1>${esc(g.title)}</h1>

@@ -214,6 +214,11 @@ for (const [id, e] of Object.entries(ENGINES)) if (new Set(e.groups).size !== e.
     const got = pOk(kind, key);
     if (got !== null && got !== want) fail("Запчасти под класс: «" + kind + "» для " + key + " — " + (want ? "должна быть" : "не должна быть"));
   }
+  /* инструкции — только где узел есть: кардан, ремень, цепь, клапаны, спицы */
+  for (const [gid, id, want] of [["shaft-oil", "R1250", true], ["shaft-oil", "172FMM", false], ["belt-drive", "HD_M8_107", true], ["chain", "R1250", false], ["chain", "172FMM", true],
+    ["jp-valves-shim", "HON_AF34E", false], ["spokes", "HON_AF34E", false], ["multi-sync", "HON_JF28E", false], ["trial-setup", "TR2T", true], ["trial-setup", "KTM300TPI", false]]) {
+    if (ENGINES[id] && ctx.guideOk({ id: gid }, ENGINES[id]) !== want) fail("Инструкция «" + gid + "» для " + id + " — " + (want ? "должна быть" : "не должна быть"));
+  }
   const nodes = new Set((ctx.TUNE_NODES || []).map((n) => n[0]));
   for (const t of TUNING) if (!nodes.has(ctx.tuneNode(t))) fail("Тюнинг: у «" + t.id + "» нет узла (TUNE_NODES)");
   for (const r of ctx.CARB_UP || []) for (const id of (r.ladder || []).concat([r.up, r.bore, r.boreCarb]).filter(Boolean)) if (!TUNING.find((t) => t.id === id)) fail("CARB_UP: нет доработки «" + id + "»");

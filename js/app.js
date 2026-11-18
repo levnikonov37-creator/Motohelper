@@ -12030,7 +12030,7 @@ function diagFor(eng) {
   return DIAG.filter(d => !d.only || d.only.some(g => eng.groups.indexOf(g) >= 0));
 }
 function guidesFor(eng) {
-  return GUIDES.filter(g => (!g.only || g.only.some(x => x === eng.id || eng.groups.indexOf(x) >= 0)) && !(eng.cvt && NO_CVT_GUIDES.indexOf(g.id) >= 0));
+  return GUIDES.filter(g => (!g.only || g.only.some(x => x === eng.id || eng.groups.indexOf(x) >= 0)) && !(eng.cvt && NO_CVT_GUIDES.indexOf(g.id) >= 0) && (typeof guideOk !== "function" || guideOk(g, eng)));
 }
 function okFor(item, eng) {
   if (item.only && !item.only.some(x => x === eng.id || eng.groups.indexOf(x) >= 0)) return false;

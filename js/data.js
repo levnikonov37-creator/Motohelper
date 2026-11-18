@@ -9281,7 +9281,7 @@ function tuneNode(t) {
    bore — [диаметр штатный, ход], мм; по ним считаются и подписи, и прибавка. */
 var ENGINE_GEOM = { "172FMM": [72, 61.2], "172FMM-3A": [72, 61.2], "172FMM-5": [72, 61.2], "FIXCN_PR250_5": [72, 61.2], "FIXCN_172FMM7": [72, 61.2],
   "NB300": [74, 65], "FIXCN_NB300_5": [74, 65], "CBS300": [74, 65], "FIXCN_CBS300_5": [74, 65], "NC250": [77, 53.6], "NC300": [82, 53.6],
-  "YBS300": [76, 65], "PR300": [75, 61.4], "152FMH": [52.4, 49.5], "139FMB": [39, 41.4], "154FMI": [56.5, 49.5], "Z190": [62, 62] };
+  "YBS300": [76, 65], "PR300": [75, 61.4], "152FMH": [52.4, 49.5], "139FMB": [39, 41.4], "Z190": [62, 62] }; /* 154FMI нет: под этим кодом и питбайковые 125 (Ø52.4 / Ø54), и мопедные (Ø56.5) */
 function boreCc(id, d) { var g = ENGINE_GEOM[id]; return g ? Math.round(Math.PI / 4 * d * d * g[1] / 1000) : 0; }
 (function () {
   var byId = function (id) { return TUNING.find(function (t) { return t.id === id; }); };
@@ -10734,3 +10734,28 @@ function partFor(p, eng, bike) {
   if (!L && p.kind === "trip") L = /стропа|буксировоч/i.test(p.name) ? ["off", "adv"] : null;
   return !L || L.indexOf(c) >= 0;
 }
+
+/* ===================== Инструкции — только там, где этот узел есть =====================
+   Кардан и ремень — по типу привода, цепь и звёзды — только у цепи, триал и круизер — по моделям с этим мотором,
+   синхронизация дросселей — у многоцилиндровых, клапан выпуска — у жидкостных 2Т-мотоциклов (не скутеров),
+   маслорадиатор и клапаны — не у 2Т, спицы, камеры, маятник и защита картера — не у скутеров. */
+var GUIDE_ENG_TYPES = null;
+function guideEngTypes() {
+  if (GUIDE_ENG_TYPES) return GUIDE_ENG_TYPES;
+  var t = { trial: {}, cruise: {} };
+  BIKES.forEach(function (b) { b.versions.forEach(function (v) { if (b.type === "Триал") t.trial[v.engine] = 1; if (TUNE_CLASS_OF[b.type] === "cruise") t.cruise[v.engine] = 1; }); });
+  return (GUIDE_ENG_TYPES = t);
+}
+var GUIDE_NEED = {
+  "shaft-oil": function (e) { return /кардан/i.test(e.gearbox || ""); },
+  "belt-drive": function (e) { return !e.cvt && /ремень/i.test(e.gearbox || ""); },
+  "cruiser-care": function (e) { return !!guideEngTypes().cruise[e.id]; },
+  "trial-setup": function (e) { return !!guideEngTypes().trial[e.id]; },
+  "multi-sync": function (e) { return /^(twin|vtwin|boxer|i3|i4)$/.test(e.layout || ""); },
+  "pv-clean": function (e) { return !e.cvt && e.groups.indexOf("liquid") >= 0 && e.groups.indexOf("big") >= 0; },
+  "oilcooler": function (e) { return e.stroke !== "2T"; },
+  "jp-valves-shim": function (e) { return e.stroke !== "2T"; }
+};
+["chain", "chain-replace", "sprocket-change", "chain-slider", "chain-rivet"].forEach(function (id) { GUIDE_NEED[id] = hasChain; });
+["spokes", "wheel-lacing", "tube", "swingarm-bushings", "linkage", "mousse-install", "skid-install"].forEach(function (id) { GUIDE_NEED[id] = function (e) { return !e.cvt; }; });
+function guideOk(g, e) { var f = g && e && GUIDE_NEED[g.id]; return !f || !!f(e); }
