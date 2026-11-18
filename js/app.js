@@ -368,7 +368,7 @@ function EditBike({
   if (range && mm) {
     if (mm < range[0]) carbWarn = "Карбюратор " + mm + " мм маловат для " + eng.code + " — мотор будет душиться на верхах. Обычно ставят " + range[0] + "–" + range[1] + " мм.";else if (mm > range[1]) carbWarn = "Карбюратор " + mm + " мм великоват для " + eng.code + " — провалы на низах и сложная настройка. Обычно ставят " + range[0] + "–" + range[1] + " мм.";
   }
-  const tuneOk = TUNING.filter(t => tuningFor(t, eng).ok && t.cat !== "Защита");
+  const tuneOk = TUNING.filter(t => tuningFor(t, eng, window.mhBike).ok && t.cat !== "Защита");
   const groups = {};
   Object.values(ENGINES).forEach(e => {
     const g = e.stroke === "2T" ? "2-тактные" : e.cc < 170 ? "До 170 см³" : e.groups.indexOf("liquid") >= 0 ? "250–450, жидкостные" : "200–300, воздушные";
@@ -5915,9 +5915,10 @@ function enginePins(eng) {
   put("cyl", 300, 198, true);
   if (!two) put("timing", 344, 206, true);
   put("gen", 215, 318, false);
-  put("clutch", 400, 308, false);
+  /* скутер: вместо сцепления и КПП со звездой — вариатор и редуктор */
+  if (has("cvt")) put("cvt", 400, 308, false);else put("clutch", 400, 308, false);
   put("oil", 300, 386, false);
-  put("gearbox", 470, 262, false);
+  if (!has("cvt")) put("gearbox", 470, 262, false);
   put("exhaust", 540, 392, false);
   if (has("liquid")) put("cooling", 79, 186, false);else if (inst.indexOf("oilcool") >= 0) put("cooling", 90, 80, false);
   return pins;
@@ -11446,7 +11447,7 @@ const BIKE_PINS = {
 function bikePins(bike, eng, cu) {
   const L = bikeLook(bike, eng, cu),
     g = L.g;
-  return Object.keys(BIKE_PINS).map(id => {
+  return Object.keys(BIKE_PINS).filter(id => id !== "chain" || hasChain(eng)).map(id => {
     let p = BIKE_PINS[id];
     if (id === "shock" && L.twinShock) p = [204, 222];
     return {
@@ -11868,7 +11869,7 @@ function CompareView({
     const p = k.split(" ").map(x => partByKind(x, e)).find(Boolean);
     return p ? p.price : "—";
   };
-  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Макс. скорость", speedFor(eng, bike, {}, []).v, speedFor(e2, b2, {}, []).v, "км/ч", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на ТО", toCost(eng), toCost(e2), "₽", -1], ["Слабые места (серьёзные)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Поршень", kp("piston", eng), kp("piston", e2), "₽", -1], ["Комплект сцепления", kp("clutchdiscs", eng), kp("clutchdiscs", e2), "₽", -1], ["Свеча", kp("spark spark2", eng), kp("spark spark2", e2), "₽", -1], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng).ok).length, TUNING.filter(t => tuningFor(t, e2).ok).length, "", 1]];
+  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Макс. скорость", speedFor(eng, bike, {}, []).v, speedFor(e2, b2, {}, []).v, "км/ч", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на ТО", toCost(eng), toCost(e2), "₽", -1], ["Слабые места (серьёзные)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Поршень", kp("piston", eng), kp("piston", e2), "₽", -1], ["Комплект сцепления", kp("clutchdiscs", eng), kp("clutchdiscs", e2), "₽", -1], ["Свеча", kp("spark spark2", eng), kp("spark spark2", e2), "₽", -1], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng, bike).ok).length, TUNING.filter(t => tuningFor(t, e2, b2).ok).length, "", 1]];
   const fmtv = (v, u, e, b) => typeof v === "number" ? u === "₽" ? rub(v) : u === "км" ? kmHours(v, e, b) : num(v) + (u ? " " + u : "") : v;
   return /*#__PURE__*/React.createElement("section", {
     className: "panel compare"
@@ -13198,6 +13199,9 @@ function EngineExplorer({
   }
   function pick(id) {
     if (running) return;
+    /* скутер: сцепление и коробка на схеме — это вариатор и редуктор; цепи у скутера, кардана и ремня нет */
+    if ((id === "clutch" || id === "gearbox") && eng.groups.indexOf("cvt") >= 0) id = "cvt";
+    if (id === "chain" && !hasChain(eng)) return;
     if (view === "bike" && id === "engine") {
       switchView("engine");
       return;
@@ -14349,7 +14353,7 @@ function PreRide({
       done: {}
     };
   });
-  const items = PRERIDE.filter(p => !p[2] || eng.groups.indexOf(p[2]) >= 0).map(p => p[0] === "fuel" ? [p[0], eng.stroke === "2T" ? eng.groups.indexOf("efi") >= 0 || eng.cvt ? "Бензин и масло 2T в бачке" : "Бензин (смесь с маслом 2T!)" : "Бензин"].concat(p.slice(2)) : eng.cvt && p[0] === "chain" ? null : p).filter(Boolean);
+  const items = PRERIDE.filter(p => symOk(p, eng)).map(p => p[0] === "fuel" ? [p[0], eng.stroke === "2T" ? eng.groups.indexOf("efi") >= 0 || eng.cvt ? "Бензин и масло 2T в бачке" : "Бензин (смесь с маслом 2T!)" : "Бензин"].concat(p.slice(2)) : eng.cvt && p[0] === "chain" ? null : p).filter(Boolean);
   const n = items.filter(i => st.done[i[0]]).length;
   const pct = n / items.length;
   const [open, setOpen] = useState(() => load("prerideOpen", false));
@@ -14658,7 +14662,7 @@ function siteSearch(q, ctx, opt) {
   FAULTS.forEach((f, i) => add("Неисправность", f.s, () => go("repair", "ref"), "", 1, "f" + i));
   if (!repairOnly) {
     /* тюнинг ищется и по словам узла и цели («бигбор», «выхлоп», «резвее»), и по названию мотора («nb300 тюнинг») */
-    TUNING.filter(t => tuningFor(t, eng).ok).forEach(t => add("Тюнинг", t.title, () => go("tuning"), [t.cat, TUNE_SR_KW[tuneNode(t)] || "", t.q || "", t.eff || "", t.power > 0 ? "мощнее мощность резвее" : "", TUNE_SR_FAST.test(t.id) ? "быстрее скорость максималка" : "", TUNE_SR_QUICK.test(t.id) ? "резвее разгон отклик" : "", /^bore/.test(t.id) ? "бигбор расточка цпг поршневая цилиндр объем кубов кубы" : "", /^swap/.test(t.id) ? "свап замена мотора" : "", "тюнинг доработка", aka].join(" "), 1, "t" + t.id));
+    TUNING.filter(t => tuningFor(t, eng, window.mhBike).ok).forEach(t => add("Тюнинг", t.title, () => go("tuning"), [t.cat, TUNE_SR_KW[tuneNode(t)] || "", t.q || "", t.eff || "", t.power > 0 ? "мощнее мощность резвее" : "", TUNE_SR_FAST.test(t.id) ? "быстрее скорость максималка" : "", TUNE_SR_QUICK.test(t.id) ? "резвее разгон отклик" : "", /^bore/.test(t.id) ? "бигбор расточка цпг поршневая цилиндр объем кубов кубы" : "", /^swap/.test(t.id) ? "свап замена мотора" : "", "тюнинг доработка", aka].join(" "), 1, "t" + t.id));
     /* детали под мотор считаем один раз на мотор, а не на каждую букву */
     if (siteSearch.eng !== eng || siteSearch.bike !== window.mhBike) {
       siteSearch.eng = eng;
@@ -14886,7 +14890,7 @@ function unitsFor(eng) {
       id: id,
       t: AREAS[id].t
     })),
-    chassis: Object.keys(CH_AREAS).filter(id => CH_AREAS[id].kinds).map(id => ({
+    chassis: Object.keys(CH_AREAS).filter(id => CH_AREAS[id].kinds && (id !== "chain" || hasChain(eng))).map(id => ({
       id: id,
       t: CH_AREAS[id].t
     }))

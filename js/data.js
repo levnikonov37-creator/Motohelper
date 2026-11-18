@@ -1333,8 +1333,9 @@ var TUNE_EXCL = [["cdi", "cdi-prog"], ["sp-tq", "sp-sp"], ["pe30", "pwk", "pwk28
 
 /* --- проверка перед выездом --- */
 var PRERIDE = [
-  ["tires", "Шины: давление и порезы"], ["spokes", "Спицы: ни одна не болтается"], ["brakes", "Тормоза: оба держат, жидкость в норме"],
-  ["chain", "Цепь: провис 30–40 мм, смазана"], ["cables", "Газ возвращается сам, сцепление с ходом"], ["oil", "Уровень масла"],
+  ["tires", "Шины: давление и порезы"], ["spokes", "Спицы: ни одна не болтается", null, ["cvt"]], ["brakes", "Тормоза: оба держат, жидкость в норме"],
+  ["chain", "Цепь: провис 30–40 мм, смазана", null, ["cvt", "shaft", "belt"]], ["cables", "Газ возвращается сам, сцепление с ходом", null, ["cvt"]],
+  ["cvtcables", "Газ возвращается сам, оба тормоза с ходом", "cvt"], ["oil", "Уровень масла", null, ["2t"]],
   ["coolant", "Антифриз в бачке", "liquid"], ["lights", "Свет и сигнал"], ["bolts", "Оси колёс и руль затянуты"],
   ["fuel", "Бензин (2T — смесь!)"], ["kit", "Инструмент, камера, насос, телефон заряжен"]
 ];
@@ -10770,3 +10771,7 @@ Object.keys(ENGINES).forEach(function (id) {
 function symOk(i, e) { return (!i[2] || e.groups.indexOf(i[2]) >= 0) && !(i[3] && i[3].some(function (g) { return e.groups.indexOf(g) >= 0; })); }
 /* проверка / причина из базы знаний: only — хотя бы один признак, skip — ни одного */
 function kbOk(x, e) { return (!x.only || x.only.some(function (g) { return g === e.id || e.groups.indexOf(g) >= 0; })) && !(x.skip && x.skip.some(function (g) { return g === e.id || e.groups.indexOf(g) >= 0; })); }
+
+/* узел «Вариатор и редуктор» — у скутера вместо «Сцепления» и «КПП и звезды» на схеме мотора */
+AREAS.cvt = { t: "Вариатор и редуктор", kinds: ["cvtbelt", "rollers", "cvtclutch", "cvtvar", "cvtspring", "cvtsliders", "gearoil", "kickkit", "clutchholder"], diag: ["kick"],
+  guides: ["cvt", "scooter-gearoil"], spec: [["Привод", "gearbox"], ["Запуск", "start"]], re: /вариатор|ремень|ролик|редуктор|сцеплен|кик/i };
