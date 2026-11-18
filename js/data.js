@@ -878,6 +878,9 @@ var WORKS = [
 ];
 
 /* детали карбюратора — только моторам с карбюратором; звёзды и цепь — только при цепном приводе */
+/* у скутера (вариатор) нет троса и пружин сцепления, КПП и лапки, педали тормоза, маятника, датчиков нейтрали и сцепления;
+   колёса литые — без спиц, камер и ободной ленты; у скутерных 2Т нет клапана выпуска */
+var PART_CVT_NO = ["clutchsprings", "clutchcable", "clutchlever", "clutchdiscs", "clutchgasket", "shift", "shiftlever", "brakepedal", "swingbush", "swingaxle", "neutral", "clutchswitch", "spokes", "rimtape", "tube", "pv"];
 var PART_CARB_KINDS = ["carb", "carbkit", "jets", "jets2", "needle", "floatvalve", "choke"];
 var PART_CHAIN_KINDS = ["chain", "chain2", "chainlock", "chainlube", "chainclean", "chainroller", "chainguide", "chainadj", "swingslider", "sprocketF", "sprocketR", "sprocketR2", "sprocketguard", "chaintool"];
 function fits(item, eng) {
@@ -886,6 +889,9 @@ function fits(item, eng) {
   if (item.kind && eng && eng.groups) {
     if (PART_CARB_KINDS.indexOf(item.kind) >= 0 && eng.groups.indexOf("efi") >= 0 && eng.groups.indexOf("carb") < 0) return false;
     if (PART_CHAIN_KINDS.indexOf(item.kind) >= 0 && typeof hasChain === "function" && !hasChain(eng)) return false;
+    if (eng.groups.indexOf("cvt") >= 0 && (PART_CVT_NO.indexOf(item.kind) >= 0 || item.id === "oil-gear" || (eng.cc <= 60 && /^(pwk38|rk-pwk)$/.test(item.id)))) return false;
+    /* у 2Т масло не в картере: маслорадиатор и щуп-термометр не к чему */
+    if (eng.stroke === "2T" && (item.kind === "oilcooler" || item.kind === "oiltemp")) return false;
   }
   if (!item.fit || !eng) return true;
   return item.fit.some(function (f) { return f === eng.id || eng.groups.indexOf(f) >= 0; });
@@ -991,6 +997,8 @@ function tuningFor(t, eng, bike) {
   var deny = null;
   if (TUNE_CHAIN.indexOf(t.id) >= 0 && !hasChain(eng)) deny = eng.cvt ? "У вариатора нет звёзд и цепи." : "Здесь не цепь, а " + (/кардан/i.test(eng.gearbox || "") ? "кардан." : "ремень.");
   if (t.deny) Object.keys(t.deny).forEach(function (k) { if (k === eng.id || eng.groups.indexOf(k) >= 0) deny = t.deny[k]; });
+  /* карбюратор-доработка на инжекторе не встаёт: смесь там меняет прошивка */
+  if (!deny && /^carb-|^(pe30|pwk|pwk28)$/.test(t.id) && eng.groups.indexOf("efi") >= 0 && eng.groups.indexOf("carb") < 0) deny = "На инжекторе карбюратора нет — смесь меняет прошивка.";
   if (!deny && t.cls && (!t.cls.length || (bike && t.cls.indexOf(tuneClassOf(bike)) < 0))) deny = t.cls.length ? "Не для класса «" + TUNE_CLASS_T[tuneClassOf(bike)] + "»." : "Заменено конкретными вариантами.";
   var ok = fits(t, eng) && !deny;
   var note = null;
@@ -2740,26 +2748,34 @@ function wiringType(e) {
 /* Моменты затяжки: по месту и размеру резьбы, свеча — своя у каждого мотора */
 function torqueFor(e, bike) {
   var big = e.cc >= 450, small = e.cc <= 150 || (bike && bike.type === "Питбайк");
+  /* скутер: нет цепи и звёзд, мотор — он же маятник; у 2Т-скутера масло не в картере — сливной болт только у редуктора */
+  var cvt = e.groups.indexOf("cvt") >= 0, chain = hasChain(e), smallCvt = cvt && e.cc <= 160;
   var r = [
     ["Свеча (" + String(e.spark || "").split(/\s*[\/(;,]/)[0].trim() + ")", e.sparkTorque || "12–18 Н·м"],
-    ["Сливная пробка масла", big ? "20–30 Н·м" : "18–25 Н·м"],
+    cvt && e.stroke === "2T" ? ["Сливной болт редуктора", "10–13 Н·м"] : [e.stroke === "2T" ? "Сливная пробка масла КПП" : "Сливная пробка масла", big ? "20–30 Н·м" : "18–25 Н·м"],
     [e.stroke === "2T" ? "Крышки двигателя М6" : "Крышка клапанов, крышки двигателя М6", "8–10 Н·м"]
   ];
   if (e.stroke === "4T" && !e.jp) r.push(["Гайки головки цилиндра (крест-накрест, в 2–3 приёма)", e.cc <= 130 ? "M7: 15–18 Н·м" : e.cc <= 260 ? "M8: 20–25 Н·м" : "M8–M9: 25–30 Н·м"]);
   if (e.stroke === "2T") r.push(["Гайки головки 2T (крест-накрест)", e.cc <= 90 ? "10–12 Н·м" : "20–27 Н·м"]);
   r.push(["Выпускной коллектор (шпильки М6/М8)", "10–12 / 18–22 Н·м"]);
+  if (smallCvt) {
+    r.push(["Гайка ведущего шкива вариатора", e.cc <= 60 ? "35–45 Н·м" : "50–60 Н·м"]);
+    r.push(["Гайка сцепления (ведомый шкив)", e.cc <= 60 ? "35–45 Н·м" : "45–55 Н·м"]);
+  }
   r.push(["Ось переднего колеса", small ? "40–50 Н·м" : big ? "60–90 Н·м" : "45–65 Н·м"]);
-  r.push(["Ось заднего колеса", small ? "60–80 Н·м" : big ? "100–130 Н·м" : "80–100 Н·м"]);
-  r.push(["Болты звезды на ступице", small ? "M6: 10–14 Н·м + фиксатор" : "M8: 30–35 Н·м + фиксатор"]);
-  r.push(["Передняя звезда (болт/гайка)", big ? "60–100 Н·м (гайка)" : "10–12 Н·м (болт М6)"]);
+  r.push([smallCvt ? "Гайка заднего колеса (вал редуктора)" : "Ось заднего колеса", smallCvt ? "100–120 Н·м" : small ? "60–80 Н·м" : big ? "100–130 Н·м" : "80–100 Н·м"]);
+  if (chain) {
+    r.push(["Болты звезды на ступице", small ? "M6: 10–14 Н·м + фиксатор" : "M8: 30–35 Н·м + фиксатор"]);
+    r.push(["Передняя звезда (болт/гайка)", big ? "60–100 Н·м (гайка)" : "10–12 Н·м (болт М6)"]);
+  }
   r.push(["Тормозной диск", "M6: 10–12 / M8: 20–25 Н·м + фиксатор"]);
   r.push(["Суппорт к вилке", big ? "M10: 35–45 Н·м" : "M8: 25–30 Н·м"]);
-  r.push(["Траверсы (зажим перьев)", big ? "M8: 18–25 Н·м" : "M8: 15–20 Н·м"]);
+  if (!smallCvt) r.push(["Траверсы (зажим перьев)", big ? "M8: 18–25 Н·м" : "M8: 15–20 Н·м"]);
   r.push(["Гайка рулевой колонки", big ? "90–110 Н·м" : "60–80 Н·м"]);
-  r.push(["Ось маятника", small ? "45–60 Н·м" : big ? "90–110 Н·м" : "60–80 Н·м"]);
-  r.push(["Крепления двигателя к раме", big ? "M10: 45–55 Н·м" : "M8–M10: 35–45 Н·м"]);
+  r.push(cvt ? ["Болт подвески мотора к раме", smallCvt ? "M10: 40–50 Н·м" : "M10–M12: 50–70 Н·м"] : ["Ось маятника", small ? "45–60 Н·м" : big ? "90–110 Н·м" : "60–80 Н·м"]);
+  if (!cvt) r.push(["Крепления двигателя к раме", big ? "M10: 45–55 Н·м" : "M8–M10: 35–45 Н·м"]);
   r.push(["Болты амортизатора", "M10: 40–45 Н·м"]);
-  r.push(["Спицы", "3–5 Н·м, равномерно по кругу"]);
+  if (!cvt) r.push(["Спицы", "3–5 Н·м, равномерно по кругу"]);
   /* моменты из руководства этого мотора (e.torq: [начало названия узла, значение, своё название]) — заменяют типовую строку с тем же началом,
      а узлы, которых нет в типовом списке, встают после свечи, пробки, крышек и головки — перед выпуском и ходовой;
      третий элемент строки — true, если цифра сверена с руководством */
@@ -9144,7 +9160,12 @@ var TUNE_CLASS_OF = { "Эндуро": "off", "Кросс-эндуро": "off", "
   "Мопед": "moped", "Скутер": "moped" };
 var TUNE_CLASS_T = { off: "эндуро и питбайк", adv: "тур-эндуро", sm: "мотард", road: "дорожный: спорт и нейкед", cruise: "круизер, классика, турер", moped: "мопед и скутер" };
 /* класс для тюнинга (не путать с bikeClass в app.js — класс для расчёта скорости) */
-function tuneClassOf(b) { return (b && TUNE_CLASS_OF[b.type]) || "off"; }
+function tuneClassOf(b) {
+  var c = (b && TUNE_CLASS_OF[b.type]) || "off";
+  /* макси-скутер (250+ см³: TMAX, Forza, Burgman) тюнингуют как дорожный — банка, слайдеры, ветровое, а не «прямоток на мопед» */
+  if (c === "moped" && b.type === "Скутер") { var e = ENGINES[b.versions[0].engine]; if (e && e.cc >= 250) c = "road"; }
+  return c;
+}
 var TUNE_CLS = {
   skid: ["off", "adv"], hand: ["off", "adv", "sm"], radguard: ["off", "adv", "sm"], frameguard: ["off"], "link-guard": ["off"], "disc-guard": ["off"],
   "fork-guards": ["off", "sm"], chainguide: ["off", "adv", "sm"], "case-guards": ["off", "adv", "sm"], towstrap: ["off"], "kick-foot": ["off", "adv"],
@@ -9357,6 +9378,12 @@ TUNE_NODES.splice(TUNE_NODES.findIndex(function (n) { return n[0] === "drive"; }
   ["oilcool", "oil-temp"].forEach(function (id) { var t = byId(id); if (t) t.deny = Object.assign({}, t.deny, { "2t": "У 2Т нет масла в картере: смазка идёт с топливом." }); });
   [["pv-spring", "У скутерных 2Т нет клапана выпуска."], ["silencer2t", "У скутера глушитель — одна деталь с трубой: меняют трубу целиком."], ["flywheel-w", "На скутере с вариатором не нужен: мотор не глохнет на камнях."]]
     .forEach(function (x) { var t = byId(x[0]); if (t) t.deny = Object.assign({}, t.deny, { cvt: x[1] }); });
+  [["clutch", "У скутера сцепление в вариаторе — смотри «Контрпружина и пружины сцепления»."], ["radbrace", "У скутера радиатор спрятан в пластике — защищать нечего."],
+    ["swing-bear", "У скутера маятник — сам мотор, подшипников маятника нет."]].forEach(function (x) { var t = byId(x[0]); if (t) t.deny = Object.assign({}, t.deny, { cvt: x[1] }); });
+  var ck = byId("cvt-kit");
+  if (ck) ck.notes = Object.assign({}, ck.notes, { big: "Для макси-скутера (TMAX, Forza, Burgman) — Malossi / Polini, 20–40 тыс. ₽; китайских копий под большие моторы почти нет." });
+  var exm = byId("ex-moped");
+  if (exm) exm.notes = Object.assign({}, exm.notes, { efi: "На инжекторе без прошивки — только громче: смесь станет беднее, мощности не прибавится." });
   var pipe = byId("pipe");
   if (pipe) pipe.notes = Object.assign({}, pipe.notes, { cvt: "На скутер — труба под свой мотор: китайские 2–5 тыс. ₽, Stage6 / Malossi / Polini — 8–15 тыс. Без подбора жиклёра и роликов прибавки нет, а верх «уходит» за ограничитель вариатора." });
   TUNE_EXCL.forEach(function (g) { if (g.indexOf("bore300") >= 0 && g.indexOf("bore-139") >= 0) g.push("bore-qmb72", "bore-2t70"); if (g.indexOf("pe30") >= 0) g.push("carb-2t-175"); });
@@ -9466,6 +9493,11 @@ var CARB_UP = [
   Object.assign(TUNE_WEAR, { "bore-nc84": [10, 20, "ЦПГ", "Прибавка объёма небольшая — и нагрузка почти как на стоке."] });
   TUNE_GUIDE["bore-nc84"] = "compression";
   TUNE_EXCL.forEach(function (g) { if (g.indexOf("bore300") >= 0 && g.indexOf("bore-139") >= 0) g.push("bore-nb78", "bore-nc84"); });
+  /* цены 172FMM по магазинам (2026): Ø75 «300» (OTOM, Zongshen) — 9.5–12 тыс. ₽, Ø77 (MBO и др.) — 9.9–15.6 тыс. ₽;
+     комплекты бывают под 2-клапанную (CB250) и 4-клапанную (172FMM-3A / 175FMM-7) головку — не взаимозаменяемы */
+  Object.assign(TUNE_PRICES, { "bore-172-75": [9000, 12500], bore300: [9500, 16000] });
+  var b75 = byId("bore-172-75");
+  if (b75) b75.body = "Цилиндр Ø75 мм вместо 72 — тот же размер, что у 175FMM (CB300): на штатном ходе ≈ 270 см³, у продавцов «300». Прибавка меньше, чем у Ø77, но стенки гильзы толще и мотор меньше греется. Комплекты бывают под 2-клапанную (CB250) и 4-клапанную (172FMM-3A, 175FMM-7) головку — они не взаимозаменяемы.";
   /* PR300 и CBS300: после PWK — FCR */
   CARB_UP.forEach(function (r) {
     if (r.eng.indexOf("PR300") >= 0 || r.eng.indexOf("CBS300") >= 0) {
@@ -10690,7 +10722,7 @@ var PART_CLS_ID = {
   "mask": ["off", "sm"], "shrouds": ["off", "sm"], "side-pl": ["off", "sm"], "mudguard": ["off", "sm", "adv"], "bar": ["off", "adv", "sm"],
   "seat-cover": ["off", "sm"], "peg-wide": ["off", "adv", "sm"], "hourmeter": ["off", "moped"], "fender-f": ["off", "sm", "adv", "moped"]
 };
-var PART_CLS_KIND = { mousse: ["off"], moussegel: ["off"], rimlock: ["off"], spokes: ["off", "adv", "sm", "moped", "cruise"],
+var PART_CLS_KIND = { filteroil: ["off", "adv", "sm", "moped"], mousse: ["off"], moussegel: ["off"], rimlock: ["off"], spokes: ["off", "adv", "sm", "moped", "cruise"],
   skid: ["off", "adv"], handguards: ["off", "adv", "sm"], handguards2: ["off", "adv", "sm"], radguard: ["off", "adv", "sm"], frameguard: ["off"],
   swingguard: ["off"], discguard: ["off"], forkguards: ["off", "sm"], sprocketguard: ["off", "sm"], bars: ["adv", "cruise", "moped"], forkgaiters: ["off", "adv", "cruise", "moped"] };
 function partFor(p, eng, bike) {
