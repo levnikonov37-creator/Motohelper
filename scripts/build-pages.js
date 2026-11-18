@@ -1084,7 +1084,7 @@ const TUNE_PAGES = [];
       power.length && ["Сколько стоит тюнинг " + name + "?", (quick.length ? "Резвее без вскрытия мотора: " + sum(quick) + ". " : "") + "Мощнее (" + power.map((t) => t.title.replace(/\s*\(.*?\)/g, "")).join(", ") + "): " + sum(power) + " за детали, без установки."],
       cvt && tF("cvt-rollers") && ["Какие ролики поставить на " + name + ", чтобы был резвее?", "Легче штатных на 1–2 г — бодрее разгон и в горку, максималка чуть ниже; тяжелее — наоборот. Меняют весь комплект, вес подбирают шагом 0.5–1 г. С ЦПГ 70/72 ролики подбирают заново — обычно на 0.5–1 г тяжелее."],
       cvt && tF("cvt-unlock") && ["Как снять ограничение скорости на " + name + "?", tF("cvt-unlock").body + " Учти: мопед по ПДД — до 50 км/ч по конструкции."],
-      boreMain && !cvt && ["Что поменять вместе с бигбором на " + name + "?", [row && row.boreNote, tF("jets") && "Подбор главного жиклёра и иглы по свече", (tF("oilcool") || tF("fan")) && "охлаждение (" + (tF("oilcool") || tF("fan")).title.toLowerCase() + ")", (e.groups || []).indexOf("big") >= 0 && "усиленные пружины сцепления", "обкатка 300–500 км"].filter(Boolean).join("; ") + "."]
+      boreMain && !cvt && ["Что поменять вместе с бигбором на " + name + "?", [row && row.boreNote && row.boreNote.replace(/\.$/, ""), tF("jets") && "Подбор главного жиклёра и иглы по свече", (tF("oilcool") || tF("fan")) && "охлаждение (" + (tF("oilcool") || tF("fan")).title.toLowerCase() + ")", (e.groups || []).indexOf("big") >= 0 && "усиленные пружины сцепления", "обкатка 300–500 км"].filter(Boolean).join("; ") + "."]
     ].filter(Boolean);
     const sections = NODES.filter((n) => (by[n[0]] || []).length).map((n) => {
       let L = by[n[0]];
