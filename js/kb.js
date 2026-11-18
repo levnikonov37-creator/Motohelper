@@ -1839,3 +1839,18 @@ GUIDES.push({ id: "cvt", title: "Вариатор скутера: ремень, 
 
 /* база знаний загружена — приложение перерисует разделы, которые её ждали */
 if (typeof window !== "undefined" && window.dispatchEvent) { window.MH_KB = true; try { window.dispatchEvent(new Event("mh-kb")); } catch (e) {} }
+
+/* ===================== Диагностика — только про то, что у мотоцикла есть =====================
+   У скутера (вариатор) нет КПП, лапки, троса и дисков сцепления, датчика нейтрали, цепи и спиц; у кардана и ремня нет цепи;
+   у 2Т нет клапанов, цепи ГРМ, маслосъёмных колпачков и масла в картере; на инжекторе нечему «чихать в карбюратор». */
+(function () {
+  function skip(arr, ids, groups) {
+    arr.forEach(function (x) { if (ids.indexOf(x.id) >= 0) x.skip = (x.skip || []).concat(groups.filter(function (g) { return (x.skip || []).indexOf(g) < 0; })); });
+  }
+  skip(DIAG, ["clutch", "gears", "stall-gear", "noneutral", "gearnoise"], ["cvt"]);
+  skip(DIAG, ["chain"], ["cvt", "shaft", "belt"]);
+  skip(CAUSES, ["clutchworn", "clutchadj", "gearbox", "linkage", "spokesloose", "shiftspring", "shiftbent", "wrongoil"], ["cvt"]);
+  skip(CAUSES, ["sprockethub"], ["cvt", "shaft", "belt"]);
+  var SYM_SKIP = { stallgear: ["cvt"], clutchdrag: ["cvt"], jumpgear: ["cvt"], hardshift: ["cvt"], tick: ["2t"], rattle: ["2t"], smokecold: ["2t"], milkyoil: ["2t"], popintake: ["efi"] };
+  SYMPTOMS.forEach(function (c) { c.items.forEach(function (i) { if (SYM_SKIP[i[0]]) { if (i.length < 3) i[2] = null; i[3] = SYM_SKIP[i[0]]; } }); });
+})();

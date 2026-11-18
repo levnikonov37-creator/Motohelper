@@ -1333,8 +1333,9 @@ var TUNE_EXCL = [["cdi", "cdi-prog"], ["sp-tq", "sp-sp"], ["pe30", "pwk", "pwk28
 
 /* --- проверка перед выездом --- */
 var PRERIDE = [
-  ["tires", "Шины: давление и порезы"], ["spokes", "Спицы: ни одна не болтается"], ["brakes", "Тормоза: оба держат, жидкость в норме"],
-  ["chain", "Цепь: провис 30–40 мм, смазана"], ["cables", "Газ возвращается сам, сцепление с ходом"], ["oil", "Уровень масла"],
+  ["tires", "Шины: давление и порезы"], ["spokes", "Спицы: ни одна не болтается", null, ["cvt"]], ["brakes", "Тормоза: оба держат, жидкость в норме"],
+  ["chain", "Цепь: провис 30–40 мм, смазана", null, ["cvt", "shaft", "belt"]], ["cables", "Газ возвращается сам, сцепление с ходом", null, ["cvt"]],
+  ["cvtcables", "Газ возвращается сам, оба тормоза с ходом", "cvt"], ["oil", "Уровень масла", null, ["2t"]],
   ["coolant", "Антифриз в бачке", "liquid"], ["lights", "Свет и сигнал"], ["bolts", "Оси колёс и руль затянуты"],
   ["fuel", "Бензин (2T — смесь!)"], ["kit", "Инструмент, камера, насос, телефон заряжен"]
 ];
@@ -9281,7 +9282,7 @@ function tuneNode(t) {
    bore — [диаметр штатный, ход], мм; по ним считаются и подписи, и прибавка. */
 var ENGINE_GEOM = { "172FMM": [72, 61.2], "172FMM-3A": [72, 61.2], "172FMM-5": [72, 61.2], "FIXCN_PR250_5": [72, 61.2], "FIXCN_172FMM7": [72, 61.2],
   "NB300": [74, 65], "FIXCN_NB300_5": [74, 65], "CBS300": [74, 65], "FIXCN_CBS300_5": [74, 65], "NC250": [77, 53.6], "NC300": [82, 53.6],
-  "YBS300": [76, 65], "PR300": [75, 61.4], "152FMH": [52.4, 49.5], "139FMB": [39, 41.4], "154FMI": [56.5, 49.5], "Z190": [62, 62] };
+  "YBS300": [76, 65], "PR300": [75, 61.4], "152FMH": [52.4, 49.5], "139FMB": [39, 41.4], "Z190": [62, 62] }; /* 154FMI нет: под этим кодом и питбайковые 125 (Ø52.4 / Ø54), и мопедные (Ø56.5) */
 function boreCc(id, d) { var g = ENGINE_GEOM[id]; return g ? Math.round(Math.PI / 4 * d * d * g[1] / 1000) : 0; }
 (function () {
   var byId = function (id) { return TUNING.find(function (t) { return t.id === id; }); };
@@ -10734,3 +10735,43 @@ function partFor(p, eng, bike) {
   if (!L && p.kind === "trip") L = /стропа|буксировоч/i.test(p.name) ? ["off", "adv"] : null;
   return !L || L.indexOf(c) >= 0;
 }
+
+/* ===================== Инструкции — только там, где этот узел есть =====================
+   Кардан и ремень — по типу привода, цепь и звёзды — только у цепи, триал и круизер — по моделям с этим мотором,
+   синхронизация дросселей — у многоцилиндровых, клапан выпуска — у жидкостных 2Т-мотоциклов (не скутеров),
+   маслорадиатор и клапаны — не у 2Т, спицы, камеры, маятник и защита картера — не у скутеров. */
+var GUIDE_ENG_TYPES = null;
+function guideEngTypes() {
+  if (GUIDE_ENG_TYPES) return GUIDE_ENG_TYPES;
+  var t = { trial: {}, cruise: {} };
+  BIKES.forEach(function (b) { b.versions.forEach(function (v) { if (b.type === "Триал") t.trial[v.engine] = 1; if (TUNE_CLASS_OF[b.type] === "cruise") t.cruise[v.engine] = 1; }); });
+  return (GUIDE_ENG_TYPES = t);
+}
+var GUIDE_NEED = {
+  "shaft-oil": function (e) { return /кардан/i.test(e.gearbox || ""); },
+  "belt-drive": function (e) { return !e.cvt && /ремень/i.test(e.gearbox || ""); },
+  "cruiser-care": function (e) { return !!guideEngTypes().cruise[e.id]; },
+  "trial-setup": function (e) { return !!guideEngTypes().trial[e.id]; },
+  "multi-sync": function (e) { return /^(twin|vtwin|boxer|i3|i4)$/.test(e.layout || ""); },
+  "pv-clean": function (e) { return !e.cvt && e.groups.indexOf("liquid") >= 0 && e.groups.indexOf("big") >= 0; },
+  "oilcooler": function (e) { return e.stroke !== "2T"; },
+  "jp-valves-shim": function (e) { return e.stroke !== "2T"; }
+};
+["chain", "chain-replace", "sprocket-change", "chain-slider", "chain-rivet"].forEach(function (id) { GUIDE_NEED[id] = hasChain; });
+["spokes", "wheel-lacing", "tube", "swingarm-bushings", "linkage", "mousse-install", "skid-install"].forEach(function (id) { GUIDE_NEED[id] = function (e) { return !e.cvt; }; });
+function guideOk(g, e) { var f = g && e && GUIDE_NEED[g.id]; return !f || !!f(e); }
+/* признаки привода: кардан и ремень (не вариатор) — по ним прячем то, что про цепь и звёзды */
+Object.keys(ENGINES).forEach(function (id) {
+  var e = ENGINES[id];
+  if (!e || !e.groups || e.groups.indexOf("cvt") >= 0) return;
+  if (/кардан/i.test(e.gearbox || "")) { if (e.groups.indexOf("shaft") < 0) e.groups.push("shaft"); }
+  else if (/ремень/i.test(e.gearbox || "")) { if (e.groups.indexOf("belt") < 0) e.groups.push("belt"); }
+});
+/* симптом [id, название, только-для, кроме-для]: подходит ли мотору */
+function symOk(i, e) { return (!i[2] || e.groups.indexOf(i[2]) >= 0) && !(i[3] && i[3].some(function (g) { return e.groups.indexOf(g) >= 0; })); }
+/* проверка / причина из базы знаний: only — хотя бы один признак, skip — ни одного */
+function kbOk(x, e) { return (!x.only || x.only.some(function (g) { return g === e.id || e.groups.indexOf(g) >= 0; })) && !(x.skip && x.skip.some(function (g) { return g === e.id || e.groups.indexOf(g) >= 0; })); }
+
+/* узел «Вариатор и редуктор» — у скутера вместо «Сцепления» и «КПП и звезды» на схеме мотора */
+AREAS.cvt = { t: "Вариатор и редуктор", kinds: ["cvtbelt", "rollers", "cvtclutch", "cvtvar", "cvtspring", "cvtsliders", "gearoil", "kickkit", "clutchholder"], diag: ["kick"],
+  guides: ["cvt", "scooter-gearoil"], spec: [["Привод", "gearbox"], ["Запуск", "start"]], re: /вариатор|ремень|ролик|редуктор|сцеплен|кик/i };

@@ -488,8 +488,8 @@ const modelCard = (b, withBrand) => { const ph = photoOf(b, true); return `<a cl
 
 /* ===== моторы, инструкции, поломки: отдельные страницы под запросы «масло 172FMM», «зазоры клапанов», «не заводится» ===== */
 const okEng = (only, e) => !only || only.some((x) => x === e.id || (e.groups || []).indexOf(x) >= 0);
-const guidesOf = (e) => GUIDES.filter((g) => okEng(g.only, e) && !(e.cvt && NO_CVT.indexOf(g.id) >= 0));
-const diagOf = (e) => DIAG.filter((d) => !d.only || d.only.some((x) => (e.groups || []).indexOf(x) >= 0));
+const guidesOf = (e) => GUIDES.filter((g) => okEng(g.only, e) && !(e.cvt && NO_CVT.indexOf(g.id) >= 0) && ctx.guideOk(g, e));
+const diagOf = (e) => DIAG.filter((d) => ctx.kbOk(d, e));
 const KEY_GUIDES = ["oil", "valves", "valves-dohc", "valves-screw", "spark", "carb-tune", "carb-clean", "chain"];
 const bikesOf = {}; // мотор → модели
 BIKES.forEach((b) => b.versions.forEach((v) => { const l = (bikesOf[v.engine] = bikesOf[v.engine] || []); if (l.indexOf(b) < 0) l.push(b); }));
@@ -518,7 +518,7 @@ PROB_BRANDS.forEach((br) => BIKES.filter((b) => b.brand === br && topE.has(b.ver
 BIKES.forEach((b) => { if (fs.existsSync(path.join(OUT, bikeSlug.get(b), "start", "index.html"))) probBikes.add(b); });
 // первая буква строчная, остальное как есть: «Слишком жирная смесь 2T» → «слишком жирная смесь 2T»
 const lc1 = (t) => (/^[А-ЯЁ][а-яё]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t);
-const probsFor = (b) => { const e = ENGINES[b.versions[0].engine]; return DIAG.filter((d) => PROB[d.id] && (!d.only || d.only.some((g) => (e.groups || []).indexOf(g) >= 0))); };
+const probsFor = (b) => { const e = ENGINES[b.versions[0].engine]; return DIAG.filter((d) => PROB[d.id] && ctx.kbOk(d, e)); };
 const engTitle = (e) => e.code + (e.name && e.name.indexOf(e.code) < 0 ? " (" + e.name + ")" : "");
 /* значения в шагах ({valveIn}, {spark}…) свои у каждого мотора: в тексте — название, ниже — таблица по популярным моторам */
 const PH = { valveIn: "зазор впуска", valveEx: "зазор выпуска", spark: "свеча", gap: "зазор свечи", idle: "обороты ХХ", jetMain: "главный жиклёр", jetPilot: "жиклёр ХХ",
@@ -685,7 +685,7 @@ ${fbBlock("", e.code + " [" + id + "]", ["Масло", "Объём масла", 
 GUIDES.forEach((g) => {
   const canon = SITE + "m/remont/" + g.id + "/";
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Инструкции", "/m/remont/"], [g.title, null]];
-  const okE = (e) => okEng(g.only, e) && !(e.cvt && NO_CVT.indexOf(g.id) >= 0);
+  const okE = (e) => okEng(g.only, e) && !(e.cvt && NO_CVT.indexOf(g.id) >= 0) && ctx.guideOk(g, e);
   const vt = valuesTable(phKeys(g.steps), okE);
   const plain = g.steps.map((x) => String(x).replace(/\{(\w+)\}/g, (m, k) => vt.keys.indexOf(k) >= 0 ? PHI[k] || "по таблице" : "по мануалу"));
   const body = `<section class="hero"><div class="kick">Инструкция</div><h1>${esc(g.title)}</h1>
