@@ -51,7 +51,7 @@ const TYPES = typesSrc ? JSON.parse(typesSrc[1]) : null;
 if (!TYPES) fail("Не найден BF_TYPES в js/app.js");
 
 // Двигатели
-const GROUPS = new Set(["horiz", "cg", "cb", "zs4v", "dohc", "air", "liquid", "carb", "efi", "2t", "4t", "small", "big", "balancer", "jp", "eu", "in", "cn", "ru", "cvt", "kick", "estart"]); // kick / estart — по полю start (кик / электростартер)
+const GROUPS = new Set(["horiz", "cg", "cb", "zs4v", "dohc", "air", "liquid", "carb", "efi", "2t", "4t", "small", "big", "balancer", "jp", "eu", "in", "cn", "ru", "cvt", "kick", "estart", "shaft", "belt"]); // kick / estart — по полю start (кик / электростартер); shaft / belt — по приводу (кардан / ремень)
 for (const [id, e] of Object.entries(ENGINES)) {
   for (const f of ["code", "name", "stroke", "cooling", "spark"]) if (!e[f]) fail(`Двигатель ${id}: пустое поле ${f}`);
   if (!(e.cc > 0)) fail(`Двигатель ${id}: объём cc = ${e.cc}`);
@@ -218,6 +218,13 @@ for (const [id, e] of Object.entries(ENGINES)) if (new Set(e.groups).size !== e.
   for (const [gid, id, want] of [["shaft-oil", "R1250", true], ["shaft-oil", "172FMM", false], ["belt-drive", "HD_M8_107", true], ["chain", "R1250", false], ["chain", "172FMM", true],
     ["jp-valves-shim", "HON_AF34E", false], ["spokes", "HON_AF34E", false], ["multi-sync", "HON_JF28E", false], ["trial-setup", "TR2T", true], ["trial-setup", "KTM300TPI", false]]) {
     if (ENGINES[id] && ctx.guideOk({ id: gid }, ENGINES[id]) !== want) fail("Инструкция «" + gid + "» для " + id + " — " + (want ? "должна быть" : "не должна быть"));
+  }
+  /* диагностика: у скутера нет КПП и цепи, у кардана — цепи, у 2Т — клапанов, на инжекторе — карбюратора */
+  const DG = (id) => (ctx.DIAG || []).find((d) => d.id === id), SY = (id) => [].concat(...(ctx.SYMPTOMS || []).map((c) => c.items)).find((i) => i[0] === id);
+  for (const [kind, xid, id, want] of [["d", "gears", "HON_AF34E", false], ["d", "chain", "R1250", false], ["d", "chain", "172FMM", true], ["s", "tick", "HON_AF34E", false],
+    ["s", "popintake", "HON_JF28E", false], ["s", "tick", "172FMM", true]]) {
+    const it = kind === "d" ? DG(xid) : SY(xid), e = ENGINES[id];
+    if (it && e && (kind === "d" ? ctx.kbOk(it, e) : ctx.symOk(it, e)) !== want) fail("Диагностика «" + xid + "» для " + id + " — " + (want ? "должна быть" : "не должна быть"));
   }
   const nodes = new Set((ctx.TUNE_NODES || []).map((n) => n[0]));
   for (const t of TUNING) if (!nodes.has(ctx.tuneNode(t))) fail("Тюнинг: у «" + t.id + "» нет узла (TUNE_NODES)");

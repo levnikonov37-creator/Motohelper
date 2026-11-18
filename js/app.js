@@ -12027,7 +12027,7 @@ function KbWait({
   }, "Попробовать ещё раз")) : /*#__PURE__*/React.createElement("p", null, "Загрузка инструкций…"));
 }
 function diagFor(eng) {
-  return DIAG.filter(d => !d.only || d.only.some(g => eng.groups.indexOf(g) >= 0));
+  return DIAG.filter(d => kbOk(d, eng));
 }
 function guidesFor(eng) {
   return GUIDES.filter(g => (!g.only || g.only.some(x => x === eng.id || eng.groups.indexOf(x) >= 0)) && !(eng.cvt && NO_CVT_GUIDES.indexOf(g.id) >= 0) && (typeof guideOk !== "function" || guideOk(g, eng)));
@@ -14646,7 +14646,7 @@ function siteSearch(q, ctx, opt) {
   const u = unitsFor(eng);
   u.engine.concat(u.chassis).forEach(x => add("Узел", x.t, () => go("repair", "unit:" + x.id), "", 4, "u" + x.id));
   guidesFor(eng).forEach(g => add("Инструкция", g.title, () => go("repair", g.id), "", 4, "g" + g.id));
-  [].concat.apply([], SYMPTOMS.map(c => c.items)).filter(i => !i[2] || eng.groups.indexOf(i[2]) >= 0).forEach(sy => add("Симптом", sy[1], () => {
+  [].concat.apply([], SYMPTOMS.map(c => c.items)).filter(i => symOk(i, eng)).forEach(sy => add("Симптом", sy[1], () => {
     save("diag-preset", [sy[0]]);
     go("repair", "find");
   }, "", 3, "s" + sy[0]));
@@ -15362,7 +15362,7 @@ function SmartDiag({
   }, "\u041E\u0442\u043C\u0435\u0442\u044C \u0432\u0441\u0451, \u0447\u0442\u043E \u0437\u0430\u043C\u0435\u0447\u0430\u0435\u0448\u044C. \u0427\u0435\u043C \u0431\u043E\u043B\u044C\u0448\u0435 \u0441\u0438\u043C\u043F\u0442\u043E\u043C\u043E\u0432, \u0442\u0435\u043C \u0442\u043E\u0447\u043D\u0435\u0435. \u0423\u0447\u0438\u0442\u044B\u0432\u0430\u044E \u0442\u0432\u043E\u0439 ", eng.code, ", ", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, ", \u0434\u043E\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u0438 \u043F\u0440\u043E\u0431\u0435\u0433."), /*#__PURE__*/React.createElement("div", {
     className: "sym-groups"
   }, SYMPTOMS.map(g => {
-    const items = g.items.filter(i => !i[2] || eng.groups.indexOf(i[2]) >= 0);
+    const items = g.items.filter(i => symOk(i, eng));
     return /*#__PURE__*/React.createElement("div", {
       key: g.cat,
       className: "sym-group"
@@ -17348,7 +17348,7 @@ function aiKnowledge(text, eng) {
   const res = [];
   guidesFor(eng).forEach(g => res.push({ type: "Инструкция", k: "g" + g.id, s: score(g.title) }));
   diagFor(eng).forEach(d => res.push({ type: "Проверка", k: "d" + d.id, s: score(d.title) + 0.5 }));
-  [].concat.apply([], SYMPTOMS.map(c => c.items)).filter(i => !i[2] || eng.groups.indexOf(i[2]) >= 0).forEach(sy => res.push({ type: "Симптом", k: "s" + sy[0], s: score(sy[1]) }));
+  [].concat.apply([], SYMPTOMS.map(c => c.items)).filter(i => symOk(i, eng)).forEach(sy => res.push({ type: "Симптом", k: "s" + sy[0], s: score(sy[1]) }));
   CAUSES.filter(c => okFor(c, eng)).forEach(c => res.push({ type: "Причина", k: "c" + c.id, s: score(c.t) - 0.5 }));
   const best = res.filter(r => r.s >= 1).sort((a, b) => b.s - a.s);
   if (!best.length) return "";

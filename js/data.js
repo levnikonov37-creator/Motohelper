@@ -10759,3 +10759,14 @@ var GUIDE_NEED = {
 ["chain", "chain-replace", "sprocket-change", "chain-slider", "chain-rivet"].forEach(function (id) { GUIDE_NEED[id] = hasChain; });
 ["spokes", "wheel-lacing", "tube", "swingarm-bushings", "linkage", "mousse-install", "skid-install"].forEach(function (id) { GUIDE_NEED[id] = function (e) { return !e.cvt; }; });
 function guideOk(g, e) { var f = g && e && GUIDE_NEED[g.id]; return !f || !!f(e); }
+/* признаки привода: кардан и ремень (не вариатор) — по ним прячем то, что про цепь и звёзды */
+Object.keys(ENGINES).forEach(function (id) {
+  var e = ENGINES[id];
+  if (!e || !e.groups || e.groups.indexOf("cvt") >= 0) return;
+  if (/кардан/i.test(e.gearbox || "")) { if (e.groups.indexOf("shaft") < 0) e.groups.push("shaft"); }
+  else if (/ремень/i.test(e.gearbox || "")) { if (e.groups.indexOf("belt") < 0) e.groups.push("belt"); }
+});
+/* симптом [id, название, только-для, кроме-для]: подходит ли мотору */
+function symOk(i, e) { return (!i[2] || e.groups.indexOf(i[2]) >= 0) && !(i[3] && i[3].some(function (g) { return e.groups.indexOf(g) >= 0; })); }
+/* проверка / причина из базы знаний: only — хотя бы один признак, skip — ни одного */
+function kbOk(x, e) { return (!x.only || x.only.some(function (g) { return g === e.id || e.groups.indexOf(g) >= 0; })) && !(x.skip && x.skip.some(function (g) { return g === e.id || e.groups.indexOf(g) >= 0; })); }
