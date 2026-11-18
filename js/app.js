@@ -16757,11 +16757,14 @@ function tuneRecipe(eng, goal, bike) {
     carb = g("carb"),
     two = g("2t");
   const exh = () => two ? T("pipe") : first(TUNE_EXHAUST[cls] || []);
-  const cool = () => g("cvt") ? null : g("air") ? add(T("oilcool"), "обязательно", "больше мощности — больше тепла") : g("liquid") && !two ? add(T("fan"), "обязательно", "запас охлаждения") : null;
+  const cool = () => g("cvt") ? null : g("air") ? add(T("oilcool"), g("small") ? "по желанию" : "обязательно", g("small") ? "мотор с ЦПГ побольше или свапом греется сильнее — летом и с пассажиром" : "больше мощности — больше тепла") : g("liquid") && !two ? add(T("fan"), "обязательно", "запас охлаждения") : null;
   const upT = row && row.up && T(row.up),
     upFree = upT && eng.installed.indexOf(upT.id) < 0 && !tuneStockInstalled(upT.id, eng.carb);
   if (goal === "quick") {
     if (upFree) add(upT, "главное");else if (row && row.tip) info.push(row.tip);
+    /* штатный карбюратор уже хорош по размеру — следующий шаг из «лестницы» (например, FCR с ускорительным насосом) */
+    const nextC = !upFree && row && (row.ladder || []).map(T).filter(t => t && eng.installed.indexOf(t.id) < 0 && !tuneStockInstalled(t.id, eng.carb))[0];
+    if (nextC) add(nextC, "по желанию", nextC.eff);
     if (efi) add(T("ecu") || T("jp-ecu"), "главное", "чётче отклик на газ");
     add(T("filter"), carb || efi ? "обязательно" : "главное", "мотор дышит свободнее");
     if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "смесь после фильтра и карбюратора — по свече");
@@ -16777,7 +16780,7 @@ function tuneRecipe(eng, goal, bike) {
     if (bore) add(bore, "главное");else if (swap) add(swap, "главное");else if (upFree) add(upT, "главное");
     if (bore && row) {
       if (row.boreCarb) add(T(row.boreCarb), "обязательно", row.boreNote);else if (row.boreNote) info.push(row.boreNote);
-    } else if (upFree) add(upT, "по желанию");
+    } else if (upFree && !swap) add(upT, "по желанию");
     if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "без подбора смеси прибавка уходит в перегрев");
     if (efi) add(T("ecu") || T("jp-ecu"), "обязательно", "карта топлива под новый впуск и выпуск");
     const main = !steps.some(x => x.role === "главное");
@@ -16792,6 +16795,8 @@ function tuneRecipe(eng, goal, bike) {
     }
   } else if (goal === "speed") {
     add(T("sp-sp"), "главное", "длиннее передачи, если мотору хватает силы");
+    /* маленькому мотору звезда +1 не по силам: максималку поднимает только мощность */
+    if (!T("sp-sp") && !g("cvt")) add(row && T(row.bore) || first(TUNE_BORE) || first(["swap-z190", "swap-pr300"]), "главное", "на маленьком моторе максималку поднимает только мощность — звезда +1 сделает разгон вялым");
     add(T("cvt-unlock"), "главное", "заводской ограничитель держит 45 км/ч");
     add(T("cvt-kit"), steps.some(s => s.role === "главное") ? "по желанию" : "главное", "шире диапазон вариатора — выше максималка");
     add(T("cvt-rollers"), "по желанию", "ролики тяжелее — выше скорость, разгон спокойнее");
@@ -16799,7 +16804,7 @@ function tuneRecipe(eng, goal, bike) {
     add(T("filter"), "по желанию");
     if (carb) add(T("jets") || T("jp-jetkit"), "обязательно", "на газу в пол смесь должна быть чуть богаче");
     if (efi) add(T("ecu") || T("jp-ecu"), "по желанию", "снимает ограничение скорости, если оно есть");
-    info.push(g("cvt") ? "Максималка скутера упирается в мощность и вариатор: без ограничителя и с вариатором шире — быстрее, но ремень и ролики изнашиваются чаще." : "Максималка упирается в мощность и сопротивление воздуха: звезда +1 без прибавки мощности даёт скорость только на ровной трассе без ветра.");
+    info.push(g("cvt") ? "Максималка скутера упирается в мощность и вариатор: без ограничителя и с вариатором шире — быстрее, но ремень и ролики изнашиваются чаще." : !T("sp-sp") ? "На маленьком моторе звезда +1 только отнимет разгон: максималку поднимает мощность и подобранная смесь." : "Максималка упирается в мощность и сопротивление воздуха: звезда +1 без прибавки мощности даёт скорость только на ровной трассе без ветра.");
   } else {
     const main = cls === "off" || cls === "adv" ? T("skid") : cls === "moped" ? T("moped-bars") : cls === "cruise" ? T("crashbars") : T("sliders");
     add(main, "главное");

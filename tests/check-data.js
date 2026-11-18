@@ -198,7 +198,9 @@ for (const [id, e] of Object.entries(ENGINES)) if (new Set(e.groups).size !== e.
     /* скутер: вариатор и ЦПГ под свой мотор; у 2Т нет масла в картере и клапана выпуска; у мопеда с коробкой вариатора нет */
     ["cvt-rollers", "Honda Dio AF34", true], ["bore-2t70", "Honda Dio AF34", true], ["oilcool", "Honda Dio AF34", false], ["pv-spring", "Honda Dio AF34", false],
     ["bore-qmb72", "Irbis Nirvana 50", true], ["cvt-unlock", "Irbis Nirvana 50", true], ["cvt-unlock", "Honda Dio AF34", false], ["bore-2t70", "Honda PCX 125", false],
-    ["cvt-rollers", "Honda PCX 125", true], ["cvt-rollers", "Motoland Alpha", false], ["oilcool", "Motoland XR250", true]];
+    ["cvt-rollers", "Honda PCX 125", true], ["cvt-rollers", "Motoland Alpha", false], ["oilcool", "Motoland XR250", true],
+    /* FCR с ускорительным насосом — для 280–300-кубовых 4-клапанных, не для 250 на PE30 */
+    ["carb-fcr", "Kayo T6 300", true], ["carb-fcr", "Kayo K1 300", true], ["carb-fcr", "Kayo T2 250", false]];
   for (const [id, key, want] of cases) if (by(key) && okFor(id, key) !== want) fail("Тюнинг по классу: «" + id + "» для " + key + " — " + (want ? "должно подходить" : "не должно подходить"));
   /* запчасти под мотор и класс: мусс и карбюратор — не для R6, звёзды — не для вариатора и кардана */
   const pOk = (kind, key) => { const b = by(key); if (!b) return null; const e = ENGINES[b.versions[0].engine]; return PARTS.some((p) => p.kind === kind && ctx.partFor(p, e, b)); };
