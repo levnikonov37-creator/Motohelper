@@ -455,6 +455,18 @@ const carbUp = (e) => {
 /* у мотора есть страница «Тюнинг»: карбюраторный, на 3+ моделях, есть что поставить (карбюратор побольше, бигбор или свап) */
 const tuneEligible = (id) => { const e = ENGINES[id]; if (!e || (bikesOf[id] || []).length < 3 || (e.groups || []).indexOf("carb") < 0) return false;
   return !!ctx.carbUpFor(e) || ctx.TUNING.some((t) => /^(bore|swap)/.test(t.id) && ctx.tuningFor(t, e).ok); };
+/* популярные модели со своей страницей «Тюнинг <модель>» (остальным хватает страницы тюнинга мотора) */
+const MODEL_TUNE_KEYS = ["Kayo T2 250", "Kayo T4 250", "Kayo K1 250", "Kayo K2 250", "Motoland XT250 HS", "Motoland TT250", "Regulmoto Sport-003 PR", "Avantis Enduro 250 CARB ARS",
+  "Progasi Super Max 250 RR", "BSE Z5 250", "Motoland XR250", "Motoland XR250 Lite", "Kayo K1 300", "Kayo T4 300", "Kayo K2 300", "Kayo T2 300 Enduro",
+  "Kayo T6 300", "Kayo K6 300", "Kayo K6-R 300", "Kayo K5 300 Enduro", "Motoland XT300", "Motoland XT300 HS 21/18", "Regulmoto Crosstrec 300", "Progasi Endurance 300",
+  "Sharmax PowerMax 300", "BSE Z7 300", "Progasi Race 300", "Avantis Enduro 300 PRO CARB", "Motoland XT300 HS", "Motoland XR300", "Kayo K1-L 300 MX",
+  "Kayo K6 250", "Kayo T6 250 Enduro", "BSE M2 250", "Motoland WRX250 NC", "Kayo K6 300 FCR", "Motoland WRX300 NC", "BSE T9", "Regulmoto Nibbi 300",
+  "Regulmoto Legend 300 PRO", "Motoland 300 Enduro GL300", "Motoland FX 300", "Regulmoto Fargo 300",
+  "Kayo Basic 125", "Kayo TT125", "Kayo Classic 150", "Kayo TT140", "Kayo KT160", "Kayo Classic 190", "Motoland TT155", "Kayo TS155",
+  "Motoland RZ200", "Racer Enduro RC200GY-C2", "Racer Enduro RC250GY-C2",
+  "Motoland Alpha", "Racer Alpha", "Regulmoto Alpha 110", "Motoland Orion 110", "Motoland Delta 110", "Stels Delta",
+  "Honda Dio AF34", "Honda Dio AF18", "Yamaha Jog Artistic 3YK", "Irbis Nirvana 50"];
+const modelTuneHas = (b) => !!b && MODEL_TUNE_KEYS.indexOf(b.brand + " " + b.name) >= 0 && tuneEligible(b.versions[0].engine);
 const carbUpHtml = (e, pfx, link) => {
   const c = carbUp(e);
   /* без «карбюратора побольше» (скутеры: тюнинг идёт через вариатор) — хотя бы ссылка на страницу тюнинга мотора */
@@ -542,7 +554,7 @@ BIKES.forEach((b) => {
     const iss = weak(e).length ? `<h2 id="${pfx}slabye">Слабые места</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const keyG = guidesOf(e).filter((g) => KEY_GUIDES.indexOf(g.id) >= 0);
     const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
-    return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${carbUpHtml(e, pfx, appLink(b, vi) + "&r=tune")}${more}
+    return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${carbUpHtml(e, pfx, appLink(b, vi) + "&r=tune")}${vi === 0 && modelTuneHas(b) ? `<div class="chips"><a class="chip" href="/m/${slug}/tuning/">Тюнинг ${esc(full)} по шагам: резвее, мощнее, быстрее →</a></div>` : ""}${more}
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a></section>`;
   }).join("\n");
   const others = BIKES.filter((x) => x.brand === b.brand && x !== b).slice(0, 12);
@@ -921,7 +933,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 }
 
 /* «гаражный» режим: кнопки под палец в перчатке (не меньше 44 px), быстрые переходы, ✓ у цифр из руководства, яркость на солнце */
-const GARAGE_CSS = `.nw,.tu-top .cu-price{white-space:nowrap}.tu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.tu{grid-template-columns:1fr 1fr}}.tu-item{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.tu-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.tu-top b{font-size:16px}.tu-item p{margin:2px 0 0;font-size:15px;line-height:1.45}.tu-g{font-size:14px;margin-top:4px}.tu-stages{display:grid;gap:10px;margin:6px 0 10px}@media(min-width:700px){.tu-stages{grid-template-columns:1fr 1fr}}.tu-stage{padding:12px 14px;border-radius:12px;border:1px solid rgba(138,140,255,.45);background:rgba(138,140,255,.06)}.tu-stage h3{margin:0 0 2px;font-size:17px}.tu-stage ol{margin:8px 0 6px;padding-left:20px;line-height:1.5}.tu-sum{margin:0;font-weight:700}.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-eff{color:#B9C2CF;font-size:14px}.cu-nu{margin:6px 0 4px;padding-left:20px;font-size:15px;line-height:1.5}.cu-nu li{margin:4px 0}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
+const GARAGE_CSS = `.nw,.tu-top .cu-price{white-space:nowrap}.tr-role{display:inline-block;padding:0 7px;border-radius:999px;font:700 11px/1.6 var(--cond);text-transform:uppercase;letter-spacing:.04em;border:1px solid currentColor;vertical-align:1px}.r-main{color:#8A8CFF}.r-must{color:#F5B041}.r-opt{color:var(--muted)}.tu-ul{margin:4px 0 0;padding-left:18px}.tu-ul li{margin:2px 0}.tu-stage li .small{color:var(--muted)}.tu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.tu{grid-template-columns:1fr 1fr}}.tu-item{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.tu-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.tu-top b{font-size:16px}.tu-item p{margin:2px 0 0;font-size:15px;line-height:1.45}.tu-g{font-size:14px;margin-top:4px}.tu-stages{display:grid;gap:10px;margin:6px 0 10px}@media(min-width:700px){.tu-stages{grid-template-columns:1fr 1fr}}.tu-stage{padding:12px 14px;border-radius:12px;border:1px solid rgba(138,140,255,.45);background:rgba(138,140,255,.06)}.tu-stage h3{margin:0 0 2px;font-size:17px}.tu-stage ol{margin:8px 0 6px;padding-left:20px;line-height:1.5}.tu-sum{margin:0;font-weight:700}.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-eff{color:#B9C2CF;font-size:14px}.cu-nu{margin:6px 0 4px;padding-left:20px;font-size:15px;line-height:1.5}.cu-nu li{margin:4px 0}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
 .chips{gap:8px}.crumbs a{display:inline-block;padding:12px 0}
 .jump{display:flex;gap:8px;overflow-x:auto;margin:0 0 14px;padding-bottom:4px;scrollbar-width:none}.jump::-webkit-scrollbar{display:none}
 .jump a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:12px;background:#fff;color:#000;font:600 16px var(--cond);text-decoration:none}
@@ -1092,6 +1104,7 @@ ${sections}
 <p class="note">Прибавка в процентах — оценка на коленвале при правильно подобранной смеси; на колесе на 10–15% меньше. Без подбора жиклёров прибавки почти нет, а мотор перегревается.</p>
 <a class="cta" href="${app}">Собрать свой проект тюнинга в приложении →</a></section>
 <h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>
+${list.some(modelTuneHas) ? `<h2>Тюнинг по моделям</h2><div class="chips">${list.filter(modelTuneHas).map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/tuning/">Тюнинг ${esc(x.brand + " " + x.name)}</a>`).join("")}</div>` : ""}
 <h2>Мотоциклы с мотором ${esc(name)}</h2><div class="chips">${list.slice(0, 24).map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div>
 <div class="chips"><a class="chip" href="/m/motor/${slug}/">Масло, свечи, зазоры ${esc(name)} →</a><a class="chip" href="/m/tuning/">Тюнинг других моторов</a></div>`;
     const desc = `Тюнинг ${name}: ${bores.length ? "бигбор " + bores.map((t) => (/Ø\d+/.exec(t.title) || [""])[0] + ccTxt(t)).join(", ") + ", " : ""}${lad.length ? "карбюратор " + lad.map((t) => t.title.replace(/^Карбюратор\s*/, "").replace(/\s*(вместо|под)\s.*$/, "")).slice(0, 3).join(" / ") + ", " : ""}выхлоп, фильтр${bores.length || lad.length ? "" : ", жиклёры, зажигание и охлаждение"} — что даёт и сколько стоит.`;
@@ -1110,14 +1123,81 @@ ${sections}
   const sec = KINDS.map((k) => { const L = rows.filter((r) => r.kind === k[0]); return L.length ? `<h2 id="${k[0]}">Тюнинг: ${esc(k[1].charAt(0).toLowerCase() + k[1].slice(1))}</h2><p class="note">${esc(k[2])}</p><div class="grid models">${L.map(card).join("")}</div>` : ""; }).join("\n");
   const body = `<section class="hero"><div class="kick">Тюнинг</div><h1>Тюнинг питбайков, мопедов и скутеров по моторам</h1>
 <p class="lead">Что реально ставят на популярные моторы для прибавки мощности: бигбор (с честным объёмом по ходу поршня), карбюратор побольше, выхлоп, вариатор у скутеров — с ценами и нюансами.</p>
-<nav class="jump">${KINDS.filter((k) => rows.some((r) => r.kind === k[0])).map((k) => `<a href="#${k[0]}">${esc(k[1].replace(/\s*\(.*\)$/, ""))}</a>`).join("")}</nav></section>
+<nav class="jump"><a href="#models">Популярные модели</a>${KINDS.filter((k) => rows.some((r) => r.kind === k[0])).map((k) => `<a href="#${k[0]}">${esc(k[1].replace(/\s*\(.*\)$/, ""))}</a>`).join("")}</nav></section>
+<h2 id="models">Тюнинг популярных моделей</h2><p class="note">Готовые рецепты «резвее, мощнее, быстрее, надёжнее» под конкретную модель — с ценами.</p><div class="chips">${MODEL_TUNE_KEYS.map((k) => BIKES.find((x) => x.brand + " " + x.name === k)).filter(modelTuneHas).map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/tuning/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div>
 ${sec}`;
   files.set("m/tuning/index.html", page({ title: "Тюнинг питбайка, мопеда и скутера: бигбор, карбюратор, вариатор | MotoHelper", desc: "Тюнинг по моторам: " + rows.slice(0, 5).map((r) => r.name).join(", ") + ", мопеды Альфа и скутеры Dio, Jog — бигбор с честным объёмом, карбюратор побольше, вариатор, выхлоп: что даёт и сколько стоит.", canon: SITE + "m/tuning/", crumbs, body, ld: [crumbLd(crumbs)] }));
+}
+
+/* Страницы «Тюнинг <модель>» — /m/<модель>/tuning/: только популярные модели (так и ищут: «тюнинг kayo t2», «тюнинг альфы»).
+   Рецепты «Резвее / Мощнее / Быстрее / Надёжнее» — та же функция tuneRecipe, что в приложении (берём её из js/app.js),
+   поэтому сайт и приложение советуют одно и то же. Полный список доработок по узлам — на странице тюнинга мотора. */
+const MODEL_TUNE_PAGES = [];
+{
+  const APP = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
+  const cut = (a, b) => { const i = APP.indexOf(a), j = i < 0 ? -1 : APP.indexOf(b, i); if (i < 0 || j < 0) throw new Error("build-pages: в js/app.js не найдено «" + a + "» — поправь cut() в блоке «Тюнинг <модель>»"); return APP.slice(i, j); };
+  vm.runInContext([cut("const TUNE_STOCK_RE", "/* Прибавка мощности от набора"), cut("const TUNE_BORE", "\n"), cut("const TUNE_EXHAUST", "/* рецепт — компактный список")]
+    .join("\n").replace(/^const /gm, "var "), ctx);
+  const pr = (t) => (t.hi === 0 ? "своими руками" : t.lo != null ? (t.lo === t.hi ? "" : t.lo.toLocaleString("ru-RU") + "–") + t.hi.toLocaleString("ru-RU") + " ₽" : t.price ? t.price.toLocaleString("ru-RU") + " ₽" : "");
+  const sum = (L) => { const lo = L.reduce((s, t) => s + (t.lo != null ? t.lo : t.price || 0), 0), hi = L.reduce((s, t) => s + (t.hi != null ? t.hi : t.price || 0), 0); return (lo === hi ? "" : lo.toLocaleString("ru-RU") + "–") + hi.toLocaleString("ru-RU") + " ₽"; };
+  const ROLE = { "главное": "r-main", "обязательно": "r-must", "по желанию": "r-opt" };
+  const GOALS = [["quick", "Резвее", "Отклик и разгон, мотор не вскрывать."], ["power", "Мощнее", "Больше объёма или дыхания — и всё, что для этого нужно."],
+    ["speed", "Быстрее", "Максималка: передаточные числа и верх."], ["tough", "Надёжнее", "Защита и то, что ломается первым."]];
+  const engTune = {};
+  TUNE_PAGES.forEach((r) => (engTune[r.id] = r));
+  MODEL_TUNE_KEYS.forEach((key) => {
+    const b = BIKES.find((x) => x.brand + " " + x.name === key);
+    if (!b || !modelTuneHas(b)) return;
+    const id = b.versions[0].engine, e0 = ENGINES[id], et = engTune[id];
+    if (!et) return;
+    const eng = Object.assign({ installed: [] }, e0);
+    const full = b.brand + " " + b.name, slug = bikeSlug.get(b), cls = ctx.tuneClassOf(b);
+    const rec = {};
+    GOALS.forEach((g) => (rec[g[0]] = ctx.tuneRecipe(eng, g[0], b)));
+    const parts = (g) => rec[g].steps.map((s) => s.t).filter((t) => !t.svc);
+    const stage = (g) => {
+      const r = rec[g[0]];
+      if (!r.steps.length) return "";
+      return `<div class="tu-stage"><h3>${esc(g[1])}</h3><p class="small">${esc(g[2])}</p><ol>${r.steps.map((s) => `<li><b>${esc(s.t.title)}</b> <span class="tr-role ${ROLE[s.role] || ""}">${esc(s.role)}</span>${s.why ? `<span class="small"> — ${esc(s.why)}</span>` : ""} — <span class="nw">${esc(pr(s.t))}</span></li>`).join("")}</ol>${r.info.map((x) => `<p class="small">${esc(x)}</p>`).join("")}<p class="tu-sum">Детали: ${esc(sum(parts(g[0])))}</p></div>`;
+    };
+    /* что ещё ставят на этот класс: подвеска, защита, управление — по рейтингу, по 4 на узел */
+    const ok = ctx.TUNING.filter((t) => ctx.tuningFor(t, eng, b).ok);
+    const MORE = [["susp", "Подвеска"], ["guard", "Защита"], ["ctrl", "Посадка и управление"], ["wheels", "Колёса и шины"], ["brakes", "Тормоза"]];
+    const more = MORE.map((n) => { const L = ok.filter((t) => ctx.tuneNode(t) === n[0]).sort((a, c) => (c.rating || 0) - (a.rating || 0)).slice(0, 4); return L.length ? `<div class="tu-item"><div class="tu-top"><b>${esc(n[1])}</b></div><ul class="tu-ul">${L.map((t) => `<li>${esc(t.title)} — <span class="nw">${esc(pr(t))}</span></li>`).join("")}</ul></div>` : ""; }).join("");
+    const main = (g) => (rec[g].steps.find((s) => s.role === "главное") || rec[g].steps[0] || {}).t;
+    const titles = (g, n) => rec[g].steps.slice(0, n).map((s) => s.t.title.replace(/\s*\(.*?\)/g, "")).join(", ");
+    const stock = [e0.cc ? Math.round(e0.cc) + " см³" : "", (b.versions[0].hp || e0.hp) ? (b.versions[0].hp || e0.hp) + " л.с." : "", (e0.groups || []).indexOf("efi") >= 0 ? "инжектор" : e0.carb ? "карбюратор " + String(e0.carb).replace(/\s*\(.*$/, "") : "", e0.cooling ? String(e0.cooling).toLowerCase() + " охлаждение" : ""].filter(Boolean).join(" · ");
+    const faq = [
+      rec.quick.steps.length && ["Как сделать " + full + " резвее?", "Без вскрытия мотора: " + titles("quick", 4) + ". Детали — " + sum(parts("quick")) + "." + (rec.quick.info[0] ? " " + rec.quick.info[0] : "")],
+      rec.power.steps.length && ["Как увеличить мощность " + full + "?", "Главное — " + (main("power") ? main("power").title : "") + ". Вместе с этим: " + rec.power.steps.filter((s) => s.role === "обязательно").map((s) => s.t.title.replace(/\s*\(.*?\)/g, "")).join(", ") + ". Детали — " + sum(parts("power")) + ", без установки."],
+      rec.speed.steps.length && ["Как поднять максималку " + full + "?", titles("speed", 3) + ". " + (rec.speed.info[0] || "")],
+      rec.tough.steps.length && ["Что поставить на " + full + " для надёжности?", titles("tough", 5) + "."]
+    ].filter(Boolean).map((q) => [q[0], q[1].replace(/\s+/g, " ").trim()]);
+    const canon = SITE + "m/" + slug + "/tuning/";
+    const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], [b.brand, "/m/" + brandSlug[b.brand] + "/"], [b.name, "/m/" + slug + "/"], ["Тюнинг", null]];
+    const app = appLink(b, 0) + "&r=tune";
+    const twins = MODEL_TUNE_KEYS.map((k) => BIKES.find((x) => x.brand + " " + x.name === k)).filter((x) => x && x !== b && x.versions[0].engine === id && modelTuneHas(x));
+    const body = `<section class="hero"><div class="kick">Тюнинг · ${esc(ctx.TUNE_CLASS_T[cls] || "")}</div><h1>Тюнинг ${esc(full)}</h1>
+<p class="lead">${esc(full)} с мотором ${esc(e0.code)}: что поставить, чтобы был резвее, мощнее и быстрее, и что защитить в первую очередь — по шагам, с ценами за детали без установки.</p>
+<p class="small">С завода: ${esc(stock)}.</p>
+<nav class="jump">${GOALS.filter((g) => rec[g[0]].steps.length).map((g) => `<a href="#${g[0]}">${g[1]}</a>`).join("")}</nav></section>
+<section class="ver"><div class="tu-stages">${GOALS.map((g) => `<div id="${g[0]}">${stage(g)}</div>`).join("")}</div>
+<p class="note">«Главное» — то, что даёт результат; «обязательно» — без этого результат уйдёт в перегрев или поломку; «по желанию» — добавит, но можно без него. Прибавка мощности есть только при подобранной смеси.</p>
+${more ? `<h2>Что ещё ставят на ${esc(full)}</h2><div class="tu">${more}</div>` : ""}
+<div class="chips"><a class="chip" href="/m/motor/${et.slug}/tuning/">Весь тюнинг мотора ${esc(e0.code)}: по узлам →</a><a class="chip" href="/m/${slug}/">Масло, свечи, клапаны ${esc(full)}</a></div>
+<a class="cta" href="${app}">Собрать проект тюнинга ${esc(full)} в приложении →</a></section>
+<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>
+${twins.length ? `<h2>Тюнинг моделей с тем же мотором</h2><div class="chips">${twins.slice(0, 12).map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/tuning/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div>` : ""}`;
+    const desc = `Тюнинг ${full} (${e0.code}): резвее — ${titles("quick", 2).toLowerCase()}; мощнее — ${main("power") ? main("power").title.replace(/\s*\(.*?\)/g, "").toLowerCase() : "выпуск"}; быстрее — ${main("speed") ? main("speed").title.replace(/\s*\(.*?\)/g, "").toLowerCase() : "звёзды"}. Цены и что учесть.`;
+    files.set("m/" + slug + "/tuning/index.html", page({ title: pickTitle("Тюнинг " + full, [": что поставить и сколько стоит | MotoHelper", ": что поставить и сколько стоит", ": что поставить и цены", ""]), desc, canon, crumbs, body, sticky: app,
+      ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: "Тюнинг " + full, url: canon, inLanguage: "ru", description: desc }].concat(faq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] : []) }));
+    MODEL_TUNE_PAGES.push({ b, slug, canon, id, cls: et.kind });
+  });
 }
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),
-  [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
+  [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), MODEL_TUNE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
 const hi = 5 + brands.length + GUIDES.length + DIAG.length;
 files.set("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${u}</loc><changefreq>${i ? "monthly" : "weekly"}</changefreq><priority>${i === 0 ? "1.0" : i < hi ? "0.7" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
 
