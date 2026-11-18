@@ -230,7 +230,8 @@ function pump(){return rd.read().then(function(c){if(c.done){if(!txt)throw new E
 /* диапазоны и единицы не рвём по строкам («0.6–0.7 мм» целиком) */
 const nbv = (t) => String(t).replace(/(\d)\s*([–-])\s*(\d)/g, "$1\u2060$2\u2060$3").replace(/(\d) (мм|л|Н·м|бар|км|см³|л\.с\.|об\/мин|моточ\.|ч)(?![\wа-яё])/g, "$1\u00a0$2");
 const pickTitle = (base, tails) => { const t = tails.map((x) => base + x).find((x) => x.length <= 75); if (t) return t;
-  let b = base.slice(0, 62).replace(/[\s,/:;–—-]+\S*$/, ""); if ((b.match(/\(/g) || []).length > (b.match(/\)/g) || []).length) b = b.replace(/[\s,/:;–—-]+$/, "") + ")"; return b + tails[tails.length - 1]; };
+  /* обрезаем название так, чтобы с последним хвостом влезло в 75 знаков */
+  let b = base.slice(0, Math.max(30, 74 - tails[tails.length - 1].length)).replace(/[\s,/:;–—-]+\S*$/, ""); if ((b.match(/\(/g) || []).length > (b.match(/\)/g) || []).length) b = b.replace(/\s*\([^)]*$/, ""); return b + tails[tails.length - 1]; };
 const fitTitle = (t) => (t.length > 70 ? t.replace(/ \| MotoHelper$/, "") : t);
 /* значение для описания в выдаче: без источника в скобках и уточнений после «;» — «10W-40 (JASO MA)» → «10W-40»,
    «около 1.2 л, контроль по смотровому окну (руководство Kayo 2022…)» → «около 1.2 л, контроль по смотровому окну» */
@@ -768,7 +769,7 @@ ${iss}
       const r = typeof st.onNo === "object" ? st.onNo : st.onYes;
       return { "@type": "Question", name: fillT(efi && st.efiQ ? st.efiQ : st.q), acceptedAnswer: { "@type": "Answer", text: fillT(r.result + ". " + act(r)) } };
     }) };
-    files.set("m/" + slug + "/" + d.id + "/index.html", page({ ask: phrase + " (мотор " + e.code + ")", title: `${phrase}: причины и что проверить | MotoHelper`, desc, canon, crumbs, body, sticky: appLink(b, 0) + "&d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
+    files.set("m/" + slug + "/" + d.id + "/index.html", page({ ask: phrase + " (мотор " + e.code + ")", title: pickTitle(phrase, [": причины и что проверить | MotoHelper", ": причины и что проверить", ": причины", ""]), desc, canon, crumbs, body, sticky: appLink(b, 0) + "&d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
     probPages.push(canon);
   });
 });
@@ -831,7 +832,7 @@ compares.forEach((c) => {
 <h2>Характеристики</h2>${tables}
 <div class="chips"><a class="chip" href="/m/${bikeSlug.get(A)}/">Всё о ${esc(na)} →</a><a class="chip" href="/m/${bikeSlug.get(Bk)}/">Всё о ${esc(nb)} →</a>${groups[c.k] && podSlug[c.k] ? `<a class="chip" href="/m/podborka/${podSlug[c.k]}/">Все ${esc(podName(c.k).toLowerCase())} →</a>` : ""}</div>
 ${others.length ? `<h2>Другие сравнения</h2><div class="chips">${others.map((x) => `<a class="chip" href="/m/sravnenie/${x.slug}/">${esc(x.title)}</a>`).join("")}</div>` : ""}`;
-  files.set("m/sravnenie/" + c.slug + "/index.html", page({ title: `${na} или ${nb} — что выбрать: сравнение | MotoHelper`, desc: `${na} против ${nb}: ${facts.slice(0, 2).join(" ")} Масло, свечи, зазоры клапанов, слабые места.`.slice(0, 300), canon, crumbs, body, sticky: appLink(A, 0), ld: [crumbLd(crumbs)] }));
+  files.set("m/sravnenie/" + c.slug + "/index.html", page({ title: [`${na} или ${nb} — что выбрать: сравнение | MotoHelper`, `${na} или ${nb} — что выбрать: сравнение`, `${na} или ${nb} — что выбрать`, `${na} или ${nb}: сравнение`, `${na} или ${nb}`].find((x) => x.length <= 75) || `${na} или ${nb}`, desc: `${na} против ${nb}: ${facts.slice(0, 2).join(" ")} Масло, свечи, зазоры клапанов, слабые места.`.slice(0, 300), canon, crumbs, body, sticky: appLink(A, 0), ld: [crumbLd(crumbs)] }));
 });
 {
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Сравнения", null]];
