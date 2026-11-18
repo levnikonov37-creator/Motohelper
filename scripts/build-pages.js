@@ -17,7 +17,7 @@ const ctx = {};
 vm.createContext(ctx);
 // каталог (js/data.js) и база знаний (js/kb.js) — в том же порядке, что на сайте
 vm.runInContext(fs.readFileSync(path.join(ROOT, "js/data.js"), "utf8"), ctx, { filename: "js/data.js" });
-vm.runInContext(fs.readFileSync(path.join(ROOT, "js/kb.js"), "utf8") + "\n;this.__E = ENGINES; this.__B = BIKES; this.__G = GUIDES; this.__D = DIAG; this.__NC = NO_CVT_GUIDES; this.__AKA = ENGINE_AKA; this.__P = BIKE_PHOTOS; this.__PS = bikePhotoSlug;", ctx);
+vm.runInContext(fs.readFileSync(path.join(ROOT, "js/kb.js"), "utf8") + "\n;this.__E = ENGINES; this.__B = BIKES; this.__G = GUIDES; this.__D = DIAG; this.__NC = NO_CVT_GUIDES; this.__W = WIRING; this.__WC = WIRE; this.__AKA = ENGINE_AKA; this.__P = BIKE_PHOTOS; this.__PS = bikePhotoSlug;", ctx);
 const ENGINES = ctx.__E, BIKES = ctx.__B.filter((b) => b.brand !== "Любая модель");
 const GUIDES = ctx.__G, DIAG = ctx.__D, NO_CVT = ctx.__NC, AKA = ctx.__AKA || {};
 // свои фото моделей (img/bikes): путь к снимку или ""
@@ -52,7 +52,7 @@ const BRAND_RU = { Honda: "Хонда", Yamaha: "Ямаха", Kawasaki: "Кав�
   Fantic: "Фантик", Samax: "Самакс", Rockot: "Рокот", Baltmotors: "Балтмоторс", Xmotos: "Иксмотос", Lifan: "Лифан" };
 const uniq = (s) => { let x = s, i = 2; while (used[x]) x = s + "-" + i++; used[x] = 1; return x; };
 const brands = [];
-["motor", "remont", "polomka", "sravnenie", "podborka", "tuning"].forEach((x) => (used[x] = 1)); // разделы моторов, инструкций и поломок
+["motor", "remont", "polomka", "sravnenie", "podborka", "tuning", "provodka"].forEach((x) => (used[x] = 1)); // разделы моторов, инструкций и поломок
 BIKES.forEach((b) => { if (!(b.brand in brandSlug)) { brandSlug[b.brand] = uniq(slugify(b.brand)); brands.push(b.brand); } });
 BIKES.forEach((b) => bikeSlug.set(b, uniq(slugify(b.brand + " " + b.name))));
 
@@ -278,7 +278,7 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 ${body}
 ${ask ? askBlock(ask) : ""}
 ${AD}
-<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/m/polomka/">Неисправности</a> · <a href="/m/remont/">Инструкции</a> · <a href="/m/motor/">Моторы</a> · <a href="/m/tuning/">Тюнинг</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a> · <a href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a></footer>
+<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/m/polomka/">Неисправности</a> · <a href="/m/remont/">Инструкции</a> · <a href="/m/motor/">Моторы</a> · <a href="/m/tuning/">Тюнинг</a> · <a href="/m/provodka/">Электрика</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a> · <a href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a></footer>
 </main>
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}
 ${js ? `<script>${js}</script>` : ""}
@@ -555,7 +555,7 @@ BIKES.forEach((b) => {
     const groups = garageGroups(e, v, b, pfx, cross, vi === 0);
     const iss = weak(e).length ? `<h2 id="${pfx}slabye">Слабые места</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const keyG = guidesOf(e).filter((g) => KEY_GUIDES.indexOf(g.id) >= 0);
-    const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
+    const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a><a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">Схема электрики</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
     return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${carbUpHtml(e, pfx, appLink(b, vi) + "&r=tune")}${vi === 0 && modelTuneHas(b) ? `<div class="chips"><a class="chip" href="/m/${slug}/tuning/">Тюнинг ${esc(full)} по шагам: резвее, мощнее, быстрее →</a></div>` : ""}${more}
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a></section>`;
   }).join("\n");
@@ -614,7 +614,7 @@ ${types.length > 1 ? `<div class="chips"><button class="chip on" data-f="*">Вс
   const body = `<section class="hero"><div class="kick">Справочник</div><h1>Каталог мотоциклов</h1>
 <p class="lead">Мотоциклы, питбайки и мопеды: мотор, масло и сколько заливать, свечи, зазоры клапанов, жиклёры и слабые места.</p>
 <div class="chips"><span class="chip">${BIKES.length} ${plural(BIKES.length, "модель", "модели", "моделей")}</span><span class="chip">${brands.length} ${plural(brands.length, "марка", "марки", "марок")}</span><span class="chip">${ENG_N} ${plural(ENG_N, "мотор", "мотора", "моторов")}</span></div></section>
-<div class="grid" style="margin-bottom:14px"><a class="card big" href="/m/polomka/"><b>Неисправности</b></a><a class="card big" href="/m/remont/"><b>Инструкции</b></a><a class="card big" href="/m/motor/"><b>Моторы</b></a><a class="card big" href="/m/tuning/"><b>Тюнинг по моторам</b></a><a class="card big" href="/m/maslo/"><b>Масло по моторам</b></a><a class="card big" href="/m/svechi/"><b>Свечи по моторам</b></a><a class="card big" href="/m/klapany/"><b>Зазоры клапанов</b></a><a class="card big" href="/m/podborka/"><b>Подборки</b></a><a class="card big" href="/m/sravnenie/"><b>Сравнения</b></a></div>
+<div class="grid" style="margin-bottom:14px"><a class="card big" href="/m/polomka/"><b>Неисправности</b></a><a class="card big" href="/m/remont/"><b>Инструкции</b></a><a class="card big" href="/m/motor/"><b>Моторы</b></a><a class="card big" href="/m/tuning/"><b>Тюнинг по моторам</b></a><a class="card big" href="/m/provodka/"><b>Схемы электрики</b></a><a class="card big" href="/m/maslo/"><b>Масло по моторам</b></a><a class="card big" href="/m/svechi/"><b>Свечи по моторам</b></a><a class="card big" href="/m/klapany/"><b>Зазоры клапанов</b></a><a class="card big" href="/m/podborka/"><b>Подборки</b></a><a class="card big" href="/m/sravnenie/"><b>Сравнения</b></a></div>
 <div class="search">${SEARCH_ICON}<input id="q" type="search" placeholder="Найти модель: «Kayo T2», «CRF250», «174»" autocomplete="off" aria-label="Поиск модели" /></div>
 <div id="res" class="grid models res"></div>
 ${showcase()}
@@ -664,7 +664,7 @@ ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d
 ${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="chips">${gs.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>` : ""}
 ${faqHtml}
 ${fbBlock("", e.code + " [" + id + "]", ["Масло", "Объём масла", "Свеча", "Зазоры клапанов", "Карбюратор и жиклёры", "Слабые места", "На каких моделях стоит"])}
-<div class="chips">${tuneEligible(id) ? `<a class="chip" href="/m/motor/${slug}/tuning/">Тюнинг ${esc(e.code)} →</a>` : ""}<a class="chip" href="/m/maslo/">Масло для других моторов</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>`;
+<div class="chips">${tuneEligible(id) ? `<a class="chip" href="/m/motor/${slug}/tuning/">Тюнинг ${esc(e.code)} →</a>` : ""}<a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">Схема электрики</a><a class="chip" href="/m/maslo/">Масло для других моторов</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>`;
   /* 2Т: масло — в бачок или смесь, объём — в КПП или редуктор; клапанов нет */
   const twoE = e.stroke === "2T", cvtE = (e.groups || []).indexOf("cvt") >= 0;
   const oilE = twoE ? (briefOil(e.oil) || "2T").replace(/^масло\s+/i, "") + (e.oilVol && /\d/.test(e.oilVol) ? ", " + ((v) => /редуктор|КПП|коробк/i.test(v) ? v : (cvtE ? "в редуктор " : "в КПП ") + v)(brief(e.oilVol).split(",")[0]) : "")
@@ -939,7 +939,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 }
 
 /* «гаражный» режим: кнопки под палец в перчатке (не меньше 44 px), быстрые переходы, ✓ у цифр из руководства, яркость на солнце */
-const GARAGE_CSS = `.nw,.tu-top .cu-price{white-space:nowrap}.tr-role{display:inline-block;padding:0 7px;border-radius:999px;font:700 11px/1.6 var(--cond);text-transform:uppercase;letter-spacing:.04em;border:1px solid currentColor;vertical-align:1px}.r-main{color:#8A8CFF}.r-must{color:#F5B041}.r-opt{color:var(--muted)}.tu-ul{margin:4px 0 0;padding-left:18px}.tu-ul li{margin:2px 0}.tu-stage li .small{color:var(--muted)}.tu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.tu{grid-template-columns:1fr 1fr}}.tu-item{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.tu-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.tu-top b{font-size:16px}.tu-item p{margin:2px 0 0;font-size:15px;line-height:1.45}.tu-g{font-size:14px;margin-top:4px}.tu-stages{display:grid;gap:10px;margin:6px 0 10px}@media(min-width:700px){.tu-stages{grid-template-columns:1fr 1fr}}.tu-stage{padding:12px 14px;border-radius:12px;border:1px solid rgba(138,140,255,.45);background:rgba(138,140,255,.06)}.tu-stage h3{margin:0 0 2px;font-size:17px}.tu-stage ol{margin:8px 0 6px;padding-left:20px;line-height:1.5}.tu-sum{margin:0;font-weight:700}.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-eff{color:#B9C2CF;font-size:14px}.cu-nu{margin:6px 0 4px;padding-left:20px;font-size:15px;line-height:1.5}.cu-nu li{margin:4px 0}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
+const GARAGE_CSS = `.wr-static{background:#0E1013;border:1px solid var(--line);border-radius:14px;padding:8px;margin:8px 0}.wr-static svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}.wr-legend{list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}.wr-legend li{display:flex;gap:10px;align-items:center;line-height:1.35}.wr-legend i{width:30px;height:8px;border-radius:4px;flex:none}.nw,.tu-top .cu-price{white-space:nowrap}.tr-role{display:inline-block;padding:0 7px;border-radius:999px;font:700 11px/1.6 var(--cond);text-transform:uppercase;letter-spacing:.04em;border:1px solid currentColor;vertical-align:1px}.r-main{color:#8A8CFF}.r-must{color:#F5B041}.r-opt{color:var(--muted)}.tu-ul{margin:4px 0 0;padding-left:18px}.tu-ul li{margin:2px 0}.tu-stage li .small{color:var(--muted)}.tu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.tu{grid-template-columns:1fr 1fr}}.tu-item{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.tu-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.tu-top b{font-size:16px}.tu-item p{margin:2px 0 0;font-size:15px;line-height:1.45}.tu-g{font-size:14px;margin-top:4px}.tu-stages{display:grid;gap:10px;margin:6px 0 10px}@media(min-width:700px){.tu-stages{grid-template-columns:1fr 1fr}}.tu-stage{padding:12px 14px;border-radius:12px;border:1px solid rgba(138,140,255,.45);background:rgba(138,140,255,.06)}.tu-stage h3{margin:0 0 2px;font-size:17px}.tu-stage ol{margin:8px 0 6px;padding-left:20px;line-height:1.5}.tu-sum{margin:0;font-weight:700}.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-eff{color:#B9C2CF;font-size:14px}.cu-nu{margin:6px 0 4px;padding-left:20px;font-size:15px;line-height:1.5}.cu-nu li{margin:4px 0}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
 .chips{gap:8px}.crumbs a{display:inline-block;padding:12px 0}
 .jump{display:flex;gap:8px;overflow-x:auto;margin:0 0 14px;padding-bottom:4px;scrollbar-width:none}.jump::-webkit-scrollbar{display:none}
 .jump a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:12px;background:#fff;color:#000;font:600 16px var(--cond);text-decoration:none}
@@ -1200,10 +1200,81 @@ ${twins.length ? `<h2>Тюнинг моделей с тем же мотором<
     MODEL_TUNE_PAGES.push({ b, slug, canon, id, cls: et.kind });
   });
 }
+
+/* Схемы электрики — /m/provodka/ и /m/provodka/<тип>/: AC-CDI (без АКБ, на кике), DC-CDI (с АКБ и стартером), инжектор.
+   Те же данные, что схема в приложении (WIRING / WIRE в js/kb.js): узлы с проверками мультиметром, провода по цветам.
+   Под запросы «схема электрики питбайка», «схема проводки мопеда альфа», «цвета проводов CDI», «как проверить CDI». */
+const WIRE_PAGES = [];
+{
+  const W = ctx.__W, WC = ctx.__WC;
+  const TYPES = [
+    ["ac", "Схема электрики без АКБ (AC-CDI)", "питбайки и мопеды на кике", "Схема электрики питбайка и мопеда без аккумулятора (AC-CDI): провода и проверка"],
+    ["dc", "Схема электрики с АКБ и стартером (DC-CDI)", "мотоциклы, эндуро и мопеды с электростартером", "Схема электрики мотоцикла с аккумулятором (DC-CDI): цвета проводов, проверка"],
+    ["efi", "Схема электрики инжектора (ЭБУ)", "мотоциклы и скутеры на инжекторе", "Схема электрики инжекторного мотоцикла: ЭБУ, бензонасос, датчики, проверка"]];
+  const svg = (w) => {
+    /* раскладка — как в приложении (WiringView): сетка 3 столбца, провода идут по коридорам между блоками */
+    const NW = 104, NH = 52, X = (c) => 16 + c * 126, Y = (r) => 22 + r * 92;
+    const rows = Math.max.apply(null, w.nodes.map((n) => n[2])) + 1, byId = {};
+    w.nodes.forEach((n) => (byId[n[0]] = n));
+    const laneR = (c) => X(c) + NW + 11, laneL = (c) => X(c) - 11, rowGap = (r, down) => (down ? Y(r) + NH + 20 : Y(r) - 20);
+    const path = (wi, i) => {
+      const A = byId[wi[0]], B = byId[wi[1]], o = (i % 5 - 2) * 3;
+      const ax = X(A[1]) + NW / 2, ay = Y(A[2]) + NH / 2, by = Y(B[2]) + NH / 2 + o / 2;
+      if (A[2] === B[2] && Math.abs(A[1] - B[1]) === 1) { const l = A[1] < B[1]; return "M" + (l ? X(A[1]) + NW : X(A[1])) + " " + (ay + o) + "H" + (l ? X(B[1]) : X(B[1]) + NW); }
+      const down = B[2] >= A[2], gy = rowGap(A[2], down) + o, toLeft = B[1] > A[1], lx = (toLeft ? laneL(B[1]) : laneR(B[1])) + o, ex = toLeft ? X(B[1]) : X(B[1]) + NW;
+      return "M" + (ax + o) + " " + (down ? Y(A[2]) + NH : Y(A[2])) + "V" + gy + "H" + lx + "V" + by + "H" + ex;
+    };
+    const wires = w.wires.map((wi, i) => { const c = WC[wi[2]], d = path(wi, i); return `<path d="${d}" stroke="#0E1013" stroke-width="${wi[2] === "hv" ? 9 : 7}" fill="none"/><path d="${d}" stroke="${c[0]}" stroke-width="${wi[2] === "hv" ? 6 : 4}" fill="none"/>${c[3] ? `<path d="${d}" stroke="${c[3]}" stroke-width="4" stroke-dasharray="5 7" fill="none"/>` : ""}`; }).join("");
+    const nodes = w.nodes.map((n) => { const words = String(n[3]).split(" "), lines = []; words.forEach((x) => { const L = lines[lines.length - 1]; if (L && (L + " " + x).length <= 14) lines[lines.length - 1] = L + " " + x; else lines.push(x); });
+      return `<g transform="translate(${X(n[1])} ${Y(n[2])})"><rect width="${NW}" height="${NH}" rx="10" fill="#1A1E24" stroke="#3A414B"/>${lines.slice(0, 3).map((l, i, a) => `<text x="${NW / 2}" y="${NH / 2 + (i - (a.length - 1) / 2) * 13 + 4}" text-anchor="middle" font-size="11" font-weight="600" fill="#F2F3F0">${esc(l)}</text>`).join("")}</g>`; }).join("");
+    return `<svg class="wr-svg" viewBox="0 0 390 ${Y(rows - 1) + NH + 34}" role="img" aria-label="Схема электрики: ${esc(w.t)}">${wires}${nodes}</svg>`;
+  };
+  const engOf = {};
+  engIds.forEach((id) => { const t = ctx.wiringType(ENGINES[id]); (engOf[t] = engOf[t] || []).push(id); });
+  TYPES.forEach(([key, h1, who, title]) => {
+    const w = W[key];
+    if (!w) return;
+    const canon = SITE + "m/provodka/" + key + "/";
+    const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Схемы электрики", "/m/provodka/"], [w.t, null]];
+    const used = w.wires.map((x) => x[2]).filter((c, i, a) => a.indexOf(c) === i);
+    const engs = (engOf[key] || []).slice().sort((a, b) => (bikesOf[b] || []).length - (bikesOf[a] || []).length).slice(0, 24);
+    const bikes = engs.slice(0, 8).map((id) => (bikesOf[id] || []).find((b) => b.brand !== "Любая модель")).filter(Boolean);
+    const rep = bikes[0] || BIKES.find((b) => ctx.wiringType(ENGINES[b.versions[0].engine]) === key);
+    const app = rep ? appLink(rep, 0) + "&r=wiring" : "/";
+    const val = (s) => String(s).replace(/\{(\w+)\}/g, "по мануалу своего мотора");
+    const find = (id) => w.nodes.find((n) => n[0] === id);
+    const faqSrc = [["cdi", "Как проверить коммутатор CDI?"], ["ecu", "Как проверить ЭБУ?"], ["coil", "Как проверить катушку зажигания?"], ["reg", "Как проверить реле-регулятор?"], ["stator", "Как проверить статор (генератор)?"], ["exc", "Нет искры на кике — что проверить?"], ["pump", "Не качает бензонасос — что проверить?"], ["rel", "Не крутит стартер — что проверить?"]];
+    const faq = faqSrc.map(([id, q]) => { const n = find(id); return n ? [q, n[4] + " " + n[5].map((r) => r[0] + ": " + val(r[1])).join("; ") + "."] : null; }).filter(Boolean)
+      .concat([["Какой провод масса, а какой — глушение?", used.map((k) => WC[k][1] + " — " + WC[k][2].charAt(0).toLowerCase() + WC[k][2].slice(1)).slice(0, 6).join("; ") + ". Цвета — самые частые у китайских мотоциклов; у японских и европейских сверяй со схемой из сервис-мануала."]]);
+    const body = `<section class="hero"><div class="kick">Схема электрики · ${esc(who)}</div><h1>${esc(h1)}</h1><p class="lead">${esc(w.d)}</p>
+<nav class="jump"><a href="#shema">Схема</a><a href="#uzly">Узлы и проверка</a><a href="#provoda">Цвета проводов</a><a href="#motory">Моторы</a></nav></section>
+<section class="ver"><h2 id="shema">Схема</h2><div class="wr-static">${svg(w)}</div><p class="note">Цвета — самые частые у китайских мотоциклов. У твоего могут отличаться: сверяй по фишкам и прозванивай. Японские и европейские модели — по схеме из сервис-мануала.</p>
+<a class="cta" href="${app}">Интерактивная схема: нажми на узел — что мерить мультиметром →</a></section>
+<h2 id="uzly">Узлы и что мерить</h2><div class="tu">${w.nodes.map((n) => `<div class="tu-item"><div class="tu-top"><b>${esc(n[3])}</b></div><p>${esc(n[4])}</p>${n[5] && n[5].length ? `<ul class="tu-ul">${n[5].map((r) => `<li>${esc(r[0])}: <b>${esc(val(r[1]))}</b></li>`).join("")}</ul>` : ""}</div>`).join("")}</div>
+<h2 id="provoda">Цвета проводов</h2><ul class="wr-legend">${used.map((k) => `<li><i style="background:${WC[k][3] ? `repeating-linear-gradient(90deg,${WC[k][0]} 0 6px,${WC[k][3]} 6px 10px)` : WC[k][0]}"></i><b>${esc(WC[k][1])}</b> — ${esc(WC[k][2])}</li>`).join("")}</ul>
+<div class="chips"><a class="chip" href="/m/remont/coil-test/">Проверка зажигания мультиметром</a>${key !== "ac" ? `<a class="chip" href="/m/remont/charging/">Проверка зарядки</a>` : ""}<a class="chip" href="/m/remont/wiring-repair/">Ремонт проводки</a><a class="chip" href="/m/polomka/electric/">Неисправности электрики</a></div>
+<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>
+<h2 id="motory">Моторы с такой схемой</h2><div class="chips">${engs.map((id) => `<a class="chip" href="/m/motor/${engSlug[id]}/">${esc(ENGINES[id].code)}</a>`).join("")}</div>
+${bikes.length ? `<h2>Модели</h2><div class="chips">${bikes.map((b) => `<a class="chip" href="/m/${bikeSlug.get(b)}/">${esc(b.brand + " " + b.name)}</a>`).join("")}</div>` : ""}
+<div class="chips"><a class="chip" href="/m/provodka/">Все схемы электрики</a></div>`;
+    const desc = w.d.split(". ").slice(0, 2).join(". ").replace(/\.?$/, ".") + " Узлы, что мерить мультиметром и цвета проводов.";
+    files.set("m/provodka/" + key + "/index.html", page({ title: pickTitle(title, [" | MotoHelper", ""]), desc, canon, crumbs, body, sticky: app,
+      ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: h1, url: canon, inLanguage: "ru", description: desc },
+        { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] }));
+    WIRE_PAGES.push({ key, canon, h1, who, n: (engOf[key] || []).length });
+  });
+  /* каталог */
+  const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Схемы электрики", null]];
+  const body = `<section class="hero"><div class="kick">Электрика</div><h1>Схема электрики мотоцикла, питбайка и мопеда</h1>
+<p class="lead">Три типовые схемы, на которых собраны почти все мотоциклы: без аккумулятора на кике (AC-CDI), с аккумулятором и стартером (DC-CDI) и инжектор с ЭБУ. Какой узел за что отвечает, что мерить мультиметром и какого цвета провода.</p></section>
+<div class="grid">${WIRE_PAGES.map((p) => `<a class="card big" href="/m/provodka/${p.key}/"><b>${esc({ ac: "Без АКБ, на кике (AC-CDI)", dc: "С АКБ и стартером (DC-CDI)", efi: "Инжектор (ЭБУ)" }[p.key])}</b><small>${esc(p.who)} · ${p.n} ${plural(p.n, "мотор", "мотора", "моторов")}</small></a>`).join("")}</div>
+<p class="note">Какая схема у твоего мотоцикла: есть аккумулятор и кнопка стартера — DC-CDI; только кик и нет аккумулятора — AC-CDI; инжектор — ЭБУ. На странице модели в каталоге есть ссылка на нужную схему.</p>`;
+  files.set("m/provodka/index.html", page({ title: "Схема электрики мотоцикла, питбайка и мопеда: CDI, цвета проводов | MotoHelper", desc: "Схемы электрики: AC-CDI без аккумулятора, DC-CDI с аккумулятором и стартером, инжектор с ЭБУ — узлы, проверка мультиметром и цвета проводов.", canon: SITE + "m/provodka/", crumbs, body, ld: [crumbLd(crumbs)] }));
+}
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),
-  [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), MODEL_TUNE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
+  [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), MODEL_TUNE_PAGES.map((t) => t.canon), [SITE + "m/provodka/"], WIRE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
 const hi = 5 + brands.length + GUIDES.length + DIAG.length;
 files.set("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${u}</loc><changefreq>${i ? "monthly" : "weekly"}</changefreq><priority>${i === 0 ? "1.0" : i < hi ? "0.7" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
 
