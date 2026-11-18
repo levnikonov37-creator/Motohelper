@@ -878,6 +878,9 @@ var WORKS = [
 ];
 
 /* детали карбюратора — только моторам с карбюратором; звёзды и цепь — только при цепном приводе */
+/* у скутера (вариатор) нет троса и пружин сцепления, КПП и лапки, педали тормоза, маятника, датчиков нейтрали и сцепления;
+   колёса литые — без спиц, камер и ободной ленты; у скутерных 2Т нет клапана выпуска */
+var PART_CVT_NO = ["clutchsprings", "clutchcable", "clutchlever", "clutchdiscs", "clutchgasket", "shift", "shiftlever", "brakepedal", "swingbush", "swingaxle", "neutral", "clutchswitch", "spokes", "rimtape", "tube", "pv"];
 var PART_CARB_KINDS = ["carb", "carbkit", "jets", "jets2", "needle", "floatvalve", "choke"];
 var PART_CHAIN_KINDS = ["chain", "chain2", "chainlock", "chainlube", "chainclean", "chainroller", "chainguide", "chainadj", "swingslider", "sprocketF", "sprocketR", "sprocketR2", "sprocketguard", "chaintool"];
 function fits(item, eng) {
@@ -886,6 +889,9 @@ function fits(item, eng) {
   if (item.kind && eng && eng.groups) {
     if (PART_CARB_KINDS.indexOf(item.kind) >= 0 && eng.groups.indexOf("efi") >= 0 && eng.groups.indexOf("carb") < 0) return false;
     if (PART_CHAIN_KINDS.indexOf(item.kind) >= 0 && typeof hasChain === "function" && !hasChain(eng)) return false;
+    if (eng.groups.indexOf("cvt") >= 0 && (PART_CVT_NO.indexOf(item.kind) >= 0 || item.id === "oil-gear" || (eng.cc <= 60 && /^(pwk38|rk-pwk)$/.test(item.id)))) return false;
+    /* у 2Т масло не в картере: маслорадиатор и щуп-термометр не к чему */
+    if (eng.stroke === "2T" && (item.kind === "oilcooler" || item.kind === "oiltemp")) return false;
   }
   if (!item.fit || !eng) return true;
   return item.fit.some(function (f) { return f === eng.id || eng.groups.indexOf(f) >= 0; });
@@ -991,6 +997,8 @@ function tuningFor(t, eng, bike) {
   var deny = null;
   if (TUNE_CHAIN.indexOf(t.id) >= 0 && !hasChain(eng)) deny = eng.cvt ? "У вариатора нет звёзд и цепи." : "Здесь не цепь, а " + (/кардан/i.test(eng.gearbox || "") ? "кардан." : "ремень.");
   if (t.deny) Object.keys(t.deny).forEach(function (k) { if (k === eng.id || eng.groups.indexOf(k) >= 0) deny = t.deny[k]; });
+  /* карбюратор-доработка на инжекторе не встаёт: смесь там меняет прошивка */
+  if (!deny && /^carb-|^(pe30|pwk|pwk28)$/.test(t.id) && eng.groups.indexOf("efi") >= 0 && eng.groups.indexOf("carb") < 0) deny = "На инжекторе карбюратора нет — смесь меняет прошивка.";
   if (!deny && t.cls && (!t.cls.length || (bike && t.cls.indexOf(tuneClassOf(bike)) < 0))) deny = t.cls.length ? "Не для класса «" + TUNE_CLASS_T[tuneClassOf(bike)] + "»." : "Заменено конкретными вариантами.";
   var ok = fits(t, eng) && !deny;
   var note = null;
@@ -9152,7 +9160,12 @@ var TUNE_CLASS_OF = { "Эндуро": "off", "Кросс-эндуро": "off", "
   "Мопед": "moped", "Скутер": "moped" };
 var TUNE_CLASS_T = { off: "эндуро и питбайк", adv: "тур-эндуро", sm: "мотард", road: "дорожный: спорт и нейкед", cruise: "круизер, классика, турер", moped: "мопед и скутер" };
 /* класс для тюнинга (не путать с bikeClass в app.js — класс для расчёта скорости) */
-function tuneClassOf(b) { return (b && TUNE_CLASS_OF[b.type]) || "off"; }
+function tuneClassOf(b) {
+  var c = (b && TUNE_CLASS_OF[b.type]) || "off";
+  /* макси-скутер (250+ см³: TMAX, Forza, Burgman) тюнингуют как дорожный — банка, слайдеры, ветровое, а не «прямоток на мопед» */
+  if (c === "moped" && b.type === "Скутер") { var e = ENGINES[b.versions[0].engine]; if (e && e.cc >= 250) c = "road"; }
+  return c;
+}
 var TUNE_CLS = {
   skid: ["off", "adv"], hand: ["off", "adv", "sm"], radguard: ["off", "adv", "sm"], frameguard: ["off"], "link-guard": ["off"], "disc-guard": ["off"],
   "fork-guards": ["off", "sm"], chainguide: ["off", "adv", "sm"], "case-guards": ["off", "adv", "sm"], towstrap: ["off"], "kick-foot": ["off", "adv"],
@@ -9365,6 +9378,12 @@ TUNE_NODES.splice(TUNE_NODES.findIndex(function (n) { return n[0] === "drive"; }
   ["oilcool", "oil-temp"].forEach(function (id) { var t = byId(id); if (t) t.deny = Object.assign({}, t.deny, { "2t": "У 2Т нет масла в картере: смазка идёт с топливом." }); });
   [["pv-spring", "У скутерных 2Т нет клапана выпуска."], ["silencer2t", "У скутера глушитель — одна деталь с трубой: меняют трубу целиком."], ["flywheel-w", "На скутере с вариатором не нужен: мотор не глохнет на камнях."]]
     .forEach(function (x) { var t = byId(x[0]); if (t) t.deny = Object.assign({}, t.deny, { cvt: x[1] }); });
+  [["clutch", "У скутера сцепление в вариаторе — смотри «Контрпружина и пружины сцепления»."], ["radbrace", "У скутера радиатор спрятан в пластике — защищать нечего."],
+    ["swing-bear", "У скутера маятник — сам мотор, подшипников маятника нет."]].forEach(function (x) { var t = byId(x[0]); if (t) t.deny = Object.assign({}, t.deny, { cvt: x[1] }); });
+  var ck = byId("cvt-kit");
+  if (ck) ck.notes = Object.assign({}, ck.notes, { big: "Для макси-скутера (TMAX, Forza, Burgman) — Malossi / Polini, 20–40 тыс. ₽; китайских копий под большие моторы почти нет." });
+  var exm = byId("ex-moped");
+  if (exm) exm.notes = Object.assign({}, exm.notes, { efi: "На инжекторе без прошивки — только громче: смесь станет беднее, мощности не прибавится." });
   var pipe = byId("pipe");
   if (pipe) pipe.notes = Object.assign({}, pipe.notes, { cvt: "На скутер — труба под свой мотор: китайские 2–5 тыс. ₽, Stage6 / Malossi / Polini — 8–15 тыс. Без подбора жиклёра и роликов прибавки нет, а верх «уходит» за ограничитель вариатора." });
   TUNE_EXCL.forEach(function (g) { if (g.indexOf("bore300") >= 0 && g.indexOf("bore-139") >= 0) g.push("bore-qmb72", "bore-2t70"); if (g.indexOf("pe30") >= 0) g.push("carb-2t-175"); });
@@ -10703,7 +10722,7 @@ var PART_CLS_ID = {
   "mask": ["off", "sm"], "shrouds": ["off", "sm"], "side-pl": ["off", "sm"], "mudguard": ["off", "sm", "adv"], "bar": ["off", "adv", "sm"],
   "seat-cover": ["off", "sm"], "peg-wide": ["off", "adv", "sm"], "hourmeter": ["off", "moped"], "fender-f": ["off", "sm", "adv", "moped"]
 };
-var PART_CLS_KIND = { mousse: ["off"], moussegel: ["off"], rimlock: ["off"], spokes: ["off", "adv", "sm", "moped", "cruise"],
+var PART_CLS_KIND = { filteroil: ["off", "adv", "sm", "moped"], mousse: ["off"], moussegel: ["off"], rimlock: ["off"], spokes: ["off", "adv", "sm", "moped", "cruise"],
   skid: ["off", "adv"], handguards: ["off", "adv", "sm"], handguards2: ["off", "adv", "sm"], radguard: ["off", "adv", "sm"], frameguard: ["off"],
   swingguard: ["off"], discguard: ["off"], forkguards: ["off", "sm"], sprocketguard: ["off", "sm"], bars: ["adv", "cruise", "moped"], forkgaiters: ["off", "adv", "cruise", "moped"] };
 function partFor(p, eng, bike) {
