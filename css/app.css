@@ -2810,8 +2810,8 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .phero h1 { font-size: clamp(24px, 4.6vw, 38px) !important; }
 .grad { -webkit-text-fill-color: transparent; background: linear-gradient(95deg, var(--g-acc2), var(--g-acc) 60%, #C98BFF) !important; -webkit-background-clip: text !important; background-clip: text !important; }
 /* шапка и нижнее меню */
-.topbar { background: rgba(12,14,18,.82) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--g-line) !important; box-shadow: none !important; }
-.tabbar { background: rgba(14,16,21,.9) !important; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--g-line) !important; }
+.topbar { background: rgb(12,14,18) !important; /* сплошной: размытие под шапкой отключено, полупрозрачная пропускала текст */ backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--g-line) !important; box-shadow: none !important; }
+.tabbar { background: rgb(14,16,21) !important; /* сплошной, как у шапки */ backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--g-line) !important; }
 .brand-mark { border-radius: 9px !important; }
 /* карточки */
 .panel, .act, .guide, .tcard, .cause, .fold, .tstage, .bf-item, .install-card, .catalog-card, .season-home, .preride, .tg-card {
@@ -2833,7 +2833,7 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .chip.on, a.chip:hover, button.chip:hover { background: rgba(124,132,255,.18) !important; border-color: rgba(124,132,255,.55) !important; color: #fff !important; }
 .seg { border-radius: 12px !important; border: 1px solid var(--g-line2) !important; background: rgba(255,255,255,.03) !important; }
 .seg button.on { background: #EEF1F5 !important; color: #0C0E12 !important; }
-.tabs { background: rgba(22,26,33,.85) !important; border: 1px solid var(--g-line) !important; border-radius: 16px !important; }
+.tabs { background: rgb(22,26,33) !important; /* сплошной: под прилипшей панелью не просвечивает текст */ border: 1px solid var(--g-line) !important; border-radius: 16px !important; }
 .tabs button.on, .tabs [aria-selected="true"] { background: #EEF1F5 !important; color: #0C0E12 !important; }
 /* плитки действий: иконка в круге с цветом */
 .act > .ico { border-radius: 12px !important; background: rgba(255,255,255,.05) !important; border: 1px solid var(--g-line) !important; }
