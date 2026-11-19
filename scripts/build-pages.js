@@ -264,10 +264,8 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 <link rel="icon" type="image/png" sizes="120x120" href="/img/favicon-120.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@500;600&family=Fira+Sans:wght@400;500;600&family=Unbounded:wght@600;700&display=swap" media="print" onload="this.media='all'" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@500;600&family=Fira+Sans:wght@400;500;600&family=Unbounded:wght@600;700&display=swap" /></noscript>
+<link rel="preload" href="/fonts/fira-sans-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/fira-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/m/m.css" />
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
@@ -961,7 +959,7 @@ footer a{display:inline-block;padding:12px 0}
 .buyrow a small{margin-left:6px;font-size:11px;color:var(--muted)}
 @media (max-width:600px){.mphoto{padding:2% 4%}.mphoto img{max-height:190px;width:auto;max-width:100%}.hero .lead{font-size:15px;margin-bottom:6px}.tiles{grid-template-columns:1fr 1fr}}
 @media (prefers-contrast:more){:root{--muted:#d0d0d0}.grp,.tile{border-color:#fff!important}.grp dt{color:#e6e6e6}.tile .src{color:#ffc65c}}`;
-files.set("m/m.css", CSS + "\n" + GARAGE_CSS + "\n");
+files.set("m/m.css", fs.readFileSync(path.join(ROOT, "fonts/fonts.css"), "utf8") + "\n" + CSS + "\n" + GARAGE_CSS + "\n");
 files.set("m/ask.js", ASK_JS + "\n");
 files.set("m/rv.js", RV_JS + "\n");
 files.set("m/fb.js", FB_JS + "\n");

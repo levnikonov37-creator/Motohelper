@@ -5,9 +5,9 @@
    страницу дольше 4 с, показываем сохранённую копию, а свежую кладём в кэш на следующий раз.
    ИИ-механику интернет нужен всегда. */
 // --- сборка (scripts/build-assets.js) пишет эти строки сама, руками не править ---
-const VERSION = "mh-dd6aceac0f";
+const VERSION = "mh-ff3ad56634";
 const BUILT = [
-  "css/app.min.css?v=ff4b9b3aa6",
+  "css/app.min.css?v=2507b7871d",
   "js/data.min.js?v=150858344c",
   "js/kb.min.js?v=d961933b91",
   "js/app.min.js?v=b534aa7cff",
@@ -54,7 +54,8 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return; // запросы к ИИ (POST) — мимо кэша
   const url = new URL(req.url);
   const same = url.origin === self.location.origin;
-  const font = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
+  /* шрифты — свои (/fonts/) и, у старых страниц в кэше, Google: не меняются, сначала кэш */
+  const font = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname) || (same && url.pathname.indexOf("/fonts/") === 0);
   if (!same && !font) return;
   if (font || url.searchParams.has("v")) {
     // шрифты и файлы с меткой версии не меняются — сначала кэш
