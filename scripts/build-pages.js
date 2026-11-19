@@ -171,12 +171,32 @@ h1{font-weight:700!important}h2{font-weight:600!important;font-size:19px!importa
 
 const SEARCH_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>`;
 /* поиск по каталогу: индекс m/index.json грузится при первом вводе */
+/* русские названия и раскладка — те же, что в поиске приложения (BF_ALIAS, BF_TR, BF_LOOK, BF_RU/EN в js/app.js):
+   «кайо т2», «альфа», «альфы», «хр250», «rfqj» (не та раскладка) находят модель */
+const SR_MAP = (() => {
+  const A = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
+  const cut = (a, b) => { const i = A.indexOf(a), j = i < 0 ? -1 : A.indexOf(b, i); if (i < 0 || j < 0) throw new Error("build-pages: в js/app.js не найдено «" + a + "»"); return A.slice(i, j); };
+  const c = {};
+  vm.createContext(c);
+  vm.runInContext((cut("const BF_ALIAS = {", "\n};") + "\n};\n" + cut("const BF_RU = ", "function bfAlts")).replace(/^const /gm, "var ") + "\nthis.M={ru:BF_RU,en:BF_EN,tr:BF_TR,look:BF_LOOK,alias:BF_ALIAS};", c);
+  const alias = {};
+  Object.keys(c.M.alias).forEach((k) => { if (k.indexOf(" ") < 0) alias[k] = String(c.M.alias[k]).split(/[ -]/)[0]; });
+  return { ru: c.M.ru, en: c.M.en, tr: c.M.tr, look: c.M.look, alias };
+})();
+/* поиск по каталогу: индекс m/index.json грузится при первом вводе; файл m/search.js — общий для каталога и страницы 404 */
 const SEARCH_JS = `(function(){var i=document.getElementById("q"),o=document.getElementById("res"),idx=null;if(!i)return;
+var A=${JSON.stringify(SR_MAP)};
 var norm=function(s){return String(s).toLowerCase().replace(/ё/g,"е").replace(/[^a-zа-я0-9]+/g," ").trim()};
-function show(){var q=norm(i.value);if(!q){o.className="grid models res";o.innerHTML="";return}if(!idx){fetch("/m/index.json").then(function(r){return r.json()}).then(function(j){idx=j.map(function(x){x.s=norm(x.b+" "+x.n+" "+x.e+" "+x.t);return x});show()});return}
-var w=q.split(" "),r=idx.filter(function(x){return w.every(function(t){return x.s.indexOf(t)>=0})}).slice(0,40);
+function alts(t){if(!/[а-я]/.test(t)){var ru=t.split("").map(function(c){var k=A.en.indexOf(c);return k<0?c:A.ru[k]}).join("");return A.alias[ru]?[t,A.alias[ru]]:[t]}var tr=function(m){return t.split("").map(function(c){return m[c]!=null?m[c]:(A.tr[c]!=null?A.tr[c]:c)}).join("")};
+var lay=t.split("").map(function(c){var k=A.ru.indexOf(c);return k<0?c:A.en[k]}).join("").replace(/[^a-z0-9]/g,""),out=[t,lay,tr({}),tr(A.look)];
+var st=t.replace(/[аеиоуыэюяйь]+$/,""),al=A.alias[t];if(!al&&st.length>=4)for(var k in A.alias)if(k.indexOf(st)===0){al=A.alias[k];break}if(al)out.push(al);return out}
+/* очки: слово в названии модели важнее, чем в коде мотора, а код — важнее объёма и типа; с начала слова — выше */
+function sc(x,a){var b=0;a.forEach(function(t){var m=0,f=function(s,v){var k=s.indexOf(t);if(k<0)return;m=Math.max(m,k===0||s[k-1]===" "?v+1:v)};f(x.nm,4);f(x.nm2,3);f(x.cd,2);f(x.s,0);b+=m});return b}
+function show(){var q=norm(i.value);if(!q){o.className="grid models res";o.innerHTML="";return}if(!idx){fetch("/m/index.json").then(function(r){return r.json()}).then(function(j){idx=j.map(function(x){x.nm=norm(x.b+" "+x.n);x.nm2=x.nm.replace(/ /g,"");x.cd=norm(String(x.e).split("·")[0]);x.s=norm(x.b+" "+x.n+" "+x.e+" "+x.t).replace(/ /g,"")+" "+norm(x.b+" "+x.n+" "+x.e+" "+x.t);return x});show()});return}
+var w=q.split(" ").map(alts),r=idx.filter(function(x){return w.every(function(a){return a.some(function(t){return x.s.indexOf(t)>=0})})});
+r=r.map(function(x,n){return[x,w.reduce(function(s,a){return s+sc(x,a)},0),n]}).sort(function(a,b){return b[1]-a[1]||a[2]-b[2]}).slice(0,40).map(function(y){return y[0]});
 o.className="grid models res on";o.innerHTML=r.length?r.map(function(x){return '<a class="card" href="/m/'+x.u+'/"><b>'+x.b+' '+x.n+'</b><small>'+x.t+' · '+x.e+'</small></a>'}).join(""):'<p class="note">Ничего не нашлось — попробуй марку или код мотора («174», «PR300»).</p>'}
-i.addEventListener("input",show)})();`;
+i.addEventListener("input",show);if(i.value)show()})();`;
 /* фильтр по типу на странице марки */
 const FILTER_JS = `(function(){var b=document.querySelectorAll("[data-t]");document.querySelectorAll("button[data-f]").forEach(function(c){c.addEventListener("click",function(){var f=c.getAttribute("data-f");
 document.querySelectorAll("button[data-f]").forEach(function(x){x.classList.toggle("on",x===c)});b.forEach(function(x){x.classList.toggle("hide",f!=="*"&&x.getAttribute("data-t")!==f)})})})})();`;
@@ -618,6 +638,7 @@ ${types.length > 1 ? `<div class="chips"><button class="chip on" data-f="*">Вс
 ${showcase()}
 <h2>Популярные марки</h2><div class="grid">${pop.map((br) => `<a class="card big" href="/m/${brandSlug[br]}/"><b>${esc(br)}</b><span class="n">${count(br)}</span></a>`).join("")}</div>
 <h2>Все марки</h2>${Object.keys(byLetter).map((l, i, ls) => `${cyr(l) && !cyr(ls[i - 1] || "a") ? `<h2>Российские марки</h2>` : ""}<div class="letter">${esc(l)}</div><div class="grid">${byLetter[l].map((br) => `<a class="card" href="/m/${brandSlug[br]}/"><b>${esc(br)}</b><small>${count(br)} ${plural(count(br), "модель", "модели", "моделей")}</small></a>`).join("")}</div>`).join("")}`;
+  files.set("m/search.js", SEARCH_JS + "\n");
   files.set("m/index.html", page({ title: "Каталог мотоциклов, питбайков и мопедов — масло, свечи, моторы | MotoHelper", desc: `${BIKES.length} моделей: мотор, масло и его объём, свечи, зазоры клапанов, жиклёры и слабые места.`, canon: SITE + "m/", crumbs, body, ld: [crumbLd(crumbs)], js: SEARCH_JS }));
   files.set("m/index.json", JSON.stringify(BIKES.map((b) => { const e = ENGINES[b.versions[0].engine]; return { b: b.brand, n: b.name, u: bikeSlug.get(b), t: b.type, e: e.code + (e.cc ? " · " + e.cc + " см³" : "") }; })) + "\n");
 }

@@ -17408,6 +17408,9 @@ function aiCardBase(eng, bike, ver, cu, mt) {
   const kick = eng.groups.indexOf("kick") >= 0,
     est = eng.groups.indexOf("estart") >= 0;
   L.push("Запуск: " + eng.start + (cu.start ? " (так у владельца, с завода — " + (ENGINES[cu.engine] || ENGINES[ver.engine]).start + ")" : "") + ". " + (!kick ? "КИКСТАРТЕРА НА ЭТОМ МОТОРЕ НЕТ — не предлагай проверять или чинить кик. " : "") + (!est ? "ЭЛЕКТРОСТАРТЕРА НЕТ — запуск только кикстартером. " : "") + "КПП: " + eng.gearbox + ". ГРМ: " + (eng.timing || "—") + ".");
+  /* привод на колесо — чтобы не советовать цепь скутеру или кардану */
+  const gr = k => eng.groups.indexOf(k) >= 0;
+  L.push("Привод на колесо: " + (gr("cvt") ? "вариатор с ремнём и редуктор — цепи, звёзд и ручной коробки нет" : gr("shaft") ? "кардан — цепи и звёзд нет" : gr("belt") ? "зубчатый ремень — цепи нет" : "цепь и звёзды") + ".");
   if (eng.stroke === "4T") L.push("Клапаны на холодную: впуск " + eng.valveIn + ", выпуск " + eng.valveEx + ", интервал " + kmHours(eng.valveInt, eng, bike) + ".");
   L.push(eng.hours ? "Обслуживание — по моточасам (кроссовая техника / питбайк)" + (eng.oilInt ? ": масло каждые " + eng.oilInt + " моточ." : "") + ". Пробег считай в моточасах, км — только для ориентира." : "Обслуживание — по пробегу: масло каждые " + eng.oilInt + " км.");
   L.push("Свеча " + eng.spark + ", зазор " + eng.gap + ", затяжка " + eng.sparkTorque + ". Масло " + eng.oil + ", " + eng.oilVol + (eng.coolant ? ". Антифриз " + eng.coolant : "") + ".");
