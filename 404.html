@@ -6,9 +6,8 @@
 <title>Страница не найдена — MotoHelper</title>
 <meta name="robots" content="noindex" />
 <meta name="theme-color" content="#000000" />
-<link rel="stylesheet" href="/fonts/fonts.css" />
 <link rel="stylesheet" href="/m/m.css" />
-<style>.nf{min-height:70vh;display:grid;place-content:center;text-align:center;gap:6px}.nf .big{font:400 clamp(72px,22vw,140px)/1 var(--display);font-style:italic;color:transparent;-webkit-text-stroke:2px #fff;text-shadow:none}.nf .row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}.nf .btn{padding:12px 18px;border-radius:3px;text-decoration:none;font:600 15px var(--cond);color:#000;background:#fff;box-shadow:4px 4px 0 rgba(255,255,255,.22)}.nf .btn.g{background:none;border:1px solid rgba(255,255,255,.5);color:#fff;box-shadow:none}</style>
+<style>.nf-q{width:min(560px,92vw);margin:14px auto 0}.nf-q input{width:100%}.nf .res{text-align:left;width:min(720px,94vw);margin:8px auto 0}.nf{min-height:70vh;display:grid;place-content:center;text-align:center;gap:6px}.nf .big{font:400 clamp(72px,22vw,140px)/1 var(--display);font-style:italic;color:transparent;-webkit-text-stroke:2px #fff;text-shadow:none}.nf .row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}.nf .btn{padding:12px 18px;border-radius:3px;text-decoration:none;font:600 15px var(--cond);color:#000;background:#fff;box-shadow:4px 4px 0 rgba(255,255,255,.22)}.nf .btn.g{background:none;border:1px solid rgba(255,255,255,.5);color:#fff;box-shadow:none}</style>
 </head>
 <body>
 <header class="top"><a class="logo" href="/"><i>MH</i>MotoHelper</a></header>
@@ -17,7 +16,10 @@
   <h1>Тут пусто</h1>
   <p class="lead">Такой страницы нет — возможно, ссылка устарела. Мотоцикл можно найти в каталоге или прямо в приложении.</p>
   <div class="row"><a class="btn" href="/">Открыть MotoHelper</a><a class="btn g" href="/m/">Каталог моделей</a></div>
+  <div class="search nf-q"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" type="search" placeholder="Найди модель: «кайо т2», «альфа», «174»" autocomplete="off" aria-label="Поиск модели" /></div>
+  <div id="res" class="grid models res"></div>
 </main>
+<script src="/m/search.js" defer></script>
 <script>/* старые ссылки вида /?bike=… или /#… — отправляем в приложение */ if (/[?#]bike=/.test(location.href)) location.replace("/" + location.search + location.hash);</script>
 <!-- Yandex.Metrika counter --><script>(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();if(!/(^|\.)motohelper\.ru$/.test(location.hostname))return;for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=113844391","ym");ym(113844391,"init",{webvisor:true,clickmap:true,referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true,trackHash:true});</script><noscript><div><img src="https://mc.yandex.ru/watch/113844391" style="position:absolute;left:-9999px" alt="" /></div></noscript><!-- /Yandex.Metrika counter -->
 </body>
