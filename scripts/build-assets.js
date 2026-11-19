@@ -44,7 +44,8 @@ const ver = {};
 for (const [src, dst] of MIN) {
   const css = src.endsWith(".css");
   // es2019 / старые браузеры: сжатие не добавит синтаксиса, которого нет в исходниках (?. ?? и т. п.)
-  const r = esbuild.transformSync(read(src), {
+  /* свои шрифты (fonts/fonts.css) — в начало CSS приложения: без запросов к Google Fonts */
+  const r = esbuild.transformSync((src === "css/app.css" ? read("fonts/fonts.css") + "\n" : "") + read(src), {
     loader: css ? "css" : "js",
     minify: true,
     charset: "utf8",

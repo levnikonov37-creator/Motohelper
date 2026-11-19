@@ -194,7 +194,7 @@ const REVIEWS = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT,
 const rvItem = (x) => `<div class="rv-item"><div class="rv-head"><b>${esc(x.name || "Владелец")}</b>${x.km ? ` · пробег ${esc(x.km)}` : ""}${x.t ? ` · ${esc(String(x.t).slice(0, 7).split("-").reverse().join("."))}` : ""}</div><p>${esc(x.text)}</p></div>`;
 const rvBlock = (slug, model, short) => { const items = REVIEWS[slug] || [];
   return `<section class="rv" data-slug="${slug}" data-model="${esc(model)}"><h2>Отзывы владельцев ${esc(short)}</h2><div class="rv-list">${items.map(rvItem).join("") || `<p class="note rv-empty">Пока нет отзывов. Ездишь на ${esc(short)}? Расскажи, что ломалось и на каком пробеге — это поможет другим.</p>`}</div>
-<details class="rv-add"><summary>Написать отзыв</summary><form><div class="rv-row"><input name="name" maxlength="40" placeholder="Имя (необязательно)" /><input name="km" maxlength="20" placeholder="Пробег" /></div><textarea name="text" rows="4" minlength="30" maxlength="1500" required placeholder="Что нравится, что ломалось и на каком пробеге, какое масло и запчасти ставил"></textarea><button type="submit">Отправить</button><p class="rv-msg note"></p></form></details></section>`; };
+<details class="rv-add"><summary>Написать отзыв</summary><form><div class="rv-row"><input name="name" maxlength="40" placeholder="Имя (необязательно)" aria-label="Имя" /><input name="km" maxlength="20" placeholder="Пробег" aria-label="Пробег" /></div><textarea name="text" aria-label="Текст отзыва" rows="4" minlength="30" maxlength="1500" required placeholder="Что нравится, что ломалось и на каком пробеге, какое масло и запчасти ставил"></textarea><button type="submit">Отправить</button><p class="rv-msg note"></p></form></details></section>`; };
 const RV_JS = `(function(){var box=document.querySelector(".rv");if(!box)return;var list=box.querySelector(".rv-list"),f=box.querySelector("form"),msg=box.querySelector(".rv-msg"),ep=null;
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 function item(x){var d=el("div","rv-item"),h=el("div","rv-head"),b=el("b",null,x.name||"Владелец");h.appendChild(b);var extra=(x.km?" · пробег "+x.km:"")+(x.t?" · "+String(x.t).slice(0,7).split("-").reverse().join("."):"");if(extra)h.appendChild(document.createTextNode(extra));d.appendChild(h);d.appendChild(el("p",null,x.text));return d}
@@ -207,7 +207,7 @@ else msg.textContent=o.s===429?"Сегодня больше отзывов от�
 /* «Значение не совпадает?» — владелец сообщает, что на странице не так (или что всё сходится с мануалом).
    Сообщение уходит на сервер сайта (как «Сообщить о неточности» в приложении); скрипт — m/fb.js */
 const fbBlock = (bike, engine, keys) => `<details class="fbk" data-bike="${esc(bike)}" data-engine="${esc(engine)}"><summary>Значение не совпадает с мануалом? Сообщи</summary>
-<form><select name="k"><option value="">Что не так</option>${keys.map((k) => `<option>${esc(k)}</option>`).join("")}<option>Другое</option></select><textarea name="t" rows="3" maxlength="2000" required placeholder="Как у тебя и откуда: «по мануалу объём масла 1.3 л», «на наклейке другая свеча»"></textarea><input name="c" maxlength="120" placeholder="Как с тобой связаться (необязательно)" /><div class="fbk-btns"><button type="submit">Отправить</button><button type="button" class="fbk-ok">Всё совпадает с мануалом</button></div></form><p class="fbk-msg" role="status"></p></details>`;
+<form><select name="k" aria-label="Что не так"><option value="">Что не так</option>${keys.map((k) => `<option>${esc(k)}</option>`).join("")}<option>Другое</option></select><textarea name="t" aria-label="Что не так и откуда данные" rows="3" maxlength="2000" required placeholder="Как у тебя и откуда: «по мануалу объём масла 1.3 л», «на наклейке другая свеча»"></textarea><input name="c" maxlength="120" placeholder="Как с тобой связаться (необязательно)" aria-label="Контакт" /><div class="fbk-btns"><button type="submit">Отправить</button><button type="button" class="fbk-ok">Всё совпадает с мануалом</button></div></form><p class="fbk-msg" role="status"></p></details>`;
 const FB_JS = `(function(){var box=document.querySelector(".fbk");if(!box)return;var f=box.querySelector("form"),msg=box.querySelector(".fbk-msg"),ep=null;
 fetch("/ai-config.json").then(function(r){return r.json()}).then(function(j){ep=j.endpoint}).catch(function(){});
 function send(text){if(!ep){msg.textContent="Сервер сайта сейчас недоступен — попробуй позже.";return}var bs=f.querySelectorAll("button");for(var i=0;i<bs.length;i++)bs[i].disabled=true;msg.textContent="Отправляю…";
@@ -264,10 +264,8 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 <link rel="icon" type="image/png" sizes="120x120" href="/img/favicon-120.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@500;600&family=Fira+Sans:wght@400;500;600&family=Unbounded:wght@600;700&display=swap" media="print" onload="this.media='all'" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@500;600&family=Fira+Sans:wght@400;500;600&family=Unbounded:wght@600;700&display=swap" /></noscript>
+<link rel="preload" href="/fonts/fira-sans-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/fira-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/m/m.css" />
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
@@ -961,7 +959,7 @@ footer a{display:inline-block;padding:12px 0}
 .buyrow a small{margin-left:6px;font-size:11px;color:var(--muted)}
 @media (max-width:600px){.mphoto{padding:2% 4%}.mphoto img{max-height:190px;width:auto;max-width:100%}.hero .lead{font-size:15px;margin-bottom:6px}.tiles{grid-template-columns:1fr 1fr}}
 @media (prefers-contrast:more){:root{--muted:#d0d0d0}.grp,.tile{border-color:#fff!important}.grp dt{color:#e6e6e6}.tile .src{color:#ffc65c}}`;
-files.set("m/m.css", CSS + "\n" + GARAGE_CSS + "\n");
+files.set("m/m.css", fs.readFileSync(path.join(ROOT, "fonts/fonts.css"), "utf8") + "\n" + CSS + "\n" + GARAGE_CSS + "\n");
 files.set("m/ask.js", ASK_JS + "\n");
 files.set("m/rv.js", RV_JS + "\n");
 files.set("m/fb.js", FB_JS + "\n");
