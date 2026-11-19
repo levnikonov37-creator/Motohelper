@@ -1,0 +1,5 @@
+# собранный файл места лежит в build/ и коммитится намеренно;
+# временные файлы Studio — нет
+*.rbxl.lock
+*.rbxlx.lock
+sourcemap.json

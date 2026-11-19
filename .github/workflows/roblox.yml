@@ -1,0 +1,63 @@
+# Выкладка игры roblox/ в Roblox после каждого изменения в main (и по кнопке Run workflow).
+# Создаёт Game Passes и Developer Products из roblox/store.json, вписывает их ID в Config.luau
+# (коммитом в main), собирает место Rojo и публикует его через Open Cloud.
+# Нужны секреты репозитория (Settings → Secrets and variables → Actions):
+#   ROBLOX_API_KEY     — ключ с create.roblox.com/dashboard/credentials (права — в roblox/README.md)
+#   ROBLOX_UNIVERSE_ID — Universe ID игры
+#   ROBLOX_PLACE_ID    — Place ID стартового места
+# Без ключа шаги пропускаются, проверка не краснеет.
+name: roblox
+on:
+  push:
+    branches: [main]
+    paths: ["roblox/**", ".github/workflows/roblox.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: roblox-publish
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+      ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID || vars.ROBLOX_UNIVERSE_ID }}
+      ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID || vars.ROBLOX_PLACE_ID }}
+    steps:
+      - name: No key
+        if: ${{ env.ROBLOX_API_KEY == '' }}
+        run: echo "ROBLOX_API_KEY не задан — выкладка в Roblox пропущена (см. roblox/README.md)"
+      - uses: actions/checkout@v4
+        if: ${{ env.ROBLOX_API_KEY != '' }}
+      - uses: actions/setup-node@v4
+        if: ${{ env.ROBLOX_API_KEY != '' }}
+        with:
+          node-version: 20
+      - name: Install Rojo
+        if: ${{ env.ROBLOX_API_KEY != '' }}
+        run: |
+          curl -fsSL -o rojo.zip https://github.com/rojo-rbx/rojo/releases/download/v7.7.1/rojo-7.7.1-linux-x86_64.zip \
+            && unzip -o rojo.zip -d "$HOME/.local/bin" && rm rojo.zip \
+            || cargo install rojo --version 7.7.1 --locked --root "$HOME/.local"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Game Passes and Developer Products
+        if: ${{ env.ROBLOX_API_KEY != '' }}
+        run: node roblox/tools/roblox-cloud.mjs store
+      - name: Build place
+        if: ${{ env.ROBLOX_API_KEY != '' }}
+        run: rojo build roblox/default.project.json -o roblox/build/MotoEmpireTycoon.rbxl
+      - name: Save IDs to the repository
+        if: ${{ env.ROBLOX_API_KEY != '' }}
+        run: |
+          if git diff --quiet -- roblox/src/shared/Config.luau; then echo "ID не менялись"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add roblox/src/shared/Config.luau roblox/build/MotoEmpireTycoon.rbxl
+          git commit -m "Roblox: ID пропусков и товаров в Config.luau"
+          git push
+      - name: Name and description
+        if: ${{ env.ROBLOX_API_KEY != '' }}
+        continue-on-error: true
+        run: node roblox/tools/roblox-cloud.mjs info
+      - name: Publish
+        if: ${{ env.ROBLOX_API_KEY != '' }}
+        run: node roblox/tools/roblox-cloud.mjs publish roblox/build/MotoEmpireTycoon.rbxl

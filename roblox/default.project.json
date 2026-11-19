@@ -1,0 +1,61 @@
+{
+  "name": "MotoEmpireTycoon",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      },
+      "Remotes": {
+        "$className": "Folder",
+        "Notify": { "$className": "RemoteEvent" },
+        "Rebirth": { "$className": "RemoteFunction" },
+        "ClaimDaily": { "$className": "RemoteFunction" },
+        "RedeemCode": { "$className": "RemoteFunction" }
+      }
+    },
+
+    "ServerScriptService": {
+      "Server": {
+        "$path": "src/server"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/client"
+        }
+      }
+    },
+
+    "Workspace": {
+      "$properties": {
+        "StreamingEnabled": false
+      }
+    },
+
+    "Lighting": {
+      "$properties": {
+        "ClockTime": 14.5,
+        "Brightness": 2.5,
+        "GlobalShadows": true,
+        "Ambient": [0.27, 0.27, 0.3],
+        "OutdoorAmbient": [0.55, 0.55, 0.6]
+      }
+    },
+
+    "TextChatService": {
+      "$properties": {
+        "ChatVersion": "TextChatService"
+      }
+    },
+
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}
