@@ -20,7 +20,8 @@ const CORE = [
   "./", "index.html", "offline.html", "manifest.webmanifest", "js/engine-worklet.js",
   "img/topo.svg", "img/icon-192.png", "img/icon-512.png",
 ].concat(BUILT);
-// 3D-модель мотора (vendor/three.min.js) заранее не качаем: она ляжет в кэш при первом открытии 3D
+// 3D-модель мотора: большая, кладём в кэш фоном, чтобы и она работала без сети
+const LATER = ["vendor/three.min.js"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
@@ -28,7 +29,7 @@ self.addEventListener("install", (e) => {
       // файл той же версии уже лежит в старом кэше — переносим, не качая заново;
       // страницу и файлы без метки — мимо HTTP-кэша браузера, чтобы не сохранить устаревшую копию
       /\?v=/.test(u) ? caches.match(u).then((hit) => (hit ? c.put(u, hit) : c.add(u))) : c.add(new Request(u, { cache: "reload" }))
-    )))
+    )).then(() => c.addAll(LATER).catch(() => {})))
       .then(() => self.skipWaiting())
   );
 });
