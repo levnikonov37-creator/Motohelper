@@ -2,22 +2,22 @@
    Файлы с меткой версии (?v=хэш — их ставит scripts/build-assets.js) не меняются: берём из памяти телефона,
    в сеть идём, только если файла там нет. Новая версия сайта = новые метки в index.html.
    Страница и прочие файлы: сначала сеть (всегда свежая версия), без сети — кэш; если сеть есть, но тянет
-   страницу дольше 4 с, показываем сохранённую копию, а свежую кладём в кэш на следующий раз.
+   страницу дольше 4 с, показываем сохранённую копию этой страницы, а свежую кладём в кэш на следующий раз.
    ИИ-механику интернет нужен всегда. */
 // --- сборка (scripts/build-assets.js) пишет эти строки сама, руками не править ---
-const VERSION = "mh-4a8d960973";
+const VERSION = "mh-1ed5a5dcb6";
 const BUILT = [
   "css/app.min.css?v=4185393e4b",
-  "js/data.min.js?v=150858344c",
+  "js/data.min.js?v=39f08d0984",
   "js/kb.min.js?v=d961933b91",
-  "js/app.min.js?v=98994d6e4b",
+  "js/app.min.js?v=0ec156753b",
   "js/motion.min.js?v=ad93390c5d",
   "vendor/react.production.min.js?v=4b4969fa4e",
   "vendor/react-dom.production.min.js?v=21758ed084",
 ];
 // --- конец сборки ---
 const CORE = [
-  "./", "index.html", "manifest.webmanifest", "js/engine-worklet.js",
+  "./", "index.html", "offline.html", "manifest.webmanifest", "js/engine-worklet.js",
   "img/topo.svg", "img/icon-192.png", "img/icon-512.png",
 ].concat(BUILT);
 // 3D-модель мотора: большая, кладём в кэш фоном, чтобы и она работала без сети
@@ -66,7 +66,11 @@ self.addEventListener("fetch", (e) => {
   // (GitHub Pages разрешает хранить её 10 минут), а сверяется с сервером — обновления видны сразу
   const nav = req.mode === "navigate";
   const net = (nav ? fetch(req.url, { cache: "no-cache", credentials: "same-origin" }) : fetch(req, { cache: "no-cache" })).then((res) => keep(req, res));
-  const saved = () => caches.match(req, { ignoreSearch: true }).then((hit) => hit || (nav ? caches.match("index.html") : undefined));
+  /* оболочку приложения (index.html) подставляем только по адресу приложения: на странице каталога /m/… её относительные
+     пути не работают — вышла бы пустая «Загрузка…». Для страниц каталога без сохранённой копии — offline.html */
+  const appNav = nav && (url.pathname === "/" || url.pathname === "/index.html");
+  const own = () => caches.match(req, { ignoreSearch: true });
+  const saved = () => own().then((hit) => hit || (appNav ? caches.match("index.html") : nav ? caches.match("offline.html") : undefined));
   e.waitUntil(net.catch(() => {})); // свежая копия ляжет в кэш, даже если ответили сохранённой
   if (!nav) {
     e.respondWith(net.catch(() => saved().then((hit) => hit || Response.error())));
@@ -75,7 +79,8 @@ self.addEventListener("fetch", (e) => {
   e.respondWith(new Promise((resolve) => {
     let done = false;
     const give = (res) => { if (!done && res) { done = true; resolve(res); } };
-    const slow = setTimeout(() => saved().then(give), 4000);
+    /* сеть тянет дольше 4 с — сохранённая копия этой же страницы (если есть); оболочку или «нет сети» — только при ошибке */
+    const slow = setTimeout(() => (appNav ? saved() : own()).then(give), 4000);
     net.then((res) => { clearTimeout(slow); give(res); }, () => { clearTimeout(slow); saved().then((hit) => give(hit || Response.error())); });
   }));
 });

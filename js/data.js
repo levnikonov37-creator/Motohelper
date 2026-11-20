@@ -890,15 +890,37 @@ function fits(item, eng) {
     if (PART_CARB_KINDS.indexOf(item.kind) >= 0 && eng.groups.indexOf("efi") >= 0 && eng.groups.indexOf("carb") < 0) return false;
     if (PART_CHAIN_KINDS.indexOf(item.kind) >= 0 && typeof hasChain === "function" && !hasChain(eng)) return false;
     if (eng.groups.indexOf("cvt") >= 0 && (PART_CVT_NO.indexOf(item.kind) >= 0 || item.id === "oil-gear" || (eng.cc <= 60 && /^(pwk38|rk-pwk)$/.test(item.id)))) return false;
+    /* антифриз, помпа, термостат, крышка радиатора — только у жидкостного охлаждения */
+    if (["coolant", "waterpump", "thermostat", "radcap", "coolhoses", "radiator"].indexOf(item.kind) >= 0 && eng.groups.indexOf("liquid") < 0) return false;
     /* у 2Т масло не в картере: маслорадиатор и щуп-термометр не к чему */
-    if (eng.stroke === "2T" && (item.kind === "oilcooler" || item.kind === "oiltemp")) return false;
+    if (eng.stroke === "2T" && ["oilcooler", "oiltemp", "oilfilter", "camchain", "tensioner", "valvein", "valveex", "camshaft", "vcgasket", "shims", "valvespring"].indexOf(item.kind) >= 0) return false;
   }
   if (!item.fit || !eng) return true;
-  return item.fit.some(function (f) { return f === eng.id || eng.groups.indexOf(f) >= 0; });
+  if (!item.fit.some(function (f) { return f === eng.id || eng.groups.indexOf(f) >= 0; })) return false;
+  /* свеча «по группе» (CR8E — всем DOHC, BR8ES — всем 2Т) — только если её код есть в паспорте мотора:
+     у R6 стоит CR10EK, у PW50 — BPR4HS, у KLR650 — другая резьба */
+  if (item.kind === "spark" && item.fit.indexOf(eng.id) < 0 && eng.spark && !/мануал|^—$/.test(eng.spark)) {
+    var nm = function (x) { return String(x).toUpperCase().replace(/[\s-]/g, ""); }, sp = nm(eng.spark);
+    var codes = (String(item.name).match(/[A-Z]{1,5}\d{1,2}[A-Z0-9-]*/g) || []).map(nm);
+    if (codes.length && !codes.some(function (k) { return sp.indexOf(k) >= 0; })) return false;
+  }
+  return true;
 }
 /* деталь нужного вида под мотор: сначала именно под этот ID, потом под группу */
 function partByKind(kind, eng) {
   var c = PARTS.filter(function (p) { return p.kind === kind && fits(p, eng); });
+  /* масло — той вязкости, что в паспорте мотора («10W-50» → не «10W-40»); свеча — с кодом из паспорта */
+  var norm = function (x) { return String(x || "").toUpperCase().replace(/[\s-]/g, ""); };
+  if (kind === "oil") {
+    var vis = (String(eng.oil || "").match(/\d+W-?\d+/gi) || []).map(norm);
+    var byVis = vis.length && c.find(function (p) { return vis.some(function (v) { return norm(p.name).indexOf(v) >= 0; }); });
+    if (byVis) return byVis;
+  }
+  if (kind === "spark" || kind === "spark2") {
+    var codes = String(eng.spark || "").split(/[\/,;()]|\s+или\s+/).map(function (x) { return norm(x.replace(/^(NGK|DENSO|TORCH|BRISK|CHAMPION|BOSCH|LDA|ЛДА)\s*/i, "")); }).filter(function (x) { return x.length >= 4; });
+    var byCode = codes.length && c.find(function (p) { return codes.some(function (k) { return norm(p.name).indexOf(k) >= 0; }); });
+    if (byCode) return byCode;
+  }
   return c.find(function (p) { return p.fit && p.fit.indexOf(eng.id) >= 0; }) || c[0] || null;
 }
 function partByName(name) { return PARTS.find(function (p) { return p.name === name; }) || null; }
@@ -1158,6 +1180,13 @@ function maintItems(e) {
     if (x.id === "oil" && e.stroke === "2T") { if (e.cvt) return false; x.t = "Масло КПП"; x.every = 5000; }
     if (x.id === "fork" && e.cvt) return false;
     return true;
+  });
+  /* дорожные мотоциклы и скутеры: бумажный воздушный фильтр и свеча живут намного дольше, чем у эндуро в пыли
+     (класс — из buildSpec: e.cls) */
+  if (/^(sport|naked|cruiser|tour|moped)$/.test(e.cls || "") || (!e.cls && e.cvt)) r.forEach(function (x) {
+    if (x.id === "air") x.every = e.cvt ? 6000 : 12000;
+    if (x.id === "fork") x.every = 20000;
+    if (x.id === "spark" && !e.cvt) x.every = 12000;
   });
   if (e.cvt) r.push({ id: "cvtbelt", t: "Ремень вариатора", every: 10000 }, { id: "rollers", t: "Ролики вариатора", every: 8000 }, { id: "gearoil", t: "Масло в редукторе", every: 5000 });
   if (e.groups.indexOf("liquid") >= 0) r.push({ id: "coolant", t: "Антифриз", every: 10000 });
@@ -1589,11 +1618,15 @@ function genKit(id, priceK) {
   add("clutch", "Диски сцепления", 2600, "Трансмиссия", "clutchdiscs"); add("cspr", "Пружины сцепления", 900, "Трансмиссия", "clutchsprings");
   add("stator", "Статор генератора", 2800, "Электрика", "stator"); add("reg", "Реле-регулятор", 1400, "Электрика", "regulator");
   add("hg", liq ? "Прокладка ГБЦ (металл)" : "Прокладка ГБЦ", liq ? 1100 : 350, "Двигатель", "headgasket");
-  add("chain", "Цепь ГРМ", 1500, "Двигатель", "camchain"); add("tens", "Натяжитель цепи ГРМ", 900, "Двигатель", "tensioner");
-  add("vin", "Клапан впускной", 900, "Двигатель", "valvein"); add("vex", "Клапан выпускной", 1100, "Двигатель", "valveex");
-  add("cam", dohc ? "Распредвалы (пара)" : "Распредвал", dohc ? 5200 : 3200, "Двигатель", "camshaft");
-  add("of", "Масляный фильтр", 450, "Расходники", "oilfilter"); add("af", "Воздушный фильтр", 1100, "Расходники", "airfilter");
-  add("vcg", "Прокладка крышки клапанов", 400, "Двигатель", "vcgasket"); add("cgsk", "Прокладка крышки сцепления", 300, "Двигатель", "clutchgasket");
+  /* у 2Т нет ГРМ, клапанов и масляного фильтра — масло в бензине или в бачке */
+  if (is4t) {
+    add("chain", "Цепь ГРМ", 1500, "Двигатель", "camchain"); add("tens", "Натяжитель цепи ГРМ", 900, "Двигатель", "tensioner");
+    add("vin", "Клапан впускной", 900, "Двигатель", "valvein"); add("vex", "Клапан выпускной", 1100, "Двигатель", "valveex");
+    add("cam", dohc ? "Распредвалы (пара)" : "Распредвал", dohc ? 5200 : 3200, "Двигатель", "camshaft");
+    add("of", "Масляный фильтр", 450, "Расходники", "oilfilter"); add("vcg", "Прокладка крышки клапанов", 400, "Двигатель", "vcgasket");
+  }
+  add("af", "Воздушный фильтр", 1100, "Расходники", "airfilter");
+  add("cgsk", "Прокладка крышки сцепления", 300, "Двигатель", "clutchgasket");
   add("csseal", "Сальник вторичного вала (у звезды)", 250, "Трансмиссия", "csseal");
   if (el) { add("starter", "Стартер", 3500, "Электрика", "starter"); add("sprag", "Обгонная муфта стартера", 2400, "Электрика", "sprag"); }
   if (liq) { add("wp", "Ремкомплект помпы", 1600, "Двигатель", "waterpump"); add("thermo", "Термостат", 1300, "Двигатель", "thermostat"); }
@@ -2542,7 +2575,7 @@ CL("XR80", "XR100", { code: "XR80 / CRF80", name: "Honda XR80R / CRF80F (вер�
 CL("KX112", "YZ85", { code: "KX112", name: "Kawasaki KX112 / KX100 (2T 99–112)", maker: "Kawasaki", cc: 112, hp: 26 }, 1.1);
 CL("F800", "F850", { code: "BMW F800", name: "BMW F 800 (рядная двойка 798, Rotax: F 650/700/800 GS, F 800 R)", cc: 798, hp: 85, cam: "DOHC, 8 клапанов, 2 цилиндра (360°)" }, 2.2);
 CL("F900", "F850", { code: "BMW F900", name: "BMW F 900 (рядная двойка 895: F 900 GS / F 900 R / Voge 900DSX)", cc: 895, hp: 105 }, 2.3);
-CL("R1170", "R1250", { code: "BMW Boxer 1170", name: "BMW оппозит 1170 (R 1200 GS / R nineT)", cc: 1170, hp: 110, cooling: "Воздушно-масляное (с 2013 — воздушно-жидкостное)", cam: "DOHC, 8 клапанов" }, 2.4);
+CL("R1170", "R1250", { code: "BMW Boxer 1170", name: "BMW оппозит 1170 (R 1200 GS / R nineT)", cc: 1170, hp: 110, groups: ["dohc", "air", "efi", "4t", "big", "eu"], coolant: "—", cooling: "Воздушно-масляное", cam: "DOHC, 8 клапанов" }, 2.4);
 CL("LC8_990", "LC8", { code: "LC8 990", name: "KTM LC8 950/990 (V-twin 75°: 950/990 Adventure)", cc: 999, hp: 106, carb: "Keihin ×2 (950) / инжектор (990)" }, 2.6);
 CL("HNC750", "XL750", { code: "RC70E/RC88E", name: "Honda NC700/NC750 (рядная двойка 270°, наклон 55°: NC750X / NC750S / Integra)", cc: 745, hp: 55, cam: "SOHC, 8 клапанов" }, 1.8);
 CL("HNC700", "HNC750", { code: "RC61E", cc: 670, hp: 52 }, 1.8);
@@ -2776,7 +2809,8 @@ function torqueFor(e, bike) {
   r.push(cvt ? ["Болт подвески мотора к раме", smallCvt ? "M10: 40–50 Н·м" : "M10–M12: 50–70 Н·м"] : ["Ось маятника", small ? "45–60 Н·м" : big ? "90–110 Н·м" : "60–80 Н·м"]);
   if (!cvt) r.push(["Крепления двигателя к раме", big ? "M10: 45–55 Н·м" : "M8–M10: 35–45 Н·м"]);
   r.push(["Болты амортизатора", "M10: 40–45 Н·м"]);
-  if (!cvt) r.push(["Спицы", "3–5 Н·м, равномерно по кругу"]);
+  /* спицы — у эндуро, кросса, питбайков и классики; у спорта, нейкедов, круизеров и туреров диски литые */
+  if (!cvt && !(bike && /^(Спорт|Нейкед|Чоппер|Турер)$/.test(bike.type))) r.push(["Спицы", "3–5 Н·м, равномерно по кругу"]);
   /* моменты из руководства этого мотора (e.torq: [начало названия узла, значение, своё название]) — заменяют типовую строку с тем же началом,
      а узлы, которых нет в типовом списке, встают после свечи, пробки, крышек и головки — перед выпуском и ходовой;
      третий элемент строки — true, если цифра сверена с руководством */
@@ -10755,9 +10789,15 @@ var GUIDE_NEED = {
   "multi-sync": function (e) { return /^(twin|vtwin|boxer|i3|i4)$/.test(e.layout || ""); },
   "pv-clean": function (e) { return !e.cvt && e.groups.indexOf("liquid") >= 0 && e.groups.indexOf("big") >= 0; },
   "oilcooler": function (e) { return e.stroke !== "2T"; },
-  "jp-valves-shim": function (e) { return e.stroke !== "2T"; }
+  /* шайбы под толкателем — только DOHC и не гидрокомпенсаторы (valveInt: 0) */
+  "jp-valves-shim": function (e) { return e.stroke !== "2T" && e.groups.indexOf("dohc") >= 0 && e.valveInt !== 0; },
+  /* «рядная четвёрка» — только рядным четвёркам, а не всем DOHC (одноцилиндровым, V-twin, оппозитам) */
+  "i4-valves": function (e) { return e.stroke !== "2T" && e.valveInt !== 0 && (e.layout === "i4" || (!e.layout && /рядн\S* четв|\bI4\b|4 цилиндр|четырёхцилиндр/i.test((e.name || "") + " " + (e.cam || "")))); }
 };
-["chain", "chain-replace", "sprocket-change", "chain-slider", "chain-rivet"].forEach(function (id) { GUIDE_NEED[id] = hasChain; });
+/* клапаны, ГБЦ, клапанная крышка — только у 4Т; регулировка — не у гидрокомпенсаторов */
+["valves", "valves-dohc", "valves-screw"].forEach(function (id) { GUIDE_NEED[id] = function (e) { return e.stroke !== "2T" && e.valveInt !== 0; }; });
+["vcgasket-replace", "headgasket", "valve-lap", "valve-seals", "camchain", "timing-marks"].forEach(function (id) { GUIDE_NEED[id] = function (e) { return e.stroke !== "2T"; }; });
+["chain", "chain-replace", "sprocket-change", "chain-slider", "chain-rivet", "csseal"].forEach(function (id) { GUIDE_NEED[id] = hasChain; });
 ["spokes", "wheel-lacing", "tube", "swingarm-bushings", "linkage", "mousse-install", "skid-install"].forEach(function (id) { GUIDE_NEED[id] = function (e) { return !e.cvt; }; });
 function guideOk(g, e) { var f = g && e && GUIDE_NEED[g.id]; return !f || !!f(e); }
 /* признаки привода: кардан и ремень (не вариатор) — по ним прячем то, что про цепь и звёзды */
@@ -10775,3 +10815,21 @@ function kbOk(x, e) { return (!x.only || x.only.some(function (g) { return g ===
 /* узел «Вариатор и редуктор» — у скутера вместо «Сцепления» и «КПП и звезды» на схеме мотора */
 AREAS.cvt = { t: "Вариатор и редуктор", kinds: ["cvtbelt", "rollers", "cvtclutch", "cvtvar", "cvtspring", "cvtsliders", "gearoil", "kickkit", "clutchholder"], diag: ["kick"],
   guides: ["cvt", "scooter-gearoil"], spec: [["Привод", "gearbox"], ["Запуск", "start"]], re: /вариатор|ремень|ролик|редуктор|сцеплен|кик/i };
+
+/* масло к ТО той вязкости, что в паспорте мотора: раньше всем 4Т предлагалось 10W-40 (или 10W-50 по DOHC),
+   а Harley и Уралу нужно 20W-50, BMW — 5W-40, многим японцам — 10W-30 */
+(function () {
+  var vis = {}, any = [];
+  Object.keys(ENGINES).forEach(function (id) {
+    var e = ENGINES[id]; if (e.stroke === "2T") return;
+    var m = String(e.oil || "").match(/(\d+)W-?(\d+)/i);
+    if (!m) { any.push(id); return; }
+    var v = m[1] + "W-" + m[2]; (vis[v] = vis[v] || []).push(id);
+  });
+  var PR = { "10W-30": 800, "15W-40": 750, "15W-50": 1100, "20W-50": 950, "5W-40": 1100, "10W-60": 1500, "20W-40": 900, "15W-60": 1400, "5W-30": 950 };
+  PARTS.forEach(function (p) {
+    if (p.id === "oil-1040") p.fit = (vis["10W-40"] || []).concat(any);
+    if (p.id === "oil-1050") p.fit = vis["10W-50"] || [];
+  });
+  Object.keys(PR).forEach(function (v) { if (vis[v]) PARTS.push(P("oil-" + v.replace(/\D/g, ""), "Масло 4T " + v + " (1 л)", PR[v], "Расходники", "oil", vis[v])); });
+})();
