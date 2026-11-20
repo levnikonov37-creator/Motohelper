@@ -158,7 +158,7 @@ const RU_MONTH = ["января", "февраля", "марта", "апреля"
 module.exports = function tgPosts(h) {
   const { ROOT, SITE, ENGINES, BIKES, GUIDES, bikesOf, engSlug, bikeSlug, brandSlug, brief, briefOil, briefValves, PHOTOS, photoSlug, SPARK_X, FLAGSHIP, MODEL_TUNE_KEYS, manual } = h;
   /* значение есть: не «—» и не заглушка «по мануалу» (пометки об источнике в скобках — не в счёт) */
-  const ok = (v) => { const x = v == null ? "" : brief(v); return x !== "" && x !== "—" && !/^(см\.?\s*)?(по\s+)?мануал/i.test(x) && /[\dA-Za-zА-Яа-я]/.test(x); };
+  const ok = (v) => { const x = v == null ? "" : brief(v); return x !== "" && x !== "—" && !/^(см\.?\s*)?(по\s+)?(мануал|каталог)/i.test(x) && /[\dA-Za-zА-Яа-я]/.test(x); };
   const key = (b) => b.brand + " " + b.name;
   const engOf = (b) => ENGINES[b.versions[0].engine];
   const url = (b) => SITE + "m/" + bikeSlug.get(b) + "/";
@@ -230,7 +230,9 @@ module.exports = function tgPosts(h) {
     const e = engOf(b), id = b.versions[0].engine, hp = b.versions[0].hp || e.hp;
     const iss = (e.issues || []).find((x) => x.sev === "high") || (e.issues || [])[0];
     const fact = factFor(b, i);
-    const oil = e.stroke === "2T" ? (/premix|смес/i.test(e.oil) ? "смесь с бензином" : briefOil(e.oil)) : briefOil(e.oil) + (ok(e.oilVol) ? ", " + cut(brief(e.oilVol), 40) : "");
+    /* объём — первая часть без подписи модели: «Africa Twin: 3.9 л при замене, 4.0 л с фильтром» → «3.9 л при замене» */
+    const vol = ok(e.oilVol) ? brief(e.oilVol).replace(/^[^:\d]{2,40}:\s*/, "").split(/,\s/)[0] : "";
+    const oil = e.stroke === "2T" ? (/premix|смес/i.test(e.oil) ? "смесь с бензином" : briefOil(e.oil)) : briefOil(e.oil) + (vol && vol.length <= 45 ? ", " + vol : "");
     const text = fit([
       "🏍 Мотоцикл дня: " + key(b),
       [b.type, e.code + (e.cc ? ", " + Math.round(e.cc) + " см³" : "") + (hp ? ", " + hp + " л.с." : "")].filter(Boolean).join(" · "),
@@ -252,11 +254,12 @@ module.exports = function tgPosts(h) {
     return { text, card };
   }
   const ONLY = { "2t": "для двухтактников", "4t": "", carb: "для карбюраторных моторов", efi: "для инжектора", liquid: "для моторов с жидкостным охлаждением", cvt: "для скутеров", horiz: "для мопедов и питбайков", air: "для моторов с воздушным охлаждением", big: "", estart: "", kick: "" };
-  const unPh = (s) => s.replace(/\s*\(\{\w+\}\)/g, "").replace(/\s*—\s*\{oilVol\}/g, "").replace(/ \{(spark|name)\}/g, "")
-    .replace(/\{oil\}/g, "масло по мануалу").replace(/\{coolant\}/g, "антифриз по мануалу").replace(/\{\w+\}/g, "по мануалу");
+  /* в шагах инструкций — цифры конкретного мотора ({valveIn}, {idle}…): в общем совете их нет, такие шаги убираем */
+  const unPh = (s) => s.replace(/\s*\([^()]*\{\w+\}[^()]*\)/g, "").replace(/\s*—\s*\{oilVol\}/g, "").replace(/ \{(spark|name)\}/g, "")
+    .replace(/\{oil\}/g, "масло").replace(/\{coolant\}/g, "антифриз");
   function tipPost(g, i, withJoke) {
     const only = (g.only || []).length === 1 ? ONLY[g.only[0]] || "" : "";
-    const steps = g.steps.map((s) => cut(firstSentence(unPh(s)), 170)).filter((s) => s.length > 12).slice(0, 5);
+    const steps = g.steps.map((s) => firstSentence(unPh(s))).filter((s) => s.length > 12 && s.length <= 210 && !/\{\w+\}|:,|:\s*$/.test(s)).slice(0, 5);
     const text = fit([
       "💡 Совет: " + g.title.replace(/^./, (c) => c.toUpperCase()) + (only ? " (" + only + ")" : ""),
       [g.time ? "⏱ " + g.time : "", g.diff || ""].filter(Boolean).join(" · "),

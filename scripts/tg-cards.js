@@ -147,6 +147,9 @@ function html(c) {
 }
 
 (async () => {
+  /* картинки постов, которых больше нет в расписании, — удаляем */
+  const keep = new Set(cards.map((c) => c.id + ".jpg"));
+  if (fs.existsSync(OUT)) fs.readdirSync(OUT).filter((f) => /\.jpg$/.test(f) && !keep.has(f)).forEach((f) => { fs.unlinkSync(path.join(OUT, f)); console.log("удалена лишняя " + f); });
   if (!todo.length) return console.log("Картинки постов: всё нарисовано (" + cards.length + ")");
   fs.mkdirSync(OUT, { recursive: true });
   const b = await chromium.launch();
