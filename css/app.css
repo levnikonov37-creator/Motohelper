@@ -3133,3 +3133,10 @@ small.diff { font-size: 13px; }
 .schip { font-size: 13px !important; }
 /* фото модели на компьютере не на весь экран */
 @media (min-width: 900px) { .bike-view .model-photo, .bike-view .model-photo img { max-height: 420px; } }
+
+/* одно поле поиска во всём приложении (кроме белого главного в шапке): тёмное, тонкая рамка, скругление 14 px, при фокусе — белая рамка */
+.qsearch:not(.hero .qsearch), .qsearch.grow { border: 1px solid rgba(255, 255, 255, .22) !important; border-radius: 14px !important; background: rgba(255, 255, 255, .04) !important; }
+.qsearch:not(.hero .qsearch):focus-within, .qsearch.grow:focus-within { border-color: #fff !important; box-shadow: 0 0 0 3px rgba(242, 242, 242, .18) !important; }
+/* ссылка «Страница модели на сайте» под шапкой «Мотоцикла» */
+.site-link { display: inline-flex; align-items: center; min-height: 44px; margin: 2px 0 6px; color: var(--muted, #B9C2CF); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.site-link:hover { color: #fff; }

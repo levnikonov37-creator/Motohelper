@@ -386,10 +386,33 @@ function EditBike({
     if (mm < range[0]) carbWarn = "Карбюратор " + mm + " мм маловат для " + eng.code + " — мотор будет душиться на верхах. Обычно ставят " + range[0] + "–" + range[1] + " мм.";else if (mm > range[1]) carbWarn = "Карбюратор " + mm + " мм великоват для " + eng.code + " — провалы на низах и сложная настройка. Обычно ставят " + range[0] + "–" + range[1] + " мм.";
   }
   const tuneOk = TUNING.filter(t => tuningFor(t, eng, window.mhBike).ok && t.cat !== "Защита");
+  /* моторы для свапа: сначала похожие на штатный (тот же такт и привод, объём ±40 %, самые распространённые первыми),
+     дальше — по типу и объёму; скутерные с вариатором отдельно, чтобы на эндуро не предлагались первыми */
   const groups = {};
-  Object.values(ENGINES).forEach(e => {
-    const g = e.stroke === "2T" ? "2-тактные" : e.cc < 170 ? "До 170 см³" : e.groups.indexOf("liquid") >= 0 ? "250–450, жидкостные" : "200–300, воздушные";
+  const isCvt = e => !!e.cvt || e.groups.indexOf("cvt") >= 0;
+  const nB = useMemo(() => {
+    const c = {};
+    BIKES.forEach(b => b.versions.forEach(v => c[v.engine] = (c[v.engine] || 0) + 1));
+    return c;
+  }, []);
+  const near = e => e.stroke === baseEngine.stroke && isCvt(e) === isCvt(baseEngine) && e.cc && baseEngine.cc && Math.abs(e.cc - baseEngine.cc) / baseEngine.cc <= 0.4;
+  const sorted = Object.values(ENGINES).slice().sort((a, b) => (nB[b.id] || 0) - (nB[a.id] || 0) || String(a.code).localeCompare(String(b.code)));
+  groups["Похожие на штатный"] = sorted.filter(near).slice(0, 40);
+  sorted.forEach(e => {
+    if (groups["Похожие на штатный"].indexOf(e) >= 0) return;
+    const g = isCvt(e) ? "Скутерные (вариатор)" : e.stroke === "2T" ? "2-тактные" : e.cc < 170 ? "4T до 170 см³" : e.cc <= 320 ? "4T 170–320 см³" : e.cc <= 700 ? "4T 320–700 см³" : "4T больше 700 см³";
     (groups[g] = groups[g] || []).push(e);
+  });
+  Object.keys(groups).forEach(g => {
+    if (g !== "Похожие на штатный") groups[g].sort((a, b) => String(a.code).localeCompare(String(b.code)));
+  });
+  /* порядок групп: похожие, затем 4Т по объёму, скутерные, 2Т */
+  ["4T до 170 см³", "4T 170–320 см³", "4T 320–700 см³", "4T больше 700 см³", "Скутерные (вариатор)", "2-тактные"].forEach(g => {
+    if (groups[g]) {
+      const L = groups[g];
+      delete groups[g];
+      groups[g] = L;
+    }
   });
   return /*#__PURE__*/React.createElement("div", {
     className: "edit"
@@ -1984,6 +2007,10 @@ function BikeFinder({
     try {
       const k = bikeKey(b);
       localStorage.setItem("mh2-recent", JSON.stringify([k].concat(bfRecent().filter(x => x !== k)).slice(0, 6)));
+      /* версия, которую выбрали, — чтобы в «Недавних» открывалась она, а не первая */
+      const vv = JSON.parse(localStorage.getItem("mh2-recent-vi") || "{}");
+      vv[k] = i || 0;
+      localStorage.setItem("mh2-recent-vi", JSON.stringify(vv));
     } catch (e) {}
     onPick(b, i);
   };
@@ -11898,6 +11925,7 @@ function toCost(e) {
 function CompareView({
   eng,
   bike,
+  cu,
   other,
   onClose,
   onChange
@@ -11909,8 +11937,8 @@ function CompareView({
     const p = k.split(" ").map(x => partByKind(x, e)).find(Boolean);
     return p ? p.price : "—";
   };
-  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Макс. скорость", speedFor(eng, bike, {}, []).v, speedFor(e2, b2, {}, []).v, "км/ч", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на ТО", toCost(eng), toCost(e2), "₽", -1], ["Слабые места (серьёзные)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Поршень", kp("piston", eng), kp("piston", e2), "₽", -1], ["Комплект сцепления", kp("clutchdiscs", eng), kp("clutchdiscs", e2), "₽", -1], ["Свеча", kp("spark spark2", eng), kp("spark spark2", e2), "₽", -1], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng, bike).ok).length, TUNING.filter(t => tuningFor(t, e2, b2).ok).length, "", 1]];
-  const fmtv = (v, u, e, b) => typeof v === "number" ? u === "₽" ? rub(v) : u === "км" ? kmHours(v, e, b) : num(v) + (u ? " " + u : "") : v;
+  const rows = [["Мощность", eng.hp, e2.hp, "л.с.", 1], ["Макс. скорость", speedFor(eng, bike, cu || {}, TUNING.filter(t => (eng.installed || []).indexOf(t.id) >= 0)).v, speedFor(e2, b2, {}, []).v, "км/ч", 1], ["Объём", eng.cc, e2.cc, "см³", 1], ["Момент", eng.torque, e2.torque], ["Схема", eng.cam, e2.cam], ["Охлаждение", eng.cooling, e2.cooling], ["Питание", eng.groups.indexOf("efi") >= 0 ? "инжектор" : eng.carb, e2.groups.indexOf("efi") >= 0 ? "инжектор" : e2.carb], ["Топливо", eng.fuel, e2.fuel], ["Замена масла", eng.hours ? "по моточасам" : eng.oilInt, e2.hours ? "по моточасам" : e2.oilInt, "км", 1], ["Регулировка клапанов", eng.stroke === "2T" ? "—" : eng.valveInt, e2.stroke === "2T" ? "—" : e2.valveInt, "км", 1], ["Расходники на ТО", toCost(eng), toCost(e2), "₽", -1], ["Слабые места (серьёзные)", eng.issues.length + " (" + eng.issues.filter(i => i.sev === "high").length + ")", e2.issues.length + " (" + e2.issues.filter(i => i.sev === "high").length + ")"], ["Поршень", kp("piston", eng), kp("piston", e2), "₽", -1], ["Комплект сцепления", kp("clutchdiscs", eng), kp("clutchdiscs", e2), "₽", -1], ["Свеча", kp("spark spark2", eng), kp("spark spark2", e2), "₽", -1], ["Запчастей в базе", PARTS.filter(p => fits(p, eng)).length, PARTS.filter(p => fits(p, e2)).length, "", 1], ["Доработок доступно", TUNING.filter(t => tuningFor(t, eng, bike).ok).length, TUNING.filter(t => tuningFor(t, e2, b2).ok).length, "", 1]];
+  const fmtv = (v, u, e, b) => typeof v === "number" ? u === "₽" ? rub(v) : u === "км" ? kmHours(v, e, b) : u === "л.с." ? String(Math.round(v * 10) / 10) + " " + u : num(v) + (u ? " " + u : "") : v;
   return /*#__PURE__*/React.createElement("section", {
     className: "panel compare"
   }, /*#__PURE__*/React.createElement("div", {
@@ -13793,9 +13821,14 @@ function BikeMenu({
   onClose
 }) {
   const seen = {};
+  /* гараж — сверху и со звёздочкой; ниже «Недавние» (просмотренные), с той версией, что открывали */
+  let rvi = {};
+  try {
+    rvi = JSON.parse(localStorage.getItem("mh2-recent-vi") || "{}");
+  } catch (e) {}
   const list = garage.concat(bfRecent().map(k => ({
     key: k,
-    vi: 0
+    vi: rvi[k] || 0
   }))).filter(g => {
     if (seen[g.key]) return false;
     seen[g.key] = 1;
@@ -13826,14 +13859,18 @@ function BikeMenu({
     className: "bmenu",
     role: "menu",
     onClick: e => e.stopPropagation()
-  }, /*#__PURE__*/React.createElement("h4", null, "\u041C\u043E\u0438 \u043C\u043E\u0442\u043E\u0446\u0438\u043A\u043B\u044B"), list.map(it => {
+  }, /*#__PURE__*/React.createElement("h4", null, list.some(it => it.star) ? "Мой гараж" : "Недавние"), list.map((it, idx) => {
     const on = it.g.key === sel.key && it.g.vi === sel.vi;
-    return /*#__PURE__*/React.createElement("button", {
+    /* после гаража — подзаголовок «Недавние» */
+    const head = !it.star && idx > 0 && list[idx - 1].star ? /*#__PURE__*/React.createElement("h4", {
+      key: "h-recent"
+    }, "Недавние") : null;
+    return [head, /*#__PURE__*/React.createElement("button", {
       key: it.g.key + "|" + it.g.vi,
       role: "menuitem",
       className: "bm-item" + (on ? " on" : ""),
       onClick: () => onSwitch(it)
-    }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, it.c.nick || it.b.name), /*#__PURE__*/React.createElement("small", null, it.b.brand, " \xB7 ", it.e.code || "")), /*#__PURE__*/React.createElement("i", null, on ? "сейчас" : it.star ? "★" : ""));
+    }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, it.c.nick || it.b.name), /*#__PURE__*/React.createElement("small", null, it.b.brand, " \xB7 ", it.e.code || "")), /*#__PURE__*/React.createElement("i", null, on ? "сейчас" : it.star ? "★" : ""))];
   }), /*#__PURE__*/React.createElement("div", {
     className: "bm-foot"
   }, /*#__PURE__*/React.createElement("button", {
@@ -14540,7 +14577,8 @@ function BikePage(props) {
       className: "grad"
     }, cu.nick || bike.name)),
     sub: "Характеристики, настройка, тюнинг и сравнение — всё про твой мотоцикл.",
-    stats: [[eng.hp + " л.с.", "мощность"], [eng.cc + " см³", "объём"], ["≈ " + speedFor(eng, bike, cu, TUNING.filter(t => eng.installed.indexOf(t.id) >= 0)).v + " км/ч", "макс. скорость"], [eng.code, "двигатель"]]
+    /* на подвкладках «Настроить» и «Тюнинг» телефону — без плиток цифр: иначе содержимое начинается ниже первого экрана */
+    stats: tab !== "overview" && window.innerWidth < 700 ? null : [[eng.hp + " л.с.", "мощность"], [eng.cc + " см³", "объём"], ["≈ " + speedFor(eng, bike, cu, TUNING.filter(t => eng.installed.indexOf(t.id) >= 0)).v + " км/ч", "макс. скорость"], [eng.code, "двигатель"]]
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn ghost",
     onClick: () => setPicker(true)
@@ -14570,9 +14608,14 @@ function BikePage(props) {
       key: sel.key,
       vi: i
     })
-  }, v.label)))), /*#__PURE__*/React.createElement(GarageBar, props), eng.jp && /*#__PURE__*/React.createElement("div", {
+  }, v.label)))), /*#__PURE__*/React.createElement(GarageBar, props), bike.brand !== "Любая модель" && /*#__PURE__*/React.createElement("a", {
+    /* страница модели в каталоге: её удобно отправить другу или найти в поиске — масло, свечи, клапаны, поломки */
+    className: "site-link",
+    href: "/m/" + catSlug(bike.brand + " " + bike.name) + "/"
+  }, "Страница ", bike.brand + " " + bike.name, " на сайте: масло, свечи, клапаны, поломки →"), eng.jp && /*#__PURE__*/React.createElement("div", {
     className: "callout info"
   }, "Цифры — типовые из сервис-мануалов. Для своего года выпуска сверь с мануалом."), cmp && /*#__PURE__*/React.createElement(CompareView, {
+    cu: cu,
     eng: eng,
     bike: bike,
     other: cmp,
@@ -14822,10 +14865,12 @@ function SiteSearchInline({
   placeholder
 }) {
   const [q, setQ] = useState("");
-  const res = siteSearch(q, ctx, {
+  /* поиск по всему сайту тяжёлый: при быстром наборе считаем по «отложенной» строке — ввод не подтормаживает */
+  const dq = React.useDeferredValue ? React.useDeferredValue(q) : q;
+  const res = useMemo(() => siteSearch(dq, ctx, {
     scope: scope,
     max: 8
-  });
+  }), [dq, ctx, scope]);
   return /*#__PURE__*/React.createElement("div", {
     className: "site-search"
   }, /*#__PURE__*/React.createElement("div", {
@@ -14874,9 +14919,10 @@ function SearchSheet({
       window.removeEventListener("keydown", h);
     };
   }, []);
-  const res = siteSearch(q, ctx, {
+  const dq = React.useDeferredValue ? React.useDeferredValue(q) : q;
+  const res = useMemo(() => siteSearch(dq, ctx, {
     max: 24
-  });
+  }), [dq, ctx]);
   function pick(act) {
     act();
     onClose();
