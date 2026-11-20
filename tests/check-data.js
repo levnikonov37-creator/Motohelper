@@ -252,6 +252,22 @@ for (const [id, e] of Object.entries(ENGINES)) if (new Set(e.groups).size !== e.
   for (const r of ctx.CARB_UP || []) for (const id of (r.ladder || []).concat([r.up, r.bore, r.boreCarb]).filter(Boolean)) if (!TUNING.find((t) => t.id === id)) fail("CARB_UP: нет доработки «" + id + "»");
 }
 
+/* Telegram-канал: время по Москве, без повторов, по длине влезает в Telegram, картинки на месте, ссылки — на свои страницы */
+{
+  const tg = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "tg/posts.json"), "utf8"));
+  const ids = new Set(), slots = new Set();
+  for (const p of tg.posts) {
+    if (ids.has(p.id)) fail("Telegram: повтор id поста " + p.id); ids.add(p.id);
+    if (!/^\d{4}-\d\d-\d\d$/.test(p.date) || !/^(09|12|18):00$/.test(p.time || "")) fail("Telegram: дата или время не по расписанию (09:00, 12:00, 18:00) у " + p.id + ": " + p.date + " " + p.time);
+    if (slots.has(p.date + " " + p.time)) fail("Telegram: два поста в одно время " + p.date + " " + p.time); slots.add(p.date + " " + p.time);
+    if (!p.text || p.text.length > 4096) fail("Telegram: пустой или слишком длинный пост " + p.id);
+    if (p.photo && p.text.length > 1024) fail("Telegram: подпись к картинке длиннее 1024 знаков у " + p.id + " (" + p.text.length + ")");
+    if (p.photo && !fs.existsSync(path.join(__dirname, "..", p.photo.replace("https://motohelper.ru/", "")))) fail("Telegram: нет картинки " + p.photo);
+    for (const u of p.text.match(/https:\/\/motohelper\.ru\/[^\s]*/g) || []) { const f = u.replace("https://motohelper.ru/", "").split(/[#?]/)[0].replace(/[).,]+$/, "");
+      if (f && !fs.existsSync(path.join(__dirname, "..", f, f.endsWith("/") ? "index.html" : ""))) fail("Telegram: ссылка на несуществующую страницу в " + p.id + ": " + u); }
+  }
+}
+
 if (errors.length) {
   console.error(`Найдено ошибок: ${errors.length}`);
   errors.slice(0, 200).forEach((e) => console.error(" - " + e));

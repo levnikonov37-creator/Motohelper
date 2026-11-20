@@ -1111,40 +1111,16 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
   files.set("m/podborka/index.html", page({ title: "Подборки мотоциклов, питбайков и эндуро по объёму | MotoHelper", desc: "Эндуро 250, эндуро 300, питбайки 125 и 150 и другие классы: все модели в одной таблице — мотор, мощность, масло.", canon: SITE + "m/podborka/", crumbs, body, ld: [crumbLd(crumbs)] }));
 }
 
-/* Telegram-канал: tg/posts.json = написанные посты (tg/manual.json) + «мотор дня» на свободные дни.
-   Порядок моторов — по числу моделей; без масла, свечи или зазоров клапанов мотор пропускаем. */
+/* Telegram-канал: tg/posts.json (что и когда публиковать — читает ИИ-сервер) и tg/cards.json (из чего scripts/tg-cards.js
+   рисует картинки img/tg/<id>.jpg). Расписание, советы, праздники и факты — в scripts/tg-posts.js, свои посты — в tg/manual.json. */
 {
   const manual = JSON.parse(fs.readFileSync(path.join(ROOT, "tg/manual.json"), "utf8"));
-  const busy = new Set(manual.posts.map((p) => p.date));
-  const ok = (v) => v && v !== "—" && !/мануал/i.test(v);
-  const seen = new Set(), manualText = manual.posts.map((p) => p.text).join("\n");
-  const cards = popular.filter((id) => { const e = ENGINES[id], c = e.code; if (seen.has(c) || manualText.indexOf("/m/motor/" + engSlug[id] + "/") >= 0 || !ok(e.oil) || !ok(e.oilVol) || !ok(e.spark) || !ok(e.valveIn) || !ok(e.valveEx)) return false; seen.add(c); return true; })
-    .map((id) => {
-      const e = ENGINES[id], list = bikesOf[id], iss = (e.issues || []).find((x) => x.sev === "high") || (e.issues || [])[0];
-      const names = list.slice(0, 4).map((b) => b.brand + " " + b.name).join(", ") + (list.length > 4 ? " и ещё " + (list.length - 4) : "");
-      const text = [
-        "⚙️ Мотор дня: " + e.code + (e.cc ? " (" + Math.round(e.cc) + " см³" + (e.hp ? ", " + e.hp + " л.с." : "") + ")" : ""),
-        "",
-        "Стоит на: " + names,
-        "",
-        "🛢 Масло: " + e.oil + ", " + e.oilVol + (e.oilInt ? " — менять " + kmh(e.oilInt, e, list[0]) : ""),
-        "🕯 Свеча: " + e.spark + (ok(e.gap) ? ", зазор " + e.gap : ""),
-        "🔧 Клапаны (на холодную): впуск " + e.valveIn + ", выпуск " + e.valveEx,
-        iss ? "⚠️ Слабое место: " + iss.t + ". " + (iss.fix || "") : "",
-        "",
-        "Всё про мотор: " + SITE + "m/motor/" + engSlug[id] + "/",
-      ].filter((x, i, a) => x !== "" || a[i - 1] !== "").join("\n").replace(/\n{3,}/g, "\n\n").trim();
-      return { id: "eng-" + engSlug[id], text };
-    });
-  const posts = manual.posts.slice();
-  const day = new Date(Date.UTC(2026, 9, 30)), last = Date.UTC(2027, 5, 30);
-  let k = 0;
-  for (; day.getTime() <= last && k < cards.length; day.setUTCDate(day.getUTCDate() + 1)) {
-    const d = day.toISOString().slice(0, 10);
-    if (!busy.has(d)) posts.push(Object.assign({ date: d }, cards[k++]));
-  }
-  posts.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
-  files.set("tg/posts.json", JSON.stringify({ _: "Собрано scripts/build-pages.js из tg/manual.json и базы моторов — правь tg/manual.json", channel: manual.channel, posts }, null, 1) + "\n");
+  const tg = require("./tg-posts")({ ROOT, SITE, ENGINES, BIKES, GUIDES, bikesOf, engSlug, bikeSlug, brandSlug, brief, briefOil, briefValves, plural,
+    PHOTOS, photoSlug: ctx.__PS, SPARK_X: ctx.SPARK_X || {}, FLAGSHIP, MODEL_TUNE_KEYS, manual });
+  files.set("tg/posts.json", JSON.stringify({ _: "Собрано scripts/build-pages.js (scripts/tg-posts.js + tg/manual.json). Время — по Москве. Свои посты — в tg/manual.json", channel: manual.channel, posts: tg.posts }, null, 1) + "\n");
+  files.set("tg/cards.json", JSON.stringify({ _: "Картинки постов: node scripts/tg-cards.js рисует недостающие img/tg/<id>.jpg", cards: tg.cards }, null, 1) + "\n");
+  const miss = tg.posts.filter((p) => p.date >= require("./tg-posts").START && !p.photo).length;
+  if (miss && !check) console.log("Telegram: " + miss + " постов без картинки — запусти node scripts/tg-cards.js и пересобери");
 }
 
 /* Telegram-бот: справочник для ответов в личке, разбитый на мелкие файлы tg/idx/<первые 2 знака>.json — у сервера на

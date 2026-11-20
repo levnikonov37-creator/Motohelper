@@ -50,10 +50,12 @@ const sse = (body, provider) =>
   new Response(body, { headers: { ...CORS, "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache", "x-mh-provider": provider } });
 
 export default {
-  // раз в день (Cloudflare → Triggers → Cron, 15:00 UTC = 18:00 МСК) — очередной пост в Telegram-канал
-  // и каждое утро в 06:00 UTC (09:00 МСК) — отчёт за вчера владельцу
+  // по расписанию (Cloudflare → Triggers → Cron; ставит worker/deploy.sh): 06:00 UTC (09:00 МСК) — отчёт за вчера владельцу
+  // и посты на 09:00; 09:00 UTC (12:00 МСК) — совет; 15:00 UTC (18:00 МСК) — мотоцикл дня и самопроверка ИИ.
+  // Различаем по часу, а не по строке cron: так работает и при «0 6 * * *», и при старом «0 6 * * 1».
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(event.cron === "0 6 * * *" ? dailyReport(env) : daily(env));
+    const h = new Date(event.scheduledTime || Date.now()).getUTCHours();
+    ctx.waitUntil(h === 6 ? dailyReport(env).then(() => daily(env, false)) : daily(env, h === 15));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -317,50 +319,72 @@ async function listFeedback(env, token) {
   return json({ ok: true, count: items.length, items });
 }
 
-// --- Telegram-канал: посты из tg/posts.json на сайте, по одному в день, каждый — один раз (отметка в KV) ---
+// --- Telegram-канал: посты из tg/posts.json на сайте. У поста дата и время по Москве («18:00» — мотоцикл дня, «12:00» — совет,
+// праздники — в своё время); каждый запуск по расписанию публикует посты на сегодня, время которых уже наступило.
+// Каждый пост — один раз (отметка в KV). С картинкой (photo) — sendPhoto с подписью, без неё — обычное сообщение. ---
 const TG_POSTS = "https://motohelper.ru/tg/posts.json";
-const mskDay = () => new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+const mskNow = () => new Date(Date.now() + 3 * 3600e3).toISOString();
+const mskDay = () => mskNow().slice(0, 10);
+const postTime = (p) => (/^\d\d:\d\d$/.test(p.time || "") ? p.time : "18:00");
 async function tgQueue(env) {
   const res = await fetch(TG_POSTS + "?t=" + Date.now(), { cf: { cacheTtl: 0 } });
   if (!res.ok) throw new Error("posts.json " + res.status);
   const cfg = await res.json();
-  const today = mskDay(), posts = (cfg.posts || []).filter((p) => p && p.id && p.text && p.date);
+  const today = mskDay(), hm = mskNow().slice(11, 16);
+  // только сегодня и завтра: старые посты давно вышли, а отметки в KV для сотен постов читать незачем
+  const tomorrow = new Date(Date.parse(today) + 864e5).toISOString().slice(0, 10);
+  const posts = (cfg.posts || []).filter((p) => p && p.id && p.text && p.date && p.date >= today && p.date <= tomorrow)
+    .sort((a, b) => (a.date + postTime(a) < b.date + postTime(b) ? -1 : 1));
   const sent = {};
   if (env.FEEDBACK) await Promise.all(posts.map(async (p) => (sent[p.id] = !!(await env.FEEDBACK.get("tg:sent:" + p.id)))));
-  return { cfg, today, posts, sent };
+  return { cfg, today, hm, posts, sent, all: cfg.posts || [] };
 }
 async function tgStatus(env) {
   try {
-    const { cfg, today, posts, sent } = await tgQueue(env);
-    const left = posts.filter((p) => !sent[p.id]).sort((a, b) => (a.date < b.date ? -1 : 1));
-    return { ok: true, bot: !!env.TELEGRAM_BOT_TOKEN, channel: cfg.channel, today, sent: posts.length - left.length, left: left.length, next: left[0] ? { id: left[0].id, date: left[0].date } : null };
+    const { cfg, today, hm, posts, sent, all } = await tgQueue(env);
+    const left = all.filter((p) => p && p.date && p.date + postTime(p) > today + hm).sort((a, b) => (a.date + postTime(a) < b.date + postTime(b) ? -1 : 1));
+    return { ok: true, bot: !!env.TELEGRAM_BOT_TOKEN, channel: cfg.channel, now: today + " " + hm,
+      today: posts.filter((p) => p.date === today).map((p) => ({ id: p.id, time: postTime(p), photo: !!p.photo, sent: sent[p.id] })),
+      next: left[0] ? { id: left[0].id, date: left[0].date, time: postTime(left[0]) } : null, planned: left.length, lastDate: left.length ? left[left.length - 1].date : null };
   } catch (e) {
     return { ok: false, error: e.message };
   }
+}
+/* один пост: с картинкой — sendPhoto (подпись до 1024 знаков; длиннее — картинка, затем текст), без картинки или если
+   Telegram не забрал картинку — обычное сообщение */
+async function tgSend(env, chat, p) {
+  const text = String(p.text);
+  if (p.photo) {
+    const long = text.length > 1024;
+    const j = await tgApi(env, "sendPhoto", Object.assign({ chat_id: chat, photo: p.photo }, long ? {} : { caption: text }));
+    if (j.ok) {
+      if (!long) return j;
+      const t = await tgApi(env, "sendMessage", { chat_id: chat, text: text.slice(0, 4096), link_preview_options: { is_disabled: true } });
+      return t.ok ? t : j;
+    }
+  }
+  return tgApi(env, "sendMessage", { chat_id: chat, text: text.slice(0, 4096) });
 }
 async function tgRun(env) {
   try {
     if (!env.TELEGRAM_BOT_TOKEN) return { ok: false, error: "нет TELEGRAM_BOT_TOKEN" };
     if (!env.FEEDBACK) return { ok: false, error: "нет KV FEEDBACK — некуда записать, что пост вышел" };
-    const { cfg, today, posts, sent } = await tgQueue(env);
+    const { cfg, today, hm, posts, sent } = await tgQueue(env);
     if (!cfg.channel || cfg.channel === "@CHANNEL") return { ok: false, error: "в posts.json не указан канал" };
-    const due = posts.filter((p) => !sent[p.id] && p.date <= today).sort((a, b) => (a.date < b.date ? -1 : 1))[0];
-    if (!due) return { ok: true, posted: null, today };
-    // отметка до отправки: если cron и ручной запуск совпадут, пост не выйдет дважды
-    await env.FEEDBACK.put("tg:sent:" + due.id, new Date().toISOString());
-    const r = await fetch("https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN + "/sendMessage", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: cfg.channel, text: String(due.text).slice(0, 4096) }),
-    });
-    const j = await r.json().catch(() => ({}));
-    if (!j.ok) {
-      await env.FEEDBACK.delete("tg:sent:" + due.id);
-      return { ok: false, error: "telegram: " + (j.description || r.status), id: due.id };
+    const due = posts.filter((p) => !sent[p.id] && p.date === today && postTime(p) <= hm).slice(0, 4);
+    const out = [], errors = [];
+    for (const p of due) {
+      // отметка до отправки: если cron и ручной запуск совпадут, пост не выйдет дважды
+      await env.FEEDBACK.put("tg:sent:" + p.id, new Date().toISOString(), { expirationTtl: 60 * 60 * 24 * 60 });
+      const j = await tgSend(env, cfg.channel, p).catch((e) => ({ ok: false, description: e.message }));
+      if (!j.ok) {
+        await env.FEEDBACK.delete("tg:sent:" + p.id);
+        errors.push(p.id + ": telegram: " + (j.description || "?"));
+      } else out.push(p);
     }
-    return { ok: true, posted: due.id, today, text: String(due.text) };
+    return { ok: !errors.length, error: errors.join("; ") || undefined, posted: out.map((p) => p.id), posts: out, today, time: hm };
   } catch (e) {
-    return { ok: false, error: e.message };
+    return { ok: false, error: e.message, posted: [], posts: [] };
   }
 }
 
@@ -646,15 +670,18 @@ async function tellOwner(env, text) {
   return { ok: false, error: text };
 }
 
-/* раз в день: пост в канал и самопроверка ИИ; итог — в KV «health» (его читает ежедневная проверка по расписанию) */
-async function daily(env) {
+/* по расписанию: посты в канал, время которых наступило; full (вечерний запуск) — ещё и самопроверка ИИ с итогом в KV «health»
+   (его читает утренний отчёт) */
+async function daily(env, full) {
   const tg = await tgRun(env);
-  // тот же пост — в группу ВКонтакте (если публикация подключена через /vk-auth)
+  // те же посты — в группу ВКонтакте (если публикация подключена через /vk-auth)
   let vk = null;
-  if (tg.ok && tg.posted && tg.text) {
-    vk = await vkPost(env, tg.text).catch((e) => ({ ok: false, error: e.message }));
+  for (const p of tg.posts || []) {
+    vk = await vkPost(env, p).catch((e) => ({ ok: false, error: e.message }));
     if (vk && !vk.ok && !vk.off) await tellOwner(env, "⚠️ Пост в группу ВК не вышел: " + vk.error);
   }
+  if (!tg.ok) await tellOwner(env, "⚠️ Пост в канал не вышел: " + tg.error);
+  if (!full) return { tg };
   let ai;
   try {
     const r = await selfTest(env);
@@ -664,7 +691,6 @@ async function daily(env) {
   }
   const health = { t: new Date().toISOString(), tg: { ok: tg.ok, posted: tg.posted, error: tg.error }, vk: vk && { ok: vk.ok, error: vk.error }, ai: { ok: ai.ok, provider: ai.provider, error: ai.ok ? undefined : JSON.stringify(ai.error).slice(0, 300) } };
   if (env.FEEDBACK) await env.FEEDBACK.put("health", JSON.stringify(health));
-  if (!tg.ok) await tellOwner(env, "⚠️ Пост в канал не вышел: " + tg.error);
   return health;
 }
 
@@ -1002,7 +1028,7 @@ async function vkAuth(request, env) {
   const state = b64url(crypto.getRandomValues(new Uint8Array(24)));
   const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
   await env.FEEDBACK.put("vk:pkce:" + state, verifier, { expirationTtl: 900 });
-  const q = new URLSearchParams({ response_type: "code", client_id: env.VK_CLIENT_ID, redirect_uri: vkRedirect(request), state, code_challenge: challenge, code_challenge_method: "S256", scope: "wall groups" });
+  const q = new URLSearchParams({ response_type: "code", client_id: env.VK_CLIENT_ID, redirect_uri: vkRedirect(request), state, code_challenge: challenge, code_challenge_method: "S256", scope: "wall groups photos" });
   // код-верификатор ещё и в куке: KV между точками Cloudflare догоняет до минуты, кука приходит сразу
   return new Response(null, { status: 302, headers: { Location: "https://id.vk.com/authorize?" + q, "Set-Cookie": "vkpk=" + state + "." + verifier + "; Path=/vk-cb; Max-Age=900; HttpOnly; Secure; SameSite=Lax", "Cache-Control": "no-store" } });
 }
@@ -1054,13 +1080,30 @@ async function vkToken(env) {
   await env.FEEDBACK.put("vk:auth", JSON.stringify(Object.assign(a, { access: t.access_token, refresh: t.refresh_token || a.refresh, exp: Date.now() + (t.expires_in || 3600) * 1000 })));
   return t.access_token;
 }
-async function vkPost(env, text) {
+/* пост в группу ВК: текст + картинка поста (если ВК дал доступ к фото — scope photos), иначе ссылка из поста —
+   ВК покажет её превью с картинкой страницы */
+async function vkPhoto(env, token, url) {
+  const srv = await vkCall("photos.getWallUploadServer", { group_id: env.VK_GROUP_ID }, token);
+  const img = await fetch(url);
+  if (!img.ok) throw new Error("картинка " + img.status);
+  const fd = new FormData();
+  fd.append("photo", new Blob([await img.arrayBuffer()], { type: "image/jpeg" }), "post.jpg");
+  const up = await (await fetch(srv.upload_url, { method: "POST", body: fd })).json();
+  const saved = await vkCall("photos.saveWallPhoto", { group_id: env.VK_GROUP_ID, photo: up.photo, server: up.server, hash: up.hash }, token);
+  return saved && saved[0] ? "photo" + saved[0].owner_id + "_" + saved[0].id : "";
+}
+async function vkPost(env, post) {
   if (!env.VK_GROUP_ID) return { ok: false, off: true, error: "нет VK_GROUP_ID" };
+  const p = typeof post === "string" ? { text: post } : post;
   const raw = env.FEEDBACK && (await env.FEEDBACK.get("vk:auth"));
-  if (raw && !/\bwall\b/.test(JSON.parse(raw).scope || "")) return { ok: false, off: true, error: "ВК не выдал доступ к стене" };
+  const scope = raw ? JSON.parse(raw).scope || "" : "";
+  if (raw && !/\bwall\b/.test(scope)) return { ok: false, off: true, error: "ВК не выдал доступ к стене" };
   const token = await vkToken(env);
   if (!token) return { ok: false, off: true, error: "группа ВК не подключена (/vk-auth)" };
-  const res = await vkCall("wall.post", { owner_id: "-" + env.VK_GROUP_ID, from_group: 1, message: String(text).slice(0, 15000) }, token);
+  let att = "";
+  if (p.photo && /\bphotos\b/.test(scope)) att = await vkPhoto(env, token, p.photo).catch(() => "");
+  if (!att) att = (String(p.text).match(/https:\/\/motohelper\.ru\/\S*/) || [""])[0];
+  const res = await vkCall("wall.post", Object.assign({ owner_id: "-" + env.VK_GROUP_ID, from_group: 1, message: String(p.text).slice(0, 15000) }, att ? { attachments: att } : {}), token);
   return { ok: true, post: res && res.post_id };
 }
 async function vkStatus(env) {
