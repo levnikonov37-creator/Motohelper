@@ -244,6 +244,9 @@ for (const [id, e] of Object.entries(ENGINES)) if (new Set(e.groups).size !== e.
     if (oil && oil.name.toUpperCase().replace(/[\s-]/g, "").indexOf(vis.toUpperCase().replace(/[\s-]/g, "")) < 0) fail("Масло к ТО " + id + ": в паспорте " + vis + ", а предлагается «" + oil.name + "»");
   }
   for (const p of PARTS) if (p.kind === "spark" && /по мануалу|по каталогу/i.test(p.name)) fail("Деталь-свеча без кода: " + p.id);
+  /* мощность и момент должны сходиться: пик мощности на 2 200–15 500 об/мин (иначе момент списан с другого мотора) */
+  for (const id of Object.keys(ENGINES)) { const e = ENGINES[id], hp = parseFloat(e.hp), m = /([\d.,]+)\s*Н·м/.exec(String(e.torque || ""));
+    if (hp && m) { const rpm = hp * 7121 / parseFloat(m[1].replace(",", ".")); if (rpm > 15500 || rpm < 2200) fail("Мощность и момент не сходятся у " + id + ": " + e.hp + " л.с. при " + e.torque + " (пик ≈ " + Math.round(rpm) + " об/мин)"); } }
   const nodes = new Set((ctx.TUNE_NODES || []).map((n) => n[0]));
   for (const t of TUNING) if (!nodes.has(ctx.tuneNode(t))) fail("Тюнинг: у «" + t.id + "» нет узла (TUNE_NODES)");
   for (const r of ctx.CARB_UP || []) for (const id of (r.ladder || []).concat([r.up, r.bore, r.boreCarb]).filter(Boolean)) if (!TUNING.find((t) => t.id === id)) fail("CARB_UP: нет доработки «" + id + "»");
