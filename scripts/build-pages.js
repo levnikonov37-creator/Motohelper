@@ -663,6 +663,16 @@ const sparkOf = (e) => { const sp = String(e.spark || "").toUpperCase(); return 
 const SPARK_ENG = {};
 engIds.forEach((id) => sparkOf(ENGINES[id]).forEach((k) => (SPARK_ENG[k] = SPARK_ENG[k] || []).push(id)));
 const sparkSlug = (k) => "ngk-" + slugify(k);
+/* расходники по номеру (HiFlo, K&N, EBC, Yuasa) — страницы «на какие мотоциклы подходит» для номеров, что стоят на 3+ моделях */
+const CONS_KIND = { oil: ["Масляный фильтр", "HiFlo", "hiflo"], air: ["Воздушный фильтр", "K&N", "kn"], pf: ["Тормозные колодки", "EBC", "ebc"], pr: ["Тормозные колодки", "EBC", "ebc"], pads: ["Тормозные колодки", "EBC", "ebc"], bat: ["Аккумулятор", "Yuasa", "yuasa"] };
+const CONS = {};
+Object.keys(ctx.CROSS || {}).forEach((name) => { const b = BIKES.find((x) => x.brand + " " + x.name === name); if (!b) return;
+  (ctx.CROSS[name] || []).forEach((r) => Object.keys(r).forEach((f) => { if (!CONS_KIND[f]) return; [].concat(r[f]).forEach((code) => { if (!code || /^OEM\b/i.test(code)) return;
+    const key = CONS_KIND[f][2] + "-" + slugify(code), x = (CONS[key] = CONS[key] || { key, code, kind: f, rows: [] });
+    x.rows.push({ b, y: r.y || "", where: f === "pf" ? "перед" : f === "pr" ? "зад" : "" }); }); })); });
+const CONS_PAGES = Object.values(CONS).filter((x) => new Set(x.rows.map((r) => r.b)).size >= 3);
+const consOf = (b) => CONS_PAGES.filter((x) => x.rows.some((r) => r.b === b));
+const consChips = (b) => consOf(b).map((x) => `<a class="chip" href="/m/rashodnik/${x.key}/">${esc(CONS_KIND[x.kind][1] + " " + x.code)}: на какие ещё мотоциклы →</a>`).join("");
 const sparkChips = (e) => sparkOf(e).filter((k) => SPARK_ENG[k]).map((k) => `<a class="chip" href="/m/svecha/${sparkSlug(k)}/">Свеча NGK ${esc(k)}: аналоги →</a>`).join("");
 const WIRE_ANCHOR = { ac: "Схема электрики без АКБ (AC-CDI)", dc: "Схема электрики с АКБ (DC-CDI)", efi: "Схема электрики инжектора (ЭБУ)", points: "Схема контактного зажигания" };
 /* подпись поломки без названия модели: «На {M} садится аккумулятор» → «Садится аккумулятор» */
@@ -684,7 +694,7 @@ BIKES.forEach((b) => {
     const iss = weak(e).length ? `<h2 id="${pfx}slabye">Слабые места</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const keyG = guidesOf(e).filter((g) => KEY_GUIDES.indexOf(g.id) >= 0);
     const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a>${sparkChips(e)}<a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">${WIRE_ANCHOR[ctx.wiringType(e)] || "Схема электрики"}</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
-    return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${carbUpHtml(e, pfx, appLink(b, vi) + "&r=tune")}${vi === 0 && modelTuneHas(b) ? `<div class="chips"><a class="chip" href="/m/${slug}/tuning/">Тюнинг ${esc(full)} по шагам: резвее, мощнее, быстрее →</a></div>` : ""}${more}
+    return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${carbUpHtml(e, pfx, appLink(b, vi) + "&r=tune")}${vi === 0 && consOf(b).length ? `<div class="chips">${consChips(b)}</div>` : ""}${vi === 0 && modelTuneHas(b) ? `<div class="chips"><a class="chip" href="/m/${slug}/tuning/">Тюнинг ${esc(full)} по шагам: резвее, мощнее, быстрее →</a></div>` : ""}${more}
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a><div class="chips"><a class="chip" href="${appLink(b, vi)}&amp;add=1">☆ Сохранить ${esc(b.versions.length > 1 ? full + " (" + verName(v, vi, e) + ")" : full)} в гараж — журнал ТО и напоминания</a></div></section>`;
   }).join("\n");
   const others = neighbours(b);
@@ -1202,6 +1212,44 @@ ${sib.length ? `<h2>Горячее и холоднее</h2><div class="chips">${
     SPARK_PAGES.push({ k, canon, n: models.length });
   });
 }
+
+/* «Масляный фильтр HiFlo HF204RC: на какие мотоциклы подходит» — по таблице аналогов расходников CROSS */
+{
+  CONS_PAGES.forEach((x) => {
+    const [what, brand] = CONS_KIND[x.kind], title = what + " " + brand + " " + x.code, canon = SITE + "m/rashodnik/" + x.key + "/";
+    const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Расходники", "/m/rashodnik/"], [brand + " " + x.code, null]];
+    const byB = new Map(); x.rows.forEach((r) => { const L = byB.get(r.b) || []; L.push(r); byB.set(r.b, L); });
+    const models = [...byB.keys()].sort((a, c) => COLL.compare(a.brand + " " + a.name, c.brand + " " + c.name));
+    const engs = [...new Set(models.map((b) => b.versions[0].engine))].filter((id) => engSlug[id]);
+    const brands = [...new Set(models.map((b) => b.brand))];
+    const rowsHtml = models.map((b) => { const L = byB.get(b), yrs = [...new Set(L.map((r) => r.y).filter(Boolean))].join(", "), wh = [...new Set(L.map((r) => r.where).filter(Boolean))].sort((p, q) => (p === "перед" ? -1 : 1) - (q === "перед" ? -1 : 1)).join(" и ");
+      return `<tr><td><a href="/m/${bikeSlug.get(b)}/">${esc(b.brand + " " + b.name)}</a></td><td>${esc(yrs || "все годы")}</td>${x.kind === "pf" || x.kind === "pr" || x.kind === "pads" ? `<td>${esc(wh || "—")}</td>` : ""}</tr>`; }).join("");
+    const pads = x.kind === "pf" || x.kind === "pr" || x.kind === "pads";
+    const faq = [
+      ["На какие мотоциклы подходит " + brand + " " + x.code + "?", models.slice(0, 10).map((b) => b.brand + " " + b.name).join(", ") + (models.length > 10 ? " и ещё " + (models.length - 10) + " " + plural(models.length - 10, "модель", "модели", "моделей") : "") + ". Годы выпуска — в таблице: у некоторых моделей номер зависит от поколения."],
+      ["Как не ошибиться с " + what.toLowerCase() + "?", "Сверь номер по году выпуска и по старой детали: " + (x.kind === "oil" ? "диаметр, резьбу и высоту фильтра" : x.kind === "air" ? "форму и размер воздушного фильтра" : x.kind === "bat" ? "размеры, полярность и ёмкость аккумулятора" : "форму колодки и крепление в суппорте") + ". Оригинальный номер (OEM) — в мануале и каталоге производителя."]
+    ];
+    const body = `<section class="hero"><div class="kick">${esc(what)}</div><h1>${esc(title)}: на какие мотоциклы подходит</h1>
+<p class="lead">${models.length} ${plural(models.length, "модель", "модели", "моделей")} ${brands.length > 1 ? "от " + brands.length + " " + plural(brands.length, "марки", "марок", "марок") : brands[0]} в базе MotoHelper. Номера ${esc(brand)} — по каталогам производителя; перед покупкой сверь по году выпуска и по старой детали.</p></section>
+<h2>Мотоциклы</h2><div class="tblw"><table class="tbl"><tr><th>Модель</th><th>Годы</th>${pads ? "<th>Ось</th>" : ""}</tr>${rowsHtml}</table></div>
+${engs.length ? `<h2>Моторы</h2><div class="chips">${engs.slice(0, 20).map((id) => `<a class="chip" href="/m/motor/${engSlug[id]}/">${esc(ENGINES[id].code)}</a>`).join("")}</div>` : ""}
+<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>
+<div class="chips"><a class="chip" href="/m/rashodnik/">Все расходники по номерам →</a>${x.kind === "oil" ? `<a class="chip" href="/m/remont/oil/">Как поменять масло и фильтр →</a>` : x.kind === "air" ? `<a class="chip" href="/m/remont/airfilter/">Как обслужить воздушный фильтр →</a>` : pads ? `<a class="chip" href="/m/remont/pads/">Как поменять колодки →</a>` : ""}</div>`;
+    const desc = `${title}: на какие мотоциклы подходит — ${models.slice(0, 4).map((b) => b.brand + " " + b.name).join(", ")}${models.length > 4 ? " и ещё " + (models.length - 4) : ""}. Годы выпуска и моторы.`;
+    files.set("m/rashodnik/" + x.key + "/index.html", page({ title: pickTitle(title, [": на какие мотоциклы подходит | MotoHelper", ": на какие мотоциклы подходит", ": мотоциклы", ""]), desc, canon, crumbs, body,
+      ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: title, url: canon, inLanguage: "ru", description: desc },
+        { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] }));
+    x.canon = canon; x.n = models.length;
+  });
+  /* каталог расходников по номерам */
+  const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Расходники", null]];
+  const group = (kinds, h) => { const L = CONS_PAGES.filter((x) => kinds.indexOf(x.kind) >= 0).sort((a, b) => b.n - a.n);
+    return L.length ? `<h2>${h}</h2><div class="chips">${L.map((x) => `<a class="chip" href="/m/rashodnik/${x.key}/">${esc(CONS_KIND[x.kind][1] + " " + x.code)} · ${x.n}</a>`).join("")}</div>` : ""; };
+  const body = `<section class="hero"><div class="kick">Расходники</div><h1>Расходники по номерам: на какие мотоциклы подходят</h1><p class="lead">Масляные фильтры HiFlo, воздушные K&amp;N, колодки EBC и аккумуляторы Yuasa — какой номер на какие мотоциклы. Цифра — сколько моделей в базе.</p></section>
+${group(["oil"], "Масляные фильтры HiFlo")}${group(["air"], "Воздушные фильтры K&amp;N")}${group(["pf", "pr", "pads"], "Тормозные колодки EBC")}${group(["bat"], "Аккумуляторы Yuasa")}
+<div class="chips"><a class="chip" href="/m/svechi/">Свечи: таблица и аналоги →</a><a class="chip" href="/m/maslo/">Масло: таблица по моторам →</a></div>`;
+  if (CONS_PAGES.length) files.set("m/rashodnik/index.html", page({ title: "Расходники мотоцикла по номерам: фильтры HiFlo, K&N, колодки EBC | MotoHelper", desc: "Масляные фильтры HiFlo, воздушные K&N, колодки EBC и аккумуляторы Yuasa: какой номер на какие мотоциклы подходит, по годам выпуска.", canon: SITE + "m/rashodnik/", crumbs, body, ld: [crumbLd(crumbs)] }));
+}
 const HUBS = [];
 {
   const okv = (x) => x && x !== "—" && !/мануал/i.test(x);
@@ -1255,7 +1303,7 @@ const HUBS = [];
     const other = defs.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/${x.slug}/">${esc(x.h1)}</a>`).join("");
     const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], [d.kick, null]];
     const body = `<section class="hero"><div class="kick">${d.kick}</div><h1>${d.h1}</h1><p class="lead">${d.lead}</p>
-<div class="chips"><a class="chip" href="/m/motor/">Все моторы →</a>${other}</div></section>
+<div class="chips"><a class="chip" href="/m/motor/">Все моторы →</a>${other}${CONS_PAGES.length ? `<a class="chip" href="/m/rashodnik/">Фильтры, колодки, АКБ по номерам</a>` : ""}</div></section>
 <p class="note">Не нашёл свой мотор — открой <a href="/m/motor/">список моторов</a> или найди модель в <a href="/m/">каталоге</a>. Данные справочные: перед работой сверься с мануалом своего мотоцикла.</p>
 ${d.slug === "svechi" && SPARK_PAGES.length ? `<h2>Аналоги свечей NGK, Denso, Torch</h2><div class="chips">${SPARK_PAGES.slice().sort((a, b) => b.n - a.n).map((x) => `<a class="chip" href="/m/svecha/${sparkSlug(x.k)}/">NGK ${esc(x.k)}</a>`).join("")}</div>` : ""}
 ${sections}
@@ -1513,7 +1561,7 @@ ${bikes.length ? `<h2>Модели</h2><div class="chips">${bikes.map((b) => `<a
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),
-  [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), MODEL_TUNE_PAGES.map((t) => t.canon), [SITE + "m/provodka/"], WIRE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages, SPARK_PAGES.map((x) => x.canon));
+  [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), MODEL_TUNE_PAGES.map((t) => t.canon), [SITE + "m/provodka/"], WIRE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages, SPARK_PAGES.map((x) => x.canon), CONS_PAGES.length ? [SITE + "m/rashodnik/"].concat(CONS_PAGES.map((x) => x.canon)) : []);
 {
   const vh = {};
   for (const [f, c] of files) if (/@@V:/.test(c)) files.set(f, c.replace(/@@V:([\w./-]+)@@/g, (m, a) => vh[a] || (vh[a] = require("crypto").createHash("sha1").update(files.get(a) || "").digest("hex").slice(0, 10))));
