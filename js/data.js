@@ -10921,3 +10921,15 @@ Object.keys(ENGINES).forEach(function (id) {
     return old(e);
   };
 })();
+
+/* моторы-копии (CL), которым достался крутящий момент базового мотора другого объёма (KX250F — 50 Н·м от KX450),
+   и жиклёры чужого карбюратора: верных цифр в источниках не нашли — честно «по мануалу», а не неверное число */
+["KX250FC", "RMZ250C", "DRZ250", "CRF70", "XR100", "NX400", "XT500", "JP2T65", "KLX300E", "KTM50", "KTM125", "KTM250SX", "S250KT", "S250BJ", "KTM200", "KTM150",
+  "BETA125", "BETA250", "TR200", "XR80", "KX112", "LC8_990", "T250Y", "S160BJ", "BETA200", "SUZ_TS200R", "SUZ_TS125", "SHERCO_125", "TM_125"].forEach(function (id) {
+  var e = ENGINES[id]; if (e && !(e.ex && e.ex.torque)) e.torque = "по мануалу";
+});
+["XR650R", "XR600R", "DRZ250", "XT600", "XT350", "XT500", "KTM125", "CRF70", "XR200R"].forEach(function (id) {
+  var e = ENGINES[id]; if (!e || (e.ex && e.ex.jetMain)) return;
+  e.jetMain = "по мануалу"; e.jetPilot = "по мануалу"; if (e.needle && /\d/.test(e.needle)) e.needle = "по мануалу";
+});
+if (ENGINES.KLX300E && /инжектор/i.test(ENGINES.KLX300E.carb || "")) { ENGINES.KLX300E.jetMain = "—"; ENGINES.KLX300E.jetPilot = "—"; ENGINES.KLX300E.needle = "—"; }
