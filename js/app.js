@@ -207,6 +207,7 @@ function buildSpec(bike, ver, cu) {
   startTags(s);
   /* кроссовую технику и питбайки обслуживают по моточасам, а не по километрам */
   const cls = bike ? bikeClass(bike, base) : "";
+  s.cls = cls;
   if (!s.hours && (cls === "cross" || cls === "pit" || cls === "kids")) {
     s.hours = true;
     s.hoursAuto = true;
@@ -222,7 +223,10 @@ function buildSpec(bike, ver, cu) {
     return t && tuningFor(t, base).ok;
   });
   const inst = TUNING.filter(t => installed.indexOf(t.id) >= 0);
-  const gain = Math.round(inst.reduce((a, t) => a + t.power, 0) * (inst.filter(t => t.power > 0).length > 1 ? 0.8 : 1));
+  /* прибавка — той же формулой, что в тюнинге (tuneGain): иначе шапка, «Обзор» и тюнинг показывали разные л.с. */
+  const gain = inst.length ? tuneGain(inst, Object.assign({}, base, {
+    stockHp: stock.hp
+  })) : 0;
   s.stockHp = stock.hp;
   s.hp = cu.hp ? Number(cu.hp) : Math.round(stock.hp * (1 + gain / 100) * 10) / 10;
   s.gain = gain;
@@ -308,6 +312,19 @@ function Vf() {
 const isEx = (eng, k) => !!(eng && eng.ex && eng.ex[k]);
 /* смесь для двухтактника: только где масло льют в бензин (premix), а не в бачок */
 const isPremix = eng => eng.stroke === "2T" && /premix/i.test(eng.oil || "");
+/* справочник «Неисправности» под мотор: без антифриза у воздушного, карбюратора у инжектора, клапанов у 2Т,
+   сцепления и КПП у вариатора, цепи у ремня и кардана */
+const faultsFor = eng => !eng ? FAULTS : FAULTS.map(f => {
+  const g = x => eng.groups.indexOf(x) >= 0,
+    efiOnly = g("efi") && !g("carb"),
+    t2 = eng.stroke === "2T";
+  if (f.area === "cooling" && /антифриз/i.test(f.s) && !g("liquid")) return null;
+  if ((f.area === "clutch" || f.area === "gearbox") && eng.cvt) return null;
+  const c = f.c.filter(x => !(/^EFI:/.test(x) && !g("efi")) && !(/^2T:/.test(x) && !t2) && !(efiOnly && /жикл|игла|поплав|подсос|карбюр|ускорительн|винт качества|игольчат/i.test(x)) && !(t2 && /клапан|колпачк|ГРМ|распредв|коромысл/i.test(x)) && !(!g("liquid") && /помп|термостат|антифриз/i.test(x)) && !(/Цепь и звёзды/.test(x) && !hasChain(eng)));
+  return c.length ? Object.assign({}, f, {
+    c
+  }) : null;
+}).filter(Boolean);
 function Field({
   label,
   k,
@@ -710,7 +727,8 @@ function Maint({
   st.forEach(it => {
     const kit = TO_KITS[it.id];
     if (!kit) return;
-    kit.kinds.forEach(k => {
+    /* дорожным и скутерам — сменный воздушный фильтр, а не пропитка для поролона */
+    (it.id === "air" && (/^(sport|naked|cruiser|tour|moped)$/.test(eng.cls || "") || eng.cvt) ? ["airfilter"] : kit.kinds).forEach(k => {
       const p = partByKind(k, eng);
       if (p && buy.indexOf(p) < 0) buy.push(p);
     });
@@ -11847,7 +11865,9 @@ function ChassisPanel({
 
 /* --- сравнение двух мотоциклов --- */
 function toCost(e) {
-  const liters = Math.max(1, Math.ceil(Math.max.apply(null, (String(e.oilVol).match(/\d+(\.\d+)?/g) || ["1"]).map(Number))));
+  /* литры — первое число с единицей «л» («около 1.2 л… (руководство Kayo 2022)» → 1.2, а не 2022) */
+  const m = /(\d+(?:[.,]\d+)?)\s*(?:[–-]\s*\d+(?:[.,]\d+)?\s*)?л(?![а-яё])/i.exec(String(e.oilVol || "")),
+    liters = Math.max(1, Math.ceil(m ? parseFloat(m[1].replace(",", ".")) : 1));
   let s = 0;
   [["oil", liters], ["oilfilter", 1], ["spark", 1], ["airfilter", 1]].forEach(x => {
     const p = partByKind(x[0], e);
@@ -12529,6 +12549,20 @@ function App() {
     window.addEventListener("hashchange", h);
     return () => window.removeEventListener("hashchange", h);
   }, []);
+  /* вход по ссылке «#bike=…&g=…»: после смены модели или версии адрес обновляем, а разовые g/d/r/ai убираем —
+     иначе при перезагрузке вкладки (телефон делает это сам) вернулась бы старая модель и затёрла сохранённый выбор */
+  useEffect(() => {
+    try {
+      const raw = String(location.hash || "").replace(/^#/, "");
+      if (!raw) return;
+      const h = new URLSearchParams(raw);
+      if (!h.get("bike") && !["g", "d", "r", "ai"].some(k => h.has(k))) return;
+      const q = new URLSearchParams();
+      q.set("bike", sel.key);
+      if (sel.vi) q.set("v", String(sel.vi));
+      if (q.toString() !== raw) history.replaceState(history.state, "", location.pathname + location.search + "#" + q.toString());
+    } catch (e) {}
+  }, [sel.key, sel.vi]);
   const [bmenu, setBmenuRaw] = useState(false);
   function setBmenu(v) {
     if (v) {
@@ -14242,7 +14276,7 @@ function Passport({
   const sh = x => String(x == null ? "" : x).replace(/\s*\([^)]*\)/g, "").trim();
   const rng = x => (String(x || "").match(/\d+(?:[.,]\d+)?(?:\s*[–-]\s*\d+(?:[.,]\d+)?)?/) || [""])[0].replace(/\s+/g, "");
   const vNum = ok(eng.valveIn) && rng(eng.valveIn) && rng(eng.valveEx);
-  const rows = [["Масло", sh(eng.oil), ok(eng.oilVol) ? sh(eng.oilVol) : "", ok(eng.oilVol) ? eng.dis && eng.dis.oilVol ? "dis" : src("oilVol") : null], ["Свеча", sh(eng.spark), ok(eng.gap) ? "зазор " + sh(eng.gap) : "", ok(eng.spark) ? eng.dis && eng.dis.spark ? "dis" : src("spark") : null], eng.stroke === "2T" ? ["Смесь", eng.mix || "бензин + масло 2T", "", null] : ["Клапаны", vNum ? rng(eng.valveIn) + " / " + rng(eng.valveEx) : ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", vNum ? eng.dis && eng.dis.note ? eng.dis.note + " — мм, на холодном" : "впуск / выпуск, мм, на холодном" : "впуск / выпуск, мм", vNum ? eng.dis && (eng.dis.valveIn || eng.dis.valveEx) ? "dis" : src("valveIn", "valveEx") : null], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : "", null]];
+  const rows = [["Масло", sh(eng.oil), ok(eng.oilVol) ? sh(eng.oilVol) : "", ok(eng.oilVol) ? eng.dis && eng.dis.oilVol ? "dis" : src("oilVol") : null], ["Свеча", sh(eng.spark), ok(eng.gap) ? "зазор " + sh(eng.gap) : "", ok(eng.spark) ? eng.dis && eng.dis.spark ? "dis" : src("spark") : null], eng.stroke === "2T" ? ["Смесь", eng.mix || (isPremix(eng) ? "бензин + масло 2T" : "не нужна — масло 2T в бачок"), isPremix(eng) ? "" : "масло подаёт насос", null] : ["Клапаны", vNum ? rng(eng.valveIn) + " / " + rng(eng.valveEx) : ok(eng.valveIn) ? eng.valveIn + " / " + eng.valveEx : "по мануалу", vNum ? eng.dis && eng.dis.note ? eng.dis.note + " — мм, на холодном" : "впуск / выпуск, мм, на холодном" : "впуск / выпуск, мм", vNum ? eng.dis && (eng.dis.valveIn || eng.dis.valveEx) ? "dis" : src("valveIn", "valveEx") : null], ["Топливо", eng.fuel, eng.oilInt ? "масло каждые " + eng.oilInt + (eng.hours ? " моточ." : " км") : "", null]];
   return /*#__PURE__*/React.createElement("div", {
     className: "panel passport" + (ph && phOk >= 0 ? " has-ph" : ""),
     "aria-label": "Паспорт мотора"
@@ -14372,7 +14406,7 @@ function PreRide({
       done: {}
     };
   });
-  const items = PRERIDE.filter(p => symOk(p, eng)).map(p => p[0] === "fuel" ? [p[0], eng.stroke === "2T" ? eng.groups.indexOf("efi") >= 0 || eng.cvt ? "Бензин и масло 2T в бачке" : "Бензин (смесь с маслом 2T!)" : "Бензин"].concat(p.slice(2)) : eng.cvt && p[0] === "chain" ? null : p).filter(Boolean);
+  const items = PRERIDE.filter(p => symOk(p, eng) && !(p[0] === "spokes" && /^(sport|naked|cruiser|tour|moped)$/.test(eng.cls || ""))).map(p => p[0] === "fuel" ? [p[0], eng.stroke === "2T" ? eng.groups.indexOf("efi") >= 0 || eng.cvt ? "Бензин и масло 2T в бачке" : "Бензин (смесь с маслом 2T!)" : "Бензин"].concat(p.slice(2)) : eng.cvt && p[0] === "chain" ? null : p).filter(Boolean);
   const n = items.filter(i => st.done[i[0]]).length;
   const pct = n / items.length;
   const [open, setOpen] = useState(() => load("prerideOpen", false));
@@ -14469,6 +14503,11 @@ function BikePage(props) {
   } = props;
   const [cmp, setCmp] = useState(null);
   const [cmpPick, setCmpPick] = useState(false);
+  /* сменили модель или версию — прежнее сравнение уже не про неё (иначе PCX сравнивается сам с собой) */
+  useEffect(() => {
+    setCmp(null);
+    setCmpPick(false);
+  }, [sel.key, sel.vi]);
   return /*#__PURE__*/React.createElement("section", {
     className: "page"
   }, /*#__PURE__*/React.createElement(PageHero, {
@@ -14678,7 +14717,7 @@ function siteSearch(q, ctx, opt) {
     save("diag-preset", Object.keys(c.w).sort((a, b) => c.w[b] - c.w[a]).slice(0, 2));
     go("repair", "find");
   }, "", 2, "c" + c.id));
-  FAULTS.forEach((f, i) => add("Неисправность", f.s, () => go("repair", "ref"), "", 1, "f" + i));
+  faultsFor(eng).forEach((f, i) => add("Неисправность", f.s, () => go("repair", "ref"), "", 1, "f" + i));
   if (!repairOnly) {
     /* тюнинг ищется и по словам узла и цели («бигбор», «выхлоп», «резвее»), и по названию мотора («nb300 тюнинг») */
     TUNING.filter(t => tuningFor(t, eng, window.mhBike).ok).forEach(t => add("Тюнинг", t.title, () => go("tuning"), [t.cat, TUNE_SR_KW[tuneNode(t)] || "", t.q || "", t.eff || "", t.power > 0 ? "мощнее мощность резвее" : "", TUNE_SR_FAST.test(t.id) ? "быстрее скорость максималка" : "", TUNE_SR_QUICK.test(t.id) ? "резвее разгон отклик" : "", /^bore/.test(t.id) ? "бигбор расточка цпг поршневая цилиндр объем кубов кубы" : "", /^swap/.test(t.id) ? "свап замена мотора" : "", "тюнинг доработка", aka].join(" "), 1, "t" + t.id));
@@ -15063,6 +15102,8 @@ function seasonNow(d) {
 function seasonItems(eng, which) {
   return SEASON[which].items.filter(it => {
     const c = it[2];
+    /* цепь — только у цепного привода (не ремень, не кардан, не вариатор) */
+    if (it[0] === "chain") return hasChain(eng);
     if (!c) return true;
     if (c[0] === "!") return eng.groups.indexOf(c.slice(1)) < 0 && !(c === "!cvt" && eng.cvt);
     if (c === "cvt") return !!eng.cvt || eng.groups.indexOf("cvt") >= 0;
@@ -15575,7 +15616,7 @@ function GuidesList({
     className: "g-meta"
   }, /*#__PURE__*/React.createElement("span", {
     className: "diff d-" + g.diff
-  }, g.diff), /*#__PURE__*/React.createElement("span", null, g.time), /*#__PURE__*/React.createElement("span", null, g.steps.length, " \u0448\u0430\u0433\u043E\u0432"), g.fig && /*#__PURE__*/React.createElement("span", {
+  }, g.diff), /*#__PURE__*/React.createElement("span", null, g.time), /*#__PURE__*/React.createElement("span", null, g.steps.length, " ", plural(g.steps.length, "шаг", "шага", "шагов")), g.fig && /*#__PURE__*/React.createElement("span", {
     className: "g-fig"
   }, "\u0441\u0445\u0435\u043C\u0430"))))));
 }
@@ -15954,7 +15995,7 @@ function RefView({
   const [sec, setSec] = useState("faults");
   const [q, setQ] = useState("");
   const qq = q.trim().toLowerCase();
-  const faults = FAULTS.filter(f => !qq || (f.s + " " + f.c.join(" ")).toLowerCase().indexOf(qq) >= 0);
+  const faults = faultsFor(eng).filter(f => !qq || (f.s + " " + f.c.join(" ")).toLowerCase().indexOf(qq) >= 0);
   const codes = OBD.filter(c => !qq || c.join(" ").toLowerCase().indexOf(qq) >= 0);
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "seg wrap",
@@ -16169,7 +16210,7 @@ function buyChecks(eng, bike) {
     cvt = !!eng.cvt;
   const S = [["Документы и номера", ["Номер рамы (VIN) и мотора совпадают с документами (ПТС/ЭПТС или договор с ГТД). Номер не перебит, площадка без следов шлифовки.", eng.jp ? "Год выпуска по VIN совпадает с заявленным." : "На картере выбит код мотора — сверь с " + eng.code + ": под видом одного мотора иногда продают другой.", "Продавец — владелец по документам, мотоцикл не в залоге и не в розыске (проверка на сайте ГИБДД и в реестре залогов)."]], ["Холодный пуск", ["Договорись, чтобы мотор был холодным — тёплый скрывает проблемы с пуском.", el ? "Стартер крутит бодро, без треска обгонной муфты." : "Заводится с 1–3 ударов кика.", efi ? "При включении зажигания насос жужжит 2–3 с, «чек» гаснет после пуска." : "Без подсоса держит холостые после прогрева, на подсосе не захлёбывается.", two ? "Дым сизый и умеренный — норма для 2T; густой белый после прогрева — плохо." : "Нет сизого дыма на перегазовке (масло горит — кольца/колпачки) и белого густого (антифриз)."]], ["Мотор " + eng.code, [two ? "Компрессия в норме (" + (eng.compression || "смотри характеристики") + "), без потерь при повторном замере." : "Компрессия: норма " + (eng.compression || "смотри характеристики") + "; разница между цилиндрами не больше 10%.", two ? "Нет звона поршня на перегазовке, сцепление не ведёт." : "Нет стука на холостых и шуршания цепи ГРМ на перегазовке.", "Нет течей масла: крышки, сальник у передней звезды, прокладка цилиндра.", "Масло на щупе не чёрное и без эмульсии (белая пена — вода или антифриз)."]]];
   if (eng.issues && eng.issues.length) S.push(["Слабые места этой модели — проверь особенно", eng.issues.map(i => i.t + " — " + (i.fix || ""))]);
-  S.push(["Ходовая", [cvt ? "Вариатор: плавный старт без рывков и вибрации, нет свиста ремня." : "Цепь и звёзды: зубья не «акульи», цепь не оттягивается от задней звезды больше чем на ползвена.", "Вилка: нет масла на перьях, при нажатии на тормоз и раскачке нет стука.", "Рулевая колонка: колесо в воздухе, руль ходит свободно без «щелчка» в центре; на тормозе нет люфта.", "Колёса: нет люфта подшипников, спицы целые и одинаково звенят, обода без вмятин.", "Тормоза: диски без глубоких борозд, колодки не стёрты в металл, рычаг не проваливается."]], ["Рама и пластик", ["Нет сварки и трещин на раме и маятнике (особенно у рулевой колонки и креплений подрамника).", "Следы падений: погнутые рычаги, подножки, задиры на крышках двигателя, новый пластик на старом мотоцикле.", "Руль стоит ровно относительно колеса — иначе может быть повёрнута вилка или рама."]], ["Электрика", ["Работают фара, стоп, поворотники, сигнал.", el ? "Зарядка на 3000–5000 об/мин: 13.5–14.8 В на аккумуляторе." : "Свет не гаснет и не перегорает на оборотах.", "Нет «колхоза» в проводке: скрутки, изолента, лишние провода к CDI/ЭБУ."]], ["Тест-драйв", [cvt ? "Разгон ровный, максималка соответствует объёму, на горке не теряет тягу." : "Передачи включаются чётко, не выбивает под газом, нейтраль находится.", cvt ? "Тормоза держат, скутер не уводит в сторону." : "Сцепление не буксует на резком газе на 3–4 передаче и не ведёт при выжатом рычаге.", "Мотоцикл едет прямо, не виляет на отпущенном руле, тормоза не уводят в сторону.", "После поездки — проверь, не появились ли течи и нет ли запаха горелого."]]);
+  S.push(["Ходовая", [cvt ? "Вариатор: плавный старт без рывков и вибрации, нет свиста ремня." : /кардан/i.test(eng.gearbox || "") ? "Кардан: нет люфта и течи масла у главной пары, на ходу без гула и щелчков." : /ремень/i.test(eng.gearbox || "") ? "Ремень привода: без трещин, надрывов и выкрошенных зубьев, натяжение по метке." : "Цепь и звёзды: зубья не «акульи», цепь не оттягивается от задней звезды больше чем на ползвена.", "Вилка: нет масла на перьях, при нажатии на тормоз и раскачке нет стука.", "Рулевая колонка: колесо в воздухе, руль ходит свободно без «щелчка» в центре; на тормозе нет люфта.", "Колёса: нет люфта подшипников, спицы целые и одинаково звенят, обода без вмятин.", "Тормоза: диски без глубоких борозд, колодки не стёрты в металл, рычаг не проваливается."]], ["Рама и пластик", ["Нет сварки и трещин на раме и маятнике (особенно у рулевой колонки и креплений подрамника).", "Следы падений: погнутые рычаги, подножки, задиры на крышках двигателя, новый пластик на старом мотоцикле.", "Руль стоит ровно относительно колеса — иначе может быть повёрнута вилка или рама."]], ["Электрика", ["Работают фара, стоп, поворотники, сигнал.", el ? "Зарядка на 3000–5000 об/мин: 13.5–14.8 В на аккумуляторе." : "Свет не гаснет и не перегорает на оборотах.", "Нет «колхоза» в проводке: скрутки, изолента, лишние провода к CDI/ЭБУ."]], ["Тест-драйв", [cvt ? "Разгон ровный, максималка соответствует объёму, на горке не теряет тягу." : "Передачи включаются чётко, не выбивает под газом, нейтраль находится.", cvt ? "Тормоза держат, скутер не уводит в сторону." : "Сцепление не буксует на резком газе на 3–4 передаче и не ведёт при выжатом рычаге.", "Мотоцикл едет прямо, не виляет на отпущенном руле, тормоза не уводят в сторону.", "После поездки — проверь, не появились ли течи и нет ли запаха горелого."]]);
   return S;
 }
 function BuyCheckView({
@@ -16265,7 +16306,7 @@ function SpecsView({
     className: "muted small"
   }, tr.exact ? "Размер по диаметрам колёс из названия модели." : "Типичный размер для такого мотоцикла — точный написан на боковине твоей шины."), /*#__PURE__*/React.createElement("h3", null, "Давление (перед / зад)"), tbl(tr.pressure), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, "Меряй на холодную шину. Ниже 0.8 бар без мусса или рим-лока колесо может провернуться на ободе.")), /*#__PURE__*/React.createElement("div", {
+  }, "Меряй на холодную шину." + (/^(enduro|cross|pit|kids|motard)$/.test(bikeClass(bike, eng)) ? " Ниже 0.8 бар без мусса или рим-лока колесо может провернуться на ободе." : bikeClass(bike, eng) === "trial" ? " На триале 0.3–0.5 бар — норма: обод бескамерный." : ""))), /*#__PURE__*/React.createElement("div", {
     className: "adj-block"
   }, /*#__PURE__*/React.createElement("h3", null, "Моменты затяжки ", eng.code), tbl(tq), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
@@ -16277,7 +16318,7 @@ function SpecsView({
     className: "adj-block"
   }, /*#__PURE__*/React.createElement("h3", null, "Цвет свечи"), tbl(REF.plug)), /*#__PURE__*/React.createElement("div", {
     className: "adj-block"
-  }, /*#__PURE__*/React.createElement("h3", null, "Жидкости"), tbl(REF.fluids)));
+  }, /*#__PURE__*/React.createElement("h3", null, "Жидкости"), tbl(REF.fluids.filter(r => r[0] === "Антифриз" ? eng.groups.indexOf("liquid") >= 0 : r[0] === "Масло 2T" ? isPremix(eng) : r[0] === "Смазка цепи" ? hasChain(eng) : true))));
 }
 
 /* ===== Тюнинг v4: конструктор, график, звёзды ===== */
@@ -16688,9 +16729,9 @@ function TopSpeed({
     className: "vmax-n"
   }, /*#__PURE__*/React.createElement("b", null, sp.v), /*#__PURE__*/React.createElement("span", null, "\u043A\u043C/\u0447")), /*#__PURE__*/React.createElement("div", {
     className: "vmax-t"
-  }, /*#__PURE__*/React.createElement("h3", null, "\u041C\u0430\u043A\u0441\u0438\u043C\u0430\u043B\u044C\u043D\u0430\u044F \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C (\u043E\u0446\u0435\u043D\u043A\u0430)"), /*#__PURE__*/React.createElement("p", null, sp.limit === "power" ? "Упирается в мощность мотора: звезда на скорость почти ничего не добавит" + (up.v > sp.v ? " (≈ +" + (up.v - sp.v) + " км/ч)" : "") + ", прибавку даст тюнинг мотора." : "Упирается в предельные обороты " + num(sp.red) + " об/мин: передняя звезда +1 зуб даст ≈ +" + (up.v - sp.v) + " км/ч."), /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("h3", null, "\u041C\u0430\u043A\u0441\u0438\u043C\u0430\u043B\u044C\u043D\u0430\u044F \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C (\u043E\u0446\u0435\u043D\u043A\u0430)"), /*#__PURE__*/React.createElement("p", null, !hasChain(eng) ? (eng.cvt ? "Упирается в мощность и настройку вариатора: прибавку дадут ролики, пружина и тюнинг мотора." : "Передаточное число заводское (ремень или кардан): прибавку даст только мощность мотора.") : sp.limit === "power" ? "Упирается в мощность мотора: звезда на скорость почти ничего не добавит" + (up.v > sp.v ? " (≈ +" + (up.v - sp.v) + " км/ч)" : "") + ", прибавку даст тюнинг мотора." : "Упирается в предельные обороты " + num(sp.red) + " об/мин: передняя звезда +1 зуб даст ≈ +" + (up.v - sp.v) + " км/ч."), /*#__PURE__*/React.createElement("p", {
     className: "muted small"
-  }, "\u0417\u0432\u0451\u0437\u0434\u044B ", sp.front, "/", sp.rear, ", \u0437\u0430\u0434\u043D\u0435\u0435 \u043A\u043E\u043B\u0435\u0441\u043E ", sp.rim, "\u2033, ", sp.hp, " \u043B.\u0441. \u041F\u043E\u0433\u0440\u0435\u0448\u043D\u043E\u0441\u0442\u044C \xB110\u201315%. ", !cu.sprF && "Звёзды типовые для класса — ", !cu.sprF && /*#__PURE__*/React.createElement("button", {
+  }, hasChain(eng) ? "Звёзды " + sp.front + "/" + sp.rear + ", заднее колесо " + sp.rim + "″, " : "", sp.hp, " \u043B.\u0441. \u041F\u043E\u0433\u0440\u0435\u0448\u043D\u043E\u0441\u0442\u044C \xB110\u201315%. ", hasChain(eng) && !cu.sprF && "Звёзды типовые для класса — ", hasChain(eng) && !cu.sprF && /*#__PURE__*/React.createElement("button", {
     className: "link inline",
     onClick: onEdit
   }, "\u0443\u043A\u0430\u0436\u0438 \u0441\u0432\u043E\u0438"))));
@@ -17076,7 +17117,7 @@ function TuneNodes({
     const id = nd[0],
       list = by[id],
       isOpen = open === id;
-    const title = id === "fuel" && efi ? "Впрыск и прошивка" : nd[1];
+    const title = id === "fuel" && efi ? "Впрыск и прошивка" : id === "drive" && !hasChain(eng) ? eng.cvt ? "Вариатор" : "Сцепление и привод" : nd[1];
     return h("div", {
       key: id,
       className: "tn" + (isOpen ? " open" : ""),
