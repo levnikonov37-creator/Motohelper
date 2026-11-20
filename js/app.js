@@ -12510,6 +12510,25 @@ function App() {
       flash("Добавлено в гараж");
     }
   }
+  /* «…/#bike=…&add=1» — кнопка «Сохранить в гараж» со страниц каталога: модель сразу в гараже, «add=1» из адреса убираем */
+  useEffect(() => {
+    const h = () => {
+      if (!/(^|[#&])add=1(&|$)/.test(String(location.hash || ""))) return;
+      const s = bikeFromHash();
+      if (!s) return;
+      setGarage(gs => gs.some(g => g.key === s.key && g.vi === s.vi) ? gs : gs.concat([{
+        key: s.key,
+        vi: s.vi
+      }]).slice(-12));
+      flash("Добавлено в гараж — журнал ТО и напоминания теперь здесь");
+      try {
+        history.replaceState(null, "", location.href.replace(/&add=1(?=&|$)|([#])add=1&?/, "$1"));
+      } catch (e) {}
+    };
+    h();
+    window.addEventListener("hashchange", h);
+    return () => window.removeEventListener("hashchange", h);
+  }, []);
   const [bmenu, setBmenuRaw] = useState(false);
   function setBmenu(v) {
     if (v) {
@@ -18446,8 +18465,10 @@ function bikeLink(bike, vi) {
   if (vi) q.set("v", String(vi));
   return location.href.split("#")[0] + "#" + q.toString();
 }
+/* делимся страницей модели в каталоге (/m/<модель>/): у неё своё превью в Telegram и ВКонтакте, и ссылка работает на поиск;
+   оттуда одна кнопка — в приложение с этой моделью */
 function shareBike(bike, vi, flash) {
-  const url = bikeLink(bike, vi),
+  const url = bike.brand === "Любая модель" ? bikeLink(bike, vi) : location.origin + "/m/" + catSlug(bike.brand + " " + bike.name) + "/",
     title = bike.brand + " " + bike.name + " — MotoHelper";
   if (navigator.share) {
     navigator.share({
