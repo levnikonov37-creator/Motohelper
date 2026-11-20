@@ -17,7 +17,7 @@ const ctx = {};
 vm.createContext(ctx);
 // каталог (js/data.js) и база знаний (js/kb.js) — в том же порядке, что на сайте
 vm.runInContext(fs.readFileSync(path.join(ROOT, "js/data.js"), "utf8"), ctx, { filename: "js/data.js" });
-vm.runInContext(fs.readFileSync(path.join(ROOT, "js/kb.js"), "utf8") + "\n;this.__E = ENGINES; this.__B = BIKES; this.__G = GUIDES; this.__D = DIAG; this.__NC = NO_CVT_GUIDES; this.__W = WIRING; this.__WC = WIRE; this.__AKA = ENGINE_AKA; this.__P = BIKE_PHOTOS; this.__PS = bikePhotoSlug;", ctx);
+vm.runInContext(fs.readFileSync(path.join(ROOT, "js/kb.js"), "utf8") + "\n;this.__E = ENGINES; this.__B = BIKES; this.__G = GUIDES; this.__D = DIAG; this.__NC = NO_CVT_GUIDES; this.__W = WIRING; this.__C = CAUSES; this.__WC = WIRE; this.__AKA = ENGINE_AKA; this.__P = BIKE_PHOTOS; this.__PS = bikePhotoSlug;", ctx);
 const ENGINES = ctx.__E, BIKES = ctx.__B.filter((b) => b.brand !== "Любая модель");
 const GUIDES = ctx.__G, DIAG = ctx.__D, NO_CVT = ctx.__NC, AKA = ctx.__AKA || {};
 // свои фото моделей (img/bikes): путь к снимку или ""
@@ -196,11 +196,21 @@ function show(){var q=norm(i.value);if(!q){o.className="grid models res";o.inner
 var w=q.split(" ").map(alts),r=idx.filter(function(x){return w.every(function(a){return a.some(function(t){return x.s.indexOf(t)>=0})})});
 r=r.map(function(x,n){return[x,w.reduce(function(s,a){return s+sc(x,a)},0),n]}).sort(function(a,b){return b[1]-a[1]||a[2]-b[2]}).slice(0,40).map(function(y){return y[0]});
 o.className="grid models res on";o.innerHTML=r.length?r.map(function(x){return '<a class="card" href="/m/'+x.u+'/"><b>'+x.b+' '+x.n+'</b><small>'+x.t+' · '+x.e+'</small></a>'}).join(""):'<p class="note">Ничего не нашлось — попробуй марку или код мотора («174», «PR300»).</p>'}
-i.addEventListener("input",show);if(i.value)show()})();`;
+i.addEventListener("input",show);try{var pq=new URLSearchParams(location.search).get("q");if(pq&&!i.value)i.value=pq}catch(x){}if(i.value)show()})();`;
 /* фильтр по типу на странице марки */
 const FILTER_JS = `(function(){var b=document.querySelectorAll("[data-t]");document.querySelectorAll("button[data-f]").forEach(function(c){c.addEventListener("click",function(){var f=c.getAttribute("data-f");
 document.querySelectorAll("button[data-f]").forEach(function(x){x.classList.toggle("on",x===c)});b.forEach(function(x){x.classList.toggle("hide",f!=="*"&&x.getAttribute("data-t")!==f)})})})})();`;
 
+/* «Поделиться» (Telegram, ВКонтакте, WhatsApp, системное меню телефона, копия ссылки), подписка на канал и «Установить на телефон» —
+   на всех страницах каталога: люди сами приводят друзей и возвращаются. Скрипт — m/share.js */
+const shareBar = (canon, title) => { const u = encodeURIComponent(canon), t = encodeURIComponent(title.replace(/ \| MotoHelper$/, ""));
+  return `<div class="share" data-u="${canon}" data-t="${esc(title.replace(/ \| MotoHelper$/, ""))}"><b>Поделиться страницей</b><div class="chips"><button type="button" class="chip share-sys" hidden>Отправить…</button><a class="chip" data-via="tg" href="https://t.me/share/url?url=${u}&amp;text=${t}" target="_blank" rel="nofollow noopener">Telegram</a><a class="chip" data-via="vk" href="https://vk.com/share.php?url=${u}&amp;title=${t}" target="_blank" rel="nofollow noopener">ВКонтакте</a><a class="chip" data-via="wa" href="https://wa.me/?text=${t}%20${u}" target="_blank" rel="nofollow noopener">WhatsApp</a><button type="button" class="chip share-copy">Скопировать ссылку</button></div><span class="share-msg small" aria-live="polite"></span></div>`; };
+const SUB = `<aside class="sub"><b>Советы по ремонту и ТО каждый день в 18:00</b><p class="small">Мотор дня, частые поломки и как их чинить — в канале MotoHelper.</p><div class="chips"><a class="chip" href="https://t.me/motohelperru">Канал в Telegram</a><a class="chip" href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a><button type="button" class="chip inst" hidden>Установить MotoHelper на телефон</button></div></aside>`;
+const SHARE_JS = `(function(){var g=function(v){if(window.ym)try{ym(113844391,"reachGoal","share",{via:v})}catch(x){}};var bar=document.querySelector(".share");
+if(bar){var u=bar.getAttribute("data-u"),t=bar.getAttribute("data-t"),msg=bar.querySelector(".share-msg");bar.querySelectorAll("a[data-via]").forEach(function(a){a.addEventListener("click",function(){g(a.getAttribute("data-via"))})});
+var sy=bar.querySelector(".share-sys");if(sy&&navigator.share){sy.hidden=false;sy.addEventListener("click",function(){navigator.share({title:t,url:u}).then(function(){g("system")}).catch(function(){})})}
+var cp=bar.querySelector(".share-copy");if(cp)cp.addEventListener("click",function(){var ok=function(){msg.textContent="Ссылка скопирована — отправь другу";g("copy")},no=function(){window.prompt("Скопируй ссылку:",u)};if(navigator.clipboard)navigator.clipboard.writeText(u).then(ok,no);else no()})}
+var ib=document.querySelector(".inst"),dp=null;if(ib){addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;ib.hidden=false});ib.addEventListener("click",function(){if(!dp)return;dp.prompt();dp.userChoice.then(function(c){if(c&&c.outcome==="accepted")g("install");dp=null;ib.hidden=true})})}})();`;
 /* реклама РСЯ на страницах каталога — только если в ai-config.json задан rsya.blockId */
 const SITE_CFG = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, "ai-config.json"), "utf8")); } catch (e) { return {}; } })();
 const RSYA_ID = SITE_CFG.rsya && /^R-A-[\d-]+$/.test(SITE_CFG.rsya.blockId || "") ? SITE_CFG.rsya.blockId : "";
@@ -251,7 +261,7 @@ function pump(){return rd.read().then(function(c){if(c.done){if(!txt)throw new E
 const nbv = (t) => String(t).replace(/(\d)\s*([–-])\s*(\d)/g, "$1\u2060$2\u2060$3").replace(/(\d) (мм|л|Н·м|бар|км|см³|л\.с\.|об\/мин|моточ\.|ч)(?![\wа-яё])/g, "$1\u00a0$2");
 const pickTitle = (base, tails) => { const t = tails.map((x) => base + x).find((x) => x.length <= 75); if (t) return t;
   /* обрезаем название так, чтобы с последним хвостом влезло в 75 знаков */
-  let b = base.slice(0, Math.max(30, 74 - tails[tails.length - 1].length)).replace(/[\s,/:;–—-]+\S*$/, ""); if ((b.match(/\(/g) || []).length > (b.match(/\)/g) || []).length) b = b.replace(/\s*\([^)]*$/, ""); return b + tails[tails.length - 1]; };
+  let b = base.slice(0, Math.max(30, 74 - tails[tails.length - 1].length)).replace(/[\s,/:;–—-]+\S*$/, "").replace(/[\s,:;–—-]+(и|в|с|на|по|для|или|а|от|до|без)$/i, ""); if ((b.match(/\(/g) || []).length > (b.match(/\)/g) || []).length) b = b.replace(/\s*\([^)]*$/, ""); return b + tails[tails.length - 1]; };
 const fitTitle = (t) => (t.length > 70 ? t.replace(/ \| MotoHelper$/, "") : t);
 /* значение для описания в выдаче: без источника в скобках и уточнений после «;» — «10W-40 (JASO MA)» → «10W-40»,
    «около 1.2 л, контроль по смотровому окну (руководство Kayo 2022…)» → «около 1.2 л, контроль по смотровому окну» */
@@ -279,7 +289,11 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 <meta property="og:description" content="${esc(desc)}" />
 <meta property="og:url" content="${canon}" />
 <meta property="og:image" content="${SITE}img/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="theme-color" content="#000000" />
+<link rel="manifest" href="/manifest.webmanifest" />
 <link rel="icon" href="/favicon.ico" sizes="48x48" />
 <link rel="icon" type="image/png" sizes="120x120" href="/img/favicon-120.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png" />
@@ -294,15 +308,18 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 <main>
 <nav class="crumbs">${crumbs.map((c) => (c[1] ? `<a href="${c[1]}">${esc(c[0])}</a>` : esc(c[0]))).join(" › ")}</nav>
 ${body}
+${shareBar(canon, title)}
 ${ask ? askBlock(ask) : ""}
+${SUB}
 ${AD}
-<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/m/polomka/">Неисправности</a> · <a href="/m/remont/">Инструкции</a> · <a href="/m/motor/">Моторы</a> · <a href="/m/tuning/">Тюнинг</a> · <a href="/m/provodka/">Электрика</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a> · <a href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a></footer>
+<footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/m/polomka/">Неисправности</a> · <a href="/m/remont/">Инструкции</a> · <a href="/m/motor/">Моторы</a> · <a href="/m/tuning/">Тюнинг</a> · <a href="/m/provodka/">Электрика</a> · <a href="/m/podborka/">Подборки</a> · <a href="/m/sravnenie/">Сравнения</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a> · <a href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a></footer>
 </main>
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}
 ${js ? `<script>${js}</script>` : ""}
 ${ask ? `<script src="/m/ask.js" defer></script>` : ""}
 ${rv ? `<script src="/m/rv.js" defer></script>` : ""}
 ${fb ? `<script src="/m/fb.js" defer></script>` : ""}
+<script src="/m/share.js" defer></script>
 ${METRIKA}
 </body>
 </html>
@@ -498,9 +515,16 @@ ${c.row.nuance && c.row.nuance.length ? `<ul class="cu-nu">${c.row.nuance.map((x
 const engShort = (b) => { const e = ENGINES[b.versions[0].engine]; return [e.code, e.cc ? e.cc + " см³" : "", (b.versions[0].hp || e.hp) ? (b.versions[0].hp || e.hp) + " л.с." : ""].filter(Boolean).join(" · "); };
 /* витрина каталога: модели с фото — по одной-две от марки, чтобы были разные */
 const showcase = () => {
-  const seen = {}, list = BIKES.filter((b) => photoOf(b)).sort((a, b) => COLL.compare(a.brand, b.brand) || COLL.compare(a.name, b.name)).filter((b) => (seen[b.brand] = (seen[b.brand] || 0) + 1) <= 2);
-  return list.length ? `<h2>Популярные модели</h2><div class="showcase">${list.slice(0, 16).map((b) => `<a class="show" href="/m/${bikeSlug.get(b)}/"><img src="${photoOf(b, true)}" alt="${esc(b.brand + " " + b.name)}" loading="lazy" width="240" height="150"><small>${esc(b.brand)} · ${esc(b.type)}</small><b>${esc(b.name)}</b><small>${esc(engShort(b))}</small></a>`).join("")}</div>` : "";
+  /* сначала самые продаваемые (флагманы и модели со страницами тюнинга), затем — с фото, по две-три от марки */
+  const seen = {}, top = FLAGSHIP.concat(MODEL_TUNE_KEYS).map((n) => BIKES.find((b) => b.brand + " " + b.name === n)).filter((b, i, a) => b && a.indexOf(b) === i);
+  const list = top.concat(BIKES.filter((b) => photoOf(b) && top.indexOf(b) < 0).sort((a, b) => COLL.compare(a.brand, b.brand) || COLL.compare(a.name, b.name))).filter((b) => (seen[b.brand] = (seen[b.brand] || 0) + 1) <= 3);
+  return list.length ? `<h2>Популярные модели</h2><div class="grid models">${list.slice(0, 16).map((b) => modelCard(b, true)).join("")}</div>` : "";
 };
+const OFTEN = [["Масло и свечи Kayo T2 250", "/m/kayo-t2-250/"], ["Тюнинг мопеда Альфа", "/m/motoland-alpha/tuning/"], ["Тюнинг 172FMM: бигбор и карбюратор", "/m/motor/zs172fmm/tuning/"],
+  ["Kayo T2 или Motoland TT250", "/m/sravnenie/motoland-tt250-vs-kayo-t2-250/"], ["Схема электрики питбайка без АКБ", "/m/provodka/ac/"], ["Какое масло заливать: таблица", "/m/maslo/"],
+  ["Зазоры клапанов: таблица", "/m/klapany/"], ["Эндуро 250: какой выбрать", "/m/podborka/enduro-250/"], ["Не заводится питбайк", "/m/polomka/start/"], ["Регулировка клапанов", "/m/remont/valves/"]];
+const oftenHtml = () => { const L = OFTEN.filter((x) => fs.existsSync(path.join(ROOT, x[1].slice(1), "index.html")));
+  return L.length ? `<h2>Часто ищут</h2><div class="chips">${L.map((x) => `<a class="chip" href="${x[1]}">${esc(x[0])}</a>`).join("")}</div>` : ""; };
 const modelCard = (b, withBrand) => { const ph = photoOf(b, true); return `<a class="card${ph ? " ph" : ""}" href="/m/${bikeSlug.get(b)}/" data-t="${esc(b.type)}">${ph ? `<img src="${ph}" alt="" loading="lazy" width="240" height="150">` : ""}<b>${esc((withBrand ? b.brand + " " : "") + b.name)}</b><small>${esc(b.type)} · ${esc(engShort(b))}</small></a>`; };
 
 
@@ -508,6 +532,17 @@ const modelCard = (b, withBrand) => { const ph = photoOf(b, true); return `<a cl
 const okEng = (only, e) => !only || only.some((x) => x === e.id || (e.groups || []).indexOf(x) >= 0);
 const guidesOf = (e) => GUIDES.filter((g) => okEng(g.only, e) && !(e.cvt && NO_CVT.indexOf(g.id) >= 0) && ctx.guideOk(g, e));
 const diagOf = (e) => DIAG.filter((d) => ctx.kbOk(d, e));
+/* поломка → симптомы (js/kb.js SYMPTOMS): по весам причин (CAUSES.w) и их инструкциям (CAUSES.guide) — «Как починить» */
+const DIAG_SYM = { start: ["nostart"], cold: ["hardcold", "coldnorev"], hot: ["hardhot"], idle: ["stallidle", "idle"], backfire: ["backfire", "popintake"],
+  smoke: ["smokeblack", "smokeblue", "smokewhite", "smokecold"], knock: ["tick", "rattle", "knockbottom", "ping"], power: ["nopower", "notop"], overheat: ["overheat"],
+  coolant: ["coolantloss", "coolantpush", "milkyoil"], efi: ["check"], clutch: ["clutchslip", "clutchdrag"], gears: ["jumpgear", "hardshift"], starter: ["nocrank", "starterspin"],
+  electric: ["lights", "nolights"], brakes: ["brakesoft", "brakerear", "brakepulse", "brakedrag", "squeal"], suspension: ["forkleak", "forkbottom", "clunk", "suspsqueak"],
+  plug: ["plugblack", "plugwhite", "plugwet"], "stall-gear": ["stallgear"], hesitate: ["hesitate", "misfire"], flooding: ["fuelsmell", "plugwet"], leak: ["oilleak", "oilconsume"],
+  vibration: ["vibe", "wobble"], noneutral: ["clutchdrag"], charge: ["batdrain", "drainnight"], fuses: ["fusesblow"], kick: ["kickslip"], fan: ["overheat"], "fuel-use": ["fuelsmell"] };
+const fixGuides = (d, e) => { const sc = {};
+  (ctx.__C || []).forEach((c) => (DIAG_SYM[d.id] || []).forEach((k) => { if (c.guide && c.w && c.w[k]) sc[c.guide] = Math.max(sc[c.guide] || 0, c.w[k]); }));
+  return Object.keys(sc).sort((a, b) => sc[b] - sc[a]).map((id) => GUIDES.find((g) => g.id === id)).filter((g) => g && (!e || guidesOf(e).indexOf(g) >= 0)).slice(0, 6); };
+const fixHtml = (d, e) => { const L = fixGuides(d, e); return L.length ? `<h2>Как починить</h2><div class="chips">${L.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>` : ""; };
 const KEY_GUIDES = ["oil", "valves", "valves-dohc", "valves-screw", "spark", "carb-tune", "carb-clean", "chain"];
 const bikesOf = {}; // мотор → модели
 BIKES.forEach((b) => b.versions.forEach((v) => { const l = (bikesOf[v.engine] = bikesOf[v.engine] || []); if (l.indexOf(b) < 0) l.push(b); }));
@@ -558,6 +593,52 @@ function valuesTable(keys, okFn) {
     return `<tr><td><a href="/m/motor/${engSlug[id]}/">${esc(e.code)}</a></td>${keys.map((k) => `<td>${esc(e[k] && e[k] !== "—" ? e[k] : "—")}</td>`).join("")}</tr>`; }).join("")}</table></div>` };
 }
 
+/* ===== подборки (тип + объём) и сравнения популярных моделей одного класса — только по данным базы ===== */
+const CC_CLS = (cc) => (cc <= 55 ? 50 : cc <= 75 ? 70 : cc <= 115 ? 110 : cc <= 135 ? 125 : cc <= 165 ? 150 : cc <= 215 ? 200 : cc <= 265 ? 250 : cc <= 320 ? 300 : cc <= 480 ? 450 : cc <= 700 ? 600 : cc <= 950 ? 900 : 1200);
+const TYPE_MANY = { "Эндуро": "Эндуро", "Питбайк": "Питбайки", "Мопед": "Мопеды", "Скутер": "Скутеры", "Мотард": "Мотарды", "Кросс-эндуро": "Кросс-эндуро", "Тур-эндуро": "Тур-эндуро", "Лёгкий эндуро": "Лёгкие эндуро", "Спорт": "Спортбайки", "Нейкед": "Нейкеды", "Чоппер": "Чопперы", "Классика": "Классические мотоциклы", "Турер": "Туреры", "Триал": "Триал" };
+const hpOf = (b, v) => Number(v.hp || ENGINES[v.engine].hp) || 0;
+const groups = {};
+BIKES.forEach((b) => { const e = ENGINES[b.versions[0].engine]; if (!e.cc) return; const k = b.type + "|" + CC_CLS(e.cc); (groups[k] = groups[k] || []).push(b); });
+const podSlug = {};
+const podKeys = Object.keys(groups).filter((k) => groups[k].length >= 5).sort((a, b) => groups[b].length - groups[a].length);
+podKeys.forEach((k) => { const [t, c] = k.split("|"); podSlug[k] = slugify(t) + "-" + c; });
+const podName = (k) => { const [t, c] = k.split("|"); return (TYPE_MANY[t] || t) + " " + c + " см³"; };
+/* сравнения: в классе (тип + объём) по одной модели от популярной марки — та, у которой больше поколений; до 6 марок, все пары */
+const compareByGroup = {}, compares = [];
+/* самые продаваемые модели — в сравнениях их класса они выбираются первыми */
+/* модели, у которых уже есть страницы сравнений (в репозитории), при прочих равных остаются в сравнениях:
+   новая модель марки с более коротким названием не должна вытеснять их — иначе старые страницы пропали бы из поиска */
+const OLD_CMP = new Set();
+try { fs.readdirSync(path.join(OUT, "sravnenie"), { withFileTypes: true }).filter((d) => d.isDirectory()).forEach((d) => d.name.split("-vs-").forEach((x) => OLD_CMP.add(x))); } catch (e) {}
+Object.keys(groups).forEach((k) => {
+  const pick = {};
+  groups[k].filter((b) => CMP_BRANDS.indexOf(b.brand) >= 0).forEach((b) => { const p = pick[b.brand]; const fl = (x) => FLAGSHIP.indexOf(x.brand + " " + x.name) >= 0;
+    const st = (x) => (OLD_CMP.has(bikeSlug.get(x)) ? 1 : 0);
+    if (!p || fl(b) > fl(p) || (fl(b) === fl(p) && (st(b) > st(p) || (st(b) === st(p) && (b.versions.length > p.versions.length || (b.versions.length === p.versions.length && b.name.length < p.name.length)))))) pick[b.brand] = b; });
+  const reps = Object.values(pick).sort((a, b) => CMP_BRANDS.indexOf(a.brand) - CMP_BRANDS.indexOf(b.brand)).slice(0, 6);
+  for (let i = 0; i < reps.length; i++) for (let j = i + 1; j < reps.length; j++) {
+    const c = { a: reps[i], b: reps[j], k, slug: bikeSlug.get(reps[i]) + "-vs-" + bikeSlug.get(reps[j]), title: reps[i].brand + " " + reps[i].name + " или " + reps[j].brand + " " + reps[j].name };
+    compares.push(c); (compareByGroup[k] = compareByGroup[k] || []).push(c);
+  }
+});
+/* перелинковка моделей: соседи по алфавиту внутри марки (а не первые 12 — иначе весь вес у одних и тех же),
+   похожие модели других марок того же класса (тип + объём) — ближайшие по мощности, сравнения с участием модели */
+const SIB = {};
+brands.forEach((br) => (SIB[br] = BIKES.filter((x) => x.brand === br).sort((x, y) => COLL.compare(x.name, y.name))));
+const neighbours = (b) => { const sib = SIB[b.brand] || [], i0 = sib.indexOf(b), n = sib.length;
+  return n <= 13 ? sib.filter((x) => x !== b) : [-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6].map((d) => sib[(i0 + d + n) % n]); };
+const clsKey = (b) => { const e = ENGINES[b.versions[0].engine]; return e.cc ? b.type + "|" + CC_CLS(e.cc) : ""; };
+const BY_HP = {};
+Object.keys(groups).forEach((k) => (BY_HP[k] = groups[k].slice().sort((x, y) => hpOf(x, x.versions[0]) - hpOf(y, y.versions[0]) || COLL.compare(x.brand + " " + x.name, y.brand + " " + y.name))));
+const similar = (b, skip) => { const k = clsKey(b), L = BY_HP[k] || [], j = L.indexOf(b), out = [];
+  for (let d = 1; out.length < 8 && d < L.length; d++) [L[j - d], L[j + d]].forEach((x) => { if (x && x.brand !== b.brand && skip.indexOf(x) < 0 && out.length < 8) out.push(x); });
+  return out; };
+const CMP_OF = new Map();
+compares.forEach((c) => [c.a, c.b].forEach((x) => { if (!CMP_OF.has(x)) CMP_OF.set(x, []); CMP_OF.get(x).push(c); }));
+const WIRE_ANCHOR = { ac: "Схема электрики без АКБ (AC-CDI)", dc: "Схема электрики с АКБ (DC-CDI)", efi: "Схема электрики инжектора (ЭБУ)" };
+/* подпись поломки без названия модели: «На {M} садится аккумулятор» → «Садится аккумулятор» */
+const PROB_SHORT = { charge: "Садится аккумулятор", knock: "Стучит мотор" };
+const probShort = (id) => PROB_SHORT[id] || PROB[id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase());
 BIKES.forEach((b) => {
   const slug = bikeSlug.get(b), canon = SITE + "m/" + slug + "/";
   const full = b.brand + " " + b.name;
@@ -570,16 +651,17 @@ BIKES.forEach((b) => {
     const approx = v.approx ? `<p class="note">≈ Мотор подобран по похожей модели — сверь код на картере.</p>` : "";
     const pfx = b.versions.length > 1 ? "v" + (vi + 1) + "-" : "";
     const cross = vi === 0 && ctx.crossRows(b).length > 0;
-    const groups = garageGroups(e, v, b, pfx, cross, vi === 0);
+    const groups = (head ? "" : `<h2 class="vh">Характеристики и ТО</h2>`) + garageGroups(e, v, b, pfx, cross, vi === 0);
     const iss = weak(e).length ? `<h2 id="${pfx}slabye">Слабые места</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const keyG = guidesOf(e).filter((g) => KEY_GUIDES.indexOf(g.id) >= 0);
-    const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a><a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">Схема электрики</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
+    const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a><a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">${WIRE_ANCHOR[ctx.wiringType(e)] || "Схема электрики"}</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
     return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${carbUpHtml(e, pfx, appLink(b, vi) + "&r=tune")}${vi === 0 && modelTuneHas(b) ? `<div class="chips"><a class="chip" href="/m/${slug}/tuning/">Тюнинг ${esc(full)} по шагам: резвее, мощнее, быстрее →</a></div>` : ""}${more}
-<a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a></section>`;
+<a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a><div class="chips"><a class="chip" href="${appLink(b, vi)}&amp;add=1">☆ Сохранить ${esc(b.versions.length > 1 ? full + " (" + verName(v, vi, e) + ")" : full)} в гараж — журнал ТО и напоминания</a></div></section>`;
   }).join("\n");
-  const others = BIKES.filter((x) => x.brand === b.brand && x !== b).slice(0, 12);
+  const others = neighbours(b);
   // модели других марок на том же моторе: запчасти и советы у них общие — и перелинковка каталога
   const twins = (bikesOf[b.versions[0].engine] || []).filter((x) => x !== b && x.brand !== b.brand && x.brand !== "Любая модель").slice(0, 10);
+  const ck = clsKey(b), sim = similar(b, twins), myCmp = CMP_OF.get(b) || [];
   /* вопрос-ответ: то, что спрашивают в поиске («какое масло в Kayo T2») — видимым блоком и разметкой FAQPage */
   const v0 = b.versions[0], multi = b.versions.length > 1 ? " (" + verName(v0, 0, e0) + ")" : "";
   const okv = (x) => x && x !== "—" && !/мануал/i.test(x);
@@ -594,17 +676,20 @@ BIKES.forEach((b) => {
   ].filter(Boolean).map((q) => [q[0], dot(q[1])]);
   const faqHtml = `<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>`;
   const ru = BRAND_RU[b.brand], fullRu = ru ? ru + " " + b.name : "";
-  const body = `<section class="hero"><div class="kick">${esc(b.brand)}${ru ? " (" + esc(ru) + ")" : ""} · ${esc(b.type)}</div><h1>${esc(b.name)}</h1>
+  const body = `<section class="hero"><div class="kick">${esc(b.brand)}${ru ? " (" + esc(ru) + ")" : ""} · ${esc(b.type)}</div><h1>${esc(full)}</h1>
 <p class="lead">Мотор ${esc(e0.code)}${e0.cc ? ", " + e0.cc + " см³" : ""}${e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с" : ""}. ${two0 ? (cvt0 ? "Какое масло 2T и в редуктор" : "Какое масло 2T и в коробку") + ", свеча, " + jet0 + " и слабые места" : "Какое масло и сколько, свеча, зазоры клапанов" + (jet0 === "жиклёры" ? ", жиклёры" : "") + " и слабые места"}${b.versions.length > 1 ? " — по поколениям" : ""}.</p>
 ${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}${b.aka && b.aka.length ? (b.versions.length > 1 ? `<p class="note">У продавцов эта модель называется по-разному: ${esc(b.aka.map((n) => b.brand + " " + n).join(", "))}. Это одна машина — версии отличаются только мотором.</p>` : `<p class="note">Также продаётся как: ${esc(b.aka.join(", "))}.</p>`) : ""}${photoOf(b) ? `<figure class="mphoto"><img src="${photoOf(b)}" alt="${esc(full)}" width="800" height="500" fetchpriority="high"></figure>` : ""}</section>
 ${vers}
-${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>` : ""}
-${probBikes.has(b) ? "" : `<h2>Если что-то не так</h2><div class="chips">${probsFor(b).slice(0, 8).map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(PROB[d.id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase()))}</a>`).join("")}</div>`}
+${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(probShort(d.id))}</a>`).join("")}</div>` : ""}
+${probBikes.has(b) ? "" : `<h2>Если ${esc(full)} не заводится, глохнет или дымит</h2><div class="chips">${probsFor(b).slice(0, 8).map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(probShort(d.id))}</a>`).join("")}</div>`}
 ${faqHtml}
+${myCmp.length ? `<h2>Сравнения ${esc(full)}</h2><div class="chips">${myCmp.map((c) => `<a class="chip" href="/m/sravnenie/${c.slug}/">${esc(c.title)}</a>`).join("")}</div>` : ""}
+<p class="small">Сравнить с другими моторами: <a href="/m/maslo/">масло — таблица</a> · <a href="/m/svechi/">свечи — таблица</a>${two0 ? "" : ` · <a href="/m/klapany/">зазоры клапанов — таблица</a>`}</p>
 ${fbBlock(full, e0.code, two0 ? ["Масло", "Объём масла в КПП / редуктор", "Свеча", jet0 === "жиклёры" ? "Карбюратор и жиклёры" : "Инжектор", "Мотор", "Мощность"] : ["Масло", "Объём масла", "Свеча", "Зазоры клапанов", jet0 === "жиклёры" ? "Карбюратор и жиклёры" : "Инжектор", "Мотор", "Мощность"])}
 ${twins.length ? `<h2>Этот же мотор ${esc(e0.code)} стоит на</h2><div class="chips">${twins.map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div><p><a class="chip" href="/m/motor/${engSlug[b.versions[0].engine]}/">Всё о моторе ${esc(e0.code)} →</a></p>` : ""}
+${sim.length ? `<h2>Похожие на ${esc(full)}: ${esc(podName(ck).charAt(0).toLowerCase() + podName(ck).slice(1))} других марок</h2><div class="grid models">${sim.map((x) => modelCard(x, true)).join("")}</div>` : ""}${podSlug[ck] ? `<p><a class="chip" href="/m/podborka/${podSlug[ck]}/">Все ${esc(podName(ck).toLowerCase())} в одной таблице: какой выбрать →</a></p>` : ""}
 ${rvBlock(slug, full, b.name)}
-${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все модели ${esc(b.brand)} →</a></p>` : ""}`;
+${others.length ? `<h2>Другие модели ${esc(b.brand)}</h2><div class="grid models">${others.map((x) => modelCard(x)).join("")}</div><p><a class="chip" href="/m/${brandSlug[b.brand]}/">Все ${SIB[b.brand].length} ${plural(SIB[b.brand].length, "модель", "модели", "моделей")} ${esc(b.brand)} →</a></p>` : ""}`;
   const desc = `${full}: мотор ${e0.code}${e0.cc ? " (" + e0.cc + " см³" + (e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с." : "") + ")" : ""}, масло ${two0 ? (briefOil(e0.oil) || "2T").replace(/^масло\s+/i, "") + (e0.oilVol && /\d/.test(e0.oilVol) ? ", " + ((v) => /редуктор|КПП|коробк/i.test(v) ? v : (cvt0 ? "в редуктор " : "в КПП ") + v)(brief(e0.oilVol).split(",")[0]) : "") : (briefOil(e0.oil) || "—") + (e0.oilVol && /\d/.test(e0.oilVol) ? " " + brief(e0.oilVol).split(",")[0] : "")}, свеча ${brief(e0.spark).split(" / ")[0] || "—"}${briefValves(e0.valveIn, e0.valveEx) ? ", зазоры клапанов " + briefValves(e0.valveIn, e0.valveEx) : ""}. Слабые места и ремонт.`;
   const descRu = fullRu ? desc.replace(full + ":", full + " (" + fullRu + "):") : desc;
   files.set("m/" + slug + "/index.html", page({ rv: true, fb: true, ask: full + " (мотор " + e0.code + ")", title: pickTitle(full, two0 ? [...(fullRu ? [" (" + ru + ") — масло 2T, свеча, " + jet0 + ", слабые места", " (" + ru + ") — масло 2T, свеча, " + jet0] : []), " — масло 2T, свеча, " + jet0 + ", слабые места | MotoHelper", " — масло 2T, свеча, " + jet0 + ", слабые места", " — масло 2T, свеча, " + jet0, ": масло 2T, свеча"] : [...(fullRu ? [" (" + ru + ") — масло, свечи, зазоры клапанов, слабые места", " (" + ru + ") — масло, свечи, зазоры клапанов"] : []), " — масло, свечи, зазоры клапанов, слабые места | MotoHelper", " — масло, свечи, зазоры клапанов, слабые места", " — масло, свечи, зазоры клапанов", ": масло, свечи, клапаны"]), desc: descRu, canon, crumbs, body, sticky: appLink(b, 0),
@@ -618,7 +703,12 @@ brands.forEach((br) => {
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], [br, null]];
   const body = `<section class="hero"><div class="kick">Каталог · марка${BRAND_RU[br] ? " · " + esc(BRAND_RU[br]) : ""}</div><h1>${esc(br)}</h1><p class="lead">${list.length} ${plural(list.length, "модель", "модели", "моделей")}: мотор, масло, свечи, зазоры клапанов и слабые места.</p>
 ${types.length > 1 ? `<div class="chips"><button class="chip on" data-f="*">Все</button>${types.map((t) => `<button class="chip" data-f="${esc(t)}">${esc(t)}</button>`).join("")}</div>` : ""}</section>
-<div class="grid models">${list.map((b) => modelCard(b)).join("")}</div>`;
+<div class="grid models">${list.map((b) => modelCard(b)).join("")}</div>
+${(() => { const ks = podKeys.filter((k) => groups[k].some((b) => b.brand === br)); return ks.length ? `<h2>Подборки с моделями ${esc(br)}</h2><div class="chips">${ks.map((k) => `<a class="chip" href="/m/podborka/${podSlug[k]}/">${esc(podName(k))}: какой выбрать</a>`).join("")}</div>` : ""; })()}
+${(() => { const cs = compares.filter((c) => c.a.brand === br || c.b.brand === br); return cs.length ? `<h2>Сравнения ${esc(br)}</h2><div class="chips">${cs.slice(0, 24).map((c) => `<a class="chip" href="/m/sravnenie/${c.slug}/">${esc(c.title)}</a>`).join("")}</div>` : ""; })()}
+${(() => { const ts = list.filter((b) => modelTuneHas(b)); return ts.length ? `<h2>Тюнинг ${esc(br)}</h2><div class="chips">${ts.map((b) => `<a class="chip" href="/m/${bikeSlug.get(b)}/tuning/">Тюнинг ${esc(br + " " + b.name)}</a>`).join("")}</div>` : ""; })()}
+${(() => { const n = {}; list.forEach((b) => b.versions.forEach((v) => (n[v.engine] = (n[v.engine] || 0) + 1))); const es = Object.keys(n).filter((id) => engSlug[id]).sort((a, b) => n[b] - n[a]).slice(0, 8);
+  return es.length ? `<h2>Моторы ${esc(br)}</h2><div class="chips">${es.map((id) => `<a class="chip" href="/m/motor/${engSlug[id]}/">${esc(ENGINES[id].code)} — масло, свеча, клапаны</a>`).join("")}</div>` : ""; })()}`;
   files.set("m/" + brandSlug[br] + "/index.html", page({ title: `${br}${BRAND_RU[br] ? " (" + BRAND_RU[br] + ")" : ""}: все модели — масло, свечи, моторы | MotoHelper`, desc: `Справочник по мотоциклам ${br}${BRAND_RU[br] ? " (" + BRAND_RU[br] + ")" : ""}: ${list.slice(0, 6).map((b) => b.name).join(", ")} и другие — мотор, масло, свечи, зазоры клапанов, слабые места.`,
     canon: SITE + "m/" + brandSlug[br] + "/", crumbs, body, ld: [crumbLd(crumbs)], js: types.length > 1 ? FILTER_JS : "" }));
 });
@@ -636,6 +726,7 @@ ${types.length > 1 ? `<div class="chips"><button class="chip on" data-f="*">Вс
 <div class="search">${SEARCH_ICON}<input id="q" type="search" placeholder="Найти модель: «Kayo T2», «CRF250», «174»" autocomplete="off" aria-label="Поиск модели" /></div>
 <div id="res" class="grid models res"></div>
 ${showcase()}
+${oftenHtml()}
 <h2>Популярные марки</h2><div class="grid">${pop.map((br) => `<a class="card big" href="/m/${brandSlug[br]}/"><b>${esc(br)}</b><span class="n">${count(br)}</span></a>`).join("")}</div>
 <h2>Все марки</h2>${Object.keys(byLetter).map((l, i, ls) => `${cyr(l) && !cyr(ls[i - 1] || "a") ? `<h2>Российские марки</h2>` : ""}<div class="letter">${esc(l)}</div><div class="grid">${byLetter[l].map((br) => `<a class="card" href="/m/${brandSlug[br]}/"><b>${esc(br)}</b><small>${count(br)} ${plural(count(br), "модель", "модели", "моделей")}</small></a>`).join("")}</div>`).join("")}`;
   files.set("m/search.js", SEARCH_JS + "\n");
@@ -649,7 +740,7 @@ engIds.forEach((id) => {
   const e = ENGINES[id], list = bikesOf[id], b0 = list[0], slug = engSlug[id], canon = SITE + "m/motor/" + slug + "/";
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Моторы", "/m/motor/"], [e.code, null]];
   const aka = AKA[id] ? String(AKA[id]).split(/\s+/).filter((x) => x && x.toLowerCase() !== String(e.code).toLowerCase()) : [];
-  const groups = garageGroups(e, {}, b0, "");
+  const groups = `<h2 class="vh">Характеристики и ТО</h2>` + garageGroups(e, {}, b0, "");
   const iss = weak(e).length ? `<h2 id="slabye">Слабые места ${esc(e.code)}</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
   const gs = guidesOf(e), ds = diagOf(e);
   const tName = dupCode[e.code] > 1 && e.name && e.name !== e.code ? e.name : e.code;
@@ -678,12 +769,12 @@ engIds.forEach((id) => {
 ${aka.length ? `<div class="chips">${aka.slice(0, 8).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>` : ""}</section>
 <section class="ver"><div class="tiles">${cheat(e, {}, "")}</div>${jumpNav(e, "", weak(e).length, false, buyItems(e, null).length > 0)}${toolsNav(e, appLink(b0, b0.versions.findIndex((v) => v.engine === id)))}${groups}${iss}${carbUpHtml(e, "", appLink(b0, b0.versions.findIndex((v) => v.engine === id)) + "&r=tune")}
 <a class="cta" href="${appLink(b0, b0.versions.findIndex((v) => v.engine === id))}">Ремонт, запчасти и ИИ-механик для ${esc(e.code)} →</a></section>
-<h2>Мотоциклы с мотором ${esc(e.code)}</h2><div class="grid models">${list.slice(0, 60).map((x) => modelCard(x, true)).join("")}</div>
+<h2>Мотоциклы с мотором ${esc(e.code)}</h2><div class="grid models">${list.slice(0, 60).map((x) => modelCard(x, true)).join("")}</div>${list.length > 60 ? `<div class="chips">${list.slice(60).map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div>` : ""}
 ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(d.title)}</a>`).join("")}</div>` : ""}
 ${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="chips">${gs.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>` : ""}
 ${faqHtml}
 ${fbBlock("", e.code + " [" + id + "]", ["Масло", "Объём масла", "Свеча", "Зазоры клапанов", "Карбюратор и жиклёры", "Слабые места", "На каких моделях стоит"])}
-<div class="chips">${tuneEligible(id) ? `<a class="chip" href="/m/motor/${slug}/tuning/">Тюнинг ${esc(e.code)} →</a>` : ""}<a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">Схема электрики</a><a class="chip" href="/m/maslo/">Масло для других моторов</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>`;
+<div class="chips">${tuneEligible(id) ? `<a class="chip" href="/m/motor/${slug}/tuning/">Тюнинг ${esc(e.code)} →</a>` : ""}<a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">${WIRE_ANCHOR[ctx.wiringType(e)] || "Схема электрики"}</a><a class="chip" href="/m/maslo/">Масло для других моторов</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>`;
   /* 2Т: масло — в бачок или смесь, объём — в КПП или редуктор; клапанов нет */
   const twoE = e.stroke === "2T", cvtE = (e.groups || []).indexOf("cvt") >= 0;
   const oilE = twoE ? (briefOil(e.oil) || "2T").replace(/^масло\s+/i, "") + (e.oilVol && /\d/.test(e.oilVol) ? ", " + ((v) => /редуктор|КПП|коробк/i.test(v) ? v : (cvtE ? "в редуктор " : "в КПП ") + v)(brief(e.oilVol).split(",")[0]) : "")
@@ -719,10 +810,19 @@ ${(g.tools || []).length ? `<h2>Понадобится</h2><ul class="plain">${g
 ${vt.html}
 <a class="cta" href="/#g=${g.id}">Открыть с цифрами для своего мотоцикла →</a>
 <p>Не нашёл ответ? Опиши поломку <a href="/#ai=1">ИИ-механику MotoHelper</a> — выбери свою модель, и он ответит с её цифрами.</p>
+${(() => { const ds = DIAG.filter((d) => fixGuides(d).indexOf(g) >= 0); return ds.length ? `<h2>Когда это нужно</h2><div class="chips">${ds.map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(d.title)}</a>`).join("")}</div>` : ""; })()}
+${(() => { const T = { oil: ["/m/maslo/", "Какое масло и сколько: таблица по моторам"], spark: ["/m/svechi/", "Свечи и зазор: таблица по моторам"], valves: ["/m/klapany/", "Зазоры клапанов: таблица по моторам"], "valves-dohc": ["/m/klapany/", "Зазоры клапанов: таблица по моторам"], "valves-screw": ["/m/klapany/", "Зазоры клапанов: таблица по моторам"] }[g.id];
+  const fl = FLAGSHIP.map((n) => BIKES.find((x) => x.brand + " " + x.name === n)).filter((x) => x && okE(ENGINES[x.versions[0].engine])).slice(0, 8);
+  return (T ? `<p><a class="chip" href="${T[0]}">${T[1]} →</a></p>` : "") + (fl.length ? `<h2>Цифры для популярных моделей</h2><div class="chips">${fl.map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div>` : ""); })()}
+${(() => { const L = GUIDES.filter((x) => x.area && x.area === g.area), i = L.indexOf(g); if (L.length < 2 || i < 0) return "";
+  const pr = L[(i - 1 + L.length) % L.length], nx = L[(i + 1) % L.length];
+  return `<div class="pn">${pr !== g ? `<a class="chip" href="/m/remont/${pr.id}/">← ${esc(pr.title)}</a>` : ""}${nx !== g && nx !== pr ? `<a class="chip" href="/m/remont/${nx.id}/">${esc(nx.title)} →</a>` : ""}</div>`; })()}
 <h2>Другие инструкции</h2><div class="chips">${GUIDES.filter((x) => x !== g && x.area && x.area === g.area).slice(0, 12).concat(GUIDES.filter((x) => KEY_GUIDES.indexOf(x.id) >= 0 && x !== g)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 16).map((x) => `<a class="chip" href="/m/remont/${x.id}/">${esc(x.title)}</a>`).join("")}<a class="chip" href="/m/remont/">Все инструкции →</a></div>`;
   const desc = (g.title + ": " + plain.slice(0, 3).join(" ")).slice(0, 230).replace(/\s+\S*$/, "") + "…";
   const ld = { "@context": "https://schema.org", "@type": "HowTo", name: g.title, inLanguage: "ru", url: canon, step: plain.map((t, i) => ({ "@type": "HowToStep", position: i + 1, text: t })) };
   if (g.tools && g.tools.length) ld.tool = g.tools.map((t) => ({ "@type": "HowToTool", name: t }));
+  /* «30 мин», «1–1.5 ч» → PT30M, PT1H (берём меньшее) */
+  { const m = String(g.time || "").match(/^([\d.,]+)(?:[–-][\d.,]+)?\s*(мин|ч)/); if (m) { const n = parseFloat(m[1].replace(",", ".")); ld.totalTime = m[2] === "ч" ? "PT" + (Number.isInteger(n) ? n + "H" : Math.round(n * 60) + "M") : "PT" + Math.round(n) + "M"; } }
   files.set("m/remont/" + g.id + "/index.html", page({ ask: "инструкция «" + g.title + "»", title: pickTitle(g.title, [" на мотоцикле и питбайке — пошагово | MotoHelper", " на мотоцикле и питбайке — пошагово", " — пошагово", ""]), desc, canon, crumbs, body, sticky: "/#g=" + g.id, ld: [crumbLd(crumbs), ld] }));
 });
 {
@@ -748,6 +848,10 @@ DIAG.forEach((d) => {
   const body = `<section class="hero"><div class="kick">Неисправность</div><h1>${esc(d.title)}</h1><p class="lead">Проверяй по порядку — от простого к сложному. ${causes.length ? "Частые причины: " + esc(causes.slice(0, 5).join(", ")) + "." : ""}</p></section>
 <h2>Что проверить</h2><ol class="steps">${steps}</ol>
 ${vt.html}
+${fixHtml(d)}
+${(() => { const L = [...probBikes].filter((b) => probsFor(b).indexOf(d) >= 0).sort((a, b) => (FLAGSHIP.indexOf(b.brand + " " + b.name) >= 0) - (FLAGSHIP.indexOf(a.brand + " " + a.name) >= 0) || COLL.compare(a.brand + " " + a.name, b.brand + " " + b.name));
+  if (!L.length || !PROB[d.id]) return ""; const chip = (b) => `<a class="chip" href="/m/${bikeSlug.get(b)}/${d.id}/">${esc(PROB[d.id].replace("{M}", b.brand + " " + b.name))}</a>`;
+  return `<h2>${esc(d.title)} — проверка с цифрами своей модели</h2><div class="chips">${L.slice(0, 24).map(chip).join("")}</div>${L.length > 24 ? `<details class="more"><summary>Все модели (${L.length})</summary><div class="chips">${L.slice(24).map(chip).join("")}</div></details>` : ""}`; })()}
 <a class="cta" href="/#d=${d.id}">Пройти проверку в MotoHelper под свой мотоцикл →</a>
 <p>Не нашёл ответ? Опиши поломку <a href="/#ai=1">ИИ-механику MotoHelper</a> — выбери свою модель, и он ответит с её цифрами.</p>
 <h2>Другие неисправности</h2><div class="chips">${DIAG.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/polomka/${x.id}/">${esc(x.title)}</a>`).join("")}</div>`;
@@ -786,14 +890,17 @@ ${nums.length ? `<h2>Цифры ${esc(e.code)}</h2><div class="tiles">${nums.map
 ${iss}
 <a class="cta" href="${appLink(b, 0)}&d=${d.id}">Пройти проверку в MotoHelper для ${esc(full)} →</a>
 <p>Не нашёл ответ? Опиши поломку <a href="${appLink(b, 0)}&amp;ai=1">ИИ-механику MotoHelper</a> — он знает ${esc(full)}.</p>
-<h2>Другие поломки ${esc(full)}</h2><div class="chips">${list.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/${slug}/${x.id}/">${esc(x.title)}</a>`).join("")}<a class="chip" href="/m/${slug}/">Всё о ${esc(b.name)} →</a></div>
+${fixHtml(d, e)}
+<h2>Другие поломки ${esc(full)}</h2><div class="chips">${list.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/${slug}/${x.id}/">${esc(PROB[x.id] ? PROB[x.id].replace("{M}", full) : x.title)}</a>`).join("")}<a class="chip" href="/m/${slug}/">Всё о ${esc(full)} →</a><a class="chip" href="/m/motor/${engSlug[b.versions[0].engine]}/">Всё о моторе ${esc(e.code)} →</a></div>
 <p><a href="/m/polomka/${d.id}/">${esc(d.title)} — общая проверка для любого мотоцикла</a></p>`;
     const desc = `${phrase}: что проверить по шагам — свеча ${val("spark") || "по мануалу"}${val("valveIn") ? ", зазоры клапанов " + val("valveIn") + " / " + (val("valveEx") || "—") : ""}${causes.length ? ". Причины: " + causes.slice(0, 3).join(", ") : ""}.`;
     const faq = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: d.steps.filter((st) => (st.onNo && st.onNo.result) || (st.onYes && st.onYes.result)).slice(0, 6).map((st) => {
       const r = typeof st.onNo === "object" ? st.onNo : st.onYes;
       return { "@type": "Question", name: fillT(efi && st.efiQ ? st.efiQ : st.q), acceptedAnswer: { "@type": "Answer", text: fillT(r.result + ". " + act(r)) } };
     }) };
-    files.set("m/" + slug + "/" + d.id + "/index.html", page({ ask: phrase + " (мотор " + e.code + ")", title: pickTitle(phrase, [": причины и что проверить | MotoHelper", ": причины и что проверить", ": причины", ""]), desc, canon, crumbs, body, sticky: appLink(b, 0) + "&d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
+    /* FAQPage здесь не ставим: вопросы одинаковые у всех моделей на этом моторе — для поиска это шаблон */
+    void faq;
+    files.set("m/" + slug + "/" + d.id + "/index.html", page({ ask: phrase + " (мотор " + e.code + ")", title: pickTitle(phrase, [": причины и что проверить | MotoHelper", ": причины и что проверить", ": причины", ""]), desc, canon, crumbs, body, sticky: appLink(b, 0) + "&d=" + d.id, ld: [crumbLd(crumbs)] }));
     probPages.push(canon);
   });
 });
@@ -805,34 +912,6 @@ ${iss}
 }
 
 
-/* ===== подборки (тип + объём) и сравнения популярных моделей одного класса — только по данным базы ===== */
-const CC_CLS = (cc) => (cc <= 55 ? 50 : cc <= 75 ? 70 : cc <= 115 ? 110 : cc <= 135 ? 125 : cc <= 165 ? 150 : cc <= 215 ? 200 : cc <= 265 ? 250 : cc <= 320 ? 300 : cc <= 480 ? 450 : cc <= 700 ? 600 : cc <= 950 ? 900 : 1200);
-const TYPE_MANY = { "Эндуро": "Эндуро", "Питбайк": "Питбайки", "Мопед": "Мопеды", "Скутер": "Скутеры", "Мотард": "Мотарды", "Кросс-эндуро": "Кросс-эндуро", "Тур-эндуро": "Тур-эндуро", "Лёгкий эндуро": "Лёгкие эндуро", "Спорт": "Спортбайки", "Нейкед": "Нейкеды", "Чоппер": "Чопперы", "Классика": "Классические мотоциклы", "Турер": "Туреры", "Триал": "Триал" };
-const hpOf = (b, v) => Number(v.hp || ENGINES[v.engine].hp) || 0;
-const groups = {};
-BIKES.forEach((b) => { const e = ENGINES[b.versions[0].engine]; if (!e.cc) return; const k = b.type + "|" + CC_CLS(e.cc); (groups[k] = groups[k] || []).push(b); });
-const podSlug = {};
-const podKeys = Object.keys(groups).filter((k) => groups[k].length >= 5).sort((a, b) => groups[b].length - groups[a].length);
-podKeys.forEach((k) => { const [t, c] = k.split("|"); podSlug[k] = slugify(t) + "-" + c; });
-const podName = (k) => { const [t, c] = k.split("|"); return (TYPE_MANY[t] || t) + " " + c + " см³"; };
-/* сравнения: в классе (тип + объём) по одной модели от популярной марки — та, у которой больше поколений; до 6 марок, все пары */
-const compareByGroup = {}, compares = [];
-/* самые продаваемые модели — в сравнениях их класса они выбираются первыми */
-/* модели, у которых уже есть страницы сравнений (в репозитории), при прочих равных остаются в сравнениях:
-   новая модель марки с более коротким названием не должна вытеснять их — иначе старые страницы пропали бы из поиска */
-const OLD_CMP = new Set();
-try { fs.readdirSync(path.join(OUT, "sravnenie"), { withFileTypes: true }).filter((d) => d.isDirectory()).forEach((d) => d.name.split("-vs-").forEach((x) => OLD_CMP.add(x))); } catch (e) {}
-Object.keys(groups).forEach((k) => {
-  const pick = {};
-  groups[k].filter((b) => CMP_BRANDS.indexOf(b.brand) >= 0).forEach((b) => { const p = pick[b.brand]; const fl = (x) => FLAGSHIP.indexOf(x.brand + " " + x.name) >= 0;
-    const st = (x) => (OLD_CMP.has(bikeSlug.get(x)) ? 1 : 0);
-    if (!p || fl(b) > fl(p) || (fl(b) === fl(p) && (st(b) > st(p) || (st(b) === st(p) && (b.versions.length > p.versions.length || (b.versions.length === p.versions.length && b.name.length < p.name.length)))))) pick[b.brand] = b; });
-  const reps = Object.values(pick).sort((a, b) => CMP_BRANDS.indexOf(a.brand) - CMP_BRANDS.indexOf(b.brand)).slice(0, 6);
-  for (let i = 0; i < reps.length; i++) for (let j = i + 1; j < reps.length; j++) {
-    const c = { a: reps[i], b: reps[j], k, slug: bikeSlug.get(reps[i]) + "-vs-" + bikeSlug.get(reps[j]), title: reps[i].brand + " " + reps[i].name + " или " + reps[j].brand + " " + reps[j].name };
-    compares.push(c); (compareByGroup[k] = compareByGroup[k] || []).push(c);
-  }
-});
 compares.forEach((c) => {
   const A = c.a, Bk = c.b, va = A.versions[0], vb = Bk.versions[0], ea = ENGINES[va.engine], eb = ENGINES[vb.engine];
   const na = A.brand + " " + A.name, nb = Bk.brand + " " + Bk.name, canon = SITE + "m/sravnenie/" + c.slug + "/";
@@ -878,7 +957,7 @@ podKeys.forEach((k) => {
     topHp ? `Самый мощный — <a href="/m/${bikeSlug.get(top)}/">${esc(top.brand + " " + top.name)}</a>: ${topHp} л.с.` : "",
     engCount[topEng] > 1 ? `Чаще всего стоит мотор <a href="/m/motor/${engSlug[topEng]}/">${esc(ENGINES[topEng].code)}</a> — на ${engCount[topEng]} ${plural(engCount[topEng], "модели", "моделях", "моделях")}: запчасти к нему найти проще всего.` : "",
   ].filter(Boolean);
-  const rows = list.slice(0, 120).map((b) => { const v = b.versions[0], e = ENGINES[v.engine];
+  const rows = list.map((b) => { const v = b.versions[0], e = ENGINES[v.engine];
     return `<tr><td><a href="/m/${bikeSlug.get(b)}/">${esc(b.brand + " " + b.name)}</a></td><td><a href="/m/motor/${engSlug[v.engine]}/">${esc(e.code)}</a></td><td>${hpOf(b, v) || "—"}</td><td>${esc(e.cooling || "—")}</td><td>${esc(e.oilVol || "—")}</td><td>${e.oilInt ? esc(kmh(e.oilInt, e, b).replace(/^каждые /, "")) : "—"}</td></tr>`; }).join("");
   const cmp = (compareByGroup[k] || []).slice(0, 12);
   /* «какой выбрать»: самые частые моторы класса — плюсы и минусы из данных (охлаждение, клапаны, балансир, инжектор, тюнинг, слабые места) */
@@ -906,7 +985,8 @@ ${cmp.length ? `<h2>Сравнения</h2><div class="chips">${cmp.map((c) => `
 <h2>Другие подборки</h2><div class="chips">${podKeys.filter((x) => x !== k && x.split("|")[0] === k.split("|")[0]).concat(podKeys.filter((x) => x.split("|")[0] !== k.split("|")[0]).slice(0, 6)).slice(0, 14).map((x) => `<a class="chip" href="/m/podborka/${podSlug[x]}/">${esc(podName(x))}</a>`).join("")}</div>`;
   files.set("m/podborka/" + podSlug[k] + "/index.html", page({ title: pickTitle(name, engTop.length > 1 ? [": какой выбрать — моторы, мощность, масло | MotoHelper", ": какой выбрать — моторы, мощность, масло", ": какой выбрать", ": все модели"] : [": все модели — мотор, мощность, масло | MotoHelper", ": все модели — мотор, мощность, масло", ": все модели"]),
     desc: `${name}: ${list.length} ${plural(list.length, "модель", "модели", "моделей")}${engTop.length > 1 ? ". Какой мотор выбрать: " + engTop.slice(0, 4).map((id) => ENGINES[id].code).join(", ") + " — плюсы, минусы и слабые места" : " — " + list.slice(0, 4).map((b) => b.brand + " " + b.name).join(", ")}. Мощность, охлаждение, масло.`, canon, crumbs, body,
-    ld: [crumbLd(crumbs)].concat(pfaq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: pfaq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] : []) }));
+    ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "ItemList", name, numberOfItems: list.length, itemListElement: list.slice(0, 100).map((b, i) => ({ "@type": "ListItem", position: i + 1, url: SITE + "m/" + bikeSlug.get(b) + "/", name: b.brand + " " + b.name })) }]
+      .concat(pfaq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: pfaq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] : []) }));
 });
 {
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Подборки", null]];
@@ -978,7 +1058,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 }
 
 /* «гаражный» режим: кнопки под палец в перчатке (не меньше 44 px), быстрые переходы, ✓ у цифр из руководства, яркость на солнце */
-const GARAGE_CSS = `.pc-plus li::marker{content:"+ ";color:#3DDC97}.pc-minus li::marker{content:"– ";color:#F5B041}.wr-static{background:#0E1013;border:1px solid var(--line);border-radius:14px;padding:8px;margin:8px 0}.wr-static svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}.wr-legend{list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}.wr-legend li{display:flex;gap:10px;align-items:center;line-height:1.35}.wr-legend i{width:30px;height:8px;border-radius:4px;flex:none}.nw,.tu-top .cu-price{white-space:nowrap}.tr-role{display:inline-block;padding:0 7px;border-radius:999px;font:700 11px/1.6 var(--cond);text-transform:uppercase;letter-spacing:.04em;border:1px solid currentColor;vertical-align:1px}.r-main{color:#8A8CFF}.r-must{color:#F5B041}.r-opt{color:var(--muted)}.tu-ul{margin:4px 0 0;padding-left:18px}.tu-ul li{margin:2px 0}.tu-stage li .small{color:var(--muted)}.tu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.tu{grid-template-columns:1fr 1fr}}.tu-item{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.tu-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.tu-top b{font-size:16px}.tu-item p{margin:2px 0 0;font-size:15px;line-height:1.45}.tu-g{font-size:14px;margin-top:4px}.tu-stages{display:grid;gap:10px;margin:6px 0 10px}@media(min-width:700px){.tu-stages{grid-template-columns:1fr 1fr}}.tu-stage{padding:12px 14px;border-radius:12px;border:1px solid rgba(138,140,255,.45);background:rgba(138,140,255,.06)}.tu-stage h3{margin:0 0 2px;font-size:17px}.tu-stage ol{margin:8px 0 6px;padding-left:20px;line-height:1.5}.tu-sum{margin:0;font-weight:700}.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-eff{color:#B9C2CF;font-size:14px}.cu-nu{margin:6px 0 4px;padding-left:20px;font-size:15px;line-height:1.5}.cu-nu li{margin:4px 0}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
+const GARAGE_CSS = `.share,.sub{margin:22px 0 8px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}.share>b,.sub>b{display:block;font:700 16px var(--cond);margin-bottom:4px}.share .chips,.sub .chips{margin:8px 0 0}.share button.chip,.sub button.chip{cursor:pointer;color:inherit;font:inherit;border:1px solid var(--line);background:var(--card)}.share-msg{display:block;margin-top:6px;color:#3DDC97}.sub p{margin:0}.pn{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin:14px 0}.chip[hidden]{display:none}.chip{max-width:100%;white-space:normal;overflow-wrap:anywhere}details.more{margin:6px 0 10px}details.more>summary{cursor:pointer;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:10px;font:600 15px var(--cond)}.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.pc-plus li::marker{content:"+ ";color:#3DDC97}.pc-minus li::marker{content:"– ";color:#F5B041}.wr-static{background:#0E1013;border:1px solid var(--line);border-radius:14px;padding:8px;margin:8px 0}.wr-static svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}.wr-legend{list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}.wr-legend li{display:flex;gap:10px;align-items:center;line-height:1.35}.wr-legend i{width:30px;height:8px;border-radius:4px;flex:none}.nw,.tu-top .cu-price{white-space:nowrap}.tr-role{display:inline-block;padding:0 7px;border-radius:999px;font:700 11px/1.6 var(--cond);text-transform:uppercase;letter-spacing:.04em;border:1px solid currentColor;vertical-align:1px}.r-main{color:#8A8CFF}.r-must{color:#F5B041}.r-opt{color:var(--muted)}.tu-ul{margin:4px 0 0;padding-left:18px}.tu-ul li{margin:2px 0}.tu-stage li .small{color:var(--muted)}.tu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.tu{grid-template-columns:1fr 1fr}}.tu-item{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.tu-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.tu-top b{font-size:16px}.tu-top b a{display:inline-block;padding:12px 0;margin:-12px 0}.tu-item p{margin:2px 0 0;font-size:15px;line-height:1.45}.tu-g{font-size:14px;margin-top:4px}.tu-stages{display:grid;gap:10px;margin:6px 0 10px}@media(min-width:700px){.tu-stages{grid-template-columns:1fr 1fr}}.tu-stage{padding:12px 14px;border-radius:12px;border:1px solid rgba(138,140,255,.45);background:rgba(138,140,255,.06)}.tu-stage h3{margin:0 0 2px;font-size:17px}.tu-stage ol{margin:8px 0 6px;padding-left:20px;line-height:1.5}.tu-sum{margin:0;font-weight:700}.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-eff{color:#B9C2CF;font-size:14px}.cu-nu{margin:6px 0 4px;padding-left:20px;font-size:15px;line-height:1.5}.cu-nu li{margin:4px 0}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
 .chips{gap:8px}.crumbs a{display:inline-block;padding:12px 0}
 .jump{display:flex;gap:8px;overflow-x:auto;margin:0 0 14px;padding-bottom:4px;scrollbar-width:none}.jump::-webkit-scrollbar{display:none}
 .jump a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:12px;background:#fff;color:#000;font:600 16px var(--cond);text-decoration:none}
@@ -1002,6 +1082,7 @@ footer a{display:inline-block;padding:12px 0}
 @media (prefers-contrast:more){:root{--muted:#d0d0d0}.grp,.tile{border-color:#fff!important}.grp dt{color:#e6e6e6}.tile .src{color:#ffc65c}}`;
 files.set("m/m.css", fs.readFileSync(path.join(ROOT, "fonts/fonts.css"), "utf8") + "\n" + CSS + "\n" + GARAGE_CSS + "\n");
 files.set("m/ask.js", ASK_JS + "\n");
+files.set("m/share.js", SHARE_JS + "\n");
 files.set("m/rv.js", RV_JS + "\n");
 files.set("m/fb.js", FB_JS + "\n");
 /* сводные таблицы по моторам: /m/maslo/, /m/svechi/, /m/klapany/ — под общие запросы («какое масло заливать в мотоцикл»,
@@ -1315,7 +1396,22 @@ const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),
   [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), MODEL_TUNE_PAGES.map((t) => t.canon), [SITE + "m/provodka/"], WIRE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
 const hi = 5 + brands.length + GUIDES.length + DIAG.length;
-files.set("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${u}</loc><changefreq>${i ? "monthly" : "weekly"}</changefreq><priority>${i === 0 ? "1.0" : i < hi ? "0.7" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
+/* дата изменения страницы для sitemap (<lastmod>): GitHub Pages ставит всем файлам одно время выкладки, и Яндекс не видит,
+   что поменялось. Храним в m/lastmod.json «адрес → [дата, хэш содержимого]»; хэш — по заголовку, описанию и основному тексту
+   (без подвала, «Поделиться» и «Спроси механика»), так что правка шаблона подвала дату не сдвигает */
+const LASTMOD = (() => { try { return JSON.parse(fs.readFileSync(path.join(OUT, "lastmod.json"), "utf8")); } catch (e) { return {}; } })();
+const TODAY = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); // по Москве
+const lastmodOf = {};
+urls.forEach((u) => {
+  const f = u.slice(SITE.length) + "index.html", html = files.get(f);
+  if (!u.startsWith(SITE + "m/") || !html) return;
+  const main = html.slice(html.indexOf("<main>"), Math.max(html.indexOf('<div class="share"'), html.indexOf("<main>")));
+  const key = (html.match(/<title>[^<]*<\/title>/) || [""])[0] + (html.match(/<meta name="description"[^>]*>/) || [""])[0] + main;
+  const h = require("crypto").createHash("sha1").update(key).digest("hex").slice(0, 12), old = LASTMOD[u];
+  lastmodOf[u] = old && old[1] === h ? old : [TODAY, h];
+});
+files.set("m/lastmod.json", JSON.stringify(lastmodOf).replace(/\],"/g, '],\n"') + "\n");
+files.set("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${u}</loc>${lastmodOf[u] ? `<lastmod>${lastmodOf[u][0]}</lastmod>` : ""}<changefreq>${i ? "monthly" : "weekly"}</changefreq><priority>${i === 0 ? "1.0" : i < hi ? "0.7" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
 
 /* склеенные модели (мопеды-«семьи», v40): старые адреса не пропадают — короткие страницы-переадресации
    на общую модель (и на её страницы поломок, сравнения — если такие есть) */

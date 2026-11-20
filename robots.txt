@@ -2,4 +2,3 @@ User-agent: *
 Allow: /
 
 Sitemap: https://motohelper.ru/sitemap.xml
-Host: https://motohelper.ru

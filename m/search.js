@@ -10,4 +10,4 @@ function show(){var q=norm(i.value);if(!q){o.className="grid models res";o.inner
 var w=q.split(" ").map(alts),r=idx.filter(function(x){return w.every(function(a){return a.some(function(t){return x.s.indexOf(t)>=0})})});
 r=r.map(function(x,n){return[x,w.reduce(function(s,a){return s+sc(x,a)},0),n]}).sort(function(a,b){return b[1]-a[1]||a[2]-b[2]}).slice(0,40).map(function(y){return y[0]});
 o.className="grid models res on";o.innerHTML=r.length?r.map(function(x){return '<a class="card" href="/m/'+x.u+'/"><b>'+x.b+' '+x.n+'</b><small>'+x.t+' · '+x.e+'</small></a>'}).join(""):'<p class="note">Ничего не нашлось — попробуй марку или код мотора («174», «PR300»).</p>'}
-i.addEventListener("input",show);if(i.value)show()})();
+i.addEventListener("input",show);try{var pq=new URLSearchParams(location.search).get("q");if(pq&&!i.value)i.value=pq}catch(x){}if(i.value)show()})();
