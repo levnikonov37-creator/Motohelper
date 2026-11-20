@@ -19,16 +19,23 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" > changed.txt
-            # data.js и app.js меняют все страницы приложения, но адрес у приложения один — главная
+            git show "${{ github.event.before }}:m/lastmod.json" > lastmod-old.json 2>/dev/null || echo '{}' > lastmod-old.json
+            # data.js и app.js меняют все страницы приложения, но адрес у приложения один — главная.
+            # Страницы каталога: по m/lastmod.json — только те, у которых изменилось содержимое (хэш), а не каждая,
+            # где поменялся подвал или стили. Без старого lastmod.json — по списку изменённых файлов
             python3 - <<'EOF'
-          import re
+          import re, json
           urls = set()
+          old = json.load(open("lastmod-old.json"))
+          new = json.load(open("m/lastmod.json"))
           for f in open("changed.txt").read().split():
               if f == "index.html" or f.startswith("js/") or f.startswith("css/"):
                   urls.add("https://motohelper.ru/")
               m = re.match(r"^(m/.*)index\.html$", f)
-              if m:
+              if m and not old:
                   urls.add("https://motohelper.ru/" + m.group(1))
+          if old:
+              urls |= {u for u, v in new.items() if old.get(u, [None, None])[1] != v[1]}
           open("urls.txt", "w").write("\n".join(sorted(urls)))
           EOF
           else

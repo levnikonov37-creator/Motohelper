@@ -201,6 +201,16 @@ i.addEventListener("input",show);try{var pq=new URLSearchParams(location.search)
 const FILTER_JS = `(function(){var b=document.querySelectorAll("[data-t]");document.querySelectorAll("button[data-f]").forEach(function(c){c.addEventListener("click",function(){var f=c.getAttribute("data-f");
 document.querySelectorAll("button[data-f]").forEach(function(x){x.classList.toggle("on",x===c)});b.forEach(function(x){x.classList.toggle("hide",f!=="*"&&x.getAttribute("data-t")!==f)})})})})();`;
 
+/* «Поделиться» (Telegram, ВКонтакте, WhatsApp, системное меню телефона, копия ссылки), подписка на канал и «Установить на телефон» —
+   на всех страницах каталога: люди сами приводят друзей и возвращаются. Скрипт — m/share.js */
+const shareBar = (canon, title) => { const u = encodeURIComponent(canon), t = encodeURIComponent(title.replace(/ \| MotoHelper$/, ""));
+  return `<div class="share" data-u="${canon}" data-t="${esc(title.replace(/ \| MotoHelper$/, ""))}"><b>Поделиться страницей</b><div class="chips"><button type="button" class="chip share-sys" hidden>Отправить…</button><a class="chip" data-via="tg" href="https://t.me/share/url?url=${u}&amp;text=${t}" target="_blank" rel="nofollow noopener">Telegram</a><a class="chip" data-via="vk" href="https://vk.com/share.php?url=${u}&amp;title=${t}" target="_blank" rel="nofollow noopener">ВКонтакте</a><a class="chip" data-via="wa" href="https://wa.me/?text=${t}%20${u}" target="_blank" rel="nofollow noopener">WhatsApp</a><button type="button" class="chip share-copy">Скопировать ссылку</button></div><span class="share-msg small" aria-live="polite"></span></div>`; };
+const SUB = `<aside class="sub"><b>Советы по ремонту и ТО каждый день в 18:00</b><p class="small">Мотор дня, частые поломки и как их чинить — в канале MotoHelper.</p><div class="chips"><a class="chip" href="https://t.me/motohelperru">Канал в Telegram</a><a class="chip" href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a><button type="button" class="chip inst" hidden>Установить MotoHelper на телефон</button></div></aside>`;
+const SHARE_JS = `(function(){var g=function(v){if(window.ym)try{ym(113844391,"reachGoal","share",{via:v})}catch(x){}};var bar=document.querySelector(".share");
+if(bar){var u=bar.getAttribute("data-u"),t=bar.getAttribute("data-t"),msg=bar.querySelector(".share-msg");bar.querySelectorAll("a[data-via]").forEach(function(a){a.addEventListener("click",function(){g(a.getAttribute("data-via"))})});
+var sy=bar.querySelector(".share-sys");if(sy&&navigator.share){sy.hidden=false;sy.addEventListener("click",function(){navigator.share({title:t,url:u}).then(function(){g("system")}).catch(function(){})})}
+var cp=bar.querySelector(".share-copy");if(cp)cp.addEventListener("click",function(){var ok=function(){msg.textContent="Ссылка скопирована — отправь другу";g("copy")},no=function(){window.prompt("Скопируй ссылку:",u)};if(navigator.clipboard)navigator.clipboard.writeText(u).then(ok,no);else no()})}
+var ib=document.querySelector(".inst"),dp=null;if(ib){addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;ib.hidden=false});ib.addEventListener("click",function(){if(!dp)return;dp.prompt();dp.userChoice.then(function(c){if(c&&c.outcome==="accepted")g("install");dp=null;ib.hidden=true})})}})();`;
 /* реклама РСЯ на страницах каталога — только если в ai-config.json задан rsya.blockId */
 const SITE_CFG = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, "ai-config.json"), "utf8")); } catch (e) { return {}; } })();
 const RSYA_ID = SITE_CFG.rsya && /^R-A-[\d-]+$/.test(SITE_CFG.rsya.blockId || "") ? SITE_CFG.rsya.blockId : "";
@@ -279,7 +289,11 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 <meta property="og:description" content="${esc(desc)}" />
 <meta property="og:url" content="${canon}" />
 <meta property="og:image" content="${SITE}img/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="theme-color" content="#000000" />
+<link rel="manifest" href="/manifest.webmanifest" />
 <link rel="icon" href="/favicon.ico" sizes="48x48" />
 <link rel="icon" type="image/png" sizes="120x120" href="/img/favicon-120.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png" />
@@ -294,7 +308,9 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 <main>
 <nav class="crumbs">${crumbs.map((c) => (c[1] ? `<a href="${c[1]}">${esc(c[0])}</a>` : esc(c[0]))).join(" › ")}</nav>
 ${body}
+${shareBar(canon, title)}
 ${ask ? askBlock(ask) : ""}
+${SUB}
 ${AD}
 <footer>MotoHelper — ремонт, ТО и запчасти для мотоциклов, питбайков и мопедов: диагностика, инструкции, ИИ-механик. Данные справочные — перед работой сверяйся с мануалом своего мотоцикла. <a href="/m/">Каталог</a> · <a href="/m/polomka/">Неисправности</a> · <a href="/m/remont/">Инструкции</a> · <a href="/m/motor/">Моторы</a> · <a href="/m/tuning/">Тюнинг</a> · <a href="/m/provodka/">Электрика</a> · <a href="/m/podborka/">Подборки</a> · <a href="/m/sravnenie/">Сравнения</a> · <a href="/">Приложение</a> · <a href="/#ai=1">ИИ-механик</a> · <a href="https://t.me/motohelperru">Канал в Telegram</a> · <a href="https://vk.com/motohelper_ru37">Группа ВКонтакте</a></footer>
 </main>
@@ -303,6 +319,7 @@ ${js ? `<script>${js}</script>` : ""}
 ${ask ? `<script src="/m/ask.js" defer></script>` : ""}
 ${rv ? `<script src="/m/rv.js" defer></script>` : ""}
 ${fb ? `<script src="/m/fb.js" defer></script>` : ""}
+<script src="/m/share.js" defer></script>
 ${METRIKA}
 </body>
 </html>
@@ -1041,7 +1058,7 @@ ${Object.keys(byType).map((t) => `<h2>${esc(TYPE_MANY[t] || t)}</h2><div class="
 }
 
 /* «гаражный» режим: кнопки под палец в перчатке (не меньше 44 px), быстрые переходы, ✓ у цифр из руководства, яркость на солнце */
-const GARAGE_CSS = `.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.pc-plus li::marker{content:"+ ";color:#3DDC97}.pc-minus li::marker{content:"– ";color:#F5B041}.wr-static{background:#0E1013;border:1px solid var(--line);border-radius:14px;padding:8px;margin:8px 0}.wr-static svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}.wr-legend{list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}.wr-legend li{display:flex;gap:10px;align-items:center;line-height:1.35}.wr-legend i{width:30px;height:8px;border-radius:4px;flex:none}.nw,.tu-top .cu-price{white-space:nowrap}.tr-role{display:inline-block;padding:0 7px;border-radius:999px;font:700 11px/1.6 var(--cond);text-transform:uppercase;letter-spacing:.04em;border:1px solid currentColor;vertical-align:1px}.r-main{color:#8A8CFF}.r-must{color:#F5B041}.r-opt{color:var(--muted)}.tu-ul{margin:4px 0 0;padding-left:18px}.tu-ul li{margin:2px 0}.tu-stage li .small{color:var(--muted)}.tu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.tu{grid-template-columns:1fr 1fr}}.tu-item{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.tu-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.tu-top b{font-size:16px}.tu-top b a{display:inline-block;padding:12px 0;margin:-12px 0}.tu-item p{margin:2px 0 0;font-size:15px;line-height:1.45}.tu-g{font-size:14px;margin-top:4px}.tu-stages{display:grid;gap:10px;margin:6px 0 10px}@media(min-width:700px){.tu-stages{grid-template-columns:1fr 1fr}}.tu-stage{padding:12px 14px;border-radius:12px;border:1px solid rgba(138,140,255,.45);background:rgba(138,140,255,.06)}.tu-stage h3{margin:0 0 2px;font-size:17px}.tu-stage ol{margin:8px 0 6px;padding-left:20px;line-height:1.5}.tu-sum{margin:0;font-weight:700}.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-eff{color:#B9C2CF;font-size:14px}.cu-nu{margin:6px 0 4px;padding-left:20px;font-size:15px;line-height:1.5}.cu-nu li{margin:4px 0}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
+const GARAGE_CSS = `.share,.sub{margin:22px 0 8px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}.share>b,.sub>b{display:block;font:700 16px var(--cond);margin-bottom:4px}.share .chips,.sub .chips{margin:8px 0 0}.share button.chip,.sub button.chip{cursor:pointer;color:inherit;font:inherit;border:1px solid var(--line);background:var(--card)}.share-msg{display:block;margin-top:6px;color:#3DDC97}.sub p{margin:0}.pn{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin:14px 0}.chip[hidden]{display:none}.chip{max-width:100%;white-space:normal;overflow-wrap:anywhere}details.more{margin:6px 0 10px}details.more>summary{cursor:pointer;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:10px;font:600 15px var(--cond)}.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.pc-plus li::marker{content:"+ ";color:#3DDC97}.pc-minus li::marker{content:"– ";color:#F5B041}.wr-static{background:#0E1013;border:1px solid var(--line);border-radius:14px;padding:8px;margin:8px 0}.wr-static svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}.wr-legend{list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}.wr-legend li{display:flex;gap:10px;align-items:center;line-height:1.35}.wr-legend i{width:30px;height:8px;border-radius:4px;flex:none}.nw,.tu-top .cu-price{white-space:nowrap}.tr-role{display:inline-block;padding:0 7px;border-radius:999px;font:700 11px/1.6 var(--cond);text-transform:uppercase;letter-spacing:.04em;border:1px solid currentColor;vertical-align:1px}.r-main{color:#8A8CFF}.r-must{color:#F5B041}.r-opt{color:var(--muted)}.tu-ul{margin:4px 0 0;padding-left:18px}.tu-ul li{margin:2px 0}.tu-stage li .small{color:var(--muted)}.tu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.tu{grid-template-columns:1fr 1fr}}.tu-item{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.tu-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.tu-top b{font-size:16px}.tu-top b a{display:inline-block;padding:12px 0;margin:-12px 0}.tu-item p{margin:2px 0 0;font-size:15px;line-height:1.45}.tu-g{font-size:14px;margin-top:4px}.tu-stages{display:grid;gap:10px;margin:6px 0 10px}@media(min-width:700px){.tu-stages{grid-template-columns:1fr 1fr}}.tu-stage{padding:12px 14px;border-radius:12px;border:1px solid rgba(138,140,255,.45);background:rgba(138,140,255,.06)}.tu-stage h3{margin:0 0 2px;font-size:17px}.tu-stage ol{margin:8px 0 6px;padding-left:20px;line-height:1.5}.tu-sum{margin:0;font-weight:700}.cu{display:grid;gap:10px;margin:8px 0}@media(min-width:700px){.cu{grid-template-columns:1fr 1fr}}.cu-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}.cu-kick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8A8CFF}.cu-card b{font-size:17px}.cu-spec{color:#9BD4FF;font-size:14px;font-weight:600}.cu-eff{color:#B9C2CF;font-size:14px}.cu-nu{margin:6px 0 4px;padding-left:20px;font-size:15px;line-height:1.5}.cu-nu li{margin:4px 0}.cu-card p{margin:2px 0 0;font-size:15px;line-height:1.45}.cu-price{font-weight:700;font-size:15px}.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;font-size:15px;border-radius:10px}
 .chips{gap:8px}.crumbs a{display:inline-block;padding:12px 0}
 .jump{display:flex;gap:8px;overflow-x:auto;margin:0 0 14px;padding-bottom:4px;scrollbar-width:none}.jump::-webkit-scrollbar{display:none}
 .jump a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:12px;background:#fff;color:#000;font:600 16px var(--cond);text-decoration:none}
@@ -1065,6 +1082,7 @@ footer a{display:inline-block;padding:12px 0}
 @media (prefers-contrast:more){:root{--muted:#d0d0d0}.grp,.tile{border-color:#fff!important}.grp dt{color:#e6e6e6}.tile .src{color:#ffc65c}}`;
 files.set("m/m.css", fs.readFileSync(path.join(ROOT, "fonts/fonts.css"), "utf8") + "\n" + CSS + "\n" + GARAGE_CSS + "\n");
 files.set("m/ask.js", ASK_JS + "\n");
+files.set("m/share.js", SHARE_JS + "\n");
 files.set("m/rv.js", RV_JS + "\n");
 files.set("m/fb.js", FB_JS + "\n");
 /* сводные таблицы по моторам: /m/maslo/, /m/svechi/, /m/klapany/ — под общие запросы («какое масло заливать в мотоцикл»,
@@ -1378,7 +1396,22 @@ const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),
   [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), MODEL_TUNE_PAGES.map((t) => t.canon), [SITE + "m/provodka/"], WIRE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
 const hi = 5 + brands.length + GUIDES.length + DIAG.length;
-files.set("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${u}</loc><changefreq>${i ? "monthly" : "weekly"}</changefreq><priority>${i === 0 ? "1.0" : i < hi ? "0.7" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
+/* дата изменения страницы для sitemap (<lastmod>): GitHub Pages ставит всем файлам одно время выкладки, и Яндекс не видит,
+   что поменялось. Храним в m/lastmod.json «адрес → [дата, хэш содержимого]»; хэш — по заголовку, описанию и основному тексту
+   (без подвала, «Поделиться» и «Спроси механика»), так что правка шаблона подвала дату не сдвигает */
+const LASTMOD = (() => { try { return JSON.parse(fs.readFileSync(path.join(OUT, "lastmod.json"), "utf8")); } catch (e) { return {}; } })();
+const TODAY = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); // по Москве
+const lastmodOf = {};
+urls.forEach((u) => {
+  const f = u.slice(SITE.length) + "index.html", html = files.get(f);
+  if (!u.startsWith(SITE + "m/") || !html) return;
+  const main = html.slice(html.indexOf("<main>"), Math.max(html.indexOf('<div class="share"'), html.indexOf("<main>")));
+  const key = (html.match(/<title>[^<]*<\/title>/) || [""])[0] + (html.match(/<meta name="description"[^>]*>/) || [""])[0] + main;
+  const h = require("crypto").createHash("sha1").update(key).digest("hex").slice(0, 12), old = LASTMOD[u];
+  lastmodOf[u] = old && old[1] === h ? old : [TODAY, h];
+});
+files.set("m/lastmod.json", JSON.stringify(lastmodOf).replace(/\],"/g, '],\n"') + "\n");
+files.set("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${u}</loc>${lastmodOf[u] ? `<lastmod>${lastmodOf[u][0]}</lastmod>` : ""}<changefreq>${i ? "monthly" : "weekly"}</changefreq><priority>${i === 0 ? "1.0" : i < hi ? "0.7" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
 
 /* склеенные модели (мопеды-«семьи», v40): старые адреса не пропадают — короткие страницы-переадресации
    на общую модель (и на её страницы поломок, сравнения — если такие есть) */
