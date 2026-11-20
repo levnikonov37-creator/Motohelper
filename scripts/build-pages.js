@@ -275,6 +275,9 @@ const fitDesc = (d) => { if (d.length <= 200) return d; const cut = d.slice(0, 2
   /* незакрытая скобка после обрезки — режем до неё */
   if ((r.match(/\(/g) || []).length > (r.match(/\)/g) || []).length) r = r.slice(0, r.lastIndexOf("("));
   return r.replace(/[,;:\s—–(-]+$/, "") + "."; };
+/* метки версий у общих файлов каталога (m.css, скрипты): после выкладки браузер берёт новый файл сразу, а service worker —
+   из кэша, пока метка та же (файлы с ?v= у него «сначала кэш»). В страницу пишем заглушку, в конце сборки — хэш файла */
+const assetV = () => ({ css: "@@V:m/m.css@@", ask: "@@V:m/ask.js@@", rv: "@@V:m/rv.js@@", fb: "@@V:m/fb.js@@", share: "@@V:m/share.js@@" });
 function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb }) {
   title = fitTitle(title);
   desc = fitDesc(desc);
@@ -304,7 +307,7 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 <link rel="preload" href="/fonts/fira-sans-400-normal.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/m/m.css" />
+<link rel="stylesheet" href="/m/m.css?v=${assetV().css}" />
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
 <body>
@@ -320,10 +323,10 @@ ${AD}
 </main>
 ${sticky ? `<div class="sticky"><a class="cta" href="${sticky}">Открыть в MotoHelper: ремонт, запчасти, ИИ</a></div>` : ""}
 ${js ? `<script>${js}</script>` : ""}
-${ask ? `<script src="/m/ask.js" defer></script>` : ""}
-${rv ? `<script src="/m/rv.js" defer></script>` : ""}
-${fb ? `<script src="/m/fb.js" defer></script>` : ""}
-<script src="/m/share.js" defer></script>
+${ask ? `<script src="/m/ask.js?v=${assetV().ask}" defer></script>` : ""}
+${rv ? `<script src="/m/rv.js?v=${assetV().rv}" defer></script>` : ""}
+${fb ? `<script src="/m/fb.js?v=${assetV().fb}" defer></script>` : ""}
+<script src="/m/share.js?v=${assetV().share}" defer></script>
 ${METRIKA}
 </body>
 </html>
@@ -653,6 +656,14 @@ const similar = (b, skip) => { const k = clsKey(b), L = BY_HP[k] || [], j = L.in
   return out; };
 const CMP_OF = new Map();
 compares.forEach((c) => [c.a, c.b].forEach((x) => { if (!CMP_OF.has(x)) CMP_OF.set(x, []); CMP_OF.get(x).push(c); }));
+/* свечи: страницы «Свеча NGK <код>: аналоги и на каких мотоциклах» — по таблице аналогов SPARK_X (js/data.js) */
+const SPARK_CODES = Object.keys(ctx.SPARK_X || {});
+const sparkRe = (k) => new RegExp("(^|[^A-Z0-9])" + k.replace(/-/g, "\\-") + "([^A-Z0-9-]|$)");
+const sparkOf = (e) => { const sp = String(e.spark || "").toUpperCase(); return SPARK_CODES.filter((k) => { const x = ctx.SPARK_X[k]; return sparkRe(k).test(sp) || (x[0] && sparkRe(x[0]).test(sp)) || (x[1] && sparkRe(x[1]).test(sp)); }); };
+const SPARK_ENG = {};
+engIds.forEach((id) => sparkOf(ENGINES[id]).forEach((k) => (SPARK_ENG[k] = SPARK_ENG[k] || []).push(id)));
+const sparkSlug = (k) => "ngk-" + slugify(k);
+const sparkChips = (e) => sparkOf(e).filter((k) => SPARK_ENG[k]).map((k) => `<a class="chip" href="/m/svecha/${sparkSlug(k)}/">Свеча NGK ${esc(k)}: аналоги →</a>`).join("");
 const WIRE_ANCHOR = { ac: "Схема электрики без АКБ (AC-CDI)", dc: "Схема электрики с АКБ (DC-CDI)", efi: "Схема электрики инжектора (ЭБУ)", points: "Схема контактного зажигания" };
 /* подпись поломки без названия модели: «На {M} садится аккумулятор» → «Садится аккумулятор» */
 const PROB_SHORT = { charge: "Садится аккумулятор", knock: "Стучит мотор" };
@@ -672,7 +683,7 @@ BIKES.forEach((b) => {
     const groups = (head ? "" : `<h2 class="vh">Характеристики и ТО</h2>`) + garageGroups(e, v, b, pfx, cross, vi === 0);
     const iss = weak(e).length ? `<h2 id="${pfx}slabye">Слабые места</h2><ul class="iss">${weak(e).map((x) => `<li class="${x.sev}"><span class="sev">${SEV[x.sev] || ""}</span><b>${esc(x.t)}</b>${esc(x.fix)}</li>`).join("")}</ul>` : "";
     const keyG = guidesOf(e).filter((g) => KEY_GUIDES.indexOf(g.id) >= 0);
-    const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a><a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">${WIRE_ANCHOR[ctx.wiringType(e)] || "Схема электрики"}</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
+    const more = `<div class="chips"><a class="chip" href="/m/motor/${engSlug[v.engine]}/">Всё о моторе ${esc(e.code)} →</a>${sparkChips(e)}<a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">${WIRE_ANCHOR[ctx.wiringType(e)] || "Схема электрики"}</a>${keyG.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>`;
     return `<section class="ver">${head}<div class="tiles">${cheat(e, v, pfx, vi === 0 ? b : null)}</div>${jumpNav(e, pfx, weak(e).length, cross, buyItems(e, cross ? b : null).length > 0, vi === 0)}${toolsNav(e, appLink(b, vi))}${approx}${groups}${iss}${carbUpHtml(e, pfx, appLink(b, vi) + "&r=tune")}${vi === 0 && modelTuneHas(b) ? `<div class="chips"><a class="chip" href="/m/${slug}/tuning/">Тюнинг ${esc(full)} по шагам: резвее, мощнее, быстрее →</a></div>` : ""}${more}
 <a class="cta" href="${appLink(b, vi)}">Ремонт, запчасти и ИИ-механик для ${esc(full)} →</a><div class="chips"><a class="chip" href="${appLink(b, vi)}&amp;add=1">☆ Сохранить ${esc(b.versions.length > 1 ? full + " (" + verName(v, vi, e) + ")" : full)} в гараж — журнал ТО и напоминания</a></div></section>`;
   }).join("\n");
@@ -792,7 +803,7 @@ ${ds.length ? `<h2>Неисправности</h2><div class="chips">${ds.map((d
 ${gs.length ? `<h2>Инструкции для ${esc(e.code)}</h2><div class="chips">${gs.map((g) => `<a class="chip" href="/m/remont/${g.id}/">${esc(g.title)}</a>`).join("")}</div>` : ""}
 ${faqHtml}
 ${fbBlock("", e.code + " [" + id + "]", ["Масло", "Объём масла", "Свеча", "Зазоры клапанов", "Карбюратор и жиклёры", "Слабые места", "На каких моделях стоит"])}
-<div class="chips">${tuneEligible(id) ? `<a class="chip" href="/m/motor/${slug}/tuning/">Тюнинг ${esc(e.code)} →</a>` : ""}<a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">${WIRE_ANCHOR[ctx.wiringType(e)] || "Схема электрики"}</a><a class="chip" href="/m/maslo/">Масло для других моторов</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>`;
+<div class="chips">${sparkChips(e)}${tuneEligible(id) ? `<a class="chip" href="/m/motor/${slug}/tuning/">Тюнинг ${esc(e.code)} →</a>` : ""}<a class="chip" href="/m/provodka/${ctx.wiringType(e)}/">${WIRE_ANCHOR[ctx.wiringType(e)] || "Схема электрики"}</a><a class="chip" href="/m/maslo/">Масло для других моторов</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам</a><a class="chip" href="/m/klapany/">Зазоры клапанов: таблица</a></div>`;
   /* 2Т: масло — в бачок или смесь, объём — в КПП или редуктор; клапанов нет */
   const twoE = e.stroke === "2T", cvtE = (e.groups || []).indexOf("cvt") >= 0;
   const oilE = twoE ? (briefOil(e.oil) || "2T").replace(/^масло\s+/i, "").replace(/2T\s+масло(?![а-яё])/gi, "2T") + (e.oilVol && /\d/.test(e.oilVol) ? ", " + ((v) => /редуктор|КПП|коробк/i.test(v) ? v : (cvtE ? "в редуктор " : "в КПП ") + v)(brief(e.oilVol).split(",")[0]) : "")
@@ -1153,6 +1164,44 @@ files.set("m/rv.js", RV_JS + "\n");
 files.set("m/fb.js", FB_JS + "\n");
 /* сводные таблицы по моторам: /m/maslo/, /m/svechi/, /m/klapany/ — под общие запросы («какое масло заливать в мотоцикл»,
    «свеча на питбайк», «зазоры клапанов таблица»). Значения — из базы, «по мануалу» не показываем. */
+
+/* «Свеча NGK CR8E: аналоги и на каких мотоциклах стоит» — запросы «cr8e аналог», «d8ea на какие мотоциклы» */
+const SPARK_PAGES = [];
+{
+  const okv = (x) => x && x !== "—" && !/мануал/i.test(x);
+  const most = (L) => { const c = {}; L.filter(Boolean).forEach((v) => (c[v] = (c[v] || 0) + 1)); const t = Object.keys(c).sort((a, b) => c[b] - c[a])[0]; return t ? [t, c[t], L.filter(Boolean).length] : null; };
+  const heat = (k) => +((k.match(/[A-Z]+(\d{1,2})/) || [])[1] || 0);
+  SPARK_CODES.filter((k) => SPARK_ENG[k]).forEach((k) => {
+    const x = ctx.SPARK_X[k], ids = SPARK_ENG[k].slice().sort((a, b) => (bikesOf[b] || []).length - (bikesOf[a] || []).length);
+    const models = [...new Set([].concat(...ids.map((id) => bikesOf[id] || [])))].filter((b) => b.brand !== "Любая модель");
+    const gap = most(ids.map((id) => okv(ENGINES[id].gap) ? brief(ENGINES[id].gap) : "")), tq = most(ids.map((id) => okv(ENGINES[id].sparkTorque) ? brief(ENGINES[id].sparkTorque) : ""));
+    /* соседи по калильному числу той же серии: CR7E — горячее, CR9E — холоднее */
+    const fam = k.replace(/\d{1,2}/, "#"), sib = SPARK_CODES.filter((y) => y !== k && y.replace(/\d{1,2}/, "#") === fam && SPARK_ENG[y]).sort((a, b) => heat(a) - heat(b));
+    const slug = sparkSlug(k), canon = SITE + "m/svecha/" + slug + "/";
+    const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Свечи", "/m/svechi/"], ["NGK " + k, null]];
+    const an = ["Denso " + x[0]].concat(x[1] ? ["Torch " + x[1]] : []);
+    const faq = [
+      ["Чем заменить свечу NGK " + k + "?", "Прямые аналоги: " + an.join(", ") + ". Калильное число и резьба у них те же — ставь любую из них."],
+      gap && ["Какой зазор у свечи NGK " + k + "?", (gap[1] >= gap[2] / 2 ? "Чаще всего " : "Обычно ") + gap[0] + " — но смотри мануал своего мотора: зазор зависит от системы зажигания."],
+      ["На какие мотоциклы ставится NGK " + k + "?", models.slice(0, 8).map((b) => b.brand + " " + b.name).join(", ") + (models.length > 8 ? " и ещё " + (models.length - 8) + " " + plural(models.length - 8, "модель", "модели", "моделей") : "") + "."],
+      sib.length && ["Можно ли поставить свечу холоднее или горячее?", "У NGK чем больше цифра, тем свеча холоднее. Соседние: " + sib.map((y) => "NGK " + y + (heat(y) < heat(k) ? " (горячее)" : " (холоднее)")).join(", ") + ". Холоднее ставят после тюнинга и при езде на высоких оборотах, горячее — если свеча чёрная от нагара на коротких поездках."]
+    ].filter(Boolean).map((q) => [q[0], /[.!?]$/.test(q[1]) ? q[1] : q[1] + "."]);
+    const body = `<section class="hero"><div class="kick">Свеча зажигания</div><h1>Свеча NGK ${esc(k)}: аналоги и на каких мотоциклах стоит</h1>
+<p class="lead">Аналоги: ${esc(an.join(", "))}. Стоит на ${ids.length} ${plural(ids.length, "моторе", "моторах", "моторах")} и ${models.length} ${plural(models.length, "модели", "моделях", "моделях")} в базе MotoHelper.</p></section>
+<h2>Аналоги</h2><div class="tblw"><table class="tbl"><tr><th>NGK</th><th>Denso</th><th>Torch</th></tr><tr><td>${esc(k)}</td><td>${esc(x[0] || "—")}</td><td>${esc(x[1] || "—")}</td></tr></table></div>
+<ul class="plain">${gap ? `<li>Зазор: <b>${esc(gap[0])}</b>${gap[2] > 1 ? ` (так у ${gap[1]} из ${gap[2]} моторов)` : ""}</li>` : ""}${tq ? `<li>Момент затяжки: <b>${esc(tq[0])}</b></li>` : ""}<li>Проверять и менять — по регламенту мотора; цвет нагара подскажет смесь: <a href="/m/polomka/plug/">цвет свечи</a>.</li></ul>
+<h2>Моторы со свечой ${esc(k)}</h2><div class="chips">${ids.slice(0, 30).map((id) => `<a class="chip" href="/m/motor/${engSlug[id]}/">${esc(ENGINES[id].code)}${ENGINES[id].cc ? " · " + Math.round(ENGINES[id].cc) + " см³" : ""}</a>`).join("")}</div>
+<h2>Мотоциклы со свечой ${esc(k)}</h2><div class="chips">${models.slice(0, 40).map((b) => `<a class="chip" href="/m/${bikeSlug.get(b)}/">${esc(b.brand + " " + b.name)}</a>`).join("")}</div>${models.length > 40 ? `<p class="small">И ещё ${models.length - 40} — на страницах моторов выше.</p>` : ""}
+${sib.length ? `<h2>Горячее и холоднее</h2><div class="chips">${sib.map((y) => `<a class="chip" href="/m/svecha/${sparkSlug(y)}/">NGK ${esc(y)} ${heat(y) < heat(k) ? "— горячее" : "— холоднее"}</a>`).join("")}</div>` : ""}
+<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>
+<div class="chips"><a class="chip" href="/m/remont/spark/">Как проверить и поменять свечу →</a><a class="chip" href="/m/svechi/">Свечи: таблица по моторам →</a></div>`;
+    const desc = `Свеча NGK ${k}: аналоги ${an.join(", ")}${gap ? ", зазор " + gap[0] : ""}. На каких мотоциклах стоит: ${models.slice(0, 3).map((b) => b.brand + " " + b.name).join(", ")}${models.length > 3 ? " и другие" : ""}.`;
+    files.set("m/svecha/" + slug + "/index.html", page({ title: pickTitle("Свеча NGK " + k, [": аналоги Denso, Torch и на какие мотоциклы | MotoHelper", ": аналоги Denso, Torch и на какие мотоциклы", ": аналоги и мотоциклы", ""]), desc, canon, crumbs, body, ask: "свеча NGK " + k,
+      ld: [crumbLd(crumbs), { "@context": "https://schema.org", "@type": "WebPage", name: "Свеча NGK " + k, url: canon, inLanguage: "ru", description: desc },
+        { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((q) => ({ "@type": "Question", name: q[0], acceptedAnswer: { "@type": "Answer", text: q[1] } })) }] }));
+    SPARK_PAGES.push({ k, canon, n: models.length });
+  });
+}
 const HUBS = [];
 {
   const okv = (x) => x && x !== "—" && !/мануал/i.test(x);
@@ -1180,7 +1229,7 @@ const HUBS = [];
           v && ["Сколько масла заливать в мотор 250–300 см³?", `Обычно от ${v[0]} до ${v[2]} л, типично около ${v[1]} л (по ${v[3]} ${v[3] % 10 === 1 && v[3] % 100 !== 11 ? "китайскому мотору" : "китайским моторам"} 240–300 см³ в базе). Точный объём своего мотора — в таблице; уровень после замены проверяй по щупу или окошку.`],
           ["Можно ли заливать автомобильное масло в мотоцикл?", "В мотор с мокрым сцеплением (почти все мотоциклы и питбайки) — нет: антифрикционные присадки автомобильного масла заставляют сцепление проскальзывать. Нужно мотоциклетное масло с допуском JASO MA или MA2."]].filter(Boolean); } },
     { slug: "svechi", kick: "Свечи", h1: "Свечи зажигания для мотоциклов и питбайков", title: "Свечи зажигания для мотоциклов и питбайков: таблица по моторам | MotoHelper",
-      lead: "Какая свеча стоит и какой у неё зазор — для популярных моторов. Аналоги NGK, Denso, Torch — на странице мотора и в приложении.",
+      lead: "Какая свеча стоит и какой у неё зазор — для популярных моторов. Аналоги NGK, Denso, Torch — ниже и на странице мотора.",
       cols: ["Свеча", "Зазор"], has: (e) => okv(e.spark), row: (e) => [e.spark, okv(e.gap) ? e.gap : "—"],
       faq: (ids) => { const pit = ids.filter((id) => regOf(ENGINES[id]) === "cn" && ENGINES[id].cc >= 100 && ENGINES[id].cc <= 160 && (ENGINES[id].groups || []).indexOf("horiz") >= 0);
         const t = mostOf(pit, (e) => e.spark), g = mostOf(ids.filter((id) => regOf(ENGINES[id]) === "cn"), (e) => okv(e.gap) ? e.gap : "");
@@ -1208,6 +1257,7 @@ const HUBS = [];
     const body = `<section class="hero"><div class="kick">${d.kick}</div><h1>${d.h1}</h1><p class="lead">${d.lead}</p>
 <div class="chips"><a class="chip" href="/m/motor/">Все моторы →</a>${other}</div></section>
 <p class="note">Не нашёл свой мотор — открой <a href="/m/motor/">список моторов</a> или найди модель в <a href="/m/">каталоге</a>. Данные справочные: перед работой сверься с мануалом своего мотоцикла.</p>
+${d.slug === "svechi" && SPARK_PAGES.length ? `<h2>Аналоги свечей NGK, Denso, Torch</h2><div class="chips">${SPARK_PAGES.slice().sort((a, b) => b.n - a.n).map((x) => `<a class="chip" href="/m/svecha/${sparkSlug(x.k)}/">NGK ${esc(x.k)}</a>`).join("")}</div>` : ""}
 ${sections}
 ${faq.length ? `<h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>` : ""}`;
     const canon = SITE + "m/" + d.slug + "/";
@@ -1463,7 +1513,11 @@ ${bikes.length ? `<h2>Модели</h2><div class="chips">${bikes.map((b) => `<a
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),
   GUIDES.map((g) => SITE + "m/remont/" + g.id + "/"), DIAG.map((d) => SITE + "m/polomka/" + d.id + "/"),
   BIKES.map((b) => SITE + "m/" + bikeSlug.get(b) + "/"), engIds.map((id) => SITE + "m/motor/" + engSlug[id] + "/"),
-  [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), MODEL_TUNE_PAGES.map((t) => t.canon), [SITE + "m/provodka/"], WIRE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages);
+  [SITE + "m/podborka/", SITE + "m/sravnenie/", SITE + "m/tuning/"], HUBS, TUNE_PAGES.map((t) => t.canon), MODEL_TUNE_PAGES.map((t) => t.canon), [SITE + "m/provodka/"], WIRE_PAGES.map((t) => t.canon), podKeys.map((k) => SITE + "m/podborka/" + podSlug[k] + "/"), compares.map((c) => SITE + "m/sravnenie/" + c.slug + "/"), probPages, SPARK_PAGES.map((x) => x.canon));
+{
+  const vh = {};
+  for (const [f, c] of files) if (/@@V:/.test(c)) files.set(f, c.replace(/@@V:([\w./-]+)@@/g, (m, a) => vh[a] || (vh[a] = require("crypto").createHash("sha1").update(files.get(a) || "").digest("hex").slice(0, 10))));
+}
 const hi = 5 + brands.length + GUIDES.length + DIAG.length;
 /* дата изменения страницы для sitemap (<lastmod>): GitHub Pages ставит всем файлам одно время выкладки, и Яндекс не видит,
    что поменялось. Храним в m/lastmod.json «адрес → [дата, хэш содержимого]»; хэш — по заголовку, описанию и основному тексту
