@@ -895,7 +895,7 @@ function fits(item, eng) {
     /* антифриз, помпа, термостат, крышка радиатора — только у жидкостного охлаждения */
     if (["coolant", "waterpump", "thermostat", "radcap", "coolhoses", "radiator"].indexOf(item.kind) >= 0 && eng.groups.indexOf("liquid") < 0) return false;
     /* у 2T масло не в картере: маслорадиатор и щуп-термометр не к чему */
-    if (eng.stroke === "2T" && ["oilcooler", "oiltemp", "oilfilter", "camchain", "tensioner", "valvein", "valveex", "camshaft", "vcgasket", "shims", "valvespring"].indexOf(item.kind) >= 0) return false;
+    if (eng.stroke === "2T" && ["oilcooler", "oiltemp", "oilfilter", "camchain", "tensioner", "valvein", "valveex", "camshaft", "vcgasket", "shims", "valvespring", "adjscrews", "camsport", "rockers"].indexOf(item.kind) >= 0) return false;
   }
   if (!item.fit || !eng) return true;
   if (!item.fit.some(function (f) { return f === eng.id || eng.groups.indexOf(f) >= 0; })) return false;
@@ -9600,7 +9600,9 @@ var BIKE_PHOTOS = [
   "Regulmoto Sport 003", "Regulmoto Sport-003 PR", "Regulmoto Sport-003 PRO", "Regulmoto TE 250", "Roliz Sport-005",
   "Roliz Sport-007", "Stels Enduro 250", "Stels Flame 200"
 ];
-function bikePhotoSlug(key) { return String(key).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+/* одинаковые фото у вариантов одной модели — один файл: браузер качает его один раз */
+var PHOTO_SAME = {"avantis-enduro-300-pro-efi": "avantis-enduro-300-pro", "avantis-enduro-300-pro-carb": "avantis-enduro-300-pro", "avantis-enduro-300-pro-21-18": "avantis-enduro-300-pro", "avantis-enduro-300-pro-efi-exclusive": "avantis-enduro-300-pro", "avantis-enduro-300-pro-carb-fcr-exclusive": "avantis-enduro-300-pro", "motoland-xr250-enduro": "motoland-xr250", "avantis-enduro-250-efi": "avantis-enduro-250-pro", "avantis-enduro-250-carb-ars": "avantis-enduro-250-pro", "avantis-enduro-250-efi-exclusive": "avantis-enduro-250-pro"};
+function bikePhotoSlug(key) { var k = String(key).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); return PHOTO_SAME[k] || k; }
 
 
 /* ===== Конструктив запуска: кикстартер и электростартер =====
@@ -10861,6 +10863,8 @@ TUNING.forEach(function (t) { if (t.id === "pv-spring") t.fit = ["pv"]; });
   tuningFor = function (t, eng, bike) {
     var r = old(t, eng, bike);
     if (r.ok && eng && eng.stroke === "2T" && t.fit && t.fit.indexOf("4t") >= 0 && t.fit.indexOf("2t") < 0) return { ok: false, deny: "Это для четырёхтактного мотора.", note: null };
+    /* распредвал, коромысла, ГБЦ, клапаны ГРМ — у 2Т их нет (клапан выпуска и лепестковый — есть) */
+    if (r.ok && eng && eng.stroke === "2T" && (/распредвал|коромысл|ГБЦ/i.test(t.title) || (/клапан/i.test(t.title) && !/выпуска|лепестк/i.test(t.title)))) return { ok: false, deny: "У двухтактного мотора нет распредвала и клапанов ГРМ.", note: null };
     return r;
   };
 })();
