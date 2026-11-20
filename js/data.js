@@ -10833,3 +10833,6 @@ AREAS.cvt = { t: "Вариатор и редуктор", kinds: ["cvtbelt", "rol
   });
   Object.keys(PR).forEach(function (v) { if (vis[v]) PARTS.push(P("oil-" + v.replace(/\D/g, ""), "Масло 4T " + v + " (1 л)", PR[v], "Расходники", "oil", vis[v])); });
 })();
+
+/* у 2Т нет ГРМ: по умолчанию J() ставил «Цепь ГРМ» — в характеристиках было «Привод ГРМ: Цепь ГРМ» у KTM 300, ИЖ, Dio */
+Object.keys(ENGINES).forEach(function (id) { var e = ENGINES[id]; if (e && e.stroke === "2T") e.timing = "—"; });
