@@ -18096,7 +18096,7 @@ function Overview({
   })], ["Топливо", /*#__PURE__*/React.createElement(Val, {
     v: eng.fuel,
     stock: S.fuel
-  })], ["Зажигание", eng.ignition], ["Привод ГРМ", eng.timing], ["КПП", eng.gearbox]];
+  })], ["Зажигание", eng.ignition], eng.stroke !== "2T" && ["Привод ГРМ", eng.timing], ["КПП", eng.gearbox]].filter(Boolean);
   const efi = eng.groups.indexOf("efi") >= 0;
   const adj = [{
     h: "Питание",

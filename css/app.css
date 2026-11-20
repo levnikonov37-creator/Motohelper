@@ -3095,3 +3095,41 @@ h2, .panel h2, .panel-head h2, .ts-title, .area-head h2, .sheet-head h2 { font-f
 .tn-nuance ul { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; line-height: 1.45; color: var(--g-ink, #EEF1F5); }
 .tn-foot { margin: 10px 2px 0; }
 :root[data-bright] .to-eff, :root[data-bright] .tc-card .tr-spec { color: #BFE6FF; }
+
+/* ===== генеральная репетиция: оформление приложения (аудит стиля) ===== */
+/* «Запчасти» на компьютере — две колонки; ленты фильтров переносятся, а не обрезаются */
+@media (min-width: 1000px) {
+  ul.parts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tags.scroll, .stage-chips { flex-wrap: wrap !important; overflow: visible; }
+}
+/* «+» в списке деталей — под палец, знак видно */
+.parts li .btn.sm.primary { min-width: 44px; padding: 0 !important; justify-content: center; font: 600 22px/1 var(--body) !important; }
+/* шапка «Мотоцикла» на телефоне компактнее */
+@media (max-width: 600px) {
+  .phero-stats .hs { padding: 6px 8px !important; }
+  .phero-stats .hs b { font-size: 17px !important; }
+}
+/* «Регулировки»: длинные значения слева, без жирного 18 px */
+.adj-block td { text-align: left !important; }
+:root[data-bright] .adj-block td { font-weight: 600; }
+.adj-block th { width: 40%; }
+/* плитки цифр в шапках — скруглённые, как карточки вокруг; подписи читаемые */
+.hs, .hero-stats .hs, .phero-stats .hs { border-radius: 12px !important; background: rgba(255, 255, 255, .04) !important; border-color: rgba(255, 255, 255, .12) !important; }
+.phero-stats .hs span { font-size: 12px !important; color: #B9C2CF !important; }
+.phero-act .seg.dark { border-radius: 12px; overflow: hidden; }
+/* нижнее меню: подписи крупнее и светлее */
+.tabbar .tab { font-size: 11.5px !important; letter-spacing: 0; }
+.tabbar .tab:not(.on) { color: #A8A8A8; }
+.tabbar .tab-ai span { position: relative; z-index: 2; }
+/* «Покраска мотора» и другие сегменты с переносом */
+.seg.wrap { display: flex !important; flex-wrap: wrap !important; height: auto; }
+.seg.wrap button { flex: 1 1 auto; }
+/* «Ремонт → Как сделать»: последняя одинокая плитка — во всю ширину; «Спросить ИИ» в одну строку */
+@media (max-width: 899px) { .rhub-group .actions4:not(:has(.act-main)) > .act:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+.hero-cta .btn { white-space: nowrap; padding-inline: 10px !important; }
+/* мелкие подписи — не меньше 12–13 px */
+.parts li .pc { font-size: 12px; }
+small.diff { font-size: 13px; }
+.schip { font-size: 13px !important; }
+/* фото модели на компьютере не на весь экран */
+@media (min-width: 900px) { .bike-view .model-photo, .bike-view .model-photo img { max-height: 420px; } }
