@@ -3,8 +3,8 @@
   --plate: #F2F2F2; --plate-ink: #0F0F0F; --mud: #9B9B9B; --danger: #B8352B; --warn: #BDBDBD; --ok: #FFFFFF; --focus: #FFFFFF;
   --stage: #1B1F23; --stage2: #262626; --stage-ink: #EEF0EC; --stage-muted: #9B9B9B;
   --display: "Russo One", "Arial Black", Impact, sans-serif;
-  --body: "Fira Sans", "Segoe UI", Roboto, Arial, sans-serif;
-  --cond: "Fira Sans Condensed", "Arial Narrow", "Fira Sans", Arial, sans-serif;
+  --body: "Fira Sans", "Fira Sans Fallback", "Segoe UI", Roboto, Arial, sans-serif;
+  --cond: "Fira Sans Condensed", "Fira Sans Condensed Fallback", "Arial Narrow", "Fira Sans", Arial, sans-serif;
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -2793,7 +2793,7 @@ code { background: #141414 !important; color: #fff; }
 :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
   --g-bg: #0C0E12; --g-bg2: #11141A; --g-card: #161A21; --g-card2: #1C2129; --g-line: rgba(255,255,255,.075); --g-line2: rgba(255,255,255,.14);
   --g-ink: #EEF1F5; --g-muted: #8E98A6; --g-acc: #8A8CFF; --g-acc2: #5FA8FF; --g-acc-ink: #0B0D18;
-  --display: "Unbounded", "Fira Sans", "Segoe UI", Arial, sans-serif;
+  --display: "Unbounded", "Unbounded Fallback", "Fira Sans", "Segoe UI", Arial, sans-serif;
   --bg: var(--g-bg); --surface: var(--g-card); --surface2: var(--g-card2); --ink: var(--g-ink); --muted: var(--g-muted); --line: var(--g-line2);
 }
 body { background: var(--g-bg) !important; color: var(--g-ink) !important; }

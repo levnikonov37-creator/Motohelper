@@ -68,7 +68,7 @@ const ENG_N = new Set(BIKES.flatMap((b) => b.versions.map((v) => v.engine))).siz
 
 const CSS = `.fbk{margin:18px 0 8px}.fbk summary{cursor:pointer;display:inline-block;padding:10px 14px;border:1px solid var(--line);border-radius:12px;font:600 15px var(--cond)}.fbk form{display:grid;gap:8px;margin-top:10px}.fbk select,.fbk input,.fbk textarea{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:15px var(--body);min-width:0}.fbk textarea{resize:vertical}.fbk-btns{display:flex;flex-wrap:wrap;gap:8px}.fbk button{padding:12px 16px;border:1px solid var(--line);border-radius:8px;background:var(--card2);color:var(--ink);font:600 15px var(--cond);cursor:pointer}.fbk button[type=submit]{background:#fff;color:#000;border-color:#fff}.fbk button:disabled{opacity:.5}.fbk-msg{margin:8px 0 0;color:var(--muted)}
 :root{color-scheme:dark;--bg:#000000;--card:#0E0E0E;--card2:#151515;--line:rgba(255,255,255,0.132);--ink:#F2F2F2;--muted:#9A9A9A;--acc:#FFFFFF;--acc2:#E6E6E6;--pink:#8F8F8F;
---display:"Russo One","Arial Black",Impact,sans-serif;--cond:"Fira Sans Condensed","Arial Narrow",Arial,sans-serif;--body:"Fira Sans","Segoe UI",Roboto,Arial,sans-serif}
+--display:"Russo One","Arial Black",Impact,sans-serif;--cond:"Fira Sans Condensed","Fira Sans Condensed Fallback","Arial Narrow",Arial,sans-serif;--body:"Fira Sans","Fira Sans Fallback","Segoe UI",Roboto,Arial,sans-serif}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);
 background-image:radial-gradient(70% 40% at 85% -5%,rgba(255,255,255,0.154),transparent 70%),radial-gradient(50% 30% at 0% 10%,rgba(255,255,255,0.049),transparent 70%);background-repeat:no-repeat}
 a{color:var(--acc2)}img{max-width:100%}
@@ -153,7 +153,7 @@ ul.plain{margin:0;padding-left:20px}ul.plain li{margin:3px 0}
 .faq summary{cursor:pointer;padding:12px 14px;font:600 16px var(--cond);list-style:none}.faq summary::-webkit-details-marker{display:none}
 .faq summary::after{content:"+";float:right;color:var(--muted)}.faq details[open] summary::after{content:"–"}.faq p{margin:0;padding:0 14px 12px;color:#D0D0D0}
 /* v70 «Гараж» — как в приложении: графит, спокойные заголовки (Unbounded), мягкие карточки */
-:root{--display:"Unbounded","Fira Sans",Arial,sans-serif;--bg:#0C0E12;--card:#161A21;--card2:#1C2129;--line:rgba(255,255,255,.075);--ink:#EEF1F5;--muted:#8E98A6}
+:root{--display:"Unbounded","Unbounded Fallback","Fira Sans",Arial,sans-serif;--bg:#0C0E12;--card:#161A21;--card2:#1C2129;--line:rgba(255,255,255,.075);--ink:#EEF1F5;--muted:#8E98A6}
 body{background:radial-gradient(900px 520px at 70% -160px,rgba(124,132,255,.16),transparent 70%),#0C0E12!important;color:var(--ink)}
 h1,h2,.card.big b,.tile b{font-style:normal!important;text-transform:none!important;text-shadow:none!important;letter-spacing:-.01em!important}
 h1{font-weight:700!important}h2{font-weight:600!important;font-size:19px!important}.card.big b{font-family:"Fira Sans",Arial,sans-serif!important;font-weight:600!important;font-size:17px!important}
@@ -303,8 +303,7 @@ function page({ title, desc, canon, crumbs, body, ld, js, sticky, ask, rv, fb })
 <link rel="icon" type="image/png" sizes="120x120" href="/img/favicon-120.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<link rel="preload" href="/fonts/fira-sans-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/fonts/fira-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/fira-sans-400-normal.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/m/m.css" />
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
@@ -653,7 +652,7 @@ const similar = (b, skip) => { const k = clsKey(b), L = BY_HP[k] || [], j = L.in
   return out; };
 const CMP_OF = new Map();
 compares.forEach((c) => [c.a, c.b].forEach((x) => { if (!CMP_OF.has(x)) CMP_OF.set(x, []); CMP_OF.get(x).push(c); }));
-const WIRE_ANCHOR = { ac: "Схема электрики без АКБ (AC-CDI)", dc: "Схема электрики с АКБ (DC-CDI)", efi: "Схема электрики инжектора (ЭБУ)" };
+const WIRE_ANCHOR = { ac: "Схема электрики без АКБ (AC-CDI)", dc: "Схема электрики с АКБ (DC-CDI)", efi: "Схема электрики инжектора (ЭБУ)", points: "Схема контактного зажигания" };
 /* подпись поломки без названия модели: «На {M} садится аккумулятор» → «Садится аккумулятор» */
 const PROB_SHORT = { charge: "Садится аккумулятор", knock: "Стучит мотор" };
 const probShort = (id) => PROB_SHORT[id] || PROB[id].replace("{M} ", "").replace(" {M}", "").replace(/^./, (c) => c.toUpperCase());
@@ -882,6 +881,17 @@ ${(() => { const L = [...probBikes].filter((b) => probsFor(b).indexOf(d) >= 0).s
   files.set("m/polomka/" + d.id + "/index.html", page({ ask: "неисправность «" + d.title + "»", title: `${d.title}: причины и что проверить — мотоцикл, питбайк | MotoHelper`, desc, canon, crumbs, body, sticky: "/#d=" + d.id, ld: [crumbLd(crumbs)].concat(faq.mainEntity.length ? [faq] : []) }));
 });
 
+/* «Про модель»: тип, объём, мощность, мотор, охлаждение, КПП, другие названия, версии + вилка и аналоги расходников —
+   своё у каждой модели, чтобы страницы поломок и тюнинга моделей на одном моторе не были копиями друг друга */
+function modelAbout(b) {
+  const e = ENGINES[b.versions[0].engine], full = b.brand + " " + b.name;
+  const dotEnd = (t) => (/[.!?]$/.test(t) ? t : t + ".");
+  const verTxt = b.versions.length > 1 ? dotEnd("Версии: " + b.versions.map((v, vi) => verName(v, vi, ENGINES[v.engine]) + (hpOf(b, v) ? " — " + hpOf(b, v) + " л.с." : "")).join("; ")) : "";
+  const gbx = String(e.gearbox || "").split(",")[0].trim().replace(/^(\d[\d–-]*)\s*ст\.?$/, "КПП $1 ступ.");
+  const about = `<h2>Про ${esc(full)}</h2><p>${esc(dotEnd([full + " — " + String(b.type || "").toLowerCase(), e.cc ? Math.round(e.cc) + " см³" : "", hpOf(b, b.versions[0]) ? hpOf(b, b.versions[0]) + " л.с." : "", "мотор " + e.code, e.cooling ? "охлаждение " + String(e.cooling).toLowerCase() : "", gbx].filter(Boolean).join(", ")))}${b.aka && b.aka.length ? " Также продаётся как " + esc(b.aka.join(", ")) + "." : ""} ${esc(verTxt)}</p>`;
+  const modelGroups = [ctx.crossRows(b).length ? crossHtml(b, "") : "", ctx.forkRows && ctx.forkRows(b).length ? forkHtml(b, "") : ""].filter(Boolean).join("");
+  return { about, modelGroups };
+}
 /* «модель + поломка» (см. PROB выше) */
 const probPages = [];
 probBikes.forEach((b) => {
@@ -899,6 +909,10 @@ probBikes.forEach((b) => {
   const list = probsFor(b);
   const nums = [["Свеча", val("spark") && val("spark") + (val("gap") ? ", зазор " + val("gap") : "")], ["Клапаны (на холодную)", val("valveIn") && "впуск " + val("valveIn") + ", выпуск " + (val("valveEx") || "—")],
     ["Масло", val("oil") && val("oil") + (val("oilVol") ? ", " + val("oilVol") : "")], ["Обороты ХХ", val("idle")], ["Компрессия", val("compression")], [efi ? "Питание" : "Карбюратор", efi ? "инжектор" : val("carb")], ["Главный жиклёр", !efi && val("jetMain")]].filter((x) => x[1]);
+  /* своё у модели (а не только у мотора): страницы «модель + поломка» на одном моторе иначе почти одинаковые */
+  const { about, modelGroups } = modelAbout(b);
+  const sameEng = [...probBikes].filter((x) => x !== b && x.versions[0].engine === b.versions[0].engine).slice(0, 8);
+  const myCmpP = CMP_OF.get(b) || [];
   list.forEach((d) => {
     const phrase = PROB[d.id].replace("{M}", full), canon = SITE + "m/" + slug + "/" + d.id + "/";
     const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], [b.brand, "/m/" + brandSlug[b.brand] + "/"], [b.name, "/m/" + slug + "/"], [d.title, null]];
@@ -909,7 +923,11 @@ probBikes.forEach((b) => {
 ${nums.length ? `<h2>Цифры ${esc(e.code)}</h2><div class="tiles">${nums.map((x) => `<div class="tile"><small>${esc(x[0])}</small><b${String(x[1]).length > 14 ? ' class="long"' : ""}>${nbv(esc(x[1]))}</b></div>`).join("")}</div>` : ""}
 <h2>Что проверить</h2><ol class="steps">${steps}</ol>
 ${iss}
+${about}
+${modelGroups ? `<div class="groups">${modelGroups}</div>` : ""}
 <a class="cta" href="${appLink(b, 0)}&d=${d.id}">Пройти проверку в MotoHelper для ${esc(full)} →</a>
+${sameEng.filter((x) => probsFor(x).indexOf(d) >= 0).length ? `<h2>${esc(d.title)} на других моделях с мотором ${esc(e.code)}</h2><div class="chips">${sameEng.filter((x) => probsFor(x).indexOf(d) >= 0).map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/${d.id}/">${esc(PROB[d.id].replace("{M}", x.brand + " " + x.name))}</a>`).join("")}</div>` : ""}
+${myCmpP.length ? `<h2>Сравнения ${esc(full)}</h2><div class="chips">${myCmpP.map((c) => `<a class="chip" href="/m/sravnenie/${c.slug}/">${esc(c.title)}</a>`).join("")}</div>` : ""}
 <p>Не нашёл ответ? Опиши поломку <a href="${appLink(b, 0)}&amp;ai=1">ИИ-механику MotoHelper</a> — он знает ${esc(full)}.</p>
 ${fixHtml(d, e)}
 <h2>Другие поломки ${esc(full)}</h2><div class="chips">${list.filter((x) => x !== d).map((x) => `<a class="chip" href="/m/${slug}/${x.id}/">${esc(PROB[x.id] ? PROB[x.id].replace("{M}", full) : x.title)}</a>`).join("")}<a class="chip" href="/m/${slug}/">Всё ${esc(oOb(full))} →</a><a class="chip" href="/m/motor/${engSlug[b.versions[0].engine]}/">Всё о моторе ${esc(e.code)} →</a></div>
@@ -1360,6 +1378,8 @@ ${more ? `<h2>Что ещё ставят на ${esc(full)}</h2><div class="tu">$
 <div class="chips"><a class="chip" href="/m/motor/${et.slug}/tuning/">Весь тюнинг мотора ${esc(e0.code)}: по узлам →</a><a class="chip" href="/m/${slug}/">Масло, свечи, клапаны ${esc(full)}</a></div>
 <a class="cta" href="${app}">Собрать проект тюнинга ${esc(full)} в приложении →</a></section>
 <h2>Частые вопросы</h2><div class="faq">${faq.map((q) => `<details><summary>${esc(q[0])}</summary><p>${esc(q[1])}</p></details>`).join("")}</div>
+${(() => { const m = modelAbout(b); return m.about + (m.modelGroups ? `<div class="groups">${m.modelGroups}</div>` : ""); })()}
+${(CMP_OF.get(b) || []).length ? `<h2>Сравнения ${esc(full)}</h2><div class="chips">${CMP_OF.get(b).map((c) => `<a class="chip" href="/m/sravnenie/${c.slug}/">${esc(c.title)}</a>`).join("")}</div>` : ""}
 ${twins.length ? `<h2>Тюнинг моделей с тем же мотором</h2><div class="chips">${twins.slice(0, 12).map((x) => `<a class="chip" href="/m/${bikeSlug.get(x)}/tuning/">${esc(x.brand + " " + x.name)}</a>`).join("")}</div>` : ""}`;
     const desc = `Тюнинг ${full} (${e0.code}): резвее — ${titles("quick", 2).split(", ").map(lc1).join(", ")}; мощнее — ${main("power") ? lc1(main("power").title.replace(/\s*\(.*?\)/g, "")) : "выпуск"}; быстрее — ${main("speed") && main("speed") !== main("power") ? lc1(main("speed").title.replace(/\s*\(.*?\)/g, "")) : ctx.hasChain(e0) ? "звёзды" : "вариатор"}. Цены и что учесть.`;
     files.set("m/" + slug + "/tuning/index.html", page({ title: pickTitle("Тюнинг " + full, [": что поставить и сколько стоит | MotoHelper", ": что поставить и сколько стоит", ": что поставить и цены", ""]), desc, canon, crumbs, body, sticky: app,
@@ -1377,7 +1397,8 @@ const WIRE_PAGES = [];
   const TYPES = [
     ["ac", "Схема электрики без АКБ (AC-CDI)", "питбайки и мопеды на кике", "Схема электрики питбайка и мопеда без аккумулятора (AC-CDI): провода и проверка"],
     ["dc", "Схема электрики с АКБ и стартером (DC-CDI)", "мотоциклы, эндуро и мопеды с электростартером", "Схема электрики мотоцикла с аккумулятором (DC-CDI): цвета проводов, проверка"],
-    ["efi", "Схема электрики инжектора (ЭБУ)", "мотоциклы и скутеры на инжекторе", "Схема электрики инжекторного мотоцикла: ЭБУ, бензонасос, датчики, проверка"]];
+    ["efi", "Схема электрики инжектора (ЭБУ)", "мотоциклы и скутеры на инжекторе", "Схема электрики инжекторного мотоцикла: ЭБУ, бензонасос, датчики, проверка"],
+    ["points", "Схема контактного зажигания: прерыватель, конденсатор, катушка", "ИЖ, Восход, Минск, Jawa, Урал и классика", "Контактное зажигание ИЖ, Минска, Восхода: схема, зазор прерывателя, конденсатор"]];
   const svg = (w) => {
     /* раскладка — как в приложении (WiringView): сетка 3 столбца, провода идут по коридорам между блоками */
     const NW = 104, NH = 52, X = (c) => 16 + c * 126, Y = (r) => 22 + r * 92;
@@ -1433,9 +1454,9 @@ ${bikes.length ? `<h2>Модели</h2><div class="chips">${bikes.map((b) => `<a
   /* каталог */
   const crumbs = [["MotoHelper", "/"], ["Каталог", "/m/"], ["Схемы электрики", null]];
   const body = `<section class="hero"><div class="kick">Электрика</div><h1>Схема электрики мотоцикла, питбайка и мопеда</h1>
-<p class="lead">Три типовые схемы, на которых собраны почти все мотоциклы: без аккумулятора на кике (AC-CDI), с аккумулятором и стартером (DC-CDI) и инжектор с ЭБУ. Какой узел за что отвечает, что мерить мультиметром и какого цвета провода.</p></section>
-<div class="grid">${WIRE_PAGES.map((p) => `<a class="card big" href="/m/provodka/${p.key}/"><b>${esc({ ac: "Без АКБ, на кике (AC-CDI)", dc: "С АКБ и стартером (DC-CDI)", efi: "Инжектор (ЭБУ)" }[p.key])}</b><small>${esc(p.who)} · ${p.n} ${plural(p.n, "мотор", "мотора", "моторов")}</small></a>`).join("")}</div>
-<p class="note">Какая схема у твоего мотоцикла: есть аккумулятор и кнопка стартера — DC-CDI; только кик и нет аккумулятора — AC-CDI; инжектор — ЭБУ. На странице модели в каталоге есть ссылка на нужную схему.</p>`;
+<p class="lead">Четыре типовые схемы, на которых собраны почти все мотоциклы: без аккумулятора на кике (AC-CDI), с аккумулятором и стартером (DC-CDI), инжектор с ЭБУ и классическое контактное зажигание (ИЖ, Восход, Минск, Jawa). Какой узел за что отвечает, что мерить мультиметром и какого цвета провода.</p></section>
+<div class="grid">${WIRE_PAGES.map((p) => `<a class="card big" href="/m/provodka/${p.key}/"><b>${esc({ ac: "Без АКБ, на кике (AC-CDI)", dc: "С АКБ и стартером (DC-CDI)", efi: "Инжектор (ЭБУ)", points: "Контактное: прерыватель и катушка" }[p.key])}</b><small>${esc(p.who)} · ${p.n} ${plural(p.n, "мотор", "мотора", "моторов")}</small></a>`).join("")}</div>
+<p class="note">Какая схема у твоего мотоцикла: есть аккумулятор и кнопка стартера — DC-CDI; только кик и нет аккумулятора — AC-CDI; инжектор — ЭБУ; прерыватель с контактами и конденсатором (советская и старая европейская техника) — контактное зажигание. На странице модели в каталоге есть ссылка на нужную схему.</p>`;
   files.set("m/provodka/index.html", page({ title: "Схема электрики мотоцикла, питбайка и мопеда: CDI, цвета проводов | MotoHelper", desc: "Схемы электрики: AC-CDI без аккумулятора, DC-CDI с аккумулятором и стартером, инжектор с ЭБУ — узлы, проверка мультиметром и цвета проводов.", canon: SITE + "m/provodka/", crumbs, body, ld: [crumbLd(crumbs)] }));
 }
 const urls = [SITE, SITE + "m/", SITE + "m/motor/", SITE + "m/remont/", SITE + "m/polomka/"].concat(brands.map((br) => SITE + "m/" + brandSlug[br] + "/"),

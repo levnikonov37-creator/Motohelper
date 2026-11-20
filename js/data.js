@@ -890,6 +890,8 @@ function fits(item, eng) {
     if (PART_CARB_KINDS.indexOf(item.kind) >= 0 && eng.groups.indexOf("efi") >= 0 && eng.groups.indexOf("carb") < 0) return false;
     if (PART_CHAIN_KINDS.indexOf(item.kind) >= 0 && typeof hasChain === "function" && !hasChain(eng)) return false;
     if (eng.groups.indexOf("cvt") >= 0 && (PART_CVT_NO.indexOf(item.kind) >= 0 || item.id === "oil-gear" || (eng.cc <= 60 && /^(pwk38|rk-pwk)$/.test(item.id)))) return false;
+    /* цепь ГРМ, натяжитель, успокоители — только если у мотора цепь ГРМ (не шестерни, не ремень, не 2Т) */
+    if (["camchain", "tensioner", "guide", "tenskit"].indexOf(item.kind) >= 0 && typeof hasCamChain === "function" && !hasCamChain(eng)) return false;
     /* антифриз, помпа, термостат, крышка радиатора — только у жидкостного охлаждения */
     if (["coolant", "waterpump", "thermostat", "radcap", "coolhoses", "radiator"].indexOf(item.kind) >= 0 && eng.groups.indexOf("liquid") < 0) return false;
     /* у 2T масло не в картере: маслорадиатор и щуп-термометр не к чему */
@@ -1160,7 +1162,7 @@ function maintItems(e) {
     { id: "reed", t: "Лепестковый клапан", every: 30 },
     { id: "pv", t: "Клапан выпуска", every: 40 },
     { id: "piston", t: "Поршень и кольца", every: e.cc > 270 ? 50 : 40 }
-  ];
+  ].filter(function (x) { return x.id === "pv" ? e.groups.indexOf("pv") >= 0 : x.id === "reed" ? !/без клапанов|роторн/i.test(e.cam || "") : true; });
   var r = [
     { id: "oil", t: "Масло и фильтр", every: e.oilInt || 1500 },
     { id: "air", t: "Воздушный фильтр", every: 500 },
@@ -1849,7 +1851,7 @@ W("IZHP5", o(RU, { code: "ИЖ П-5", name: "ИЖ Планета-5 (2T)", maker:
 W("IZHJ5", o(RU, { code: "ИЖ Ю-5", name: "ИЖ Юпитер-5 (2T, двухцилиндровый)", maker: "Ижмаш", layout: "twin", crankPhase: 180, groups: ["2t","air","carb","big"], cc: 347, hp: 24, torque: "28 Н·м", compression: "≈ 8 бар", carb: "К-62 ×2 (или один К-65)", jetMain: "≈ 160–170", spark: "А17Н / Brisk N15C ×2", issues: [{ t: "Синхронизация двух карбюраторов", sev: "med", fix: "Настраивать оба одинаково." }, { t: "Средний сальник коленвала", sev: "high", fix: "Подсос — один цилиндр «не работает»." }] }), 0.45);
 W("MINSK125", o(RU, { code: "М-125", name: "Минск ММВЗ 3.112 / М1НСК 125 (2T)", maker: "ММВЗ", groups: ["2t","air","carb","small"], cc: 124, hp: 11.5, torque: "12 Н·м", compression: "≈ 8 бар", carb: "К-65Т / Pegas", jetMain: "≈ 100–110", spark: "А17Н / Brisk N15C", issues: [{ t: "Неприхотливый — главное смесь и сальники", sev: "low", fix: "Смесь 1:40 на хорошем масле." }] }), 0.4);
 W("VOSHOD", o(RU, { code: "Восход-3М", name: "Восход-3М (2T)", maker: "ЗиД", groups: ["2t","air","carb","small"], cc: 174, hp: 14, torque: "15 Н·м", compression: "≈ 8 бар", carb: "К-62С", jetMain: "≈ 130–140", spark: "А17Н / Brisk N15C", issues: [{ t: "Перегрев на бедной смеси", sev: "med", fix: "Жиклёр и смесь." }] }), 0.4);
-W("URAL", o({ region: "ru", fuel: "АИ-92", ignition: "Электронное (у старых — контактное)", start: "Электро + кик", gearbox: "4 ст. + задний ход, кардан", needle: "3 канавка", gap: "0.6–0.7 мм", oil: "10W-40 / 20W-50", oilInt: 3000, valveInt: 3000, stroke: "4T", cooling: "Воздушное" }, { code: "Урал 750", name: "Урал / ИМЗ (оппозит OHV)", maker: "ИМЗ", layout: "boxer", groups: ["air","carb","4t","big","cg"], cam: "OHV, 4 клапана, оппозит", cc: 745, hp: 40, torque: "57 Н·м", compression: "≈ 9 бар", carb: "К-68 ×2 / Keihin ×2", jetMain: "≈ 130–140", jetPilot: "≈ 40", idle: "800–1000", valveIn: "0.10 мм", valveEx: "0.10 мм", spark: "NGK BPR6ES ×2", oilVol: "≈ 2.5 л", issues: [{ t: "Синхронизация двух карбюраторов", sev: "med", fix: "Синхронизатор или «на слух»." }, { t: "Течи масла — классика", sev: "low", fix: "Прокладки и сальники." }] }), 0.7);
+W("URAL", o({ region: "ru", fuel: "АИ-92", ignition: "Электронное (у старых — контактное)", start: "Электро + кик", gearbox: "4 ст. + задний ход, кардан", needle: "3 канавка", gap: "0.6–0.7 мм", oil: "10W-40 / 20W-50", oilInt: 3000, valveInt: 3000, stroke: "4T", cooling: "Воздушное" }, { code: "Урал 750", name: "Урал / ИМЗ (оппозит OHV)", maker: "ИМЗ", layout: "boxer", groups: ["air","carb","4t","big"], cam: "OHV, 4 клапана, оппозит", cc: 745, hp: 40, torque: "57 Н·м", compression: "≈ 9 бар", carb: "К-68 ×2 / Keihin ×2", jetMain: "≈ 130–140", jetPilot: "≈ 40", idle: "800–1000", valveIn: "0.10 мм", valveEx: "0.10 мм", spark: "NGK BPR6ES ×2", oilVol: "≈ 2.5 л", issues: [{ t: "Синхронизация двух карбюраторов", sev: "med", fix: "Синхронизатор или «на слух»." }, { t: "Течи масла — классика", sev: "low", fix: "Прокладки и сальники." }] }), 0.7);
 /* --- мотоциклы --- */
 (function () {
   var E = "Эндуро", K = "Кросс-эндуро", T = "Тур-эндуро", L = "Лёгкий эндуро", C = "Классика", P2 = "Питбайк", A = { approx: true };
@@ -2348,7 +2350,7 @@ RE("I3_800T", { code: "Triumph 800 I3", name: "Triumph 800 (рядная тро�
 RE("I3_1200T", { code: "Triumph 1215 I3", name: "Triumph 1215 (рядная тройка: Tiger Explorer / Tiger 1200)", maker: "Triumph", layout: "i3", groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 12 клапанов, 3 цилиндра", cc: 1215, hp: 137, torque: "≈ 121 Н·м", compression: "≈ 11 бар", gearbox: "6 ст., кардан", oilVol: "≈ 4 л" }, 2.6);
 RE("V450A", { code: "Aprilia V450", name: "Aprilia RXV/SXV 450/550 (V-twin 77°)", maker: "Aprilia", layout: "vtwin", vAngle: 77, groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 8 клапанов, V-twin 77°", cc: 449, hp: 60, torque: "≈ 45 Н·м", compression: "≈ 12.5 бар", oilVol: "≈ 1.5 л", oilInt: 1500, valveInt: 3000,
   issues: [{ t: "Спортивный V-twin: короткий ресурс, дорогие запчасти", sev: "high", fix: "Строгий регламент по моточасам." }] }, 2.6);
-RE("V853G", { code: "Guzzi 853", name: "Moto Guzzi 853/1151 (поперечный V-twin 90°: V85 TT / Stelvio)", maker: "Moto Guzzi", layout: "vtwin", vAngle: 90, groups: ["air", "efi", "4t", "big", "cg"], cooling: "Воздушно-масляное", cam: "OHV, 4 клапана, поперечный V-twin 90°", cc: 853, hp: 76, torque: "≈ 82 Н·м", compression: "≈ 10.5 бар", gearbox: "6 ст., кардан", oilVol: "≈ 3.5 л" }, 2.6);
+RE("V853G", { code: "Guzzi 853", name: "Moto Guzzi 853/1151 (поперечный V-twin 90°: V85 TT / Stelvio)", maker: "Moto Guzzi", layout: "vtwin", vAngle: 90, groups: ["air", "efi", "4t", "big"], cooling: "Воздушно-масляное", cam: "OHV, 4 клапана, поперечный V-twin 90°", cc: 853, hp: 76, torque: "≈ 82 Н·м", compression: "≈ 10.5 бар", gearbox: "6 ст., кардан", oilVol: "≈ 3.5 л" }, 2.6);
 RE("V1200D", { code: "Testastretta 1198", name: "Ducati Testastretta 1198 (L-twin 90°: Multistrada 1200)", maker: "Ducati", layout: "vtwin", vAngle: 90, groups: ["dohc", "liquid", "efi", "4t", "big"], cam: "DOHC, 8 клапанов, Desmodromic, V-twin 90°", cc: 1198, hp: 150, torque: "≈ 124 Н·м", compression: "≈ 12.5 бар", oilVol: "≈ 4 л", fuel: "АИ-98" }, 3.0);
 (function () {
   var T = "Тур-эндуро", E = "Эндуро", Mo = "Мотард", Nk = "Нейкед", Sp = "Спорт", A = { approx: true };
@@ -10836,3 +10838,86 @@ AREAS.cvt = { t: "Вариатор и редуктор", kinds: ["cvtbelt", "rol
 
 /* у 2Т нет ГРМ: по умолчанию J() ставил «Цепь ГРМ» — в характеристиках было «Привод ГРМ: Цепь ГРМ» у KTM 300, ИЖ, Dio */
 Object.keys(ENGINES).forEach(function (id) { var e = ENGINES[id]; if (e && e.stroke === "2T") e.timing = "—"; });
+
+/* оппозиты ИМЗ/КМЗ (Урал, Днепр, М-72): распредвал приводят шестерни, цепи ГРМ нет */
+["URAL", "DNEPR", "RU_M72", "RU_URAL650", "RU_URAL750I"].forEach(function (id) { if (ENGINES[id]) ENGINES[id].timing = "Шестерни + штанги толкателей"; });
+/* есть ли цепь ГРМ: у 2Т нет, у ГРМ на шестернях, ремне или вертикальном валу — тоже */
+function hasCamChain(e) { return !!e && e.stroke !== "2T" && !/Шестерн|шестерн|Ремень|ремень|Вал|вал/.test(e.timing || ""); }
+["camchain", "camchain-replace"].forEach(function (id) { var f = GUIDE_NEED[id]; GUIDE_NEED[id] = function (e) { return hasCamChain(e) && (!f || f(e)); }; });
+
+/* клапан выпуска 2Т (YPVS, KIPS, AETC, TPI…) — признак «pv» по описанию мотора. Без него (ИЖ, Минск, Jawa, MZ, Simson,
+   триал, PW50, скутеры) пружины и ремкомплект клапана выпуска не предлагаем и в ТО его нет */
+Object.keys(ENGINES).forEach(function (id) {
+  var e = ENGINES[id];
+  if (!e || e.stroke !== "2T" || !e.groups) return;
+  if (/YPVS|KIPS|ATAC|клапан\S* выпуска|TPI|RAVE|power ?valve|AETC/i.test([e.cam, e.name, e.code].join(" ")) && e.groups.indexOf("pv") < 0) e.groups.push("pv");
+});
+PARTS.forEach(function (p) { if (p.kind === "pv") p.fit = ["pv"]; });
+TUNING.forEach(function (t) { if (t.id === "pv-spring") t.fit = ["pv"]; });
+(function () { var f = GUIDE_NEED["pv-clean"]; GUIDE_NEED["pv-clean"] = function (e) { return e.groups.indexOf("pv") >= 0 && (!f || f(e)); }; })();
+/* доработки «для 4Т» (клапанные пружины, каналы ГБЦ, коллектор…): fit ["4t","big"] срабатывал как «или» — 2Т их получали */
+(function () {
+  var old = tuningFor;
+  tuningFor = function (t, eng, bike) {
+    var r = old(t, eng, bike);
+    if (r.ok && eng && eng.stroke === "2T" && t.fit && t.fit.indexOf("4t") >= 0 && t.fit.indexOf("2t") < 0) return { ok: false, deny: "Это для четырёхтактного мотора.", note: null };
+    return r;
+  };
+})();
+
+/* триал — не эндуро: без мусса, пластика, маски, камер 21"/18", эндуро-покрышек, мотард-колёс и заниженного сиденья (его нет) */
+var TRIAL_NO_PART = ["mousse", "moussegel", "mask", "shrouds", "side-pl", "seat-cover", "tube21", "tube18", "tube21-hd", "tube18-hd", "tube19", "rim21", "rim18", "fender-f"];
+var TRIAL_NO_TUNE = ["mousse", "tires", "motard", "seatlow", "aux-light", "hd-tubes", "tubeless", "jp-bigtank", "seat-gripper", "rack", "lowlink"];
+(function () {
+  var oldP = partFor;
+  partFor = function (p, eng, bike) {
+    if (bike && bike.type === "Триал" && (TRIAL_NO_PART.indexOf(p.id) >= 0 || TRIAL_NO_PART.indexOf(p.kind) >= 0 || ((p.kind === "tireF" || p.kind === "tireR") && /эндуро|кросс|экстрим/i.test(p.name)))) return false;
+    /* литые диски у спорта и нейкедов: камеры, ободная лента и спицы не нужны */
+    if (bike && tuneClassOf(bike) === "road" && (["tube", "rimtape", "spokes", "rimlock", "mousse", "moussegel"].indexOf(p.kind) >= 0 || /камер|спиц|ободн/i.test(p.name))) return false;
+    return oldP(p, eng, bike);
+  };
+  var oldT = tuningFor;
+  tuningFor = function (t, eng, bike) {
+    if (bike && bike.type === "Триал" && TRIAL_NO_TUNE.indexOf(t.id) >= 0) return { ok: false, deny: "Не для триала.", note: null };
+    return oldT(t, eng, bike);
+  };
+})();
+/* инструкции про спицы, камеры и мусс — не для спорта и нейкедов на литых дисках (класс — из buildSpec: e.cls) */
+["spokes", "wheel-lacing", "tube", "mousse-install"].forEach(function (id) { var f = GUIDE_NEED[id]; GUIDE_NEED[id] = function (e) { return !/^(sport|naked)$/.test(e.cls || "") && (!f || f(e)); }; });
+
+/* происхождение мотора по производителю: без группы региона мотор попадал в «Китайские моторы» таблиц масла, свечей и клапанов */
+Object.keys(ENGINES).forEach(function (id) {
+  var e = ENGINES[id]; if (!e || !e.groups) return;
+  if (["jp", "eu", "in", "cn", "ru"].some(function (g) { return e.groups.indexOf(g) >= 0; })) return;
+  var m = String(e.maker || "") + " " + String(e.name || "");
+  if (/Инди|India|Bajaj|TVS|Hero|Royal Enfield/i.test(m)) return;
+  if (/\b(Honda|Yamaha|Kawasaki|Suzuki)\b/.test(m)) e.groups.push("jp");
+  else if (/\b(KTM|Husqvarna|Beta|Sherco|TM|GasGas|Gas Gas|Aprilia|Ducati|BMW|Triumph|MV Agusta|Moto Guzzi|Husaberg|Montesa|Scorpa|TRRS|Vertigo|Jawa|MZ|Simson|Rotax|Cagiva|Benelli|Derbi|Peugeot|Piaggio|Vespa|Gilera)\b/.test(m)) e.groups.push("eu");
+});
+
+/* «Компрессия: 9.5:1» — это степень сжатия, а не давление замера: переносим её в описание схемы, компрессию — «по мануалу» */
+Object.keys(ENGINES).forEach(function (id) {
+  var e = ENGINES[id], m = /^\s*(?:степень\s*(?:сжатия)?\s*)?≈?\s*([\d.,]+)\s*:\s*1\b/i.exec(e && e.compression || "");
+  if (!m) return;
+  if (!/степень сжатия/i.test(e.cam || "")) e.cam = (e.cam ? e.cam + ", " : "") + "степень сжатия " + m[1] + ":1";
+  e.compression = "по мануалу (степень сжатия " + m[1] + ":1)";
+});
+/* детали-свечи «Свеча по мануалу…»: если код свечи у мотора известен — называем деталь по нему, иначе такую «свечу» не продаём */
+(function () {
+  for (var i = PARTS.length - 1; i >= 0; i--) {
+    var p = PARTS[i];
+    if (p.kind !== "spark" || !/по мануалу|по каталогу/i.test(p.name)) continue;
+    var e = p.fit && ENGINES[p.fit[0]], code = e && String(e.spark || "").split(/\s*\(/)[0].trim();
+    if (code && /[A-Z]{1,5}\d/.test(code) && !/мануал|каталог/i.test(code)) p.name = "Свеча " + code;
+    else PARTS.splice(i, 1);
+  }
+})();
+
+/* контактное (батарейное) зажигание и магдино — своя схема электрики «points», а не AC-CDI */
+(function () {
+  var old = wiringType;
+  wiringType = function (e) {
+    if (e && e.groups && e.groups.indexOf("efi") < 0 && /^(Батарейн|Контактн|Магдино|Маховичн|Генератор Г-401)/i.test(e.ignition || "")) return "points";
+    return old(e);
+  };
+})();

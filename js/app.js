@@ -728,7 +728,7 @@ function Maint({
     const kit = TO_KITS[it.id];
     if (!kit) return;
     /* дорожным и скутерам — сменный воздушный фильтр, а не пропитка для поролона */
-    (it.id === "air" && (/^(sport|naked|cruiser|tour|moped)$/.test(eng.cls || "") || eng.cvt) ? ["airfilter"] : kit.kinds).forEach(k => {
+    (it.id === "air" && (/^(sport|naked|cruiser|tour|moped)$/.test(eng.cls || "") || eng.cvt) ? ["airfilter"] : it.id === "oil" && eng.stroke === "2T" ? ["gearoil"] : kit.kinds).forEach(k => {
       const p = partByKind(k, eng);
       if (p && buy.indexOf(p) < 0) buy.push(p);
     });
@@ -2371,15 +2371,28 @@ function Onboarding({
     alt: "",
     width: 240,
     height: 150,
-    decoding: "async"
+    decoding: "async",
+    loading: "lazy"
   }), /*#__PURE__*/React.createElement("small", null, b.brand), /*#__PURE__*/React.createElement("b", null, b.name))))), /*#__PURE__*/React.createElement("h4", {
     className: "onb2-h"
-  }, "Или найди свой"), /*#__PURE__*/React.createElement(BikeFinder, {
+  }, "Или найди свой"), /*#__PURE__*/React.createElement("div", {
+    /* поле поиска — к верху экрана: иначе на телефоне результаты оказываются под клавиатурой и краем */
+    onFocusCapture: e => {
+      if (e.target && e.target.tagName === "INPUT") setTimeout(() => {
+        try {
+          e.target.scrollIntoView({
+            block: "start",
+            behavior: "smooth"
+          });
+        } catch (x) {}
+      }, 250);
+    }
+  }, /*#__PURE__*/React.createElement(BikeFinder, {
     compact: true,
     sel: sel,
     custom: custom,
     onPick: pick
-  }))));
+  })))));
 }
 function StartGuide({
   mt,
@@ -12090,6 +12103,8 @@ function App() {
   }, []);
   const [intro, setIntro] = useState(() => {
     try {
+      /* первый заход — сразу выбор мотоцикла, без заставки (иначе он появлялся через 3–5 с поверх чужой модели) */
+      if (onb !== null) return false;
       return !sessionStorage.getItem("mh-intro") && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     } catch (e) {
       return false;
@@ -18277,6 +18292,10 @@ function TreeRunner({
     if (r.skip2t && eng.stroke === "2T") {
       action = "Для 2T: износ поршня и колец, проверь лепестковый клапан и прокладки картера.";
       parts = ["piston", "reed", "basegasket"];
+    } else if (isEfi && eng.groups.indexOf("carb") < 0 && /жикл|игл[аеуы]|поплав|подсос|карбюр/i.test(action || "")) {
+      /* на инжекторе нет жиклёров, иглы и поплавка — смесь считает ЭБУ */
+      action = "На инжекторе: проверь давление топлива и форсунку, датчики (температуры, дросселя, лямбда) и ошибки ЭБУ — смесь считает блок, жиклёров нет.";
+      parts = parts.filter(k => ["jets", "jets2", "needle", "carbkit", "floatvalve", "carb", "choke"].indexOf(k) < 0);
     }
     const resolved = [];
     parts.forEach(k => {

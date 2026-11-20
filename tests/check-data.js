@@ -51,7 +51,7 @@ const TYPES = typesSrc ? JSON.parse(typesSrc[1]) : null;
 if (!TYPES) fail("Не найден BF_TYPES в js/app.js");
 
 // Двигатели
-const GROUPS = new Set(["horiz", "cg", "cb", "zs4v", "dohc", "air", "liquid", "carb", "efi", "2t", "4t", "small", "big", "balancer", "jp", "eu", "in", "cn", "ru", "cvt", "kick", "estart", "shaft", "belt"]); // kick / estart — по полю start (кик / электростартер); shaft / belt — по приводу (кардан / ремень)
+const GROUPS = new Set(["horiz", "cg", "cb", "zs4v", "dohc", "air", "liquid", "carb", "efi", "2t", "4t", "small", "big", "balancer", "jp", "eu", "in", "cn", "ru", "cvt", "kick", "estart", "shaft", "belt", "pv"]); // kick / estart — по полю start (кик / электростартер); shaft / belt — по приводу (кардан / ремень); pv — 2Т с клапаном выпуска
 for (const [id, e] of Object.entries(ENGINES)) {
   for (const f of ["code", "name", "stroke", "cooling", "spark"]) if (!e[f]) fail(`Двигатель ${id}: пустое поле ${f}`);
   if (!(e.cc > 0)) fail(`Двигатель ${id}: объём cc = ${e.cc}`);
@@ -226,6 +226,24 @@ for (const [id, e] of Object.entries(ENGINES)) if (new Set(e.groups).size !== e.
     const it = kind === "d" ? DG(xid) : SY(xid), e = ENGINES[id];
     if (it && e && (kind === "d" ? ctx.kbOk(it, e) : ctx.symOk(it, e)) !== want) fail("Диагностика «" + xid + "» для " + id + " — " + (want ? "должна быть" : "не должна быть"));
   }
+  /* генеральная репетиция: детали и логика «по классу» — чтобы старые ошибки не вернулись */
+  const fitsE = (p, e) => ctx.fits(p, e);
+  for (const id of Object.keys(ENGINES)) {
+    const e = ENGINES[id];
+    if (e.stroke === "2T") {
+      const bad = PARTS.find((p) => ["camchain", "tensioner", "valvein", "valveex", "camshaft", "oilfilter", "vcgasket", "shims"].indexOf(p.kind) >= 0 && fitsE(p, e));
+      if (bad) fail("2Т без ГРМ и клапанов: «" + bad.name + "» подходит к " + id);
+      if (e.timing && e.timing !== "—") fail("2Т: у " + id + " привод ГРМ «" + e.timing + "»");
+      if (e.groups.indexOf("pv") < 0) { const pv = PARTS.find((p) => p.kind === "pv" && fitsE(p, e)); if (pv) fail("Клапан выпуска у мотора без него: " + id); }
+    }
+    if (e.groups.indexOf("liquid") < 0) { const bad = PARTS.find((p) => ["coolant", "waterpump", "thermostat", "radcap"].indexOf(p.kind) >= 0 && fitsE(p, e)); if (bad) fail("Воздушное охлаждение, а подходит «" + bad.name + "»: " + id); }
+    if (/:\s*1\b/.test(e.compression || "") && !/мануал|бар/.test(e.compression)) fail("Компрессия — степень сжатия, а не давление: " + id + " «" + e.compression + "»");
+    /* масло к ТО — той вязкости, что в паспорте 4Т */
+    const vis = e.stroke !== "2T" && (String(e.oil || "").match(/(\d+)W-?(\d+)/i) || [])[0];
+    const oil = vis && ctx.partByKind("oil", e);
+    if (oil && oil.name.toUpperCase().replace(/[\s-]/g, "").indexOf(vis.toUpperCase().replace(/[\s-]/g, "")) < 0) fail("Масло к ТО " + id + ": в паспорте " + vis + ", а предлагается «" + oil.name + "»");
+  }
+  for (const p of PARTS) if (p.kind === "spark" && /по мануалу|по каталогу/i.test(p.name)) fail("Деталь-свеча без кода: " + p.id);
   const nodes = new Set((ctx.TUNE_NODES || []).map((n) => n[0]));
   for (const t of TUNING) if (!nodes.has(ctx.tuneNode(t))) fail("Тюнинг: у «" + t.id + "» нет узла (TUNE_NODES)");
   for (const r of ctx.CARB_UP || []) for (const id of (r.ladder || []).concat([r.up, r.bore, r.boreCarb]).filter(Boolean)) if (!TUNING.find((t) => t.id === id)) fail("CARB_UP: нет доработки «" + id + "»");
