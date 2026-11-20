@@ -1,27 +1,25 @@
-/* Шрифты сайта — свои копии (Fontsource, лицензия SIL OFL 1.1: см. OFL-*.txt). Только кириллица и латиница:
-   ₽ и редкие буквы берутся из системного шрифта — так страница легче. Источник — npm-пакеты @fontsource/* 5.3.0; сборка добавляет этот файл в css/app.min.css и m/m.css. */
-@font-face{font-family:'Fira Sans';font-style:normal;font-display:swap;font-weight:400;src:url(/fonts/fira-sans-cyrillic-400-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:'Fira Sans';font-style:normal;font-display:swap;font-weight:400;src:url(/fonts/fira-sans-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Fira Sans';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/fira-sans-cyrillic-500-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:'Fira Sans';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/fira-sans-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Fira Sans';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/fira-sans-cyrillic-600-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:'Fira Sans';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/fira-sans-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Fira Sans Condensed';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/fira-sans-condensed-cyrillic-500-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:'Fira Sans Condensed';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/fira-sans-condensed-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Fira Sans Condensed';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/fira-sans-condensed-cyrillic-600-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:'Fira Sans Condensed';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/fira-sans-condensed-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Fira Sans Condensed';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/fira-sans-condensed-cyrillic-700-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:'Fira Sans Condensed';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/fira-sans-condensed-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Unbounded';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/unbounded-cyrillic-600-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:'Unbounded';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/unbounded-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Unbounded';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/unbounded-cyrillic-700-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:'Unbounded';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/unbounded-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Russo One';font-style:normal;font-display:swap;font-weight:400;src:url(/fonts/russo-one-cyrillic-400-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:'Russo One';font-style:normal;font-display:swap;font-weight:400;src:url(/fonts/russo-one-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+/* Шрифты сайта — свои копии (Fontsource, лицензия SIL OFL 1.1: см. OFL-*.txt), по одному файлу на начертание:
+   кириллица и латиница @fontsource 5.3.0 слиты в один файл и урезаны fontTools (pyftsubset) до символов сайта:
+   U+0020-007E,U+00A0-00FF,U+010D,U+0301,U+0400-045F,U+0490-0491,U+2010-2027,U+2030-203A,U+2060,U+20BD,U+2116,U+2122,U+2153-215E,U+2190-2195,U+2212,U+2248,U+2261,U+2264-2265,U+22EE,U+2033;
+   функции: kern, liga, calt, ccmp, locl, mark, mkmk, tnum.
+   Эмодзи и редкие знаки берутся из системного шрифта. Сборка добавляет этот файл в css/app.min.css и m/m.css. */
+@font-face{font-family:'Fira Sans';font-style:normal;font-display:swap;font-weight:400;src:url(/fonts/fira-sans-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Fira Sans';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/fira-sans-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Fira Sans';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/fira-sans-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Fira Sans Condensed';font-style:normal;font-display:swap;font-weight:500;src:url(/fonts/fira-sans-condensed-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Fira Sans Condensed';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/fira-sans-condensed-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Fira Sans Condensed';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/fira-sans-condensed-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Unbounded';font-style:normal;font-display:swap;font-weight:600;src:url(/fonts/unbounded-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Unbounded';font-style:normal;font-display:swap;font-weight:700;src:url(/fonts/unbounded-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Russo One';font-style:normal;font-display:swap;font-weight:400;src:url(/fonts/russo-one-400-normal.woff2) format('woff2')}
+/* запасные шрифты с метриками под основные (Arial/Helvetica/Roboto): пока свой шрифт грузится, строки не перескакивают (CLS) */
+@font-face{font-family:'Fira Sans Fallback';src:local('Arial'),local('Helvetica'),local('Roboto'),local('Liberation Sans');size-adjust:97.8%;ascent-override:95.6%;descent-override:27.1%;line-gap-override:0%}
+@font-face{font-family:'Fira Sans Condensed Fallback';src:local('Arial'),local('Helvetica'),local('Roboto'),local('Liberation Sans');size-adjust:84.1%;ascent-override:111.1%;descent-override:31.5%;line-gap-override:0%}
+@font-face{font-family:'Unbounded Fallback';src:local('Arial'),local('Helvetica'),local('Roboto'),local('Liberation Sans');size-adjust:130.1%;ascent-override:76.5%;descent-override:18.8%;line-gap-override:0%}
 
 .fbk{margin:18px 0 8px}.fbk summary{cursor:pointer;display:inline-block;padding:10px 14px;border:1px solid var(--line);border-radius:12px;font:600 15px var(--cond)}.fbk form{display:grid;gap:8px;margin-top:10px}.fbk select,.fbk input,.fbk textarea{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:15px var(--body);min-width:0}.fbk textarea{resize:vertical}.fbk-btns{display:flex;flex-wrap:wrap;gap:8px}.fbk button{padding:12px 16px;border:1px solid var(--line);border-radius:8px;background:var(--card2);color:var(--ink);font:600 15px var(--cond);cursor:pointer}.fbk button[type=submit]{background:#fff;color:#000;border-color:#fff}.fbk button:disabled{opacity:.5}.fbk-msg{margin:8px 0 0;color:var(--muted)}
 :root{color-scheme:dark;--bg:#000000;--card:#0E0E0E;--card2:#151515;--line:rgba(255,255,255,0.132);--ink:#F2F2F2;--muted:#9A9A9A;--acc:#FFFFFF;--acc2:#E6E6E6;--pink:#8F8F8F;
---display:"Russo One","Arial Black",Impact,sans-serif;--cond:"Fira Sans Condensed","Arial Narrow",Arial,sans-serif;--body:"Fira Sans","Segoe UI",Roboto,Arial,sans-serif}
+--display:"Russo One","Arial Black",Impact,sans-serif;--cond:"Fira Sans Condensed","Fira Sans Condensed Fallback","Arial Narrow",Arial,sans-serif;--body:"Fira Sans","Fira Sans Fallback","Segoe UI",Roboto,Arial,sans-serif}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);
 background-image:radial-gradient(70% 40% at 85% -5%,rgba(255,255,255,0.154),transparent 70%),radial-gradient(50% 30% at 0% 10%,rgba(255,255,255,0.049),transparent 70%);background-repeat:no-repeat}
 a{color:var(--acc2)}img{max-width:100%}
@@ -106,7 +104,7 @@ ul.plain{margin:0;padding-left:20px}ul.plain li{margin:3px 0}
 .faq summary{cursor:pointer;padding:12px 14px;font:600 16px var(--cond);list-style:none}.faq summary::-webkit-details-marker{display:none}
 .faq summary::after{content:"+";float:right;color:var(--muted)}.faq details[open] summary::after{content:"–"}.faq p{margin:0;padding:0 14px 12px;color:#D0D0D0}
 /* v70 «Гараж» — как в приложении: графит, спокойные заголовки (Unbounded), мягкие карточки */
-:root{--display:"Unbounded","Fira Sans",Arial,sans-serif;--bg:#0C0E12;--card:#161A21;--card2:#1C2129;--line:rgba(255,255,255,.075);--ink:#EEF1F5;--muted:#8E98A6}
+:root{--display:"Unbounded","Unbounded Fallback","Fira Sans",Arial,sans-serif;--bg:#0C0E12;--card:#161A21;--card2:#1C2129;--line:rgba(255,255,255,.075);--ink:#EEF1F5;--muted:#8E98A6}
 body{background:radial-gradient(900px 520px at 70% -160px,rgba(124,132,255,.16),transparent 70%),#0C0E12!important;color:var(--ink)}
 h1,h2,.card.big b,.tile b{font-style:normal!important;text-transform:none!important;text-shadow:none!important;letter-spacing:-.01em!important}
 h1{font-weight:700!important}h2{font-weight:600!important;font-size:19px!important}.card.big b{font-family:"Fira Sans",Arial,sans-serif!important;font-weight:600!important;font-size:17px!important}
