@@ -1,7 +1,9 @@
-# Выкладка ИИ-сервера (worker/) в Cloudflare (worker/deploy.sh) после каждого изменения в main.
-# Нужны секреты репозитория: CLOUDFLARE_API_TOKEN (Cloudflare → motohelper-ai → Settings → Builds →
-# «API token for external CI/CD» → Create token) и CLOUDFLARE_ACCOUNT_ID (из адреса dash.cloudflare.com/<ID>/…).
-# Без токена шаг пропускается, проверка не краснеет.
+# Выкладка ИИ-сервера (worker/) в Cloudflare (worker/deploy.sh) после каждого изменения в main: код и расписания запусков.
+# Нужен один секрет репозитория — CLOUDFLARE_API_TOKEN (GitHub → Settings → Secrets and variables → Actions →
+# New repository secret). Токен: dash.cloudflare.com → My Profile → API Tokens → Create Token → шаблон «Edit Cloudflare Workers».
+# CLOUDFLARE_ACCOUNT_ID задавать не обязательно — deploy.sh найдёт аккаунт сам.
+# Без токена шаг пропускается (проверка не краснеет), а в итогах запуска появляется предупреждение.
+# Выложить вручную: Actions → deploy-worker → Run workflow.
 name: deploy-worker
 on:
   push:
@@ -21,4 +23,4 @@ jobs:
         run: sh worker/deploy.sh
       - name: No token
         if: ${{ env.CLOUDFLARE_API_TOKEN == '' }}
-        run: echo "CLOUDFLARE_API_TOKEN не задан — выкладка пропущена"
+        run: echo "::warning::CLOUDFLARE_API_TOKEN не задан в секретах репозитория — ИИ-сервер не выложен"
