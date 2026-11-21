@@ -380,7 +380,12 @@ async function tgRun(env) {
       if (!j.ok) {
         await env.FEEDBACK.delete("tg:sent:" + p.id);
         errors.push(p.id + ": telegram: " + (j.description || "?"));
-      } else out.push(p);
+      } else {
+        // номер сообщения в канале — чтобы потом можно было заменить картинку или текст вышедшего поста
+        const mid = j.result && j.result.message_id;
+        if (mid) await env.FEEDBACK.put("tg:sent:" + p.id, JSON.stringify({ t: new Date().toISOString(), mid }), { expirationTtl: 60 * 60 * 24 * 400 });
+        out.push(p);
+      }
     }
     return { ok: !errors.length, error: errors.join("; ") || undefined, posted: out.map((p) => p.id), posts: out, today, time: hm };
   } catch (e) {
