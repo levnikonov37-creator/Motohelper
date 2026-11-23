@@ -55,7 +55,7 @@ export default {
   // Различаем по часу, а не по строке cron: так работает и при «0 6 * * *», и при старом «0 6 * * 1».
   async scheduled(event, env, ctx) {
     const h = new Date(event.scheduledTime || Date.now()).getUTCHours();
-    ctx.waitUntil(h === 6 ? dailyReport(env).then(() => daily(env, false)) : daily(env, h === 15));
+    ctx.waitUntil(h === 6 || h === 9 ? reportOnce(env, h === 9).then(() => daily(env, false)) : daily(env, h === 15));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -343,7 +343,9 @@ async function tgStatus(env) {
   try {
     const { cfg, today, hm, posts, sent, all } = await tgQueue(env);
     const left = all.filter((p) => p && p.date && p.date + postTime(p) > today + hm).sort((a, b) => (a.date + postTime(a) < b.date + postTime(b) ? -1 : 1));
-    return { ok: true, bot: !!env.TELEGRAM_BOT_TOKEN, channel: cfg.channel, now: today + " " + hm,
+    let report = null;
+    try { report = env.FEEDBACK && JSON.parse((await env.FEEDBACK.get("report:last")) || "null"); } catch (e) {}
+    return { ok: true, bot: !!env.TELEGRAM_BOT_TOKEN, channel: cfg.channel, now: today + " " + hm, report,
       today: posts.filter((p) => p.date === today).map((p) => ({ id: p.id, time: postTime(p), photo: !!p.photo, sent: sent[p.id] })),
       next: left[0] ? { id: left[0].id, date: left[0].date, time: postTime(left[0]) } : null, planned: left.length, lastDate: left.length ? left[left.length - 1].date : null };
   } catch (e) {
@@ -407,11 +409,21 @@ async function ownerChat(env) {
   if (env.FEEDBACK) await env.FEEDBACK.put("tg:owner", String(m.chat.id));
   return String(m.chat.id);
 }
+/* Метрика иногда отказывает (лимит параллельных запросов, 429/5xx) — повторяем с паузой; ошибка не глотается */
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function metrika(env, q) {
-  const r = await fetch("https://api-metrika.yandex.net/stat/v1/data?ids=" + METRIKA_ID + "&lang=ru&" + q, { headers: { Authorization: "OAuth " + env.YANDEX_METRIKA_TOKEN } });
-  const j = await r.json();
-  if (!r.ok) throw new Error("Метрика " + r.status + ": " + (j.message || "").slice(0, 150));
-  return j;
+  let last;
+  for (let i = 0; i < 4; i++) {
+    try {
+      const r = await fetch("https://api-metrika.yandex.net/stat/v1/data?ids=" + METRIKA_ID + "&lang=ru&" + q, { headers: { Authorization: "OAuth " + env.YANDEX_METRIKA_TOKEN } });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok) return j;
+      last = new Error("Метрика " + r.status + ": " + String(j.message || "").slice(0, 150));
+      if (r.status !== 429 && r.status < 500) throw last;
+    } catch (e) { last = e; if (/^Метрика 4/.test(e.message) && !/^Метрика 429/.test(e.message)) throw e; }
+    await sleep(1500 * (i + 1));
+  }
+  throw last;
 }
 /* утренний отчёт владельцу (в личку боту): вчерашний день из Метрики, канал, поиск, вопросы ИИ, здоровье сервера */
 async function dailyReport(env, dry) {
@@ -421,13 +433,16 @@ async function dailyReport(env, dry) {
     const chat = await ownerChat(env);
     if (!chat) return { ok: false, error: "владелец не найден — напиши боту /start" };
     const M = "metrics=ym:s:visits,ym:s:users,ym:s:pageviews,ym:s:avgVisitDurationSeconds";
-    const [cur, prev, week, src, pages] = await Promise.all([
-      metrika(env, M + "&date1=yesterday&date2=yesterday"),
-      metrika(env, M + "&date1=2daysAgo&date2=2daysAgo"),
-      metrika(env, "metrics=ym:s:users,ym:s:visits&date1=7daysAgo&date2=yesterday"),
-      metrika(env, "metrics=ym:s:visits&dimensions=ym:s:lastTrafficSource&sort=-ym:s:visits&limit=5&date1=yesterday&date2=yesterday"),
-      metrika(env, "metrics=ym:pv:pageviews&dimensions=ym:pv:URLPath&sort=-ym:pv:pageviews&limit=5&date1=yesterday&date2=yesterday"),
-    ]);
+    // по одному, а не пять сразу: у Метрики лимит параллельных запросов, и из-за него отчёт иногда не собирался
+    const got = [];
+    for (const q of [
+      M + "&date1=yesterday&date2=yesterday",
+      M + "&date1=2daysAgo&date2=2daysAgo",
+      "metrics=ym:s:users,ym:s:visits&date1=7daysAgo&date2=yesterday",
+      "metrics=ym:s:visits&dimensions=ym:s:lastTrafficSource&sort=-ym:s:visits&limit=5&date1=yesterday&date2=yesterday",
+      "metrics=ym:pv:pageviews&dimensions=ym:pv:URLPath&sort=-ym:pv:pageviews&limit=5&date1=yesterday&date2=yesterday",
+    ]) got.push(await metrika(env, q));
+    const [cur, prev, week, src, pages] = got;
     const t = cur.totals || [0, 0, 0, 0], p = prev.totals || [0, 0, 0, 0], w = week.totals || [0, 0];
     const n = (x) => Math.round(x || 0).toLocaleString("ru-RU");
     const delta = (a, b) => (!b ? "" : " (" + (a >= b ? "+" : "") + Math.round(((a - b) / b) * 100) + "% к позавчера)");
@@ -468,6 +483,7 @@ async function dailyReport(env, dry) {
     ].filter((x, i, a) => x !== "" || (a[i - 1] !== "" && i < a.length - 1)).join("\n").trim();
     if (dry) return { ok: true, sent: false, text: lines };
     const r = await tgApi(env, "sendMessage", { chat_id: chat, text: lines, disable_web_page_preview: true });
+    if (r.ok && env.FEEDBACK) await env.FEEDBACK.put("report:sent:" + mskDay(), new Date().toISOString(), { expirationTtl: 60 * 60 * 24 * 4 });
     return r.ok ? { ok: true, sent: true } : { ok: false, error: "telegram: " + r.description };
   } catch (e) {
     return { ok: false, error: e.message };
@@ -673,6 +689,21 @@ async function tellOwner(env, text) {
     if (chat) await tgApi(env, "sendMessage", { chat_id: chat, text });
   } catch (e) {}
   return { ok: false, error: text };
+}
+
+/* Утренний отчёт владельцу: до 3 попыток; итог в KV «report:last» (виден в ?tg=status). Если в 09:00 МСК не вышел —
+   повтор в 12:00 МСК (late) и сообщение владельцу с причиной — тихо не пропадает */
+async function reportOnce(env, late) {
+  if (env.FEEDBACK && (await env.FEEDBACK.get("report:sent:" + mskDay()))) return { ok: true, already: true };
+  let r = { ok: false, error: "?" };
+  for (let i = 0; i < 3; i++) {
+    r = await dailyReport(env);
+    if (r.ok) break;
+    if (i < 2) await sleep(20000);
+  }
+  if (env.FEEDBACK) await env.FEEDBACK.put("report:last", JSON.stringify({ t: new Date().toISOString(), ok: r.ok, error: r.error }), { expirationTtl: 60 * 60 * 24 * 14 });
+  if (!r.ok) await tellOwner(env, "⚠️ Отчёт за вчера не собрался" + (late ? " и в 12:00" : " в 09:00 (повторю в 12:00)") + ": " + String(r.error).slice(0, 200));
+  return r;
 }
 
 /* по расписанию: посты в канал, время которых наступило; full (вечерний запуск) — ещё и самопроверка ИИ с итогом в KV «health»
