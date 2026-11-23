@@ -1943,7 +1943,7 @@ const BF_LOOK = {
   в: "b"
 };
 function bfAlts(t) {
-  if (!/[а-я]/.test(t)) return [t];
+  if (!/[а-я]/.test(t)) return /ks/.test(t) ? [t, t.replace(/ks/g, "x")] : [t];
   const lay = bfNorm(t.split("").map(c => {
       const i = BF_RU.indexOf(c);
       return i < 0 ? c : BF_EN[i];
@@ -1951,7 +1951,31 @@ function bfAlts(t) {
     tr = t.split("").map(c => BF_TR[c] != null ? BF_TR[c] : c).join(""),
     look = t.split("").map(c => BF_LOOK[c] || (BF_TR[c] != null ? BF_TR[c] : c)).join(""),
     trx = tr.replace(/h/g, "x");
-  return [t, lay, tr, look, /х/.test(t) ? trx : ""].filter((x, i, a) => x && a.indexOf(x) === i);
+  return [t, lay, tr, look, /х/.test(t) ? trx : "", /кс/.test(t) ? tr.replace(/ks/g, "x") : "", /кс/.test(t) ? look.replace(/ks/g, "x") : ""].filter((x, i, a) => x && a.indexOf(x) === i);
+}
+/* опечатка в слове: «motolend» → motoland, «kaio» → kayo, «мотоленд» → motoland. Только для слов из 4+ букв:
+   1 ошибка (замена, пропуск, лишняя буква или две соседние наоборот), для длинных (7+) — до 2 */
+function bfTypo(a, w) {
+  if (a.length < 4 || w.length < 3 || !/[a-zа-я]/.test(a)) return false;
+  const lim = a.length >= 7 ? 2 : 1;
+  if (Math.abs(a.length - w.length) > lim) return false;
+  const m = a.length, n = w.length, d = [];
+  for (let i = 0; i <= m; i++) { d[i] = [i]; for (let j = 1; j <= n; j++) d[i][j] = i ? 0 : j; }
+  for (let i = 1; i <= m; i++) {
+    let best = 1e9;
+    for (let j = 1; j <= n; j++) {
+      const c = a[i - 1] === w[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + c);
+      if (i > 1 && j > 1 && a[i - 1] === w[j - 2] && a[i - 2] === w[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      if (d[i][j] < best) best = d[i][j];
+    }
+    if (best > lim) return false;
+  }
+  return d[m][n] <= lim;
+}
+/* слово запроса совпало с моделью: точно — в строке поиска, иначе — с опечаткой в одном из слов названия */
+function bfMatch(x, t, exact) {
+  return bfHas(x.s, t) || (!exact && bfAlts(t).some(a => x.w.some(w => bfTypo(a, w))));
 }
 /* слово похоже на название марки: начало совпадает или отличается на 1–2 буквы («kavasaki» → kawasaki) */
 function bfNear(a, b) {
@@ -2017,7 +2041,8 @@ function BikeFinder({
   const aka = id => typeof ENGINE_AKA === "object" && ENGINE_AKA[id] || "";
   const idx = useMemo(() => BIKES.map(b => ({
     b: b,
-    s: bfNorm(b.brand + " " + b.name + " " + (b.aka || []).join(" ") + " " + b.type + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ") + " " + b.versions.map(v => bfYears(v.years) + " " + (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name + " " + aka(v.engine)).join(" "))
+    s: bfNorm(b.brand + " " + b.name + " " + (b.aka || []).join(" ") + " " + b.type + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ") + " " + b.versions.map(v => bfYears(v.years) + " " + (ENGINES[v.engine] || {}).code + " " + (ENGINES[v.engine] || {}).name + " " + ((ENGINES[v.engine] || {}).maker || "") + " " + aka(v.engine)).join(" ")),
+    w: (b.brand + " " + b.name + " " + (b.aka || []).join(" ") + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ") + " " + b.versions.map(v => (ENGINES[v.engine] || {}).maker || "").join(" ")).toLowerCase().split(/[\s\/()+,\-]+/).map(bfNorm).filter(w => w.length >= 3).filter((w, i, a) => a.indexOf(w) === i)
   })), []);
   /* Моторы: сколько моделей на каждом, строка для поиска с синонимами («174», «нб300», «зонгшен») */
   const engIdx = useMemo(() => {
@@ -2067,14 +2092,16 @@ function BikeFinder({
   const engCur = engF ? engIdx.find(x => x.ids.indexOf(engF) >= 0) : null;
   const engIds = engCur ? engCur.ids : [engF];
   const okBase = x => (!brand || x.b.brand === brand) && (!engF || x.b.versions.some(v => engIds.indexOf(v.engine) >= 0));
-  let list = pool.filter(x => okBase(x) && toks.every(t => bfHas(x.s, t))).map(x => x.b);
+  /* опечатки — только для слов, которых точно нет ни в одной модели («альфа» — это Alpha, а не Alga) */
+  const exact = toks.map(t => bfAlts(t).some(a => idx.some(x => x.w.some(w => w.indexOf(a) >= 0))));
+  let list = pool.filter(x => okBase(x) && toks.every((t, i) => bfMatch(x, t, exact[i]))).map(x => x.b);
   /* ничего не нашлось: убираем слова, которых нет ни у одной модели, а марку с опечаткой («кавасаки», «хонды») ищем приблизительно */
   let hint = "";
   if (!list.length && toks.length) {
     /* сначала без одного слова, потом без двух — оставляем самый полный запрос, по которому что-то есть */
     const tryDrop = drop => {
       const keep = toks.filter((t, i) => drop.indexOf(i) < 0);
-      const r = keep.length ? pool.filter(x => okBase(x) && keep.every(t => bfHas(x.s, t))).map(x => x.b) : [];
+      const r = keep.length ? pool.filter(x => okBase(x) && keep.every(t => bfMatch(x, t, exact[toks.indexOf(t)]))).map(x => x.b) : [];
       if (r.length) {
         list = r;
         hint = "Без «" + drop.map(i => toks[i]).join(", ") + "»";
@@ -2101,7 +2128,7 @@ function BikeFinder({
     const sc = b => {
       const words = (b.brand + " " + b.name + " " + (b.aka || []).join(" ") + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ")).toLowerCase().split(/[\s\/()+,]+/).map(bfNorm).filter(Boolean),
         nm = bfNorm(b.brand + " " + b.name);
-      let sum = ta.reduce((sum, alts) => sum + Math.max.apply(null, alts.map(a => words.indexOf(a) >= 0 ? 4 : words.some(w => w.indexOf(a) === 0) ? 3 : words.some(w => a.indexOf(w) === 0 && w.length >= 2) ? 2 : nm.indexOf(a) >= 0 ? 1 : 0)), 0);
+      let sum = ta.reduce((sum, alts) => sum + Math.max.apply(null, alts.map(a => words.indexOf(a) >= 0 ? 4 : words.some(w => w.indexOf(a) === 0) ? 3 : words.some(w => a.indexOf(w) === 0 && w.length >= 2) ? 2 : nm.indexOf(a) >= 0 ? 1 : words.some(w => bfTypo(a, w)) ? 1 : 0)), 0);
       /* два слова подряд вместе — одно слово названия («св 400» → CB400, «мт 09» → MT-09) */
       for (let i = 0; i + 1 < ta.length; i++) if (ta[i].some(a => ta[i + 1].some(c => words.some(w => w.indexOf(a + c) === 0)))) sum += 4;
       /* слово запроса прямо в коде мотора («172fmm») — выше, чем совпадение по синонимам */
@@ -14688,10 +14715,11 @@ function srTokens(q) {
   });
 }
 /* насколько текст подходит под запрос: 0 — не подходит; больше — если слова стоят в начале */
-function srMatch(text, toks) {
+function srMatch(text, toks, typo) {
   const s = String(text || "").toLowerCase().replace(/ё/g, "е");
   let score = 0,
-    hit = 0;
+    hit = 0,
+    words = null;
   for (let i = 0; i < toks.length; i++) {
     let best = 0;
     for (let j = 0; j < toks[i].length; j++) {
@@ -14700,6 +14728,11 @@ function srMatch(text, toks) {
       /* короткие слова («не», «gy») — только с начала слова, иначе «не» найдётся в «глохНЕт» */
       while (at > 0 && w.length <= 2 && !/[\s\-(«"\/]/.test(s[at - 1])) at = s.indexOf(w, at + 1);
       if (at >= 0) best = Math.max(best, at === 0 ? 3 : /[\s\-(«"\/]/.test(s[at - 1]) ? 2 : 1);
+    }
+    /* названия мотоциклов — и с опечаткой («kaio k1» → Kayo K1, «motolend» → Motoland) */
+    if (!best && typo) {
+      words = words || s.split(/[^a-zа-я0-9]+/).filter(w => w.length >= 3);
+      if (toks[i].some(a => words.some(w => bfTypo(a, w)))) best = 1;
     }
     if (best) {
       hit++;
@@ -14741,9 +14774,11 @@ function siteSearch(q, ctx, opt) {
   const repairOnly = opt && opt.scope === "repair";
   const out = [];
   /* очки: как хорошо совпал заголовок + важность типа; совпадение только по скрытым словам раздела — ниже */
-  function add(type, t, act, more, prio, k, extra) {
-    let s = srMatch(t, toks);
-    if (!s && more) s = srMatch(t + " " + more, toks) - 2;
+  function add(type, t, act, more, prio, k, extra, typo) {
+    /* опечатки — для всего, кроме запчастей (их десятки тысяч): «карбюротор» найдёт чистку карбюратора */
+    if (typo == null) typo = type !== "Запчасть";
+    let s = srMatch(t, toks, typo);
+    if (!s && more) s = srMatch(t + " " + more, toks, typo) - 2;
     if (s > 0) out.push({
       k: k,
       type: type,
@@ -14821,11 +14856,11 @@ function siteSearch(q, ctx, opt) {
         }));
         const sc = rows.map(r => srMatch(r.t, toks)),
           best = Math.max.apply(null, sc);
-        if (best > srMatch(base, toks)) rows.forEach((r, i) => sc[i] === best && add("Мотоцикл", r.t, open(r.vi), r.code, 0, "b" + bikeKey(b) + "|" + r.vi, r.code));else add("Мотоцикл", base + " — " + b.versions.map(v => v.label.split(" · ")[0]).join(" / "), open(0), aka, 0, "b" + bikeKey(b), "");
+        if (best > srMatch(base, toks)) rows.forEach((r, i) => sc[i] === best && add("Мотоцикл", r.t, open(r.vi), r.code, 0, "b" + bikeKey(b) + "|" + r.vi, r.code, true));else add("Мотоцикл", base + " — " + b.versions.map(v => v.label.split(" · ")[0]).join(" / "), open(0), aka, 0, "b" + bikeKey(b), "", true);
         return;
       }
       const code = (ENGINES[b.versions[0].engine] || {}).code || "";
-      add("Мотоцикл", base, open(0), code + (aka ? " " + aka : ""), 0, "b" + bikeKey(b), code);
+      add("Мотоцикл", base, open(0), code + (aka ? " " + aka : ""), 0, "b" + bikeKey(b), code, true);
     });
   }
   out.sort((a, b) => b.s - a.s);
