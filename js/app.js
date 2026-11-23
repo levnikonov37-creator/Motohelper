@@ -2126,9 +2126,12 @@ function BikeFinder({
     /* выше — модели, у которых слова запроса есть в самом названии, целыми словами («k1 300» → Kayo K1 300, а не BMW K 1300) */
     const ta = toks.map(bfAlts);
     const sc = b => {
-      const words = (b.brand + " " + b.name + " " + (b.aka || []).join(" ") + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ")).toLowerCase().split(/[\s\/()+,]+/).map(bfNorm).filter(Boolean),
+      const split = s => s.toLowerCase().split(/[\s\/()+,]+/).map(bfNorm).filter(Boolean),
+        own = split(b.brand + " " + b.name + " " + BF_WORDS.filter(w => w[0].test(b.name)).map(w => w[1]).join(" ")),
+        words = own.concat(split((b.aka || []).join(" "))),
         nm = bfNorm(b.brand + " " + b.name);
-      let sum = ta.reduce((sum, alts) => sum + Math.max.apply(null, alts.map(a => words.indexOf(a) >= 0 ? 4 : words.some(w => w.indexOf(a) === 0) ? 3 : words.some(w => a.indexOf(w) === 0 && w.length >= 2) ? 2 : nm.indexOf(a) >= 0 ? 1 : words.some(w => bfTypo(a, w)) ? 1 : 0)), 0);
+      /* слово целиком в своём названии — 4, только в другом названии модели (b.aka) — 3.5: «альфа» → сначала сами Альфы, потом Swift («Альфа Свифт») */
+      let sum = ta.reduce((sum, alts) => sum + Math.max.apply(null, alts.map(a => own.indexOf(a) >= 0 ? 4 : words.indexOf(a) >= 0 ? 3.5 : words.some(w => w.indexOf(a) === 0) ? 3 : words.some(w => a.indexOf(w) === 0 && w.length >= 2) ? 2 : nm.indexOf(a) >= 0 ? 1 : words.some(w => bfTypo(a, w)) ? 1 : 0)), 0);
       /* два слова подряд вместе — одно слово названия («св 400» → CB400, «мт 09» → MT-09) */
       for (let i = 0; i + 1 < ta.length; i++) if (ta[i].some(a => ta[i + 1].some(c => words.some(w => w.indexOf(a + c) === 0)))) sum += 4;
       /* слово запроса прямо в коде мотора («172fmm») — выше, чем совпадение по синонимам */
