@@ -8917,6 +8917,16 @@ mergeFamily("Stels", "Delta", [
   fam("Fxmoto", "Storm Samax II Lux", "125 см³ · в документах 49,9 см³ (139FMB)", ["Samax II Lux 125"]);
   fam("Fxmoto", "Storm Samax II Off Road", "125 см³ · в документах 49,9 см³ (139FMB)", ["Samax II Off Road 125"]);
 })();
+/* Мотомир (у продавцов — «ММ» / «МОТОМ»): мопеды-Альфы Swift. В документах до 50 см³ и мотор «1P39», по факту
+   горизонтальный 110. Swift 2 — «более мощная версия» (так у Мотомира); продавцы пишут то 110, то 125 см³ —
+   поэтому две версии, свою выбирают по объёму (в ПТС/ПСМ его нет, смотреть по продавцу или по номеру мотора). */
+(function () {
+  var M = "Мопед", A = { approx: true };
+  B("Мотомир", "Swift", M, [["152FMH", "110 см³ · в документах до 50 см³ (1P39)", A]]);
+  BIKES[BIKES.length - 1].aka = ["Alpha Swift", "Альфа Свифт", "MM Swift"];
+  B("Мотомир", "Swift 2", M, [["152FMH", "110 см³ · в документах до 50 см³ (1P39)", A], ["154FMI", "125 см³ · в документах до 50 см³ (1P39)", A]]);
+  BIKES[BIKES.length - 1].aka = ["Swift 2.0", "Alpha Swift 2", "Альфа Свифт 2.0"];
+})();
 /* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
 BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
 sortBikes();
