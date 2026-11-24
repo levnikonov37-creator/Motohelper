@@ -59,11 +59,13 @@ export default {
   // и посты на 09:00; 09:00 UTC (12:00 МСК) — совет; 15:00 UTC (18:00 МСК) — мотоцикл дня и самопроверка ИИ.
   // Различаем по часу, а не по строке cron: так работает и при «0 6 * * *», и при старом «0 6 * * 1».
   async scheduled(event, env, ctx) {
+    env = await withKeys(env);
     const h = new Date(event.scheduledTime || Date.now()).getUTCHours();
     ctx.waitUntil(h === 6 || h === 9 ? reportOnce(env, h === 9).then(() => daily(env, false)) : daily(env, h === 15));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
+    env = await withKeys(env);
     // сообщения боту в личку (Telegram шлёт их сюда с секретом из TG_HOOK_SECRET)
     if (new URL(request.url).pathname === "/tg-hook") return botHook(request, env, ctx);
     // переход в магазин по партнёрке: /go?u=<адрес на aliexpress.ru> → диплинк Admitad на эту страницу
@@ -355,13 +357,70 @@ async function gemini(env, messages, images) {
    У каждого — свой бесплатный лимит; модель, упёршуюся в лимит (429), пропускаем 10 минут, неизвестную (404/400) — сутки.
    Неверный ключ (401/403) — к следующему провайдеру. */
 const OAI = [
-  { id: "groq", key: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions", models: ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "llama-3.1-8b-instant"] },
-  { id: "cerebras", key: "CEREBRAS_API_KEY", url: "https://api.cerebras.ai/v1/chat/completions", models: ["llama-3.3-70b", "gpt-oss-120b", "llama3.1-8b"] },
-  { id: "sambanova", key: "SAMBANOVA_API_KEY", url: "https://api.sambanova.ai/v1/chat/completions", models: ["Meta-Llama-3.3-70B-Instruct", "DeepSeek-V3-0324"] },
-  { id: "mistral", key: "MISTRAL_API_KEY", url: "https://api.mistral.ai/v1/chat/completions", models: ["mistral-small-latest", "mistral-medium-latest"] },
-  { id: "openrouter", key: "OPENROUTER_API_KEY", url: "https://openrouter.ai/api/v1/chat/completions", models: ["deepseek/deepseek-chat-v3-0324:free", "meta-llama/llama-3.3-70b-instruct:free", "openai/gpt-oss-120b:free"], headers: { "HTTP-Referer": "https://motohelper.ru", "X-Title": "MotoHelper" } },
-  { id: "github", key: "GITHUB_MODELS_TOKEN", url: "https://models.github.ai/inference/chat/completions", models: ["openai/gpt-4.1-mini", "meta/Llama-3.3-70B-Instruct"] },
+  { id: "groq", name: "Groq", site: "console.groq.com/keys", key: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions", models: ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "llama-3.1-8b-instant"] },
+  { id: "cerebras", name: "Cerebras", site: "cloud.cerebras.ai → API Keys", key: "CEREBRAS_API_KEY", url: "https://api.cerebras.ai/v1/chat/completions", models: ["llama-3.3-70b", "gpt-oss-120b", "llama3.1-8b"] },
+  { id: "sambanova", name: "SambaNova", site: "cloud.sambanova.ai → API Keys", key: "SAMBANOVA_API_KEY", url: "https://api.sambanova.ai/v1/chat/completions", models: ["Meta-Llama-3.3-70B-Instruct", "DeepSeek-V3-0324"] },
+  { id: "mistral", name: "Mistral", site: "console.mistral.ai/api-keys", key: "MISTRAL_API_KEY", url: "https://api.mistral.ai/v1/chat/completions", models: ["mistral-small-latest", "mistral-medium-latest"] },
+  { id: "openrouter", name: "OpenRouter", site: "openrouter.ai/settings/keys", key: "OPENROUTER_API_KEY", url: "https://openrouter.ai/api/v1/chat/completions", models: ["deepseek/deepseek-chat-v3-0324:free", "meta-llama/llama-3.3-70b-instruct:free", "openai/gpt-oss-120b:free"], headers: { "HTTP-Referer": "https://motohelper.ru", "X-Title": "MotoHelper" } },
+  { id: "github", name: "GitHub Models", site: "github.com/settings/personal-access-tokens (право Models: Read)", key: "GITHUB_MODELS_TOKEN", url: "https://models.github.ai/inference/chat/completions", models: ["openai/gpt-4.1-mini", "meta/Llama-3.3-70B-Instruct"] },
 ];
+/* Ключи можно не вносить в Cloudflare руками: владелец присылает ключ боту в личку, бот проверяет его и кладёт в KV «aikeys».
+   Ключ из KV главнее секрета из настроек (так новый ключ из бота сразу заменяет старый). Читаем раз в минуту на копию воркера. */
+const KEY_RE = [["groq", /^gsk_[A-Za-z0-9]{20,}$/], ["cerebras", /^csk-[A-Za-z0-9]{20,}$/], ["openrouter", /^sk-or-v1-[A-Za-z0-9]{20,}$/], ["github", /^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/]];
+const KEYS_CACHE = { t: 0, v: null };
+async function withKeys(env) {
+  if (!env.FEEDBACK) return env;
+  if (Date.now() - KEYS_CACHE.t > 60000) {
+    try {
+      KEYS_CACHE.v = JSON.parse((await env.FEEDBACK.get("aikeys")) || "null");
+    } catch (e) {
+      KEYS_CACHE.v = null;
+    }
+    KEYS_CACHE.t = Date.now();
+  }
+  const v = KEYS_CACHE.v || {}, extra = {};
+  for (const p of OAI) if (typeof v[p.key] === "string" && v[p.key]) extra[p.key] = v[p.key];
+  return Object.keys(extra).length ? Object.assign(Object.create(env), extra) : env;
+}
+// «gsk_…» целиком или «/key mistral <ключ>» → { p, key }
+function parseKeyMsg(text) {
+  const t = String(text || "").trim();
+  const m = t.match(/^\/key(?:@\w+)?\s+([a-z]+)\s+(\S{16,})$/i);
+  if (m) {
+    const p = OAI.find((x) => x.id === m[1].toLowerCase());
+    return p ? { p, key: m[2] } : null;
+  }
+  if (/\s/.test(t)) return null;
+  const hit = KEY_RE.find(([, re]) => re.test(t));
+  return hit ? { p: OAI.find((x) => x.id === hit[0]), key: t } : null;
+}
+async function saveAiKey(env, { p, key }) {
+  const e = Object.assign(Object.create(env), { [p.key]: key });
+  for (const k of [...OAI_BAD.keys()]) if (k.startsWith(p.id + "|")) OAI_BAD.delete(k);
+  let ok = false, note = "";
+  try {
+    const { res, model } = await oaiChat(e, p, [{ role: "user", content: "Ответь одним словом по-русски: привет" }], { stream: false, max_tokens: 20, wait: 15000, force: true });
+    await res.text().catch(() => "");
+    ok = true;
+    note = model;
+  } catch (err) {
+    note = String((err && err.message) || err).slice(0, 160);
+  }
+  if (!ok && /\b(401|403)\b/.test(note)) return "❌ " + p.name + ": ключ не подошёл (" + note + ").\nНе сохранил. Скопируй ключ целиком и пришли ещё раз.";
+  let all = {};
+  try {
+    all = JSON.parse((await env.FEEDBACK.get("aikeys")) || "{}") || {};
+  } catch (er) {}
+  all[p.key] = key;
+  await env.FEEDBACK.put("aikeys", JSON.stringify(all));
+  KEYS_CACHE.t = 0;
+  return (ok ? "✅ " + p.name + " подключён и отвечает (" + note + ")." : "⚠️ " + p.name + ": ключ сохранил, но сейчас сервис не ответил (" + note + "). Попробую его при следующих вопросах.") +
+    "\nСообщение с ключом удалил из чата.\n\n" + aiKeysList(Object.assign(Object.create(env), all));
+}
+function aiKeysList(env) {
+  const rows = OAI.map((p) => (env[p.key] ? "✅ " + p.name : "▫️ " + p.name + " — " + p.site));
+  return "Бесплатные ИИ:\n✅ Gemini (основной)\n" + rows.join("\n") + "\n\nКлюч просто пришли сюда сообщением. Для SambaNova и Mistral — так: /key mistral <ключ>";
+}
 const OAI_BAD = new Map();
 const oaiModels = (env, p) => (env[p.id.toUpperCase() + "_MODELS"] ? String(env[p.id.toUpperCase() + "_MODELS"]).split(",").map((x) => x.trim()).filter(Boolean) : p.models);
 async function oaiChat(env, p, messages, opts) {
@@ -811,6 +870,14 @@ async function botReply(env, m, dbg = () => {}) {
   if (/^\/new/.test(text)) {
     if (env.FEEDBACK && st.h.length) await env.FEEDBACK.put(key, JSON.stringify(Object.assign(st, { h: [] })), { expirationTtl: 60 * 60 * 48 });
     return say("Начнём заново. Какой мотоцикл и что с ним?");
+  }
+  // владелец присылает ключ бесплатного ИИ (Groq, Cerebras, OpenRouter, GitHub…) — проверяем, сохраняем, сообщение с ключом стираем
+  const keyMsg = !group && parseKeyMsg(text);
+  if (!group && (keyMsg || /^\/keys?\b/.test(text))) {
+    const owner = env.FEEDBACK && String(await env.FEEDBACK.get("tg:owner")) === String(chat);
+    if (keyMsg) await tgApi(env, "deleteMessage", { chat_id: chat, message_id: m.message_id }).catch(() => {});
+    if (!owner) return say(keyMsg ? "Ключи ИИ принимаю только от владельца бота. Сообщение с ключом удалил." : "Это команда владельца бота.");
+    return say(keyMsg ? await saveAiKey(env, keyMsg) : aiKeysList(env));
   }
   // владелец присылает скриншоты комментариев из ТикТока (без подписи) — вытаскиваем модели в очередь заявок «Нет моей модели»
   if (!group && m.photo && !text && env.FEEDBACK && String(await env.FEEDBACK.get("tg:owner")) === String(chat)) return say(await ownerScreens(env, m.photo));
