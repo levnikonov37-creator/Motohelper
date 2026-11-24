@@ -366,7 +366,7 @@ const OAI = [
 ];
 /* Ключи можно не вносить в Cloudflare руками: владелец присылает ключ боту в личку, бот проверяет его и кладёт в KV «aikeys».
    Ключ из KV главнее секрета из настроек (так новый ключ из бота сразу заменяет старый). Читаем раз в минуту на копию воркера. */
-const KEY_RE = [["groq", /^gsk_[A-Za-z0-9]{20,}$/], ["cerebras", /^csk-[A-Za-z0-9]{20,}$/], ["openrouter", /^sk-or-v1-[A-Za-z0-9]{20,}$/], ["github", /^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/]];
+const KEY_RE = [["groq", /^gsk_[A-Za-z0-9]{20,}$/], ["cerebras", /^csk-[A-Za-z0-9]{20,}$/], ["openrouter", /^sk-or-v1-[A-Za-z0-9]{20,}$/], ["github", /^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/], ["mistral", /^mstrl_[A-Za-z0-9_]{20,}$/]];
 const KEYS_CACHE = { t: 0, v: null };
 async function withKeys(env) {
   if (!env.FEEDBACK) return env;
@@ -419,7 +419,7 @@ async function saveAiKey(env, { p, key }) {
 }
 function aiKeysList(env) {
   const rows = OAI.map((p) => (env[p.key] ? "✅ " + p.name : "▫️ " + p.name + " — " + p.site));
-  return "Бесплатные ИИ:\n✅ Gemini (основной)\n" + rows.join("\n") + "\n\nКлюч просто пришли сюда сообщением. Для SambaNova и Mistral — так: /key mistral <ключ>";
+  return "Бесплатные ИИ:\n✅ Gemini (основной)\n" + rows.join("\n") + "\n\nКлюч просто пришли сюда сообщением. Для SambaNova — так: /key sambanova <ключ>";
 }
 const OAI_BAD = new Map();
 const oaiModels = (env, p) => (env[p.id.toUpperCase() + "_MODELS"] ? String(env[p.id.toUpperCase() + "_MODELS"]).split(",").map((x) => x.trim()).filter(Boolean) : p.models);
