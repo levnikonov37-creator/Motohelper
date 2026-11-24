@@ -194,8 +194,8 @@ var norm=function(s){return String(s).toLowerCase().replace(/ё/g,"е").replace(
 function alts(t){if(!/[а-я]/.test(t)){var ru=t.split("").map(function(c){var k=A.en.indexOf(c);return k<0?c:A.ru[k]}).join(""),o0=A.alias[ru]?[t,A.alias[ru]]:[t];if(/ks/.test(t))o0.push(t.replace(/ks/g,"x"));return o0}var tr=function(m){return t.split("").map(function(c){return m[c]!=null?m[c]:(A.tr[c]!=null?A.tr[c]:c)}).join("")};
 var lay=t.split("").map(function(c){var k=A.ru.indexOf(c);return k<0?c:A.en[k]}).join("").replace(/[^a-z0-9]/g,""),out=[t,lay,tr({}),tr(A.look)];
 var st=t.replace(/[аеиоуыэюяйь]+$/,""),al=A.alias[t];if(!al&&st.length>=4)for(var k in A.alias)if(k.indexOf(st)===0){al=A.alias[k];break}if(al)out.push(al);if(/кс/.test(t))out.push(tr({}).replace(/ks/g,"x"));return out}
-/* опечатка в слове (4+ букв): 1 ошибка, для длинных (7+) — до 2: «motolend» → motoland, «kaio» → kayo */
-function typo(a,w){if(a.length<4||w.length<3||!/[a-zа-я]/.test(a))return false;var L=a.length>=7?2:1;if(Math.abs(a.length-w.length)>L)return false;var m=a.length,n=w.length,d=[],i,j;for(i=0;i<=m;i++){d[i]=[i];for(j=1;j<=n;j++)d[i][j]=i?0:j}
+/* опечатка в слове (4+ букв): 1 ошибка, для длинных (7+) — до 2: «motolend» → motoland, «kaio» → kayo; удвоенные буквы — не ошибка («appolo» → apollo) */
+function typo(a,w){if(a.length<4||w.length<3||!/[a-zа-я]/.test(a))return false;var sq=function(x){return x.replace(/(.)\\1+/g,"$1")};if(sq(a)===sq(w))return true;var L=a.length>=7?2:1;if(Math.abs(a.length-w.length)>L)return false;var m=a.length,n=w.length,d=[],i,j;for(i=0;i<=m;i++){d[i]=[i];for(j=1;j<=n;j++)d[i][j]=i?0:j}
 for(i=1;i<=m;i++){var best=1e9;for(j=1;j<=n;j++){var c=a[i-1]===w[j-1]?0:1;d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+c);if(i>1&&j>1&&a[i-1]===w[j-2]&&a[i-2]===w[j-1])d[i][j]=Math.min(d[i][j],d[i-2][j-2]+1);if(d[i][j]<best)best=d[i][j]}if(best>L)return false}return d[m][n]<=L}
 /* опечатки — только если слово точно не встречается ни в одной модели («альфа» — это Alpha, а не Alga) */
 function hit(x,a){return a.some(function(t){return x.s.indexOf(t)>=0})||(!a.ex&&a.some(function(t){return x.w.some(function(v){return typo(t,v)})}))}
