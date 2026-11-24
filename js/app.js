@@ -1791,6 +1791,7 @@ const BF_ALIAS = {
   "шайнерай": "shineray",
   "питонмото": "pitonmoto",
   "процида": "procida",
+  "бтм": "btm",
   "хенджиан": "hengjian",
   "хенгжиан": "hengjian",
   "фиделис": "fidelis",

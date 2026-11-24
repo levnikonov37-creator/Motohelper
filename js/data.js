@@ -9111,6 +9111,12 @@ mergeFamily("Stels", "Delta", [
   R("Procida", "K16 NB300", E, [["NB300", "ZS174MN-5, 27 л.с."]], ["Процида K16"]);
   R("Hengjian", "S7 Z300 2T", E, [["2T300", "Zongshen Z300 2T"]], ["S7 Z300", "S7-Z300"]);
   R("Racer", "Panther Lite RC250GY-C2A", E, [["166FMM", "166FMM, 224 см³"]], ["RC250GY-C2A", "Panther Lite"]);
+  /* Заявки 24.11.2026, 2-й прогон. Rockot R5F Raptor — ZS172FMM-3A (CB250-F), 249 см³, 21 л.с. (rockot-motors, globaldrive, avtovelomoto).
+     BTM 007 — у продавцов два мотора: Zongshen 177F 300 см³ ≈30 л.с. (menstechnic, activattor, i-drift) и 172FMM-5A 250 см³ 21 л.с. (страница дилера).
+     Technic ZS190 — питбайк на Zongshen ZS190, 17 л.с. (Яндекс Маркет). */
+  R("Rockot", "R5F Raptor", E, [["172FMM-3A", "ZS172FMM-3A (CB250-F), 21 л.с."]], ["R5F Raptor 2.0", "Raptor 2.0"]);
+  R("BTM", "007", E, [["FIXCN_PR300PRO", "300 · Zongshen 177F", A], ["172FMM-5", "250 · 172FMM-5A, 21 л.с.", A]], ["07", "Enduro 07", "007 300cc", "БТМ 007"]);
+  R("Technic", "ZS190", P, [["Z190", "Zongshen ZS190, 17 л.с."]], ["ДТ 190", "DT 190", "Техник 190", "Техник ДТ 190"]);
 })();
 /* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
 BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
