@@ -9073,6 +9073,19 @@ mergeFamily("Stels", "Delta", [
   one("Viper", "003 Pro", E, [["FIXCN_PR300_6", "300 см³, 6 ст."]], ["Sport 003 Pro", "Enduro 003 Pro"]);
   one("Sycmcc", "300-15", E, [["NC300", "177 · 300 см³, водяное охлаждение, 6 ст."]], ["SYC300-15", "300-15 водянка", "Sycmmc 300-15"]);
 })();
+/* ===================== Модели по заявкам с сайта («Нет моей модели») ===================== */
+/* Сюда добавляет модели задача по расписанию (раз в 2 часа читает заявки из KV «mr:…»). Формат строки:
+   R("Марка", "Модель", "Эндуро", [["ID мотора из ENGINES", "подпись версии или null", { approx: true }]], ["другие названия"]);
+   approx: true — мотор подобран по описанию продавцов, а не взят из заводской карточки (на странице: «сверь код на картере»).
+   Модели без найденного мотора не добавляем — ничего не выдумываем. */
+(function () {
+  var R = function (brand, name, type, vers, aka) {
+    if (BIKE_KEYS[brand + "|" + name]) return;
+    B(brand, name, type, vers.map(function (v) { return [v[0], v[1] || null, Object.assign({}, v[2] || {})]; }));
+    if (aka && aka.length) BIKES[BIKES.length - 1].aka = aka;
+  };
+  // ↓ новые модели по заявкам — ниже этой строки
+})();
 /* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
 BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
 sortBikes();
