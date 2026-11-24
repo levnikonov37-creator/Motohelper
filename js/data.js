@@ -9085,6 +9085,11 @@ mergeFamily("Stels", "Delta", [
     if (aka && aka.length) BIKES[BIKES.length - 1].aka = aka;
   };
   // ↓ новые модели по заявкам — ниже этой строки
+  /* Kayo K1 250 (MX / Road / Enduro) на CB250F: по руководству Kayo (таблица характеристик) — 21 л.с., а не 23 (заявка владельца из ТикТока) */
+  ["K1 250", "K1 250 Enduro", "K1 250 MX"].forEach(function (n) {
+    var b = BIKES.find(function (x) { return x.brand === "Kayo" && x.name === n; });
+    if (b) b.versions.forEach(function (v) { v.hp = 21; });
+  });
   var E = "Эндуро", L = "Лёгкий эндуро", P = "Питбайк", C = "Классика", A = { approx: true };
   /* Заявки 24.11.2026. Источники: карточки продавцов и дилеров (globaldrive, menstechnic, mototek, tokomoto, jazzmoto, n-max, x-m.su,
      sharmax.com, bvdshop, 63moto, rider62, 4enduro, pitbike-cross, universalmotors, kewsmotorcycle), объявления с кодом мотора. */
@@ -10641,7 +10646,7 @@ fixExact({
       "spark": "D8EA (руководство Kayo 2022; с резистором — DR8EA)", "oilVol": "около 1.2 л, контроль по смотровому окну (руководство Kayo 2022; у K1 250 MX — около 1 л)"},
     "172FMM-3A": {"valveIn": "0.06 мм на холодном (руководство Avantis A4 / A5 / A6, мотор ZS CB250-F / 172FMM-3A)", "valveEx": "0.08 мм на холодном",
       "spark": "D8RTC (руководство Avantis; аналог NGK DR8EA)", "gap": "0.6–0.7 мм", "idle": "1500",
-      "oil": "10W-50, JASO MA2 (рекомендация Avantis; 10W-40 JASO MA тоже подходит)", "oilVol": "около 1.2 л, по щупу или смотровому окну (руководство Avantis)"}
+      "oil": "10W-40, JASO MA (руководство Kayo для K1 250 на CB250F); у Avantis — 10W-50, JASO MA2, тоже подходит", "oilVol": "около 1.2 л, по щупу или смотровому окну (руководство Avantis)"}
   });
   var A = " (руководство Avantis)";
   if (ENGINES["172FMM-3A"]) ENGINES["172FMM-3A"].torq = [["Сливная пробка масла", "15 Н·м" + A], ["Пробка сетки масляного фильтра", "8 Н·м" + A],
