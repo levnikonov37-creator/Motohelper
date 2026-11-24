@@ -9085,6 +9085,32 @@ mergeFamily("Stels", "Delta", [
     if (aka && aka.length) BIKES[BIKES.length - 1].aka = aka;
   };
   // ↓ новые модели по заявкам — ниже этой строки
+  var E = "Эндуро", L = "Лёгкий эндуро", P = "Питбайк", C = "Классика", A = { approx: true };
+  /* Заявки 24.11.2026. Источники: карточки продавцов и дилеров (globaldrive, menstechnic, mototek, tokomoto, jazzmoto, n-max, x-m.su,
+     sharmax.com, bvdshop, 63moto, rider62, 4enduro, pitbike-cross, universalmotors, kewsmotorcycle), объявления с кодом мотора. */
+  R("Sharmax", "Power Max 145 Miami", P, [["154FMI", "ZS154FMI, 125 см³", A]], ["PowerMax 145 Miami", "Power Max 145"]);
+  R("Sharmax", "Power Max 190 Miami", P, [["YX140", "1P56FMJ, 140 см³"]], ["PowerMax 190 Miami", "Power Max 190"]);
+  R("Sharmax", "Expert Pro 450", E, [["NC450", "ZS194MQ, 449 см³", A]], ["Expert Pro RXP 450", "Expert 450"]);
+  R("Fxmoto", "K9R NB300", E, [["NB300", "ZS174MN-5"]], ["K9R"]);
+  R("MMZ", "009", E, [["FIXCN_PR300PRO", "ZS177FMN, 300 см³, балансир"]], ["S009", "009 Pro", "ММЗ 009"]);
+  R("BSE", "Z1 150", L, [["CB150", "ZS161FMJ (CB150D), 150 см³", A]], ["Z1 150cc"]);
+  R("Apollo", "Thunder 125", P, [["1P52FMI", "125 см³, 4 передачи", A]], ["RFZ Thunder 125", "RFN Thunder 125"]);
+  R("Kovi", "Pit 150", P, [["YX140", "W140 (156FMJ), 140 см³", A]], ["Pit 150 W140"]);
+  R("Geon", "Pantera 250", C, [["166FMM", "166FMM, 223 см³"]], ["Пантера 250"]);
+  R("Geon", "X-Line 250", E, [["169FMM", "2V · 169FMM, 233 см³"], ["172FMM-3A", "4V · 171YMM, 249 см³", A]], ["X Line 250", "XLine 250"]);
+  R("Fidelis", "Sport PR300", E, [["PR300", "ZS175FMN"]], ["Sport 003 PR300", "Fidelis et Fortis Sport"]);
+  R("Wels", "PR250", E, [["172FMM-5", "ZS172FMM-5"]], ["PR 250"]);
+  R("Motoland", "SX 125 E 19/16", P, [["FIXCN_153FMI", "153FMI, 125 см³", A]], ["125 SX", "SX125"]);
+  R("Regulmoto", "Spitfire Pro 19/16", P, [["YX140", "YX X150, 11 л.с.", A]], ["Spitfire Pro", "Spitfire"]);
+  R("Promax", "Daikon PR330", E, [["PR300", "175 с балансиром, 5 передач", A]], ["MX330", "Daikon 330", "Дайкон"]);
+  R("GR7", "F300A-M", E, [["175FMM", "4T 175FMM, Enduro Lite", A]], ["F300AM", "F300A-M Enduro Lite"]);
+  R("XGZ", "N911A CB300", E, [["175FMM", "ZS175FMM"]], ["N911 CB300", "N911A"]);
+  R("GTO", "Short Pro Max 300", E, [["PR300", "ZS175FMM-5A, 271 см³"]], ["Short Pro Max"]);
+  R("OXO", "Lite 300", E, [["PR300", "ZS175FMN", A]], ["Lite PR300"]);
+  R("Kews", "K16 NC450", E, [["NC450", "ZS194MQ"]], ["K16 450"]);
+  R("Procida", "K16 NB300", E, [["NB300", "ZS174MN-5, 27 л.с."]], ["Процида K16"]);
+  R("Hengjian", "S7 Z300 2T", E, [["2T300", "Zongshen Z300 2T"]], ["S7 Z300", "S7-Z300"]);
+  R("Racer", "Panther Lite RC250GY-C2A", E, [["166FMM", "166FMM, 224 см³"]], ["RC250GY-C2A", "Panther Lite"]);
 })();
 /* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
 BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
