@@ -144,15 +144,20 @@ async function answer(env, messages, images, ip, noDeepseek) {
       }
     }
     // без Gemini фото посмотреть некому — дальше только текст: бесплатные ИИ по очереди (у кого есть ключ)
-    for (const p of OAI) {
-      if (!env[p.key]) continue;
-      try {
-        const { res, model } = await oaiChat(env, p, messages);
-        return sse(res.body, p.id, model);
-      } catch (e) {
-        errors.push(p.id + ": " + e.message);
+    const viaOai = async (late) => {
+      for (const p of OAI) {
+        if (!env[p.key] || !!p.late !== late) continue;
+        try {
+          const { res, model } = await oaiChat(env, p, messages);
+          return sse(res.body, p.id, model);
+        } catch (e) {
+          errors.push(p.id + ": " + e.message);
+        }
       }
-    }
+      return null;
+    };
+    const early = await viaOai(false);
+    if (early) return early;
     if (env.AI) {
       for (const model of CF_MODELS) {
         try {
@@ -163,6 +168,9 @@ async function answer(env, messages, images, ip, noDeepseek) {
         }
       }
     }
+    // запасные послабее (Mistral) — когда и Workers AI исчерпал дневной лимит
+    const late = await viaOai(true);
+    if (late) return late;
     if (!env.DEEPSEEK_API_KEY && !env.GEMINI_API_KEY && !OAI.some((p) => env[p.key]) && !env.AI) errors.push("нет ни одного ключа и нет привязки AI");
     const limited = errors.some((x) => /429|quota|limit|exhaust|neuron/i.test(x));
     return json({ error: limited ? "rate_limited" : "upstream_error", details: errors }, limited ? 429 : 502);
@@ -303,8 +311,9 @@ async function gemini(env, messages, images) {
           let more = "", why = [];
           const t0 = Date.now(), left = () => 28000 - (Date.now() - t0);
           // 0) бесплатные ИИ с ключами (Groq, Cerebras и др.)
+          const tryOai = async (late) => {
           for (const p of OAI) {
-            if (more || left() < 3000 || !env[p.key]) continue;
+            if (more || left() < 3000 || !env[p.key] || !!p.late !== late) continue;
             try {
               const msgs = sent.trim() ? messages.concat([{ role: "assistant", content: sent }, { role: "user", content: ASK }]) : messages;
               const { res: r, model: om } = await oaiChat(env, p, msgs, { stream: false, max_tokens: 1200, wait: Math.min(12000, left()) });
@@ -313,6 +322,8 @@ async function gemini(env, messages, images) {
               if (!more) why.push(p.id + " " + om + ": пусто");
             } catch (e) { why.push(p.id + ": " + String(e.message || e).slice(0, 60)); }
           }
+          };
+          await tryOai(false);
           // 1) встроенный ИИ Cloudflare (две модели)
           for (const m of env.AI ? CF_MODELS.slice(0, 2) : []) {
             if (more || left() < 3000) break;
@@ -341,6 +352,8 @@ async function gemini(env, messages, images) {
             } catch (e) { why.push(m + ": " + (e.name === "AbortError" ? "не ответил" : String(e.message || e).slice(0, 40))); }
             finally { clearTimeout(tm); }
           }
+          // 3) запасные послабее (Mistral) — если никто выше не помог
+          await tryOai(true);
           if (why.length) ctl.enqueue(enc.encode(": запасные: " + why.join("; ").replace(/\n/g, " ") + "\n\n"));
           if (more) say(ctl, (sent && !/\s$/.test(sent) && !/^[,.;:!?)]/.test(more) ? " " : "") + more);
           else say(ctl, (sent ? "\n\n" : "") + "⚠️ Ответ оборвался: ИИ-механик сейчас перегружен — очень много вопросов. Спроси ещё раз через минуту.");
@@ -360,7 +373,8 @@ const OAI = [
   { id: "groq", name: "Groq", site: "console.groq.com/keys", key: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions", models: ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "llama-3.1-8b-instant"] },
   { id: "cerebras", name: "Cerebras", site: "cloud.cerebras.ai → API Keys", key: "CEREBRAS_API_KEY", url: "https://api.cerebras.ai/v1/chat/completions", models: ["llama-3.3-70b", "gpt-oss-120b", "llama3.1-8b"] },
   { id: "sambanova", name: "SambaNova", site: "cloud.sambanova.ai → API Keys", key: "SAMBANOVA_API_KEY", url: "https://api.sambanova.ai/v1/chat/completions", models: ["Meta-Llama-3.3-70B-Instruct", "DeepSeek-V3-0324"] },
-  { id: "mistral", name: "Mistral", site: "console.mistral.ai/api-keys", key: "MISTRAL_API_KEY", url: "https://api.mistral.ai/v1/chat/completions", models: ["mistral-small-latest", "mistral-medium-latest"] },
+  // бесплатный тариф Mistral: Small и Medium закрыты (лимит 0), Ministral — 2 запроса в минуту на модель; модели слабее — зовём после Workers AI
+  { id: "mistral", name: "Mistral", site: "console.mistral.ai/api-keys", key: "MISTRAL_API_KEY", url: "https://api.mistral.ai/v1/chat/completions", models: ["ministral-14b-latest", "ministral-8b-latest"], late: true, pause429: 60000 },
   { id: "openrouter", name: "OpenRouter", site: "openrouter.ai/settings/keys", key: "OPENROUTER_API_KEY", url: "https://openrouter.ai/api/v1/chat/completions", models: ["deepseek/deepseek-chat-v3-0324:free", "meta-llama/llama-3.3-70b-instruct:free", "openai/gpt-oss-120b:free"], headers: { "HTTP-Referer": "https://motohelper.ru", "X-Title": "MotoHelper" } },
   { id: "github", name: "GitHub Models", site: "github.com/settings/personal-access-tokens (право Models: Read)", key: "GITHUB_MODELS_TOKEN", url: "https://models.github.ai/inference/chat/completions", models: ["openai/gpt-4.1-mini", "meta/Llama-3.3-70B-Instruct"] },
 ];
@@ -446,7 +460,7 @@ async function oaiChat(env, p, messages, opts) {
     const t = (await r.text().catch(() => "")).slice(0, 100);
     err += m + " " + r.status + " " + t + "; ";
     if (r.status === 401 || r.status === 403) break;
-    OAI_BAD.set(k, Date.now() + (r.status === 429 ? 600000 : r.status === 404 || r.status === 400 ? 86400000 : 300000));
+    OAI_BAD.set(k, Date.now() + (r.status === 429 ? p.pause429 || 600000 : r.status === 404 || r.status === 400 ? 86400000 : 300000));
   }
   throw new Error(err || "все модели на паузе");
 }
