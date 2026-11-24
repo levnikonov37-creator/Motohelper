@@ -2055,6 +2055,75 @@ function bfHl(text, q) {
   if (i < 0 || first.length < 2) return text;
   return /*#__PURE__*/React.createElement(React.Fragment, null, text.slice(0, i), /*#__PURE__*/React.createElement("mark", null, text.slice(i, i + first.length)), text.slice(i + first.length));
 }
+/* «Нет моей модели»: заявка уходит на сервер (воркер), владельцу сайта — сводка в утреннем отчёте в Телеграме.
+   Только название модели и, если знает, мотор — без контактов */
+async function sendModelReq(model, engine, q) {
+  let ep = await findAiEndpoint();
+  if (!ep) return false;
+  const r = await fetch(ep, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      modelreq: {
+        model: model,
+        engine: engine,
+        q: q,
+        page: location.pathname
+      }
+    })
+  });
+  const j = await r.json().catch(() => ({}));
+  return !!j.ok;
+}
+function ModelRequest({
+  q,
+  big
+}) {
+  const [open, setOpen] = React.useState(!!big);
+  const [model, setModel] = React.useState(q || "");
+  const [engine, setEngine] = React.useState("");
+  const [st, setSt] = React.useState("");
+  React.useEffect(() => {
+    if (st !== "ok") setModel(q || "");
+  }, [q]);
+  if (st === "ok") return /*#__PURE__*/React.createElement("div", {
+    className: "mreq ok"
+  }, /*#__PURE__*/React.createElement("b", null, "Спасибо! Заявка у нас"), /*#__PURE__*/React.createElement("p", null, "Добавим модель в ближайшие дни, если найдём данные о моторе. Пока можно выбрать мотор по коду с картера — данные по нему уже есть."));
+  if (!open) return /*#__PURE__*/React.createElement("button", {
+    className: "btn mreq-open",
+    onClick: () => setOpen(true)
+  }, "Нет моей модели? Напиши — добавим");
+  async function go() {
+    if (model.trim().length < 3) return;
+    setSt("busy");
+    try {
+      setSt((await sendModelReq(model.trim(), engine.trim(), q || "")) ? "ok" : "fail");
+    } catch (e) {
+      setSt("fail");
+    }
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "mreq"
+  }, /*#__PURE__*/React.createElement("b", null, "Нет твоей модели? Напиши — добавим"), /*#__PURE__*/React.createElement("input", {
+    value: model,
+    maxLength: 80,
+    placeholder: "Марка и модель, например Kayo T4 300",
+    onChange: e => setModel(e.target.value)
+  }), /*#__PURE__*/React.createElement("input", {
+    value: engine,
+    maxLength: 40,
+    placeholder: "Мотор, если знаешь: 172FMM, NB300…",
+    onChange: e => setEngine(e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    disabled: st === "busy" || model.trim().length < 3,
+    onClick: go
+  }, st === "busy" ? "Отправляю…" : "Отправить"), st === "fail" && /*#__PURE__*/React.createElement("p", {
+    className: "muted small"
+  }, "Не отправилось — проверь интернет и попробуй ещё раз."));
+}
 function BikeFinder({
   sel,
   custom,
@@ -2369,9 +2438,14 @@ function BikeFinder({
     onClick: () => setAllBrands(true)
   }, "\u0412\u0441\u0435 \u043C\u0430\u0440\u043A\u0438 (", brands.length, ")")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     className: "bf-count"
-  }, list.length ? (hint ? hint + " · " : "") + "Найдено: " + list.length : ""), list.length === 0 && /*#__PURE__*/React.createElement("div", {
+  }, list.length ? (hint ? hint + " · " : "") + "Найдено: " + list.length : ""), list.length > 0 && /^Без «/.test(hint || "") && /*#__PURE__*/React.createElement(ModelRequest, {
+    q: q
+  }), list.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "bf-empty"
-  }, /*#__PURE__*/React.createElement("b", null, "\u041D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043D\u0430\u0448\u043B\u043E\u0441\u044C"), /*#__PURE__*/React.createElement("p", null, "\u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439 \u0442\u043E\u043B\u044C\u043A\u043E \u043C\u043E\u0434\u0435\u043B\u044C (\xABTT250\xBB, \xABK6\xBB) \u0438\u043B\u0438 \u0442\u043E\u043B\u044C\u043A\u043E \u043C\u0430\u0440\u043A\u0443. \u0415\u0441\u043B\u0438 \u0442\u0432\u043E\u0435\u0439 \u043C\u043E\u0434\u0435\u043B\u0438 \u043D\u0435\u0442 \u2014 \u0432\u044B\u0431\u0435\u0440\u0438 \u043F\u043E \u043A\u043E\u0434\u0443 \u043C\u043E\u0442\u043E\u0440\u0430, \u043E\u043D \u0432\u044B\u0431\u0438\u0442 \u043D\u0430 \u043A\u0430\u0440\u0442\u0435\u0440\u0435:"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("b", null, "\u041D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043D\u0430\u0448\u043B\u043E\u0441\u044C"), /*#__PURE__*/React.createElement(ModelRequest, {
+    q: q,
+    big: true
+  }), /*#__PURE__*/React.createElement("p", null, "\u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439 \u0442\u043E\u043B\u044C\u043A\u043E \u043C\u043E\u0434\u0435\u043B\u044C (\xABTT250\xBB, \xABK6\xBB) \u0438\u043B\u0438 \u0442\u043E\u043B\u044C\u043A\u043E \u043C\u0430\u0440\u043A\u0443. \u0415\u0441\u043B\u0438 \u0442\u0432\u043E\u0435\u0439 \u043C\u043E\u0434\u0435\u043B\u0438 \u043D\u0435\u0442 \u2014 \u0432\u044B\u0431\u0435\u0440\u0438 \u043F\u043E \u043A\u043E\u0434\u0443 \u043C\u043E\u0442\u043E\u0440\u0430, \u043E\u043D \u0432\u044B\u0431\u0438\u0442 \u043D\u0430 \u043A\u0430\u0440\u0442\u0435\u0440\u0435:"), /*#__PURE__*/React.createElement("div", {
     className: "bf-list"
   }, generic.filter(b => !toks.length || toks.some(t => bfNorm(b.name).indexOf(t) >= 0)).slice(0, 6).concat(toks.length ? [] : []).map(b => /*#__PURE__*/React.createElement(Card, {
     key: bikeKey(b),
@@ -2389,7 +2463,9 @@ function BikeFinder({
   }))), list.length > limit && /*#__PURE__*/React.createElement("button", {
     className: "btn bf-more",
     onClick: () => setLimit(limit + 40)
-  }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", list.length - limit, ")"))));
+  }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451 (", list.length - limit, ")"), list.length > 0 && toks.length > 0 && !/^Без «/.test(hint || "") && /*#__PURE__*/React.createElement(ModelRequest, {
+    q: q
+  }))));
 }
 /* ===== Первый заход: приветствие и «С чего начать» ===== */
 const ONB_TILES = [["home", "Главная", "Поиск по всему сайту, быстрые входы, проверка перед выездом и что сделать по сезону — зимой консервация, весной подготовка."], ["wrench", "Ремонт и ТО", "Всё про починку по группам: что сломалось, обслуживание (ТО и сезон), инструкции со схемами — больше 100."], ["ai", "ИИ-механик", "Опиши проблему своими словами — подскажет причину, что проверить и какие детали купить."], ["cart", "Запчасти", "Только детали под твой мотор: аналоги, сложность установки и ссылки на магазины."], ["bike", "Мой мотоцикл", "Объёмная модель мотора: крути, заводи, заглядывай внутрь. Характеристики, свои настройки и тюнинг."]];

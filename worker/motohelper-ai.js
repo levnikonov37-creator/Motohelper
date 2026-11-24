@@ -79,6 +79,8 @@ export default {
       if (u.searchParams.get("test")) return selfTest(env);
       // отзывы владельцев модели: ?reviews=<адрес модели>
       if (u.searchParams.get("reviews")) return listReviews(env, u.searchParams.get("reviews"));
+      // заявки «Нет моей модели» за 30 дней, сгруппированные: ?req=list (только названия, без IP)
+      if (u.searchParams.get("req") === "list") return json(await listModelReqs(env));
       // Telegram-канал: ?tg=status — что выйдет следующим; ?tg=run — опубликовать пост на сегодня, если ещё не вышел
       if (u.searchParams.get("tg") === "run") return json(await tgRun(env));
       // группа ВК: ?vk=status — подключена ли публикация
@@ -105,6 +107,8 @@ export default {
     // «Спроси механика» со страниц каталога: вопрос + о чём страница; подсказки и цифры — как у бота
     if (body.ask) return pageAsk(env, ctx, body, request.headers.get("CF-Connecting-IP") || "?");
     if (body.review) return saveReview(env, body.review, request.headers.get("CF-Connecting-IP") || "?");
+    // «Нет моей модели» — заявка на добавление (приложение и поиск по каталогу)
+    if (body.modelreq) return saveModelReq(env, body.modelreq, request.headers.get("CF-Connecting-IP") || "?");
     const messages = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
     const images = Array.isArray(body.images) ? body.images.slice(0, 2) : [];
     if (!messages.length) return json({ error: "no_messages" }, 400);
@@ -454,6 +458,8 @@ async function dailyReport(env, dry) {
     const wm = await webmasterStats(env).catch(() => null);
     // сообщения владельцев о неточностях за вчера (приложение и страницы каталога: «Сверить с мануалом», «Значение не совпадает?»)
     const fb = await feedbackSince(env, new Date(Date.parse(mskMidnight) - 864e5).toISOString(), mskMidnight).catch(() => null);
+    // заявки «Нет моей модели» за вчера, одинаковые — вместе
+    const mr = groupReqs(await modelReqsSince(env, new Date(Date.parse(mskMidnight) - 864e5).toISOString(), mskMidnight).catch(() => []));
     let health = null;
     try {
       health = env.FEEDBACK && JSON.parse((await env.FEEDBACK.get("health")) || "null");
@@ -475,6 +481,7 @@ async function dailyReport(env, dry) {
       wm ? "🔎 В поиске Яндекса: " + n(wm.searchable) + " страниц" + (wm.excluded ? " (исключено " + n(wm.excluded) + ")" : "") + (wm.sqi != null ? ", ИКС " + n(wm.sqi) : "") + (wm.problems ? "\n⚠️ Проблемы сайта в Вебмастере: " + wm.problems : "") : "",
       qs ? "🤖 Вопросов ИИ-механику: " + n(qs.total) + (qs.tg ? " (сайт " + n(qs.site) + ", Telegram " + n(qs.tg) + ")" : "") + (qs.top.length ? "\nО чём спрашивали: " + qs.top.join(", ") : "") : "",
       fb && fb.length ? "✍️ Владельцы сверили данные: " + n(fb.length) + "\n" + fb.slice(0, 8).map((x) => "• " + [x.bike, x.engine].filter(Boolean).join(", ") + ": " + String(x.text || "").replace(/\s+/g, " ").slice(0, 160)).join("\n") + (fb.length > 8 ? "\n… все — ?feedback=1&token=<FEEDBACK_TOKEN>" : "") : "",
+      mr.length ? "🏍 Просят добавить модели: " + n(mr.reduce((a, x) => a + x.n, 0)) + "\n" + mr.slice(0, 15).map((x) => "• " + x.model + (x.engine ? " (мотор: " + x.engine + ")" : "") + (x.n > 1 ? " ×" + x.n : "")).join("\n") + (mr.length > 15 ? "\n… все — ?req=list" : "") : "",
       health ? (health.ai && health.ai.ok ? "✅ ИИ-механик работает" : "⚠️ ИИ-механик не ответил на проверке: " + ((health.ai && health.ai.error) || "?").slice(0, 120)) + (health.tg && !health.tg.ok ? "\n⚠️ Пост в канал не вышел: " + health.tg.error : "") : "",
       "",
       (src.data || []).length ? "Откуда пришли:\n" + src.data.map((d) => "• " + d.dimensions[0].name + " — " + n(d.metrics[0])).join("\n") : "",
@@ -915,6 +922,51 @@ async function saveReview(env, r, ip) {
     if (idx.indexOf(slug) < 0) await env.FEEDBACK.put("rv:index", JSON.stringify(idx.concat(slug)));
   }
   return json({ ok: true, published: true, item });
+}
+
+/* --- «Нет моей модели»: заявки с сайта. Хранятся в KV «mr:<время ISO>-…» 90 дней; без контактов и IP.
+   С одного адреса — не больше 10 в сутки; ссылки, телефоны и мат не принимаем --- */
+const MR_IP = new Map();
+async function saveModelReq(env, r, ip) {
+  if (!env.FEEDBACK) return json({ ok: false, error: "no_kv" }, 501);
+  const clean = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
+  const item = { t: new Date().toISOString(), model: clean(r.model, 80), engine: clean(r.engine, 40), q: clean(r.q, 80), page: clean(r.page, 120) };
+  if (item.model.length < 3) return json({ ok: false, error: "short" }, 400);
+  const k = mskDay() + "|" + ip, cnt = (MR_IP.get(k) || 0) + 1;
+  if (MR_IP.size > 20000) MR_IP.clear();
+  MR_IP.set(k, cnt);
+  if (cnt > 10) return json({ ok: false, error: "rate_limited" }, 429);
+  const all = item.model + " " + item.engine;
+  if (/https?:|www\.|\.ru\b|\.com\b|@\w|t\.me|\+?\d[\d\s()-]{9,}\d|х[уy][йияеё]|п[иі]зд|еба[нл]|бля|сук[аи](?![а-яё])/i.test(all)) return json({ ok: true });
+  await env.FEEDBACK.put("mr:" + item.t + "-" + Math.random().toString(36).slice(2, 8), JSON.stringify(item), { expirationTtl: 60 * 60 * 24 * 90 });
+  return json({ ok: true });
+}
+async function modelReqsSince(env, from, to) {
+  if (!env.FEEDBACK) return [];
+  const prefixes = [...new Set([from.slice(0, 10), to.slice(0, 10)])].map((d) => "mr:" + d);
+  const keys = [].concat(...(await Promise.all(prefixes.map((p) => env.FEEDBACK.list({ prefix: p, limit: 1000 }).then((x) => x.keys.map((k) => k.name))))))
+    .filter((k) => k.slice(3) >= from && k.slice(3) < to).sort();
+  return Promise.all(keys.slice(0, 200).map(async (k) => JSON.parse((await env.FEEDBACK.get(k)) || "{}")));
+}
+/* одинаковые названия (без регистра, пробелов и дефисов) — одной строкой со счётчиком; мотор — первый указанный */
+function groupReqs(items) {
+  const m = new Map();
+  for (const x of items) {
+    if (!x || !x.model) continue;
+    const key = x.model.toLowerCase().replace(/ё/g, "е").replace(/[\s\-_.]+/g, "");
+    const g = m.get(key) || { model: x.model, engine: "", n: 0, last: "" };
+    g.n++; if (!g.engine && x.engine) g.engine = x.engine; if (x.t > g.last) g.last = x.t;
+    if (/[A-ZА-ЯЁ]/.test(x.model) && !/[A-ZА-ЯЁ]/.test(g.model)) g.model = x.model; // показываем написание с заглавными
+    m.set(key, g);
+  }
+  return [...m.values()].sort((a, b) => b.n - a.n || (b.last > a.last ? 1 : -1));
+}
+async function listModelReqs(env) {
+  if (!env.FEEDBACK) return { ok: false, error: "no_kv" };
+  const keys = (await env.FEEDBACK.list({ prefix: "mr:", limit: 1000 })).keys.map((k) => k.name).sort().reverse().slice(0, 500);
+  const items = await Promise.all(keys.map(async (k) => JSON.parse((await env.FEEDBACK.get(k)) || "{}")));
+  const g = groupReqs(items);
+  return { ok: true, total: items.length, models: g.map((x) => ({ model: x.model, engine: x.engine, n: x.n, last: x.last.slice(0, 10) })) };
 }
 
 /* --- Яндекс.Вебмастер: сколько страниц в поиске (для понедельничного отчёта) --- */
