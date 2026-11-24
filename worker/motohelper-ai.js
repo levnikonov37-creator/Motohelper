@@ -289,16 +289,38 @@ async function gemini(env, messages, images) {
         if (fin !== "STOP") {
           GEM_BAD.set(chosen, Date.now() + 600000);
           ctl.enqueue(enc.encode(": gemini " + chosen + " оборвал ответ: " + (gErr || fin || "без finishReason") + "\n\n"));
-          let more = "";
-          if (env.AI) {
+          const ASK = "Твой ответ выше оборвался на полуслове. Продолжи ровно с места обрыва — без повторов, без вступлений и без извинений.";
+          let more = "", why = [];
+          const t0 = Date.now(), left = () => 28000 - (Date.now() - t0);
+          // 1) встроенный ИИ Cloudflare (две модели)
+          for (const m of env.AI ? CF_MODELS.slice(0, 2) : []) {
+            if (more || left() < 3000) break;
             try {
-              const msgs = sent.trim()
-                ? textOnly(messages).concat([{ role: "assistant", content: sent }, { role: "user", content: "Твой ответ выше оборвался на полуслове. Продолжи ровно с места обрыва — без повторов, без вступлений и без извинений." }])
-                : textOnly(messages);
-              const r = await Promise.race([env.AI.run(CF_MODELS[0], { messages: msgs, max_tokens: 1200 }), sleep(20000).then(() => null)]);
+              const msgs = sent.trim() ? textOnly(messages).concat([{ role: "assistant", content: sent }, { role: "user", content: ASK }]) : textOnly(messages);
+              const r = await Promise.race([env.AI.run(m, { messages: msgs, max_tokens: 1200 }), sleep(Math.min(14000, left())).then(() => null)]);
               more = String((r && (r.response || (r.choices && r.choices[0] && r.choices[0].message && r.choices[0].message.content))) || "").trim();
-            } catch (e) {}
+              if (!more) why.push("cf " + m.split("/").pop() + ": пусто");
+            } catch (e) { why.push("cf " + m.split("/").pop() + ": " + String(e.message || e).slice(0, 60)); }
           }
+          // 2) другая модель Gemini, которая сейчас отвечает (без потока)
+          for (const m of GEMINI_MODELS.filter((x) => x !== chosen && !(GEM_BAD.get(x) > Date.now()))) {
+            if (more || left() < 3000) break;
+            const ac = new AbortController(), tm = setTimeout(() => ac.abort(), Math.min(12000, left()));
+            try {
+              const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent", {
+                method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY }, signal: ac.signal,
+                body: JSON.stringify({ systemInstruction: system ? { parts: [{ text: system }] } : undefined,
+                  contents: sent.trim() ? contents.concat([{ role: "model", parts: [{ text: sent }] }, { role: "user", parts: [{ text: ASK }] }]) : contents,
+                  generationConfig: Object.assign({ maxOutputTokens: 4096, temperature: 0.4 }, thinkFor(m) ? { thinkingConfig: { thinkingLevel: thinkFor(m) } } : {}) }),
+              });
+              if (!r.ok) { GEM_BAD.set(m, Date.now() + 600000); why.push(m + " " + r.status); continue; }
+              const j = await r.json();
+              const c = j.candidates && j.candidates[0];
+              more = (((c && c.content && c.content.parts) || []).filter((p) => !p.thought).map((p) => p.text || "").join("")).trim();
+            } catch (e) { why.push(m + ": " + (e.name === "AbortError" ? "не ответил" : String(e.message || e).slice(0, 40))); }
+            finally { clearTimeout(tm); }
+          }
+          if (why.length) ctl.enqueue(enc.encode(": запасные: " + why.join("; ").replace(/\n/g, " ") + "\n\n"));
           if (more) say(ctl, (sent && !/\s$/.test(sent) && !/^[,.;:!?)]/.test(more) ? " " : "") + more);
           else say(ctl, (sent ? "\n\n" : "") + "⚠️ Ответ оборвался: ИИ-механик сейчас перегружен — очень много вопросов. Спроси ещё раз через минуту.");
         }
