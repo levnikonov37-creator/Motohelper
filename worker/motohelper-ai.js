@@ -35,7 +35,8 @@ const thinkFor = (model) => (model in GEMINI_THINK ? GEMINI_THINK[model] : "mini
 // модель, которая отказала (лимит, ошибка, молчание), пропускаем 10 минут — не ждём её на каждом вопросе
 const GEM_BAD = new Map();
 // встроенный ИИ Cloudflare: пробуем по очереди — если модель убрали или она перегружена, берём следующую
-const CF_MODELS = ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-4-scout-17b-16e-instruct", "@cf/meta/llama-3.1-8b-instruct-fast", "@cf/meta/llama-3.1-8b-instruct"];
+// маленькие 8B-модели убраны: по-русски путают узлы и цифры («нейрослоп») — лучше честное «ИИ перегружен», чем выдумки
+const CF_MODELS = ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-4-scout-17b-16e-instruct"];
 // Чужие сайты не тратят твои бесплатные лимиты: запросы принимаются только отсюда (и с локальной копии)
 // http и https: ссылку без «https://» (из Telegram, ВК) браузер открывает как http://motohelper.ru
 const ALLOWED = ["motohelper.ru", "www.motohelper.ru", "levnikonov37-creator.github.io"];
@@ -117,7 +118,9 @@ export default {
     if (body.review) return saveReview(env, body.review, request.headers.get("CF-Connecting-IP") || "?");
     // «Нет моей модели» — заявка на добавление (приложение и поиск по каталогу)
     if (body.modelreq) return saveModelReq(env, body.modelreq, request.headers.get("CF-Connecting-IP") || "?");
-    const messages = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
+    // системное сообщение (правила + карточка мотоцикла) держим всегда, реплик — до 18 последних
+    const raw = Array.isArray(body.messages) ? body.messages.filter((m) => m && typeof m === "object") : [];
+    const messages = raw.filter((m) => m.role === "system").slice(0, 1).concat(raw.filter((m) => m.role !== "system").slice(-18));
     const images = Array.isArray(body.images) ? body.images.slice(0, 2) : [];
     if (!messages.length) return json({ error: "no_messages" }, 400);
     ctx.waitUntil(Promise.resolve(logQuestion(env, "site", messages))); // запись не должна задерживать ответ и не должна теряться
@@ -374,7 +377,7 @@ const OAI = [
   { id: "cerebras", name: "Cerebras", site: "cloud.cerebras.ai → API Keys", key: "CEREBRAS_API_KEY", url: "https://api.cerebras.ai/v1/chat/completions", models: ["llama-3.3-70b", "gpt-oss-120b", "llama3.1-8b"] },
   { id: "sambanova", name: "SambaNova", site: "cloud.sambanova.ai → API Keys", key: "SAMBANOVA_API_KEY", url: "https://api.sambanova.ai/v1/chat/completions", models: ["Meta-Llama-3.3-70B-Instruct", "DeepSeek-V3-0324"] },
   // бесплатный тариф Mistral: Small и Medium закрыты (лимит 0), Ministral — 2 запроса в минуту на модель; модели слабее — зовём после Workers AI
-  { id: "mistral", name: "Mistral", site: "console.mistral.ai/api-keys", key: "MISTRAL_API_KEY", url: "https://api.mistral.ai/v1/chat/completions", models: ["ministral-14b-latest", "ministral-8b-latest"], late: true, pause429: 60000 },
+  { id: "mistral", name: "Mistral", site: "console.mistral.ai/api-keys", key: "MISTRAL_API_KEY", url: "https://api.mistral.ai/v1/chat/completions", models: ["ministral-14b-latest"], late: true, pause429: 60000 },
   { id: "openrouter", name: "OpenRouter", site: "openrouter.ai/settings/keys", key: "OPENROUTER_API_KEY", url: "https://openrouter.ai/api/v1/chat/completions", models: ["deepseek/deepseek-chat-v3-0324:free", "meta-llama/llama-3.3-70b-instruct:free", "openai/gpt-oss-120b:free"], headers: { "HTTP-Referer": "https://motohelper.ru", "X-Title": "MotoHelper" } },
   { id: "github", name: "GitHub Models", site: "github.com/settings/personal-access-tokens (право Models: Read)", key: "GITHUB_MODELS_TOKEN", url: "https://models.github.ai/inference/chat/completions", models: ["openai/gpt-4.1-mini", "meta/Llama-3.3-70B-Instruct"] },
 ];
@@ -732,7 +735,8 @@ const BOT_RULES = `Ты — ИИ-механик сайта MotoHelper (motohelpe
 4. Если неясно, какой мотоцикл или мотор, — сначала коротко ответь в общем, потом спроси модель.
 5. Тормоза, руль, подвеска, течь топлива — предупреди, что ездить нельзя до ремонта.
 6. В конце, если в справочнике есть подходящая страница, дай одну-две ссылки строкой «Подробно: <ссылка>». Ссылки — только из справочника.
-7. Учитывай конструкцию мотора из справочника: если там написано «кикстартера нет» — не предлагай проверять или чинить кик; если человек пишет, что сам что-то снял или переделал (например, собрал мотор без кика), исходи из его слов. У кроссовой техники и питбайков ресурс и ТО считай в моточасах, а не в километрах.`;
+7. Учитывай конструкцию мотора из справочника: если там написано «кикстартера нет» — не предлагай проверять или чинить кик; если человек пишет, что сам что-то снял или переделал (например, собрал мотор без кика), исходи из его слов. У кроссовой техники и питбайков ресурс и ТО считай в моточасах, а не в километрах.
+8. Это разговор: не повторяй причины и проверки, которые уже называл. Если человек пишет, что проверил и не помогло, — исключи это и иди дальше: следующая причина и конкретная проверка. Простые причины кончились — скажи прямо и переходи к глубоким (компрессия, искра, зазоры, разбор карбюратора) или к сервису.`;
 async function collect(res) {
   if ((res.headers.get("Content-Type") || "").indexOf("event-stream") < 0) return "";
   let out = "";
@@ -918,7 +922,7 @@ async function botAnswer(env, m, chat, say, text, key, st, dbg, to) {
   const reply = await collect(res);
   if (!reply) return say("ИИ сейчас перегружен — попробуй через пару минут.");
   if (env.FEEDBACK) {
-    const h = past.concat([{ role: "user", content: q }, { role: "assistant", content: reply.slice(0, 1500) }]).slice(-8);
+    const h = past.concat([{ role: "user", content: q }, { role: "assistant", content: reply.slice(0, 1500) }]).slice(-12);
     await env.FEEDBACK.put(key, JSON.stringify({ d: st.d, n: st.n + 1, t: Date.now(), h }), { expirationTtl: 60 * 60 * 48 });
   }
   const shop = await shopLine(q, refs);
