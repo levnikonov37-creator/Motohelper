@@ -9024,6 +9024,55 @@ mergeFamily("Stels", "Delta", [
   /* Rockot R5L Foxfire — 166FMM (enduro24) */
   setEngine("Rockot", "R5L Foxfire", 0, "166FMM", { approx: true });
 })();
+/* Партия 4 из комментариев.
+   BSE Z3 250 — ZS172FMM, 2 клапана, 21 л.с. (moto-time, enduro24, pbm54); раньше стоял ≈4-клапанный 172FMM-3A — владелец заметил.
+   Pitonmoto — вся линейка с pitonmoto.com («RX4» у них нет — в комментарии, видимо, MX4). «Ланза» (Lanza) — это 2T Loncin MT250
+   (1E66MM): так его называют продавцы (Pitonmoto MX8 Edge MT250 (LANZA), MX8 T250L — «Lanza 1E66MM»).
+   BRZ — недостающие модели с brzmoto.ru. Darex UL 300 — ZS172FMM-5 (175FMN), то есть PR300, 25 л.с. (mototehnika45, Яндекс Маркет).
+   GTO Short Lite 300 — CB300F (4enduro). Hammer Wolf 67 — 250 штанговый с балансиром, 17 л.с. (VK дилера, Ozon) = CG250 (167FMM);
+   Wolf 072 — «175 цепной 300» (объявления) = CB300F. Yacota Apollino AMX-F 125 — YX153FMI (yacota-moto.com), AMX-F 140 — YX140.
+   Viper 003 Pro (Sport 003 Pro) — 300, 6 ст. (magshop.md) — как Regulmoto Sport-003 PR 300 6 ст.
+   Sycmcc 300-15 — «177», 300 см³, водяное охлаждение, 6 ст., 30 л.с. (motog.ru) — ближайший у нас NC300.
+   Apollo RFZ 125 — мотор YX 125 (maxiscoot: «Apollo uses this engine for their RFZ»), то есть 1P52FMI */
+(function () {
+  var E = "Эндуро", P = "Питбайк", A = { approx: true };
+  var one = function (brand, name, type, vers, aka) {
+    B(brand, name, type, vers.map(function (v) { return typeof v === "string" ? [v, null, Object.assign({}, A)] : [v[0], v[1], Object.assign({}, A, v[2] || {})]; }));
+    if (aka) BIKES[BIKES.length - 1].aka = aka;
+  };
+  var X = { approx: false };
+  setEngine("BSE", "Z3 250", 0, "172FMM", { hp: 21 });
+  setEngine("Apollo", "RFZ 125", 0, "1P52FMI", { approx: true });
+  ENGINE_AKA.FIXCN_LON_MT250 = (ENGINE_AKA.FIXCN_LON_MT250 ? ENGINE_AKA.FIXCN_LON_MT250 + " " : "") + "lanza ланза 1e66mm mt250 мт250";
+  /* Pitonmoto */
+  one("Pitonmoto", "MX8 Edge MT250", E, [["FIXCN_LON_MT250", null, X]], ["MX8 Edge Lanza", "MX8 Edge MT250 (LANZA)"]);
+  one("Pitonmoto", "MX8 T250L", E, [["FIXCN_LON_MT250", null, X]], ["MX8 T250L Lanza"]);
+  one("Pitonmoto", "MX8 Edge NB300", E, [["NB300", null, X]], ["MX8 Edge PRO NB300"]);
+  one("Pitonmoto", "MX8 Edge PR300 PRO", E, [["FIXCN_PR300PRO", null, X]]);
+  one("Pitonmoto", "MX8 Edge PRO Z300 2T", E, [["2T300", "Z300 2T с балансирным валом"]]);
+  one("Pitonmoto", "MX8 NC300S", E, [["NC300", "Карбюратор · NC300S (ZS182MN)", X], ["NB300E", "EFI · NC300S инжектор", X]], ["MX8 NC300S CARB", "MX8 NC300S EFI"]);
+  one("Pitonmoto", "MX5 Quant CB300RL", E, ["FIXCN_CB300RL_6"]);
+  one("Pitonmoto", "MX4 PR300", E, [["PR300", null, X]], ["MX4 Focus PR300", "MX4 300"]);
+  one("Pitonmoto", "MX3 CB250", E, [["165FMM", null, X]]);
+  one("Pitonmoto", "MX3 PR300", E, [["PR300", null, X]]);
+  one("Pitonmoto", "MX2 Maverick PR300", E, [["PR300", null, X]]);
+  one("Pitonmoto", "MX2 Maverick PRO", E, ["FIXCN_CB300RL_6"], ["MX2 Maverick PRO CB300RL"]);
+  /* BRZ */
+  one("BRZ", "Z7 CB250", E, [["172FMM", null, X]]);
+  one("BRZ", "Z7 CB300F", E, [["175FMM", null, X]]);
+  one("BRZ", "X8 PR300", E, [["PR300", null, X]]);
+  one("BRZ", "X8 NC300S", E, [["NC300", null, X]]);
+  one("BRZ", "MX5 PR300", E, [["PR300", null, X]]);
+  /* остальные */
+  one("Darex", "UL 300", E, [["PR300", null, X]], ["UL300"]);
+  one("GTO", "Short Lite 300", E, [["175FMM", "CB300F (ZS175FMM)", X]], ["Short Lite 300 CB300F"]);
+  one("Hammer", "Wolf 67", E, [["167FMM", "250 штанговый с балансиром, 17 л.с."]], ["Volf 67", "Wolf 67 250", "Хаммер Вольф 67"]);
+  one("Hammer", "Wolf 072", E, [["175FMM", "300 цепной (CB300F)"]], ["Wolf 72", "Хаммер Вольф 072"]);
+  one("Yacota", "Apollino AMX-F 125", P, [["FIXCN_153FMI", "YX153FMI", X]], ["Apollo AMX-F 125", "Apollino AMX-F 125 PRO Sport"]);
+  one("Yacota", "Apollino AMX-F 140", P, ["YX140"], ["Apollo AMX-F 140"]);
+  one("Viper", "003 Pro", E, [["FIXCN_PR300_6", "300 см³, 6 ст."]], ["Sport 003 Pro", "Enduro 003 Pro"]);
+  one("Sycmcc", "300-15", E, [["NC300", "177 · 300 см³, водяное охлаждение, 6 ст."]], ["SYC300-15", "300-15 водянка", "Sycmmc 300-15"]);
+})();
 /* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
 BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
 sortBikes();
