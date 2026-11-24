@@ -608,6 +608,61 @@ async function collect(res) {
   }
   return out.replace(/\*\*/g, "").replace(/^#+\s*/gm, "").trim();
 }
+/* Скриншот комментариев ТикТока от владельца → модели техники → очередь заявок (KV «mr:…», page «tiktok»).
+   Что уже есть на сайте (по m/index.json) — не ставим в очередь, а сразу даём ссылку. Ничего не придумываем: только то, что на скрине */
+const SCREEN_ASK = "На скриншоте — комментарии под видео в ТикТоке о сайте-справочнике по мотоциклам. Выпиши модели мото-техники (мотоциклы, питбайки, эндуро, мопеды, скутеры), которые люди называют как свои или просят добавить. Бери только то, что написано на скрине, ничего не додумывай. Явную опечатку в марке исправь (motolend → Motoland, kuggo → Kugoo), модель не меняй. Мотор (код вроде 172FMM, PR300, NB300) — только если он написан в том же комментарии. Ники, ответы автора видео и комментарии без модели не выписывай; квадроциклы и машины — отдельно. Ответ строго JSON: {\"models\":[{\"model\":\"Kayo T4 300\",\"engine\":\"\"}],\"atv\":[\"названия квадроциклов\"],\"no_model\":число комментариев без модели}";
+async function ownerScreens(env, photos) {
+  const img = await tgPhoto(env, photos);
+  if (!img) return "Не смог открыть скрин 😕 Пришли ещё раз.";
+  const mm = /^data:(image\/[a-z+]+);base64,(.+)$/i.exec(img);
+  let got = null, why = [];
+  for (const model of GEMINI_MODELS.filter((x) => !(GEM_BAD.get(x) > Date.now())).concat(GEMINI_MODELS)) {
+    if (got || why.length >= 4) break;
+    const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 15000);
+    try {
+      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent", {
+        method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY }, signal: ac.signal,
+        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: SCREEN_ASK }, { inline_data: { mime_type: mm[1], data: mm[2] } }] }],
+          generationConfig: Object.assign({ temperature: 0, maxOutputTokens: 2048, responseMimeType: "application/json" }, thinkFor(model) ? { thinkingConfig: { thinkingLevel: thinkFor(model) } } : {}) }),
+      });
+      if (!r.ok) { GEM_BAD.set(model, Date.now() + 600000); why.push(model + " " + r.status); continue; }
+      const j = await r.json();
+      const t = ((j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || []).filter((x) => !x.thought).map((x) => x.text || "").join("");
+      got = JSON.parse(t.replace(/^```(json)?|```$/g, "").trim());
+    } catch (e) { why.push(model + " " + (e.name === "AbortError" ? "долго" : "ошибка")); }
+    finally { clearTimeout(tm); }
+  }
+  if (!got) return "Не смог прочитать скрин — ИИ сейчас перегружен 😕 Перешли его чуть позже." + (why.length ? "\n(" + why.join("; ") + ")" : "");
+  const clean = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
+  const list = (Array.isArray(got.models) ? got.models : []).map((x) => ({ model: clean(x && x.model, 80), engine: clean(x && x.engine, 40) })).filter((x) => x.model.length >= 3).slice(0, 40);
+  // что уже есть на сайте
+  let idx = [];
+  try { idx = await fetch("https://motohelper.ru/m/index.json", { cf: { cacheTtl: 600 } }).then((r) => r.json()); } catch (e) {}
+  const norm = (x) => String(x || "").toLowerCase().replace(/ё/g, "е").replace(/[^a-zа-я0-9]+/g, "");
+  // совпадение: марка+модель, модель без марки или одно из других названий (aka в index.json — через пробел)
+  const findHit = (k) => idx.find((y) => { const b = norm(y.b), n = norm(y.n);
+    return b + n === k || (n.length >= 4 && n === k) || (y.k && k.length >= 6 && norm(y.k).includes(k.startsWith(b) ? k.slice(b.length) : k)); });
+  const have = [], queued = [], seen = new Set();
+  const now = Date.now();
+  for (const [i, x] of list.entries()) {
+    const k = norm(x.model);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    const hit = findHit(k);
+    if (hit) { have.push(hit.b + " " + hit.n + " → motohelper.ru/m/" + hit.u + "/"); continue; }
+    const t = new Date(now + i).toISOString();
+    await env.FEEDBACK.put("mr:" + t + "-tt" + Math.random().toString(36).slice(2, 6), JSON.stringify({ t, model: x.model, engine: x.engine, q: "", page: "tiktok" }), { expirationTtl: 60 * 60 * 24 * 90 });
+    queued.push(x.model + (x.engine ? " (" + x.engine + ")" : ""));
+  }
+  const atv = (Array.isArray(got.atv) ? got.atv : []).map((x) => clean(x, 60)).filter(Boolean);
+  return [
+    queued.length ? "📥 В очередь (" + queued.length + "), добавлю в ближайший прогон — раз в 2 часа:\n" + queued.map((x) => "• " + x).join("\n") : "",
+    have.length ? "✅ Уже есть на сайте:\n" + have.map((x) => "• " + x).join("\n") : "",
+    atv.length ? "🚜 Квадроциклы (пока не добавляем): " + atv.join(", ") : "",
+    !queued.length && !have.length && !atv.length ? "На скрине не нашёл названий моделей 🤷" : "",
+    got.no_model ? "Комментариев без модели: " + Number(got.no_model) : "",
+  ].filter(Boolean).join("\n\n");
+}
 async function tgPhoto(env, photos) {
   try {
     const f = await tgApi(env, "getFile", { file_id: photos[photos.length - 1].file_id });
@@ -692,6 +747,8 @@ async function botReply(env, m, dbg = () => {}) {
     if (env.FEEDBACK && st.h.length) await env.FEEDBACK.put(key, JSON.stringify(Object.assign(st, { h: [] })), { expirationTtl: 60 * 60 * 48 });
     return say("Начнём заново. Какой мотоцикл и что с ним?");
   }
+  // владелец присылает скриншоты комментариев из ТикТока (без подписи) — вытаскиваем модели в очередь заявок «Нет моей модели»
+  if (!group && m.photo && !text && env.FEEDBACK && String(await env.FEEDBACK.get("tg:owner")) === String(chat)) return say(await ownerScreens(env, m.photo));
   if (!text && !m.photo) return say("Я понимаю текст и фото. Опиши поломку словами 🙂");
   if (st.n >= (group ? GROUP_DAILY : BOT_DAILY)) return say("На сегодня лимит ответов исчерпан — приходи завтра. Пока можно поискать на сайте: https://motohelper.ru/");
   const typing = () => tgApi(env, "sendChatAction", { chat_id: chat, action: "typing" }).catch(() => {});
