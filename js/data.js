@@ -8927,6 +8927,40 @@ mergeFamily("Stels", "Delta", [
   B("Мотомир", "Swift 2", M, [["152FMH", "110 см³ · в документах до 50 см³ (1P39)", A], ["154FMI", "125 см³ · в документах до 50 см³ (1P39)", A]]);
   BIKES[BIKES.length - 1].aka = ["Swift 2.0", "Alpha Swift 2", "Альфа Свифт 2.0"];
 })();
+/* Модели из комментариев в ТикТоке. Мотор — из названия модели («Bandit PR300», «K20 NC250») или из описания у
+   продавцов (Kugoo JL-300 — ZS175FMN, то есть PR300; MMZ 065 — штанговый Zongshen 250, CG250/167FMM). Питбайки 125 и
+   Альфа 125 без карточки мотора — горизонтальный 1P54FMI, как у всего класса. Всё с ≈: на странице просим сверить код
+   на картере. Не добавлены, пока нет данных о моторе: Kayo KRZ 140, Regulmoto SAI 200, JHL TGR 250 Lite, MMZ 06 Pro 300,
+   Ajerra Sagai SB300 и Joker, марка AJ1, Almotor AL300-06, Geon Vertex 300 (4V 300 — Loncin или Zongshen?), Sycmmc 250,
+   Shineray XY200 Intruder, Roliz Sport-005 с мотором 169FMM (такого мотора ещё нет в базе) */
+(function () {
+  var E = "Эндуро", L = "Лёгкий эндуро", P = "Питбайк", M = "Мопед", A = { approx: true };
+  var one = function (brand, name, type, eng, aka) {
+    addBike(brand, name, type, eng, Object.assign({}, A));
+    if (aka) BIKES.find(function (x) { return x.brand === brand && x.name === name; }).aka = aka;
+  };
+  one("Regulmoto", "Senke SK200GY-4", L, "CG200");
+  one("Ajerra", "Tooba K5 PR300", E, "PR300");
+  one("Ajerra", "S8 NB300", E, "NB300");
+  one("MMZ", "065", E, "167FMM", ["065 NT", "ММЗ 065"]);
+  one("Apollo", "RFZ 125", P, "154FMI");
+  one("Wels", "CRF 125 Team", P, "154FMI");
+  one("Zuumav", "PM 125", P, "154FMI");
+  one("Sanchez", "Bandit PR300", E, "PR300");
+  one("Kews", "K20 NC250", E, "NC250");
+  one("Kugoo", "JL-300", E, "PR300", ["JL300", "Kuggo JL300", "Куго JL-300"]);
+  one("Gladiator", "K8 NB300", E, "NB300", ["G2R G7 NB300"]);
+  one("OXO", "Pride YB250", E, "LON_YB250R");
+  one("Sirius", "Extra 125", M, "154FMI", ["Сириус Экстра 125"]);
+  one("BRZ", "Z7 PR300", E, "PR300");
+  one("Kews", "K12 YB300H", E, "LON_YB300H");
+  one("JHL", "MX CB300", E, "175FMM", ["MX CB300F"]);
+  one("XGZ", "CQR-CB300", E, "175FMM", ["CQR CB300F"]);
+  /* Avantis A3 продают и на PR300 (ZS175FMN) */
+  var a3 = BIKES.find(function (x) { return x.brand === "Avantis" && x.name === "A3"; });
+  a3.versions[0].label = "CBS300 · ZS174MN-3, 276 см³";
+  a3.versions.push({ engine: "PR300", label: "PR300 · ZS175FMN, 271 см³", approx: true });
+})();
 /* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
 BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
 sortBikes();

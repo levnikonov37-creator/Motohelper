@@ -1761,6 +1761,20 @@ const BF_ALIAS = {
   "иксмотос": "xmotos",
   "аполло": "apollo",
   "аполо": "apollo",
+  "апполо": "apollo",
+  "аджера": "ajerra",
+  "аджерра": "ajerra",
+  "санчез": "sanchez",
+  "санчес": "sanchez",
+  "куго": "kugoo",
+  "кугу": "kugoo",
+  "гладиатор": "gladiator",
+  "оксо": "oxo",
+  "зуумав": "zuumav",
+  "зумав": "zuumav",
+  "кевс": "kews",
+  "брз": "brz",
+  "джейэйчэл": "jhl",
   "ниндзя": "ninja",
   "ниндзю": "ninja",
   "хаябуса": "hayabusa",
@@ -1957,6 +1971,9 @@ function bfAlts(t) {
    1 ошибка (замена, пропуск, лишняя буква или две соседние наоборот), для длинных (7+) — до 2 */
 function bfTypo(a, w) {
   if (a.length < 4 || w.length < 3 || !/[a-zа-я]/.test(a)) return false;
+  /* удвоенные буквы не считаем ошибкой: «appolo» → apollo, «kuggo» → kugoo */
+  const sq = x => x.replace(/(.)\1+/g, "$1");
+  if (sq(a) === sq(w)) return true;
   const lim = a.length >= 7 ? 2 : 1;
   if (Math.abs(a.length - w.length) > lim) return false;
   const m = a.length, n = w.length, d = [];
