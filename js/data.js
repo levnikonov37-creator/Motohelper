@@ -9122,6 +9122,81 @@ mergeFamily("Stels", "Delta", [
   R("Rockot", "R5F Raptor", E, [["172FMM-3A", "ZS172FMM-3A (CB250-F), 21 л.с."]], ["R5F Raptor 2.0", "Raptor 2.0"]);
   R("BTM", "007", E, [["FIXCN_PR300PRO", "300 · Zongshen 177F", A], ["172FMM-5", "250 · 172FMM-5A, 21 л.с.", A]], ["07", "Enduro 07", "007 300cc", "БТМ 007"]);
   R("Technic", "ZS190", P, [["Z190", "Zongshen ZS190, 17 л.с."]], ["ДТ 190", "DT 190", "Техник 190", "Техник ДТ 190"]);
+  /* Партия со скринов ТикТока 24.11.2026 (13 пачек) + заявки с сайта. Моторы — с сайтов марок и крупных дилеров:
+     rockot-motors, tmbkmoto, jhlmoto, sharmax-moto, zid.ru, regulmoto, darexmoto, menstechnic, globaldrive, activattor,
+     amoto.by, mototek, bvdshop, x-m.su, motogor, kolesa.kz, Яндекс Маркет. approx — код не указан прямо, подобран по описанию */
+  var K = "Кросс-эндуро", Mo = "Мопед", N = "Нейкед", Sc = "Скутер";
+  R("Forte", "FT300-C5C", E, [["PR300", "270 см³, «175MN», 19 л.с.", A]], ["C5C", "C5C 175MN"]);
+  R("Motoland", "MTX300", E, [["175FMM", "ZS175FMM, 25 л.с."]], ["MTX 300", "MTX"]);
+  R("Apollo", "Thunder 300", E, [["PR300", "ZS175FMN (PR300), 25 л.с."]], ["Thunder 300 PR300"]);
+  R("Apollo", "RFZ Start 140L", P, [["1P52FMI", "1P52FMI"]], ["RFZ 140", "RFZ 14", "RFZ Start 140"]);
+  R("BRZ", "KR3 250", E, [["172FMM-5", "ZS172FMM с балансиром, 21 л.с.", A]], ["KR3"]);
+  R("Regulmoto", "SK250GY-5", E, [["167FMM", "CG250, 13.6 л.с."]], ["SK 250GY-5", "Senke SK250GY-5"]);
+  R("TMBK", "Revolta 450 EFI", E, [["NC450", "ZS194MQ, 45 л.с."]], ["Revolta 450"]);
+  R("TMBK", "Envy 300", E, [["175FMM", "ZS175FMM, 25 л.с."]], ["ENVY"]);
+  R("TMBK", "Envy 300 Pro", E, [["PR300", "ZS175FMN, 27 л.с."]], ["ENVY 300 PRO"]);
+  R("Koshine", "XN85", K, [["KTM85", "2T 85 (по схеме KTM 85 SX), 26 л.с.", A]], ["XN 85", "Кошайн 85"]);
+  R("Koshine", "XN300 2T", E, [["2T300", "2T 300", A]], ["XN300", "XN 300", "Кошайн 300"]);
+  R("Rockot", "Basic 125E Jokester 2.0", P, [["FIXCN_153FMI", "YX 153FMI, 124 см³"]], ["Jokester 2.0", "Basic 125E", "Jokester"]);
+  R("Rockot", "GS7 Tribute 2.0", E, [["172FMM-5", "ZS172FMM-5 (PR250), балансир, 21 л.с."]], ["GS 7 Tribute 2.0", "Tribute 2.0", "GS7 Tribute"]);
+  R("Rockot", "Hi-Tech 125 Comandante", P, [["FIXCN_153FMI", "YX 153FMI, 124.6 см³"]], ["Hi-Tech 125", "HiTech 125", "Comandante 2.0"]);
+  R("Rockot", "Spectrum 150", N, [["CG150", "CG150 162FMJ, 11 л.с."]], ["Spectrum"]);
+  R("Roliz", "Sport-004", E, [["172FMM-3A", "ZS172FMM-6 (CB250R), 4 клапана, 24 л.с.", A]], ["Sport 004", "Sport004"]);
+  R("OXO", "Venom 250", E, [["172FMM-3A", "ZS172FMM-3A, 21 л.с."]], ["Venom"]);
+  R("ZTOT", "Z7 Max YBS300 Pro", E, [["YBS300", "Loncin YBS300"]], ["Z7 Max", "Z7 MAX YBS300 PRO"]);
+  R("G2R", "G7 Pro NB300", E, [["NB300", "ZS174MN-5A, 28 л.с."]], ["G7 NB300", "Pro G7 NB300"]);
+  R("Fxmoto", "CB300F", E, [["175FMM", "ZS175FMM-5A, 272 см³", A]], ["CB 300F"]);
+  R("Saimo", "06 Pro 300", E, [["PR300", "ZS175FMN, 25 л.с.", A]], ["06 PRO 300CC", "300 Pro", "Саймо"]);
+  R("ULAR", "F7", E, [["172FMM-3A", "ZS172FMM-3A, 23 л.с.", A]], ["Улар Ф7", "F7 250"]);
+  R("ULAR", "BM300-B1", E, [["172FMM", "ZS172FMM, 250 см³"]], ["BM 300 B1", "BM300 B1"]);
+  R("Racer", "Z4", E, [["FIXCN_CB300RL_6", "Zongshen CB300RL, 27 л.с."]], ["Z4L 300", "Z4 300"]);
+  R("Darex", "Matay 300", E, [["PR300", "ZS PR300, балансир, 25 л.с."]], ["Матай 300"]);
+  R("Wels", "RX 125", P, [["1P52FMI", "125 см³, 10–14 л.с.", A]], ["RX 125 E", "RX125"]);
+  R("OXO", "Shadow 150", P, [["YX140", "Yinxiang 1P56FMJ-2, 140 см³"]], ["Shadow"]);
+  R("OXO", "Base 300", E, [["PR300", "ZS175FMN, 25 л.с."]], ["Base 300 PR"]);
+  R("Sharmax", "PowerMax 320", E, [["NB300", "Zongshen 174 (NB300) с инжектором", A]], ["Power Max 320"]);
+  R("Zuumav", "A5 250", E, [["LON_YB250R", "Loncin YB250, 18 л.с."]], ["A5", "FX A5"]);
+  R("Zuumav", "K3R 125", P, [["1P52FMI", "1P52FMI, 9 л.с."]], ["K3R", "FX K3R 125"]);
+  R("Racer", "Scout M1", Mo, [["152FMH", "110 см³ · в документах до 50 см³", A]], ["RC Scout M1", "Scout M1 110"]);
+  R("Kews", "K10 PR300", E, [["PR300", "ZS175FMN (PR300)"]], ["K10"]);
+  R("Irbis", "GS 150", N, [["CG150", "149.4 см³, 11.3 л.с.", A]], ["GS150"]);
+  R("SPR", "Crossroad-1", E, [["167FMM", "Zongshen CG250 (167FMM), 229 см³"]], ["CrossRoad 1", "Crossroad-1 250", "FH250-Y1", "SPR Motors Crossroad"]);
+  R("Roliz", "Cross 125 HL", P, [["1P52FMI", "125 см³, горизонтальный, 9.3 л.с.", A]], ["Cross 125", "Эконика Cross 125 HL"]);
+  R("Ataki", "EC250", E, [["172FMM", "4T 172FMM"]], ["EC250 Enduro", "ES250"]);
+  R("Faidet", "K1 PR300", E, [["PR300", "Zongshen PR300"]], ["K1"]);
+  R("JHL", "LX26 YB300H", E, [["LON_YB300H", "Loncin YB300H (LX176FMN), балансир"]], ["LX YB300H", "LX26"]);
+  R("JHL", "S004 R 300", E, [["PR300", "PR300 / ZS175FMM-5, 24 л.с.", A]], ["TGR S004", "S004", "S004 300"]);
+  R("JHL", "LX4 CB300RL", E, [["FIXCN_CB300RL_6", "ZS175FMN (CB300RL)"]], ["LX4"]);
+  R("BRZ", "H5 PR300", E, [["PR300", "Zongshen PR300, 25 л.с."]], ["H5"]);
+  R("MMZ", "008", E, [["PR300", "PR300, балансир, 6 передач"]], ["008 PR300", "ММЗ 008", "S008"]);
+  R("Upbeat", "CB300 / DB300", E, [["175FMM", "274 см³, 24 л.с.", A]], ["CB300", "DB300", "Апбит"]);
+  R("Regulmoto", "SK200-9", N, [["CG200", "164FML, 200 см³"]], ["SK 200-9"]);
+  R("Musstang", "Region MT200-9 ST", N, [["CG200", "CG 197 см³ с балансиром", A]], ["Region MT200-9", "Mustang Region 200", "Region ST 200"]);
+  R("PWR", "TH3 300", E, [["175FMM", "175FMM"]], ["TH3"]);
+  R("SkyBike", "CRDX-200", E, [["CG200", "ZS163FML, 197 см³"]], ["CRDX 200", "CRDX200"]);
+  R("Vento", "Riva S", Mo, [["154FMI", "125 см³ · в документах 50, 8 л.с.", A]], ["VMC Riva S", "Riva-S", "Riva S 125"]);
+  R("Vento", "VMC 125", P, [["1P52FMI", "125 см³, 7.5 л.с.", A]], ["Venta 125", "VMC 125 17/14"]);
+  R("Yamasaki", "Cobra SM 110", Mo, [["152FMH", "110 см³ · в документах 50", A]], ["Cobra 110", "Cobra SM 50(110)", "Ямасаки Кобра"]);
+  R("SSSR", "Atom 125 E", P, [["1P52FMI", "125 см³, 9 л.с.", A]], ["Atom 125", "Атом 125", "СССР Атом"]);
+  R("Shorner", "R240", E, [["CG200", "200 см³ (163FML)", A]], ["R 240"]);
+  R("Baltmotors", "Joy 50", Sc, [["CN_139QMB", "4T 50 (139QMB)", A]], ["BM Joy 50", "Joy"]);
+  R("C.Moto", "LK3 150", P, [["YX140", "1P56FMJ, 12 л.с."]], ["CMoto LK3", "LK3-150", "LK3"]);
+  R("Promax", "Fidet 145E", P, [["YX140", "Yinxiang YX150E", A]], ["Fidet Fortis 145E", "Fidet 145E PRO"]);
+  R("GR1", "F250A Enduro Pro", E, [["165FMM", "Zongshen 165FMM, 16 л.с."]], ["GR1 Pro", "GR1PRO", "GR1 Pro 250"]);
+  R("ЗиД", "250 Эндуро", E, [["166FMM", "ZiD / Yinxiang 166FMM (ZiD250, YX250GY-C5C)"]], ["ZiD250", "ZiD 250", "YX250GY-C5C", "Зид 250"]);
+  /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
+  (function () {
+    var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
+    if (b && b.versions.length === 1) b.versions.push({ engine: "NC300", label: "ZS184MN, 31–33 л.с.", approx: true });
+  })();
+  /* другие написания уже существующих моделей — чтобы поиск находил их по тексту заявок */
+  [["Pitonmoto", "MX4 PR300", ["RX4 300", "RX4"]], ["Racer", "Tourist RC200GY-C2A", ["Tourist 200"]], ["Kawasaki", "KDX220R", ["KDX220SR", "KDX 220"]],
+   ["JHL", "LK140", ["OFR 140LK", "LK 140"]], ["Sharmax", "Sport 300 Air", ["Sport Air 300 BE", "Sport Air 300"]], ["XGZ", "CQR-CB300", ["EAR CQR 300", "EAR CQR"]],
+   ["Irbis", "Z50R", ["Z50R Tornado", "Tornado"]], ["Racer", "K2 RC300-GY8A", ["K2 300 Freeride", "K2 300"]], ["Минск", "ММВЗ 3.112", ["Минск 125"]]
+  ].forEach(function (r) {
+    var b = BIKES.find(function (x) { return x.brand === r[0] && x.name === r[1]; });
+    if (b) b.aka = (b.aka || []).concat(r[2].filter(function (a) { return (b.aka || []).indexOf(a) < 0; }));
+  });
 })();
 /* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
 BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
