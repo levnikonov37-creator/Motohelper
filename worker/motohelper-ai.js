@@ -1,5 +1,6 @@
 // Сервер ИИ-механика для Cloudflare Workers (бесплатный тариф).
-// Умеет: текст и фото. Порядок: DeepSeek (платный, основной) → Gemini → Groq → встроенный Workers AI.
+// Умеет: текст и фото. Порядок: DeepSeek (платный, основной) → Gemini → бесплатные Groq, Cerebras, SambaNova, Mistral,
+// OpenRouter, GitHub Models (у кого есть ключ) → встроенный Workers AI.
 // Если у DeepSeek кончился дневной лимит или деньги — отвечают бесплатные.
 //
 // Как обновить: Cloudflare → Workers & Pages → motohelper-ai → Edit code → вставить этот файл целиком → Deploy.
@@ -8,7 +9,12 @@
 //   DAILY_TOTAL      — необязательно: сколько ответов DeepSeek в сутки на всех (по умолчанию 300 ≈ 9 тыс. в месяц);
 //   DAILY_PER_USER   — необязательно: сколько ответов DeepSeek в сутки одному человеку (по умолчанию 40);
 //   GEMINI_API_KEY — ключ Google AI Studio (aistudio.google.com → Get API key), бесплатный запасной, умеет фото;
-//   GROQ_API_KEY   — необязательно, запасной вариант для текста (console.groq.com);
+//   бесплатные запасные для текста (все необязательные; чем больше ключей — тем реже «ИИ перегружен»):
+//     GROQ_API_KEY (console.groq.com → API Keys), CEREBRAS_API_KEY (cloud.cerebras.ai → API Keys),
+//     SAMBANOVA_API_KEY (cloud.sambanova.ai → API Keys), MISTRAL_API_KEY (console.mistral.ai → API Keys, тариф Experiment),
+//     OPENROUTER_API_KEY (openrouter.ai → Keys; бесплатные модели «:free»), GITHUB_MODELS_TOKEN (github.com → Settings →
+//     Developer settings → Personal access tokens, право models:read). Модели можно заменить переменной <ПРОВАЙДЕР>_MODELS
+//     («модель1,модель2»), если провайдер их переименует; проверить все: <адрес сервера>/?test=providers;
 //   привязка AI (Settings → Bindings → Workers AI, имя AI) — необязательно, последний запасной вариант.
 //   TELEGRAM_BOT_TOKEN — ключ бота (@BotFather), бот — админ канала: тогда сервер ведёт Telegram-канал по tg/posts.json;
 //   YANDEX_METRIKA_TOKEN — OAuth-ключ Метрики: по понедельникам отчёт о посещаемости владельцу (тому, кто написал боту /start).
@@ -28,7 +34,6 @@ const GEMINI_THINK = { "gemini-3.6-flash": "low" };
 const thinkFor = (model) => (model in GEMINI_THINK ? GEMINI_THINK[model] : "minimal");
 // модель, которая отказала (лимит, ошибка, молчание), пропускаем 10 минут — не ждём её на каждом вопросе
 const GEM_BAD = new Map();
-const GROQ_MODEL = "llama-3.3-70b-versatile";
 // встроенный ИИ Cloudflare: пробуем по очереди — если модель убрали или она перегружена, берём следующую
 const CF_MODELS = ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-4-scout-17b-16e-instruct", "@cf/meta/llama-3.1-8b-instruct-fast", "@cf/meta/llama-3.1-8b-instruct"];
 // Чужие сайты не тратят твои бесплатные лимиты: запросы принимаются только отсюда (и с локальной копии)
@@ -76,6 +81,7 @@ export default {
       // с DEBUG_TOKEN: &list=1 — какие модели есть у ключа; &try=a,b&think=low — пробный вопрос механику каждой модели
       if (u.searchParams.get("test") === "models" && env.DEBUG_TOKEN && u.searchParams.get("token") === env.DEBUG_TOKEN && (u.searchParams.get("list") || u.searchParams.get("try"))) return json(await geminiProbe(env, u.searchParams));
       if (u.searchParams.get("test") === "models") return json(await geminiTimes(env));
+      if (u.searchParams.get("test") === "providers") return json(await oaiProbe(env));
       if (u.searchParams.get("test")) return selfTest(env);
       // отзывы владельцев модели: ?reviews=<адрес модели>
       if (u.searchParams.get("reviews")) return listReviews(env, u.searchParams.get("reviews"));
@@ -135,12 +141,14 @@ async function answer(env, messages, images, ip, noDeepseek) {
         errors.push("gemini: " + e.message);
       }
     }
-    // без Gemini фото посмотреть некому — дальше только текст
-    if (env.GROQ_API_KEY) {
+    // без Gemini фото посмотреть некому — дальше только текст: бесплатные ИИ по очереди (у кого есть ключ)
+    for (const p of OAI) {
+      if (!env[p.key]) continue;
       try {
-        return sse(await groq(env, messages), "groq");
+        const { res, model } = await oaiChat(env, p, messages);
+        return sse(res.body, p.id, model);
       } catch (e) {
-        errors.push("groq: " + e.message);
+        errors.push(p.id + ": " + e.message);
       }
     }
     if (env.AI) {
@@ -153,14 +161,14 @@ async function answer(env, messages, images, ip, noDeepseek) {
         }
       }
     }
-    if (!env.DEEPSEEK_API_KEY && !env.GEMINI_API_KEY && !env.GROQ_API_KEY && !env.AI) errors.push("нет ни одного ключа и нет привязки AI");
+    if (!env.DEEPSEEK_API_KEY && !env.GEMINI_API_KEY && !OAI.some((p) => env[p.key]) && !env.AI) errors.push("нет ни одного ключа и нет привязки AI");
     const limited = errors.some((x) => /429|quota|limit|exhaust|neuron/i.test(x));
     return json({ error: limited ? "rate_limited" : "upstream_error", details: errors }, limited ? 429 : 502);
 }
 
 /* самопроверка: короткий вопрос через ту же цепочку, ответ читаем целиком (DeepSeek не трогаем — тратит деньги) */
 async function selfTest(env) {
-  const have = { deepseek: !!env.DEEPSEEK_API_KEY, gemini: !!env.GEMINI_API_KEY, groq: !!env.GROQ_API_KEY, workersAI: !!env.AI, feedbackKV: !!env.FEEDBACK };
+  const have = Object.assign({ deepseek: !!env.DEEPSEEK_API_KEY, gemini: !!env.GEMINI_API_KEY }, Object.fromEntries(OAI.map((p) => [p.id, !!env[p.key]])), { workersAI: !!env.AI, feedbackKV: !!env.FEEDBACK });
   const res = await answer(env, [{ role: "user", content: "Ответь одним словом по-русски: привет" }], [], "selftest", true);
   const provider = res.headers.get("x-mh-provider");
   const text = (await res.text()).slice(0, 400);
@@ -292,6 +300,17 @@ async function gemini(env, messages, images) {
           const ASK = "Твой ответ выше оборвался на полуслове. Продолжи ровно с места обрыва — без повторов, без вступлений и без извинений.";
           let more = "", why = [];
           const t0 = Date.now(), left = () => 28000 - (Date.now() - t0);
+          // 0) бесплатные ИИ с ключами (Groq, Cerebras и др.)
+          for (const p of OAI) {
+            if (more || left() < 3000 || !env[p.key]) continue;
+            try {
+              const msgs = sent.trim() ? messages.concat([{ role: "assistant", content: sent }, { role: "user", content: ASK }]) : messages;
+              const { res: r, model: om } = await oaiChat(env, p, msgs, { stream: false, max_tokens: 1200, wait: Math.min(12000, left()) });
+              const j = await r.json().catch(() => ({}));
+              more = String((j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "").trim();
+              if (!more) why.push(p.id + " " + om + ": пусто");
+            } catch (e) { why.push(p.id + ": " + String(e.message || e).slice(0, 60)); }
+          }
           // 1) встроенный ИИ Cloudflare (две модели)
           for (const m of env.AI ? CF_MODELS.slice(0, 2) : []) {
             if (more || left() < 3000) break;
@@ -332,14 +351,60 @@ async function gemini(env, messages, images) {
   return out;
 }
 
-async function groq(env, messages) {
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + env.GROQ_API_KEY },
-    body: JSON.stringify({ model: GROQ_MODEL, messages: textOnly(messages), stream: true, max_tokens: 1500, temperature: 0.4 }),
-  });
-  if (!res.ok || !res.body) throw new Error(res.status + " " + (await res.text()).slice(0, 200));
-  return res.body;
+/* Бесплатные ИИ с API как у OpenAI: их поток («choices[0].delta.content») сайт и бот понимают как есть.
+   У каждого — свой бесплатный лимит; модель, упёршуюся в лимит (429), пропускаем 10 минут, неизвестную (404/400) — сутки.
+   Неверный ключ (401/403) — к следующему провайдеру. */
+const OAI = [
+  { id: "groq", key: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions", models: ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "llama-3.1-8b-instant"] },
+  { id: "cerebras", key: "CEREBRAS_API_KEY", url: "https://api.cerebras.ai/v1/chat/completions", models: ["llama-3.3-70b", "gpt-oss-120b", "llama3.1-8b"] },
+  { id: "sambanova", key: "SAMBANOVA_API_KEY", url: "https://api.sambanova.ai/v1/chat/completions", models: ["Meta-Llama-3.3-70B-Instruct", "DeepSeek-V3-0324"] },
+  { id: "mistral", key: "MISTRAL_API_KEY", url: "https://api.mistral.ai/v1/chat/completions", models: ["mistral-small-latest", "mistral-medium-latest"] },
+  { id: "openrouter", key: "OPENROUTER_API_KEY", url: "https://openrouter.ai/api/v1/chat/completions", models: ["deepseek/deepseek-chat-v3-0324:free", "meta-llama/llama-3.3-70b-instruct:free", "openai/gpt-oss-120b:free"], headers: { "HTTP-Referer": "https://motohelper.ru", "X-Title": "MotoHelper" } },
+  { id: "github", key: "GITHUB_MODELS_TOKEN", url: "https://models.github.ai/inference/chat/completions", models: ["openai/gpt-4.1-mini", "meta/Llama-3.3-70B-Instruct"] },
+];
+const OAI_BAD = new Map();
+const oaiModels = (env, p) => (env[p.id.toUpperCase() + "_MODELS"] ? String(env[p.id.toUpperCase() + "_MODELS"]).split(",").map((x) => x.trim()).filter(Boolean) : p.models);
+async function oaiChat(env, p, messages, opts) {
+  const o = Object.assign({ stream: true, max_tokens: 1500, wait: 12000 }, opts || {});
+  let err = "";
+  for (const m of oaiModels(env, p)) {
+    const k = p.id + "|" + m;
+    if (!o.force && OAI_BAD.get(k) > Date.now()) continue;
+    const ac = new AbortController(), timer = setTimeout(() => ac.abort(), o.wait);
+    let r;
+    try {
+      r = await fetch(p.url, { method: "POST", signal: ac.signal,
+        headers: Object.assign({ "Content-Type": "application/json", Authorization: "Bearer " + env[p.key] }, p.headers || {}),
+        body: JSON.stringify({ model: m, messages: textOnly(messages), stream: o.stream, max_tokens: o.max_tokens, temperature: 0.4 }) });
+    } catch (e) {
+      clearTimeout(timer);
+      OAI_BAD.set(k, Date.now() + 300000);
+      err += m + " не ответил; ";
+      continue;
+    }
+    clearTimeout(timer); // начало ответа пришло — дальше поток не обрываем
+    if (r.ok && r.body) return { res: r, model: m };
+    const t = (await r.text().catch(() => "")).slice(0, 100);
+    err += m + " " + r.status + " " + t + "; ";
+    if (r.status === 401 || r.status === 403) break;
+    OAI_BAD.set(k, Date.now() + (r.status === 429 ? 600000 : r.status === 404 || r.status === 400 ? 86400000 : 300000));
+  }
+  throw new Error(err || "все модели на паузе");
+}
+/* ?test=providers — кто из бесплатных ИИ отвечает прямо сейчас (короткий вопрос без потока; ключи не показываем) */
+async function oaiProbe(env) {
+  const out = await Promise.all(OAI.map(async (p) => {
+    if (!env[p.key]) return { id: p.id, key: false };
+    const t = Date.now();
+    try {
+      const { res, model } = await oaiChat(env, p, [{ role: "user", content: "Ответь одним словом по-русски: привет" }], { stream: false, max_tokens: 20, wait: 15000, force: true });
+      const j = await res.json().catch(() => ({}));
+      return { id: p.id, key: true, ok: true, model, ms: Date.now() - t, reply: String((j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "").slice(0, 40) };
+    } catch (e) {
+      return { id: p.id, key: true, ok: false, error: String(e.message).slice(0, 300), ms: Date.now() - t };
+    }
+  }));
+  return { ok: true, providers: out };
 }
 
 // --- «Сообщить о неточности» с сайта ---
