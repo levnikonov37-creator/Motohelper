@@ -40,14 +40,14 @@ const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Expose-Headers": "x-mh-provider",
+  "Access-Control-Expose-Headers": "x-mh-provider, x-mh-model",
 };
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" } });
 
-const sse = (body, provider) =>
-  new Response(body, { headers: { ...CORS, "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache", "x-mh-provider": provider } });
+const sse = (body, provider, model) =>
+  new Response(body, { headers: { ...CORS, "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache", "x-mh-provider": provider, ...(model ? { "x-mh-model": model } : {}) } });
 
 export default {
   // по расписанию (Cloudflare → Triggers → Cron; ставит worker/deploy.sh): 06:00 UTC (09:00 МСК) — отчёт за вчера владельцу
@@ -129,7 +129,8 @@ async function answer(env, messages, images, ip, noDeepseek) {
     }
     if (env.GEMINI_API_KEY) {
       try {
-        return sse(await gemini(env, messages, images), "gemini");
+        const gs = await gemini(env, messages, images);
+        return sse(gs, "gemini", gs.mhModel);
       } catch (e) {
         errors.push("gemini: " + e.message);
       }
@@ -226,7 +227,7 @@ async function gemini(env, messages, images) {
     contents,
     generationConfig: Object.assign({ maxOutputTokens: 4096, temperature: 0.4 }, thinkFor(model) ? { thinkingConfig: { thinkingLevel: thinkFor(model) } } : {}),
   });
-  let res, err = "";
+  let res, err = "", chosen = "";
   // Gemini временами «зависает» на десятки секунд: ждём начала ответа не дольше 10 с на модель и 16 с всего (бот укладывается в свои 25 с),
   // потом пробуем следующую модель, а за ней — встроенный ИИ Cloudflare (см. answer)
   const until = Date.now() + 16000;
@@ -250,7 +251,7 @@ async function gemini(env, messages, images) {
       continue;
     }
     clearTimeout(timer);
-    if (res.ok && res.body) break;
+    if (res.ok && res.body) { chosen = model; break; }
     GEM_BAD.set(model, Date.now() + 600000);
     err += model + " " + res.status + " " + (await res.text()).slice(0, 120) + "; ";
     res = null;
@@ -258,10 +259,13 @@ async function gemini(env, messages, images) {
     if (err.indexOf(" 403 ") >= 0 || /API key/i.test(err)) break;
   }
   if (!res) throw new Error(err);
-  // ответ Gemini → строки «data: {"response": "..."}», которые понимает сайт
+  // ответ Gemini → строки «data: {"response": "..."}», которые понимает сайт.
+  // Gemini под нагрузкой иногда обрывает ответ на полуслове (поток кончается без finishReason STOP или с ошибкой).
+  // Тогда модель пропускаем 10 минут, а ответ дописывает встроенный ИИ Cloudflare; не вышло — честно пишем, что ответ оборвался.
   const enc = new TextEncoder(), dec = new TextDecoder();
-  let buf = "";
-  return res.body.pipeThrough(
+  const say = (ctl, t) => ctl.enqueue(enc.encode("data: " + JSON.stringify({ response: t }) + "\n\n"));
+  let buf = "", sent = "", fin = "", gErr = "";
+  const out = res.body.pipeThrough(
     new TransformStream({
       transform(chunk, ctl) {
         buf += dec.decode(chunk, { stream: true });
@@ -272,17 +276,38 @@ async function gemini(env, messages, images) {
           if (line.indexOf("data:") !== 0) continue;
           try {
             const j = JSON.parse(line.slice(5));
-            const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
-            const text = parts.map((p) => p.text || "").join("");
-            if (text) ctl.enqueue(enc.encode("data: " + JSON.stringify({ response: text }) + "\n\n"));
+            if (j.error) gErr = String(j.error.status || j.error.code || "error");
+            const c = j.candidates && j.candidates[0];
+            if (c && c.finishReason) fin = c.finishReason;
+            const parts = (c && c.content && c.content.parts) || [];
+            const text = parts.filter((p) => !p.thought).map((p) => p.text || "").join("");
+            if (text) { sent += text; say(ctl, text); }
           } catch (e) {}
         }
       },
-      flush(ctl) {
+      async flush(ctl) {
+        if (fin !== "STOP") {
+          GEM_BAD.set(chosen, Date.now() + 600000);
+          ctl.enqueue(enc.encode(": gemini " + chosen + " оборвал ответ: " + (gErr || fin || "без finishReason") + "\n\n"));
+          let more = "";
+          if (env.AI) {
+            try {
+              const msgs = sent.trim()
+                ? textOnly(messages).concat([{ role: "assistant", content: sent }, { role: "user", content: "Твой ответ выше оборвался на полуслове. Продолжи ровно с места обрыва — без повторов, без вступлений и без извинений." }])
+                : textOnly(messages);
+              const r = await Promise.race([env.AI.run(CF_MODELS[0], { messages: msgs, max_tokens: 1200 }), sleep(20000).then(() => null)]);
+              more = String((r && (r.response || (r.choices && r.choices[0] && r.choices[0].message && r.choices[0].message.content))) || "").trim();
+            } catch (e) {}
+          }
+          if (more) say(ctl, (sent && !/\s$/.test(sent) && !/^[,.;:!?)]/.test(more) ? " " : "") + more);
+          else say(ctl, (sent ? "\n\n" : "") + "⚠️ Ответ оборвался: ИИ-механик сейчас перегружен — очень много вопросов. Спроси ещё раз через минуту.");
+        }
         ctl.enqueue(enc.encode("data: [DONE]\n\n"));
       },
     })
   );
+  out.mhModel = chosen;
+  return out;
 }
 
 async function groq(env, messages) {
