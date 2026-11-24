@@ -8961,6 +8961,69 @@ mergeFamily("Stels", "Delta", [
   a3.versions[0].label = "CBS300 · ZS174MN-3, 276 см³";
   a3.versions.push({ engine: "PR300", label: "PR300 · ZS175FMN, 271 см³", approx: true });
 })();
+/* Партия 3 из комментариев. Новые моторы — клоны ближайшего по конструкции (данные обслуживания — типовые, без ✓):
+   169FMM — Zongshen CB250 69×62,2, PZ30, 17 л.с., электро + кик (карточки Roliz Sport-005: steelracing, universalmotors,
+     endurolive, mtk54 — «ZS169FMM / YX169FMM»); 166FMM — Zongshen 223 см³ ≈15 л.с. (enduro24: Rockot R5L Foxfire, BSE Z2);
+   1P52FMI — питбайковый YX125 (HS152FMH / YX125E у Ataki Prime 125: PZ19, 9 л.с., 4 ст.).
+   164FML — это CG200 (63,5×62,2, 197 см³; так подписан Motoland RZ200 у JazzMoto/DarexMoto) — добавлен как синоним.
+   Ajerra — линейка с ajerramoto.ru и pitland.ru: Sagai (K9/K10 — CB300RL, A10/C10 — YB300H), Joker (K9/K10/SS — NB300,
+   EFI — NB300 инжектор, A10/C10 — YBS300), Samurai (NC300, есть EFI), Falcon K6 (YB300R, балансир, 6 ст.), S8 RL300, AX300 2T;
+   AJ1 — суббренд Ajerra (NX 250 — ZS178MM-2, AX300 2T). Promax: MX280 и MX300 BigBore — ZS172FMM-3A, MX350PR — PR300 (x-m.su).
+   MMZ 06 Pro — ZS177FMM 300 (darexmoto, globaldrive), Almotor AL300 — ZS175FMN, 5 ст. (kaspi, almotor-russia),
+   Sycmcc Yamma 250 — 172FMM (Яндекс Маркет, motog), Sycmcc 300 — 271 см³, Geon Vertex 300 — 4V SOHC с балансиром 278 см³,
+   6 ст., воздушно-масляный (geon.kiev.ua), Shineray XY200 Intruder — CG200 с балансиром, 14,3 л.с., 5 ст. (motosvit.ua) */
+(function () {
+  var E = "Эндуро", L = "Лёгкий эндуро", P = "Питбайк", N = "Нейкед", C = "Классика", A = { approx: true };
+  var cl = function (id, base, o, aka) {
+    CL(id, base, o, 1.0);
+    delete ENGINES[id].torque; delete ENGINES[id].ex; delete ENGINES[id].dis;
+    ENGINE_AKA[id] = aka;
+  };
+  cl("169FMM", "165FMM", { code: "ZS169FMM", name: "Zongshen 169FMM (CB250, 69×62,2) · воздушный", maker: "Zongshen / Yinxiang (YX169FMM)",
+    cc: 233, hp: 17, carb: "PZ30 (с ускорительным насосом)", start: "Электро + кик" }, "169 169fmm zs169fmm yx169fmm cb250");
+  cl("166FMM", "165FMM", { code: "ZS166FMM", name: "Zongshen 166FMM · 223 см³ (CB250-тип)", maker: "Zongshen",
+    cc: 223, hp: 15, gearbox: "5 ст. (есть версии на 6 ст. с балансирным валом, без кика)", start: "Электро (+кик у части)" }, "166 166fmm zs166fmm");
+  cl("1P52FMI", "154FMI", { code: "1P52FMI", name: "YX 125 (1P52FMI / HS152FMH) · питбайк 125", maker: "Yinxiang (YX)",
+    cc: 125, hp: 9, carb: "PZ19" }, "yx125 yx125e 152fmi 1p52fmi hs152fmh 125");
+  ENGINE_AKA.CG200 += " 164fml 164";
+
+  var one = function (brand, name, type, vers, aka) {
+    B(brand, name, type, vers.map(function (v) { return typeof v === "string" ? [v, null, Object.assign({}, A)] : [v[0], v[1], Object.assign({}, A, v[2] || {})]; }));
+    if (aka) BIKES[BIKES.length - 1].aka = aka;
+  };
+  /* Ajerra и AJ1 */
+  BIKES.find(function (x) { return x.brand === "Ajerra" && x.name === "Tooba K5 PR300"; }).aka = ["Tooba 300", "Tooba K5 PRO", "Туба K5"];
+  one("Ajerra", "S8 RL300", E, ["FIXCN_CB300RL_6"]);
+  one("Ajerra", "Falcon K6", E, [["FIXCN_YB300H_6", "YB300R · балансир, 6 ст."]], ["Фалькон K6"]);
+  one("Ajerra", "Sagai", E, [["FIXCN_CB300RL_6", "K9 / K10 / SS K9 Pro · CB300RL 4V"], ["LON_YB300H", "A10 / C10 · Loncin YB300H 4V"]],
+    ["Sagai K10", "Sagai K9", "Sagai SS K9 Pro", "Sagai A10", "Sagai C10", "Sagai SB300", "Сагай"]);
+  one("Ajerra", "Joker", E, [["NB300", "K9 / K10 / SS K10 · NB300 (карбюратор)"], ["FIXCN_NB300E_5", "K10 EFI / C10 EFI / SS EFI · NB300 инжектор"],
+    ["YBS300", "A10 / C10 · Loncin YBS300"]], ["Joker K10", "Joker K9", "Joker SS K10", "Joker K10 EFI", "Joker C10", "Joker A10", "Джокер"]);
+  one("Ajerra", "Samurai", E, [["NC300", "K9 / L K10 · NC300 (карбюратор)"], ["NB300E", "SS K10 / T10 EFI · NC300 инжектор"]],
+    ["Samurai NC300", "Samurai EFI", "Samurai SS EFI", "Самурай"]);
+  one("Ajerra", "AX300 2T", E, ["2T300"]);
+  one("AJ1", "NX 250", E, ["ZS_NX250"]);
+  one("AJ1", "AX300 2T", E, ["2T300"]);
+  /* остальные */
+  one("Kayo", "KRZ 140", P, ["YX140"]);
+  one("Regulmoto", "SAI 200", L, [["CG200", "164FML, 197 см³"]], ["Sai 200", "Сай 200"]);
+  one("JHL", "TGR 250 Lite", E, ["172FMM-3A"], ["TGR250 Lite"]);
+  one("MMZ", "06 Pro 300", E, [["FIXCN_PR300PRO", "ZS177FMM, 300 см³"]], ["06 PRO 300CC", "ММЗ 06 Про"]);
+  one("Almotor", "AL300-06", E, ["FIXCN_PR300_5"], ["AL300", "Almax 300", "Альмотор AL300"]);
+  one("Geon", "Vertex 300", N, [["LON_YB300H", "300 4V SOHC с балансиром, 278 см³"]], ["Вертекс 300"]);
+  one("Sycmcc", "Yamma 250", E, [["172FMM", null, { approx: false }]], ["Sycmmc Yamma 250", "06 250", "Ямма 250"]);
+  one("Sycmcc", "300", E, ["PR300"], ["Sycmmc 300"]);
+  one("Shineray", "XY200 Intruder", C, [["CG200", "CG200 с балансиром, 197 см³"]], ["XY 200 Intruder"]);
+  one("Ataki", "Prime 125", P, [["1P52FMI", null, { approx: false }]], ["Prime 124", "Prime 125 14/12", "Prime 125 17/14", "Прайм 125"]);
+  one("Promax", "MX280", E, ["172FMM-3A"]);
+  one("Promax", "MX300 BigBore", E, [["172FMM-3A", "ZS172FMM-3A, расточен до 300 (BigBore)"]], ["MX 300 Big Bore"]);
+  one("Promax", "MX350PR", E, ["PR300"], ["MX350", "MX 350 PR"]);
+  /* Roliz Sport-005 у всех продавцов — на 169FMM (ZS169FMM / YX169FMM), раньше стоял ≈172FMM */
+  setEngine("Roliz", "Sport-005", 0, "169FMM");
+  BIKES.find(function (x) { return x.brand === "Roliz" && x.name === "Sport-005"; }).aka = ["Sport-005 Lite", "Sport-005 PR", "Эконика Sport-005"];
+  /* Rockot R5L Foxfire — 166FMM (enduro24) */
+  setEngine("Rockot", "R5L Foxfire", 0, "166FMM", { approx: true });
+})();
 /* дубль Progasi (v35) склеен уже после переноса v19 — переносим и его */
 BIKE_ALIASES_V40["Progasi Super Max 300 Pro"] = BIKE_ALIASES["Progasi Super Max 300 Pro"];
 sortBikes();
