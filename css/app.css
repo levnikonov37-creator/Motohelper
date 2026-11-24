@@ -3140,3 +3140,11 @@ small.diff { font-size: 13px; }
 /* ссылка «Страница модели на сайте» под шапкой «Мотоцикла» */
 .site-link { display: inline-flex; align-items: center; min-height: 44px; margin: 2px 0 6px; color: var(--muted, #B9C2CF); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
 .site-link:hover { color: #fff; }
+
+/* «Нет моей модели» — заявка на добавление */
+.mreq { display: grid; gap: 8px; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface2); margin-top: 10px; }
+.mreq b { font-size: 16px; }
+.mreq p { margin: 0; color: var(--muted); font-size: 14px; }
+.mreq input { width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; }
+.mreq.ok { border-color: rgba(47, 212, 122, .5); }
+.mreq-open { width: 100%; margin-top: 10px; border-style: dashed; }
