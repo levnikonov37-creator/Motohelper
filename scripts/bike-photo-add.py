@@ -112,6 +112,7 @@ def main():
         if key in src and not force: continue
         why = []
         for url in c.get("urls", [])[:12]:
+            if "wikimedia.org" in url: time.sleep(2)  # бережно к серверам Wikimedia (иначе 429)
             try:
                 im, res = cutout(fetch(url), session)
             except Exception as e:
