@@ -388,7 +388,7 @@
   <url><loc>https://motohelper.ru/m/zid-250-enduro/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/izh-planeta-5/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/izh-yupiter-5/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/izh-planeta-sport/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/izh-planeta-sport/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/izh-planeta-4/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/izh-yupiter-4/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/izh-49/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -888,9 +888,9 @@
   <url><loc>https://motohelper.ru/m/cfmoto-300cl-x/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-450sr/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-450nk/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/cfmoto-450cl-c/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/cfmoto-675sr/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/cfmoto-675nk/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/cfmoto-450cl-c/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/cfmoto-675sr/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/cfmoto-675nk/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-700cl-x/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-700mt/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-800mt/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -901,7 +901,7 @@
   <url><loc>https://motohelper.ru/m/cfmoto-800mt-sport/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-400nk/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-400gt/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/cfmoto-650nk/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/cfmoto-650nk/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-650mt/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-650gt/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-650tr-g/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -915,8 +915,8 @@
   <url><loc>https://motohelper.ru/m/cfmoto-700cl-x-adventure/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/cfmoto-800nk-advanced/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/daelim-vjf250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/daelim-roadwin-125/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/daelim-roadwin-r-125-fi/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/daelim-roadwin-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/daelim-roadwin-r-125-fi/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/daelim-vl125-daystar/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/daelim-vs125-evolution/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/darex-matay-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1064,12 +1064,12 @@
   <url><loc>https://motohelper.ru/m/gasgas-txt-racing-280/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-txt-racing-300/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-mc-250f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/gasgas-mc-450f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gasgas-mc-450f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-ex-300/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-mc-50/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-mc-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-mc-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/gasgas-mc-350f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/gasgas-mc-350f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-ex-250f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-ex-350f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/gasgas-ex-450f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1527,21 +1527,21 @@
   <url><loc>https://motohelper.ru/m/honda-pal-af17/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husaberg-fe-390/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husaberg-fe-450/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husaberg-fe-570/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husaberg-fe-570/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husaberg-te-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husaberg-te-300/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husaberg-fe-550/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husaberg-fe-650/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husaberg-fe-650/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husaberg-fe-350/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husaberg-fe-501/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husaberg-fe-501/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husaberg-te-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-te-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-te-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-300/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-fe-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-fe-350/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-fe-450/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-fe-501/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-701-enduro/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-fe-501/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-701-enduro/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-norden-901/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-tc-85/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-tc-65/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1553,26 +1553,26 @@
   <url><loc>https://motohelper.ru/m/husqvarna-tc-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-310/</loc><lastmod>2026-11-24</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-450/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-te-510/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-te-510/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-sm-610/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-630/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-nuda-900/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-tx-300/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-fx-350/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-fc-450/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-fx-350/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-fc-450/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-fe-350s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-tc-50/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-tc-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-fc-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-fc-350/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-fc-350/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-449/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-511/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-150/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-norden-901-expedition/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-701-enduro-lr/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-fx-450/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-fe-501s/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-701-enduro-lr/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-fx-450/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-fe-501s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-250i/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-300i/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-250-pro/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1581,24 +1581,24 @@
   <url><loc>https://motohelper.ru/m/husqvarna-fe-350-pro/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-fe-350-heritage/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-vitpilen-125/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-vitpilen-701/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-svartpilen-701/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-vitpilen-701/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-svartpilen-701/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-svartpilen-801/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-vitpilen-801/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-tr650-terra-strada/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-tr650-terra-strada/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-te-610/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-sms-630/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-smr-450/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-smr-510/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-smr-511/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-tc-250-4t-italiya/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-tc-250-4t-italiya/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-wr-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-wr-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-wr-300/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/husqvarna-cr-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-svartpilen-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/husqvarna-vitpilen-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/hyosung-gt125/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-svartpilen-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/husqvarna-vitpilen-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/hyosung-gt125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/hyosung-gt125r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/hyosung-gt250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/hyosung-gt250r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1710,7 +1710,7 @@
   <url><loc>https://motohelper.ru/m/kawasaki-klx150bf/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-klx250sr/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-klx250es/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-kx450/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-kx450/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx450x/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx85/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1729,17 +1729,17 @@
   <url><loc>https://motohelper.ru/m/kawasaki-vulcan-s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-versys-650/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-z650rs/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-4r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-4r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-6r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-10r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-vulcan-900/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-kx250f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-kx450f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-kx250f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-kx450f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx125/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx250-2t/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-zrx400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-zephyr-400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-zrx1200/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-zrx1200/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-z900/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kle500/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-versys-1000/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1765,7 +1765,7 @@
   <url><loc>https://motohelper.ru/m/kawasaki-klr250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kdx125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx65/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-eliminator-500/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-eliminator-500/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-z500/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx112/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx100/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1786,19 +1786,19 @@
   <url><loc>https://motohelper.ru/m/kawasaki-gpz500s-ninja-500r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-gpz600r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-gpx600r-ninja-600r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-zzr250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-zzr400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-zzr250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-zzr400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-zzr600/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-zzr1100-zx-11/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-zzr1200/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-14r-zzr1400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-12r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-6rr/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-7r-zx-7rr/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-7r-zx-7rr/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-9r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-ninja-zx-10rr/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-zxr250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-zxr400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-zxr250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-zxr400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-zxr750/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-gpz900r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-gpz1000rx/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1810,8 +1810,8 @@
   <url><loc>https://motohelper.ru/m/kawasaki-ninja-1000sx-z1000sx/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-gtr1000-concours/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-1400gtr-concours-14/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-z250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-er-4n/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-z250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-er-4n/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-er-5/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-z750/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-z750s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1826,15 +1826,15 @@
   <url><loc>https://motohelper.ru/m/kawasaki-zephyr-1100/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-zrx1100/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-balius-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-xanthus/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-xanthus/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-versys-1100/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-w400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-w400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-w650/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-w800/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-w800-cafe/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-meguro-k3/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-gpz400r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-gpx400r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-gpz400r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-gpx400r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-estrella-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-250tr/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-vulcan-400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1853,14 +1853,14 @@
   <url><loc>https://motohelper.ru/m/kawasaki-vulcan-2000/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-eliminator-125/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-eliminator-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-eliminator-400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-eliminator-400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-eliminator-600/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-eliminator-900/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx60/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx80/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-kx500/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-ninja-250sl/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kawasaki-z250sl/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kawasaki-z250sl/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kawasaki-klx230-sherpa/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-t2-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-t4-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1957,7 +1957,7 @@
   <url><loc>https://motohelper.ru/m/kayo-gp1-sm-yx160/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kayo-krz-140/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/keeway-rkv-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/keeway-rkf-125/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/keeway-rkf-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/keeway-superlight-125/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/keeway-k-light-202/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/keeway-v302c/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -1995,8 +1995,8 @@
   <url><loc>https://motohelper.ru/m/kove-800x-rally/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kove-800x-pro/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kove-450rr/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kove-321rr/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/kove-321r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kove-321rr/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/kove-321r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kove-450-rally-factory/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kovi-lite-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/kovi-pro-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2010,53 +2010,53 @@
   <url><loc>https://motohelper.ru/m/ktm-250-exc-f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-350-exc-f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-450-exc-f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-500-exc-f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-690-enduro-r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-500-exc-f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-690-enduro-r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-390-adventure/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-890-adventure-r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-790-adventure/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-1290-super-adventure/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-250-sx-f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-450-sx-f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-450-sx-f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-85-sx/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-65-sx/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-125-duke/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-rc-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-390-duke/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-390-duke/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-rc-390/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-690-smc-r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-690-duke/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-790-duke/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-890-duke/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-450-smr/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-640-adventure/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-640-adventure/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-625-sxc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-690-smc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-950-adventure/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-990-adventure/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-1190-adventure/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-1090-adventure-r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-525-exc/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-525-exc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-450-exc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-400-exc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-200-exc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-350-sx-f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-350-sx-f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-300-xc-w/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-250-xc-f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-500-exc-f-six-days/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-500-exc-f-six-days/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-300-exc-six-days/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-50-sx/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-125-sx/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-125-exc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-250-sx/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-freeride-250-f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-freeride-250-r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-freeride-250-r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-freeride-350/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-520-exc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-390-adventure-r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-390-enduro-r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-390-smc-r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-250-duke/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-250-duke/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-250-adventure/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-150-sx/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-150-xc-w/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2066,10 +2066,10 @@
   <url><loc>https://motohelper.ru/m/ktm-1290-super-adventure-r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-250-xc/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-300-xc/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-350-xc-f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-450-xc-f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-350-xc-f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-450-xc-f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-450-xc-w/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-500-xc-w/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-500-xc-w/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-250-xc-w/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-250-exc-f-six-days/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-350-exc-f-six-days/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2080,8 +2080,8 @@
   <url><loc>https://motohelper.ru/m/ktm-rc-200/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-690-duke-r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-660-smc/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-660-rallye-lc4-adventure-660/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/ktm-640-duke-ii/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-660-rallye-lc4-adventure-660/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/ktm-640-duke-ii/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-640-lc4-enduro/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-640-lc4-supermoto/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ktm-625-smc/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2175,8 +2175,8 @@
   <url><loc>https://motohelper.ru/m/moto-guzzi-bellagio-940/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/moto-guzzi-v11-sport-le-mans/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/moto-guzzi-quota-1100-es/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/moto-morini-x-cape-650/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/moto-morini-seiemmezzo-650-str-scr/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/moto-morini-x-cape-650/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/moto-morini-seiemmezzo-650-str-scr/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motoland-alpha/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motoland-tt250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motoland-tt125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2263,7 +2263,7 @@
   <url><loc>https://motohelper.ru/m/motoland-crf-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motoland-alpha-vr-11/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/musstang-region-mt200-9-st/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/mv-agusta-brutale-675/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/mv-agusta-brutale-675/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/mv-agusta-brutale-800/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/mv-agusta-brutale-800-rr/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/mv-agusta-brutale-750/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2675,8 +2675,8 @@
   <url><loc>https://motohelper.ru/m/suzuki-dr250r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-van-van-200/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-djebel-250-xc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-rm-z450/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-rm-z250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-rm-z450/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-rm-z250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-v-strom-650xt/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-dr-z70/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-dr-z50/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2695,8 +2695,8 @@
   <url><loc>https://motohelper.ru/m/suzuki-rm125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-rm250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-dr-z250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-bandit-400-gsf400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-gsx400-impulse/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-bandit-400-gsf400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-gsx400-impulse/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-bandit-600-gsf600/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-bandit-1250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-dr800s-big/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2705,7 +2705,7 @@
   <url><loc>https://motohelper.ru/m/suzuki-v-strom-1050/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-sv650/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-xf650-freewind/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-gsr600/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-gsr600/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gsx-s750/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gsx-s1000/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-v-strom-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2742,20 +2742,20 @@
   <url><loc>https://motohelper.ru/m/suzuki-tl1000s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-tl1000r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-sv1000-sv1000s/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-sv400-sv400s/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-sv650x/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-sv400-sv400s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-sv650x/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gs500-gs500e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gs500f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-gsx650f/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-gsx650f/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gsx1250fa/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-bandit-650-650s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-bandit-1200-1200s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-bandit-250-gsf250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-gsx250-across/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-gsx250-across/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gsx-r250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-gsx-r400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-gsx400s-katana/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-gsx400-inazuma/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-gsx-r400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-gsx400s-katana/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-gsx400-inazuma/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gsx-r150/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gsx-s150/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gixxer-155/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2768,8 +2768,8 @@
   <url><loc>https://motohelper.ru/m/suzuki-v-strom-1050xt/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-v-strom-1050de/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-v-strom-250sx/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-intruder-vs400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-intruder-classic-400-vl400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-intruder-vs400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-intruder-classic-400-vl400/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-desperado-400/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-intruder-vs600/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-intruder-vs750/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2824,8 +2824,8 @@
   <url><loc>https://motohelper.ru/m/suzuki-burgman-650-skywave-650/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gsx-r1100/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/suzuki-gsx1100f-katana/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-rgv250-gamma/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/suzuki-rf400r-rf400rv/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-rgv250-gamma/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/suzuki-rf400r-rf400rv/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sycmcc-yamma-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sycmcc-300/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/sycmcc-300-15/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2889,18 +2889,18 @@
   <url><loc>https://motohelper.ru/m/triumph-street-cup/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-speed-twin-900/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-scrambler-1200-xc/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/triumph-street-triple-675/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/triumph-street-triple-675-r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/triumph-street-triple-675/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/triumph-street-triple-675-r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-street-triple-765-s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-street-triple-765-r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/triumph-speed-triple-955/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/triumph-speed-triple-955/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-speed-triple-1050/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-speed-triple-1200-rs/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-speed-triple-900-trident-900/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-daytona-600/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-daytona-650/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-tt600/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/triumph-speed-four/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/triumph-speed-four/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-daytona-675/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-daytona-955i/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/triumph-sprint-st/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2933,7 +2933,7 @@
   <url><loc>https://motohelper.ru/m/tvs-apache-rtr-200-4v/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/tvs-apache-rtr-160-4v/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/tvs-apache-rr-310/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/tvs-apache-rtr-310/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/tvs-apache-rtr-310/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/tvs-apache-rtr-160/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/tvs-apache-rtr-180/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/tzr-enduro-250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -2981,13 +2981,13 @@
   <url><loc>https://motohelper.ru/m/voge-300r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-500ds/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-900dsx/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/voge-500ac/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-500ac/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-500dsx/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-525r/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-300acx/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-650ds/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-650dsx/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/voge-ds625x/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/voge-ds625x/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-ds800x-rally/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-cu525/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/voge-rr660s/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3223,7 +3223,7 @@
   <url><loc>https://motohelper.ru/m/ycf-daytona-190/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ycf-bigy-190-mx/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/ycf-bigy-125/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/yezdi-roadster/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/yezdi-roadster/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/yezdi-scrambler/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/yezdi-adventure/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/zongshen-zs250gy-3/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3233,9 +3233,9 @@
   <url><loc>https://motohelper.ru/m/zontes-zt350-t/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/zontes-zt350-x/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/zontes-zt350-gk/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/zontes-zt350-e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/zontes-zt125-u/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/zontes-zt125-g1/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zontes-zt350-e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zontes-zt125-u/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/zontes-zt125-g1/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/zontes-zt310-t/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/zontes-zt310-x/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/zontes-zt310-r/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3556,10 +3556,10 @@
   <url><loc>https://motohelper.ru/m/motor/hf05e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/hi-per2-ac-c26/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/hi-per2-pro-lc/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/honda-110-h/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/honda-125-h/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/honda-649-2014-2018/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/honda-649-2019-plus/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/honda-110-h/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/honda-125-h/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/honda-649-2014-2018/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/honda-649-2019-plus/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/hpe-300/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/husaberg-390-70/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/husaberg-450-70/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3596,12 +3596,12 @@
   <url><loc>https://motohelper.ru/m/motor/jawa-634-638/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/jawa-yezdi-334/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/jc32e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/jc34e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/jc34e-karb/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/jc34e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/jc34e-karb/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/jc40e-jc64e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/jc74e-esp/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/jc79e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/jc91e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/jc79e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/jc91e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/je01e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/je01e-1990-1999/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/je01e-2000-2007/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3740,9 +3740,9 @@
   <url><loc>https://motohelper.ru/m/motor/mc13e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mc14e-hornet-250/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mc14e-mc22/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/mc15e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/mc15e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mc15e-spada/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/mc16e-mc21e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/mc16e-mc21e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mc34e-md33e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mc41e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mc51e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3755,10 +3755,10 @@
   <url><loc>https://motohelper.ru/m/motor/me03e-2002-2007/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/me04e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/me09e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/me10e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/me10e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/me10e-x/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/me10e-fi/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/me17e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/me10e-fi/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/me17e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mf02e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mf04e-mf06e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mf08e-mf10e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3786,14 +3786,14 @@
   <url><loc>https://motohelper.ru/m/motor/mz-150-ts-etz/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/mz-250-ts-etz/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nb350/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/nc23e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/nc23e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc26e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/nc30e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/nc31-nc23e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/nc30e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/nc31-nc23e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc39-hyper-vtec/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc41e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc42-hyper-vtec-revo/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/nc51e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/nc51e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc56e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc59e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/nc65e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3808,22 +3808,22 @@
   <url><loc>https://motohelper.ru/m/motor/pc19e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pc21e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pc25e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/pc26e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/pc34e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/pc26e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/pc34e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pc35e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pc35e-f4i/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pc37e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pc40e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/pc41e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/pc80e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/pd06e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/pc41e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/pc80e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/pd06e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pe02e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pe04e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/pe05e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/pe05e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pe05e-x/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/pe05e-fi/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/pe05e-fi/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pe07e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/pe07e-2/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/pe07e-2/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/peugeot-50-ac-gorizontalnyy/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/peugeot-50-lc-gorizontalnyy/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/pf01e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3854,19 +3854,19 @@
   <url><loc>https://motohelper.ru/m/motor/r259-1200c/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rc24e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rc36e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/rc42e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/rc42e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rc43e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/rc44e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/rc44e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rc46e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rc46e-vtec/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/rc50e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/rc53e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/rc50e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/rc53e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rc61e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rc70e-rc88e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rc79e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rd03e-rd10e-rc47e-647/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/rd07e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/rd13e-680/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/rd07e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/rd13e-680/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rd350-ypvs-31k-1wt/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/re-350-iron/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/re-500-iron/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3875,7 +3875,7 @@
   <url><loc>https://motohelper.ru/m/motor/re-uce-500/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/re-uce-535/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/re01e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/re02e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/re02e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/revolution-1130/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/revolution-1250/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/revolution-max-975t/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3885,7 +3885,7 @@
   <url><loc>https://motohelper.ru/m/motor/revolution-x-750/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rf600r-gn76b/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rf900r-t701/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/rh16e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/rh16e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rm-z250-l0/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rm-z250-karb/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/rm-z450/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3908,11 +3908,11 @@
   <url><loc>https://motohelper.ru/m/motor/sc22e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc24e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc26e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc28e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc28e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc30e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc33e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc33e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc34e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc35e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc35e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc35e-karb/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc36e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc38e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -3926,26 +3926,26 @@
   <url><loc>https://motohelper.ru/m/motor/sc52e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc54e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc54e-2/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc57e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc57e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc58e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc59e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc60e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc59e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc60e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc61e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc63e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc64e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc65e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc65e-2/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc77e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc65e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc65e-2/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc77e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sc79e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc80e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sc82e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc80e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sc82e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/scout-1133-69-ci/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/scout-sixty-999/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/scram-440/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sd01e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sd02e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sd01e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sd02e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sd04e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://motohelper.ru/m/motor/sd10e/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://motohelper.ru/m/motor/sd10e/</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sfv650-l0/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sg20j-yp250r-fi/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://motohelper.ru/m/motor/sh125-150-2001-2012/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
