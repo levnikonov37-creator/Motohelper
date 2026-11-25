@@ -9011,7 +9011,7 @@ mergeFamily("Stels", "Delta", [
   one("MMZ", "06 Pro 300", E, [["FIXCN_PR300PRO", "ZS177FMM, 300 см³"]], ["06 PRO 300CC", "ММЗ 06 Про"]);
   one("Almotor", "AL300-06", E, ["FIXCN_PR300_5"], ["AL300", "Almax 300", "Альмотор AL300"]);
   one("Geon", "Vertex 300", N, [["LON_YB300H", "300 4V SOHC с балансиром, 278 см³"]], ["Вертекс 300"]);
-  one("Sycmcc", "Yamma 250", E, [["172FMM", null, { approx: false }]], ["Sycmmc Yamma 250", "06 250", "Ямма 250"]);
+  one("Sycmcc", "Yamma 250", E, [["172FMM", null, { approx: false }]], ["Sycmmc Yamma 250", "06 250", "Ямма 250", "Sycmcc 250", "Sycmcc 06 250", "Syzmcc 250"]);
   one("Sycmcc", "300", E, ["PR300"], ["Sycmmc 300"]);
   one("Shineray", "XY200 Intruder", C, [["CG200", "CG200 с балансиром, 197 см³"]], ["XY 200 Intruder"]);
   one("Ataki", "Prime 125", P, [["1P52FMI", null, { approx: false }]], ["Prime 124", "Prime 125 14/12", "Prime 125 17/14", "Прайм 125"]);
@@ -9280,6 +9280,9 @@ mergeFamily("Stels", "Delta", [
   R("Gladiator", "K7 CB300RL", E, [["FIXCN_CB300RL_6", null]], ["Gladiator K7", "Гладиатор K7"]);
   R("Rockot", "Alpha Dynamic", Mo, [["139FMB", "49,5 см³, 4T", A]], ["Rockot Alpha Dynamic 50", "Рокот Альфа Динамик"]);
   R("Honda", "Pal AF17", Sc, [["HON_AF18E", "AF17E, 2T 50 см³", A]], ["Honda Pal", "Хонда Пал", "Pal AF-17"]);
+  /* XGZ H26 — xgzmoto.ru (официальный): Loncin YBS300, 294,9 см³, 28,5 л.с., NIBBI PWK34, водяное; заявка 25.11.
+     Встречается и версия на YB300H (обзор «XGZ H26 YB300H», youtube) */
+  R("XGZ", "H26 YBS300", E, [["YBS300", "Loncin YBS300, 294,9 см³, 28,5 л.с."], ["LON_YB300H", "Loncin YB300H", A]], ["XGZ H26", "XGZ H26 PRO", "H26 YBS300 PRO", "XGZ H26 YBS300 PRO"]);
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
