@@ -77,7 +77,11 @@ def find(brand, name):
         if not OK_LIC.match(lic or ""): continue
         if (md.get("Restrictions") or {}).get("value"): continue
         artist = strip_html((md.get("Artist") or {}).get("value"))[:80] or "автор не указан"
-        out.append({"url": ii.get("thumburl") or ii.get("url"), "credit": "%s, %s" % (artist, lic), "page": ii.get("descriptionurl", "")})
+        url = (ii.get("thumburl") or ii.get("url") or "").split("?")[0]
+        m = re.match(r"(https://upload\.wikimedia\.org/wikipedia/commons)/([0-9a-f])/([0-9a-f]{2})/([^/]+)$", url)
+        if m:  # снимок меньше 1600 px отдаётся оригиналом — оригиналы Wikimedia быстро ограничивает (429), берём стандартную миниатюру 960 px
+            url = "%s/thumb/%s/%s/%s/960px-%s" % (m.group(1), m.group(2), m.group(3), m.group(4), m.group(4))
+        out.append({"url": url, "credit": "%s, %s" % (artist, lic), "page": ii.get("descriptionurl", "")})
         if len(out) >= 4: break
     return out
 

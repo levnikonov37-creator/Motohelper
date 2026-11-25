@@ -1486,5 +1486,47 @@
   "page": "",
   "source": "web",
   "credit": ""
+ },
+ "Aprilia Tuono 457": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Aprilia_Tuono_457.jpg/960px-Aprilia_Tuono_457.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Aprilia_Tuono_457.jpg",
+  "source": "commons",
+  "credit": "AVMOTO, CC BY-SA 4.0"
+ },
+ "Benelli TRK 502": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/Benelli_TRK_502_EICMA_2024_noBG.jpg/1920px-Benelli_TRK_502_EICMA_2024_noBG.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Benelli_TRK_502_EICMA_2024_noBG.jpg",
+  "source": "commons",
+  "credit": "Quelle: AVMOTO / Freisteller, Bildbearbeitung & Retusche von Auge=mit, CC BY-SA 4.0"
+ },
+ "BMW R 80 GS": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/BMW_R_80_GS_in_BMW-Museum_in_Munich%2C_Bayern.JPG/1920px-BMW_R_80_GS_in_BMW-Museum_in_Munich%2C_Bayern.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:BMW_R_80_GS_in_BMW-Museum_in_Munich,_Bayern.JPG",
+  "source": "commons",
+  "credit": "Jiří Sedláček, CC BY-SA 4.0"
+ },
+ "BMW R 100 RS / RT": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/BMW_R-100-RS_in_BMW-Museum-Munich_%28cropped%29.JPG/1920px-BMW_R-100-RS_in_BMW-Museum-Munich_%28cropped%29.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:BMW_R-100-RS_in_BMW-Museum-Munich_(cropped).JPG",
+  "source": "commons",
+  "credit": "Jiří Sedláček, CC BY-SA 4.0"
+ },
+ "BMW R 1100 R": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/BMW_R_1100_R_DSCF0406.JPG/1920px-BMW_R_1100_R_DSCF0406.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:BMW_R_1100_R_DSCF0406.JPG",
+  "source": "commons",
+  "credit": "Addvisor, CC BY-SA 4.0"
+ },
+ "BMW R 1100 RS": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/BMW_R_1100_RS_in_BMW-Museum_in_Munich%2C_Bayern.JPG/1920px-BMW_R_1100_RS_in_BMW-Museum_in_Munich%2C_Bayern.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:BMW_R_1100_RS_in_BMW-Museum_in_Munich,_Bayern.JPG",
+  "source": "commons",
+  "credit": "Jiří Sedláček, CC BY-SA 4.0"
+ },
+ "BMW R 1100 S": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/BMW_R_1100_S_in_BMW-Museum_in_Munich%2C_Bayern.JPG/1920px-BMW_R_1100_S_in_BMW-Museum_in_Munich%2C_Bayern.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:BMW_R_1100_S_in_BMW-Museum_in_Munich,_Bayern.JPG",
+  "source": "commons",
+  "credit": "Jiří Sedláček, CC BY-SA 4.0"
  }
 }

@@ -34,7 +34,7 @@ def fetch(url, tries=3):
         except (ConnectionError, urllib.error.URLError) as e:  # обрыв соединения или 429 — повторить чуть позже
             busy = isinstance(e, urllib.error.HTTPError) and e.code == 429
             if (isinstance(e, urllib.error.HTTPError) and not busy) or i == tries - 1: raise
-            time.sleep((int(e.headers.get("Retry-After") or 0) or 20 * (i + 1)) if busy else 3 * (i + 1))
+            time.sleep(min(900, int(e.headers.get("Retry-After") or 0) or 60 * (i + 1)) if busy else 3 * (i + 1))  # Retry-After соблюдаем
     return Image.open(io.BytesIO(data)).convert("RGB")
 
 
@@ -112,7 +112,7 @@ def main():
         if key in src and not force: continue
         why = []
         for url in c.get("urls", [])[:12]:
-            if "wikimedia.org" in url: time.sleep(2)  # бережно к серверам Wikimedia (иначе 429)
+            if "wikimedia.org" in url: time.sleep(10)  # не чаще раза в 10 с, чтобы не упираться в ограничения Wikimedia (429)
             try:
                 im, res = cutout(fetch(url), session)
             except Exception as e:
