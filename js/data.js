@@ -9208,6 +9208,8 @@ mergeFamily("Stels", "Delta", [
   R("RATO", "Warrior", Mo, [["152FMH", "110 см³, 7 л.с.", A], ["YX140", "Warrior 3.0 · 140 см³", A]], ["Warrior 150", "Alpha Warrior", "Warior", "Рато Варриор"]);
   R("Хорс", "053", Sc, [["CN_139QMB", "4T 50 (139QMB — мотор скутеров Хорс)", A]], ["Hors 053", "Хорс Моторс 053", "Хорс 53"]);
   R("Yamaha", "YB-1 Four", Mo, [["YAM_TTR50", "4T 49 SOHC (YB-1 Four, 2000+)", A]], ["YB1", "YB-1", "YB 1"]);
+  /* Заявки 25.11.2026: JHL LX2 CB250 — ZS172FMM-3A (jhlmoto.ru, darexmoto, kursk-moto) */
+  R("JHL", "LX2 CB250", E, [["172FMM-3A", "ZS172FMM-3A (CB250)"]], ["LX2", "LX2 250", "JHL-moto LX2"]);
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
