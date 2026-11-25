@@ -1806,6 +1806,7 @@ const BF_ALIAS = {
   "кошайн": "koshine",
   "апбит": "upbeat",
   "шорнер": "shorner",
+  "форте": "forte",
   "венто": "vento",
   "вента": "vento",
   "скайбайк": "skybike",

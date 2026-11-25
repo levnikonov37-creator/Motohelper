@@ -9265,6 +9265,9 @@ mergeFamily("Stels", "Delta", [
   R("Sanchez", "Fury NB300", E, [["NB300", null, { label: "карбюратор" }], ["NB300E", null, { label: "EFI" }]], ["Sanchez Fury", "Sanzez Fury", "Sanchez Fury NB300 EFI"]);
   R("Avantis", "LX 300", E, [["CBS300", null, { label: "CBS300 (ZS174MN-3)" }], ["NB300", null, { label: "NB300 (ZS174MN-5)" }]], ["Avantis LX300", "Авантис LX300"]);
   R("Turrut", "X4", P, [["154FMI", null, { approx: true, label: "125" }], ["Z190", null, { label: "190 (W190)" }]], ["Turrut X4 125", "Turrut X4 190"]);
+  /* Forte ALFA FT125LX (не LX-B) — intertechnika.com.ua, motomoto.ua: мотор 153FMI, горизонтальный 4T 125 см³, карбюратор;
+     ближайший в базе — горизонтальный 125 (1P54FMI), поэтому «примерно». Владелец в ТикТоке, 25.11 */
+  R("Forte", "125LX", "Мопед", [["154FMI", "153FMI, горизонтальный 125 см³", A]], ["Forte ALFA FT125LX", "FT125LX", "Forte 125 LX", "Форте 125LX"]);
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
