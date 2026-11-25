@@ -9202,7 +9202,9 @@ mergeFamily("Stels", "Delta", [
   R("Koshine", "XN150", K, [["KTM150", "2T 150, жидкостное, PWK38", A]], ["XN 150", "Кошайн 150"]);
   R("Faidet", "Kayot 125E-Pro", P, [["154FMI", "Zongshen 125, 13 л.с.", A]], ["Kayot 125E", "KAYOT 125E-PRO", "Кайот 125"]);
   R("Motoland", "GPX 125", P, [["154FMI", "YX125, карбюратор Mikuni VM22, 12 л.с.", A]], ["GPX125", "Мотоленд GPX 125"]);
-  R("Motoland", "CRF 125", P, [["154FMI", "125 см³, 12 л.с.", A]], ["CRF125", "CRF 125 Pitbike"]);
+  /* Motoland CRF 125 — две комплектации (владелец в ТикТоке, 25.11): с электростартером и АКБ (DC) и «дрыгалка» —
+     только кикстартер, без АКБ, всё питание от генератора (AC) */
+  R("Motoland", "CRF 125", P, [["154FMI", "электростартер + АКБ (DC), 125 см³", A], ["154FMI", "кикстартер, без АКБ (AC, от генератора), 125 см³", A]], ["CRF125", "CRF 125 Pitbike", "Moroland CRF 125", "Мотоленд CRF 125"]);
   R("Promax", "Alpha Dirt 150", Mo, [["1P60FMK", "Zongshen 150, 14 л.с. · в документах 49", A]], ["Alpha Dirt 150(49)", "Альфа Дирт 150"]);
   R("Stels", "Trigger 50 X", K, [["AM6", "1E40-MB2 — клон Minarelli AM6, 2T 49.6"]], ["Trigger 50X", "Trigger 50 SM", "Trigger", "Стелс Триггер 50"]);
   R("RATO", "Warrior", Mo, [["152FMH", "110 см³, 7 л.с.", A], ["YX140", "Warrior 3.0 · 140 см³", A]], ["Warrior 150", "Alpha Warrior", "Warior", "Рато Варриор"]);
