@@ -1814,6 +1814,7 @@ const BF_ALIAS = {
   "зтот": "ztot",
   "мусстанг": "musstang",
   "мустанг": "musstang",
+  "рато": "rato",
   "хенджиан": "hengjian",
   "хенгжиан": "hengjian",
   "фиделис": "fidelis",
