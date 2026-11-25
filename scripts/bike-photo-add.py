@@ -31,9 +31,10 @@ def fetch(url, tries=3):
             with urllib.request.urlopen(req, timeout=40, context=CTX) as r:
                 data = r.read(25_000_000)
             break
-        except (ConnectionError, urllib.error.URLError) as e:  # обрыв соединения — повторить через пару секунд
-            if isinstance(e, urllib.error.HTTPError) or i == tries - 1: raise
-            time.sleep(3 * (i + 1))
+        except (ConnectionError, urllib.error.URLError) as e:  # обрыв соединения или 429 — повторить чуть позже
+            busy = isinstance(e, urllib.error.HTTPError) and e.code == 429
+            if (isinstance(e, urllib.error.HTTPError) and not busy) or i == tries - 1: raise
+            time.sleep((int(e.headers.get("Retry-After") or 0) or 20 * (i + 1)) if busy else 3 * (i + 1))
     return Image.open(io.BytesIO(data)).convert("RGB")
 
 
@@ -51,6 +52,7 @@ def cutout(img, session):
     if bw / bh < 1.15: return None, "не сбоку (узкий силуэт %.2f)" % (bw / bh)
     if not 0.12 <= frac <= 0.85: return None, "силуэт %.0f%% кадра" % (frac * 100)
     if bw < 0.35 * a.shape[1]: return None, "мотоцикл мелкий в кадре"
+    if x0 <= 1 or x1 >= a.shape[1] - 2: return None, "мотоцикл обрезан краем кадра"
     m = int(0.03 * max(bw, bh))
     box = (max(0, x0 - m), max(0, y0 - m), min(a.shape[1], x1 + m + 1), min(a.shape[0], y1 + m + 1))
     return rgba.crop(box), "ok"
@@ -81,7 +83,21 @@ def update_data_js(keys, src):
     open(p, "w", encoding="utf-8").write(s)
 
 
+def drop(keys):
+    """убрать неудачные фото: python3 scripts/bike-photo-add.py --drop "Марка Модель" …"""
+    src = json.load(open(SRC_JSON, encoding="utf-8"))
+    for k in keys:
+        src.pop(k, None)
+        for d in (BIG, SMALL):
+            f = os.path.join(d, slug(k) + ".webp")
+            if os.path.exists(f): os.remove(f)
+    json.dump(src, open(SRC_JSON, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    update_data_js(list(src.keys()), src)
+
+
 def main():
+    if len(sys.argv) > 2 and sys.argv[1] == "--drop":
+        return drop(sys.argv[2:])
     if len(sys.argv) < 2: sys.exit(__doc__ or "кандидаты.jsonl")
     force = "--force" in sys.argv
     os.makedirs(SMALL, exist_ok=True)
@@ -95,7 +111,7 @@ def main():
         key = c["key"]
         if key in src and not force: continue
         why = []
-        for url in c.get("urls", [])[:5]:
+        for url in c.get("urls", [])[:12]:
             try:
                 im, res = cutout(fetch(url), session)
             except Exception as e:

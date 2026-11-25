@@ -44,6 +44,17 @@ def strip_html(s):
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s or ""))).strip()
 
 
+def other_model(title, name):
+    """в названии файла код модели сразу продолжается буквой/цифрой (TRK 502 → «TRK_502X», S 1000 R → «S1000RR») — это другая модель"""
+    n = re.sub(r"\([^)]*\)", " ", name).split("/")[0]
+    toks = [re.escape(t) for t in re.split(r"[^A-Za-z0-9]+", n) if t]
+    if not toks: return False
+    m = re.search(r"(?i)(?<![a-z0-9])" + r"[\W_]*".join(toks) + r"(?=([A-Za-z0-9]?))", title)
+    if not m:  # код целиком не встретился — тогда каждое слово названия должно быть в имени файла (Xcountry ≠ XChallenge)
+        return not all(norm(t.replace("\\", "")) in norm(title) for t in toks)
+    return bool(m.group(1)) and not re.match(r"(19|20)\d", title[m.end():m.end() + 4] or "")
+
+
 def find(brand, name):
     full, withdig = codes(name)
     if not full: return None
@@ -57,6 +68,7 @@ def find(brand, name):
         t = norm(p.get("title", ""))
         if b not in t and not (brand.lower() == "harley-davidson" and "harley" in t): continue
         if full not in t and not (withdig and all(w in t for w in withdig)): continue
+        if other_model(p.get("title", ""), name): continue
         ii = (p.get("imageinfo") or [{}])[0]
         if ii.get("mime") not in ("image/jpeg", "image/png"): continue
         if (ii.get("width") or 0) < 800 or (ii.get("width") or 0) < (ii.get("height") or 1): continue
