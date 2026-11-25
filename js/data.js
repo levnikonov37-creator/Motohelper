@@ -9212,6 +9212,9 @@ mergeFamily("Stels", "Delta", [
   R("JHL", "LX2 CB250", E, [["172FMM-3A", "ZS172FMM-3A (CB250)"]], ["LX2", "LX2 250", "JHL-moto LX2"]);
   /* Запрос владельца 25.11.2026: JHL MX YB300H — Loncin LX176FMN (jhlmoto.ru), 27–28 л.с. */
   R("JHL", "MX YB300H", E, [["LON_YB300H", "Loncin YB300H (LX176FMN), 27 л.с."]], ["JHLofr MX YB300H", "MX26", "MX YB300H LX176FMN"]);
+  /* XGZ = Xinguizun (подтвердил владелец). CQR250: 172FMM, 19–21 л.с. (объявления Авито/kolesa.kz); 172-3: название указывает на ZS172FMM-3A, продавцы пишут «300 см³, 24 л.с.» (maxmoto.su) — код не подтверждён */
+  R("XGZ", "CQR250", E, [["172FMM", "172FMM, 19–21 л.с.", A]], ["CQR-CB250", "CQR 250", "Xinguizun CQR250"]);
+  R("XGZ", "172-3", E, [["172FMM-3A", "ZS172FMM-3A по названию модели", A]], ["Xinguizun 172-3", "172-3 300"]);
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
