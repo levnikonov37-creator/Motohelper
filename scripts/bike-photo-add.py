@@ -34,7 +34,7 @@ def fetch(url, tries=3):
         except (ConnectionError, urllib.error.URLError) as e:  # обрыв соединения или 429 — повторить чуть позже
             busy = isinstance(e, urllib.error.HTTPError) and e.code == 429
             if (isinstance(e, urllib.error.HTTPError) and not busy) or i == tries - 1: raise
-            time.sleep((int(e.headers.get("Retry-After") or 0) or 20 * (i + 1)) if busy else 3 * (i + 1))
+            time.sleep(min(60, int(e.headers.get("Retry-After") or 0) or 20 * (i + 1)) if busy else 3 * (i + 1))
     return Image.open(io.BytesIO(data)).convert("RGB")
 
 
