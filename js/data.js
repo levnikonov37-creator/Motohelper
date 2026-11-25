@@ -9215,6 +9215,19 @@ mergeFamily("Stels", "Delta", [
   /* XGZ = Xinguizun (подтвердил владелец). CQR250: 172FMM, 19–21 л.с. (объявления Авито/kolesa.kz); 172-3: название указывает на ZS172FMM-3A, продавцы пишут «300 см³, 24 л.с.» (maxmoto.su) — код не подтверждён */
   R("XGZ", "CQR250", E, [["172FMM", "172FMM, 19–21 л.с.", A]], ["CQR-CB250", "CQR 250", "Xinguizun CQR250"]);
   R("XGZ", "172-3", E, [["172FMM-3A", "ZS172FMM-3A по названию модели", A]], ["Xinguizun 172-3", "172-3 300"]);
+  /* Скриншоты ТикТока 25.11.2026: Hengjian S7 YBS300 (hjmotorcycles.com), Fxmoto X1 YB300R (LX176FMN со слов владельца, 4 клапана — instagram дилера),
+     Hasky F9 Pro Ride YB300H (drom), STN H9 Pro YBS300 (motmarket, av.by), Viper ZS200N — CG200 с балансиром (delimoto, automotozip),
+     ULAR H7 — ZS175FMN (motog.ru, x-m.su), Альфа VR 11 — как Альфа RX 11 (motoland-shop) */
+  R("Hengjian", "S7 YBS300", E, [["YBS300", "Loncin YBS300"]], ["S7-YBS300", "S7 YBS"]);
+  R("Fxmoto", "X1 YB300R", E, [["LON_YB300H", "Loncin YB300R (LX176FMN), 4 клапана", A]], ["X1", "X1 YB300"]);
+  R("Hasky", "F9 Pro Ride", E, [["LON_YB300H", "Loncin YB300H"]], ["F9 Pro Ride YB300H", "F9 Pro", "Хаски F9"]);
+  R("Viper", "ZS200N", N, [["CG200", "CG200 (165FML) с балансиром, 14 л.с.", A]], ["V200N", "ZS 200 N", "Вайпер ЗС200Н"]);
+  R("ULAR", "H7", E, [["PR300", "ZS175FMN (PR300), 23–28 л.с."]], ["H7 PR300", "H7 Pro", "H7pro 300"]);
+  R("Motoland", "Alpha VR 11", Mo, [["139FMB", "50 см³", A], ["152FMH", "110 см³", A], ["154FMI", "125 см³", A]], ["Альфа VR 11", "VR11", "Альфа VR11"]);
+  (function () {
+    var b = BIKES.find(function (x) { return x.brand === "Motoland" && x.name === "XT300 HS"; });
+    if (b) b.versions.push({ engine: "LON_YB300H", label: "4V Loncin 176 (YB300H)", approx: true });
+  })();
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
