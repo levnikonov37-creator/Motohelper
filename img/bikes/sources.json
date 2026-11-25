@@ -1486,5 +1486,17 @@
   "page": "",
   "source": "web",
   "credit": ""
+ },
+ "Aprilia Tuono 457": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Aprilia_Tuono_457.jpg/960px-Aprilia_Tuono_457.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Aprilia_Tuono_457.jpg",
+  "source": "commons",
+  "credit": "AVMOTO, CC BY-SA 4.0"
+ },
+ "Benelli TRK 502": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/Benelli_TRK_502_EICMA_2024_noBG.jpg/1920px-Benelli_TRK_502_EICMA_2024_noBG.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Benelli_TRK_502_EICMA_2024_noBG.jpg",
+  "source": "commons",
+  "credit": "Quelle: AVMOTO / Freisteller, Bildbearbeitung & Retusche von Auge=mit, CC BY-SA 4.0"
  }
 }

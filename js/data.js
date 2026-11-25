@@ -9268,6 +9268,9 @@ mergeFamily("Stels", "Delta", [
   /* Forte ALFA FT125LX (не LX-B) — intertechnika.com.ua, motomoto.ua: мотор 153FMI, горизонтальный 4T 125 см³, карбюратор;
      ближайший в базе — горизонтальный 125 (1P54FMI), поэтому «примерно». Владелец в ТикТоке, 25.11 */
   R("Forte", "125LX", "Мопед", [["154FMI", "153FMI, горизонтальный 125 см³", A]], ["Forte ALFA FT125LX", "FT125LX", "Forte 125 LX", "Форте 125LX"]);
+  /* OSAKA 008 300cc — x-m.su, maxmoto.su: «ZS172FMM», 300 см³, 29 л.с., воздушное охлаждение (300-кубовый ZS172FMM = CB300F/ZS175FMM);
+     на ozon в одной карточке — «177FMN, 26 л.с.», поэтому «примерно», код сверять по ПТС. Заявка из ТикТока, 25.11 */
+  R("Osaka", "008 300", E, [["175FMM", "ZS172FMM-семейство, 300 см³, 29 л.с. (код сверь по ПТС)", A]], ["Osaka 008", "Osaka 008 300cc", "Осака 008"]);
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
