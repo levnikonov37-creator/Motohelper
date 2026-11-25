@@ -9184,6 +9184,30 @@ mergeFamily("Stels", "Delta", [
   R("Promax", "Fidet 145E", P, [["YX140", "Yinxiang YX150E", A]], ["Fidet Fortis 145E", "Fidet 145E PRO"]);
   R("GR1", "F250A Enduro Pro", E, [["165FMM", "Zongshen 165FMM, 16 л.с."]], ["GR1 Pro", "GR1PRO", "GR1 Pro 250"]);
   R("ЗиД", "250 Эндуро", E, [["166FMM", "ZiD / Yinxiang 166FMM (ZiD250, YX250GY-C5C)"]], ["ZiD250", "ZiD 250", "YX250GY-C5C", "Зид 250"]);
+  /* Добор 25.11.2026 — модели, у которых мотор сначала не нашёлся (повторный поиск: jhlmoto, x-m.su, ozon, drom, globaldrive,
+     pitbikemarket, moto63, mopedi.ru, auto.ru, клуб «Эндуро 23», hors.by). Sycmcc 66-350 в объявлениях — «182FMM / 179FMM, 350, 30–32 л.с.»:
+     такого мотора в базе не было — заведён по объявлениям, все цифры у него типовые (сверяй по картеру и мануалу) */
+  CL("FIXCN_182FMM", "175FMM", { code: "182FMM", name: "182FMM / 179FMM · китайский 350 воздушный (по объявлениям продавцов)",
+    maker: "Zongshen-тип (производитель в объявлениях не указан)", cc: 350, hp: 30 }, 1.8);
+  delete ENGINES.FIXCN_182FMM.torque; delete ENGINES.FIXCN_182FMM.ex; delete ENGINES.FIXCN_182FMM.dis;
+  ENGINE_AKA.FIXCN_182FMM = "182 182fmm 179fmm 350";
+  R("Sycmcc", "66", E, [["FIXCN_PR300PRO", "300 · 177FMM", A], ["FIXCN_182FMM", "350 · 182FMM (179FMM), 30–32 л.с.", A]], ["66 300", "66-350", "66 350", "350", "666", "Сисимасиси 66"]);
+  R("Sycmcc", "86", E, [["FIXCN_PR300PRO", "177FMM, 300 см³", A]], ["86 300", "Сисимасиси 86"]);
+  R("JHL", "H5 YBS300", E, [["YBS300", "Loncin YBS300 (176MN)"]], ["H5", "H5 YBS300 176MN"]);
+  R("Sharmax", "Expert Pro RXP 280", E, [["172FMM", "воздушный, 21 л.с. (у владельцев — 172FMM)", A]], ["RXP 280", "Expert 280", "RXP-280"]);
+  R("OXO", "Base 250 M", E, [["172FMM-3A", "Zongshen ZS172FMM-3A, 21 л.с."]], ["Base 250M", "Basic 250M", "CS250M"]);
+  R("Almotor", "AL250-06", E, [["172FMM", "250 см³, 23 л.с.", A]], ["250-06", "AL 250-06"]);
+  R("Koshine", "XN105", K, [["KTM85", "2T 105, 30 л.с. (как KTM 105 SX — расточенный 85)", A]], ["XN 105", "Кошайн 105"]);
+  R("Koshine", "XN125", K, [["KTM125", "2T 125, 37 л.с.", A]], ["XN 125", "Кошайн 125"]);
+  R("Koshine", "XN150", K, [["KTM150", "2T 150, жидкостное, PWK38", A]], ["XN 150", "Кошайн 150"]);
+  R("Faidet", "Kayot 125E-Pro", P, [["154FMI", "Zongshen 125, 13 л.с.", A]], ["Kayot 125E", "KAYOT 125E-PRO", "Кайот 125"]);
+  R("Motoland", "GPX 125", P, [["154FMI", "YX125, карбюратор Mikuni VM22, 12 л.с.", A]], ["GPX125", "Мотоленд GPX 125"]);
+  R("Motoland", "CRF 125", P, [["154FMI", "125 см³, 12 л.с.", A]], ["CRF125", "CRF 125 Pitbike"]);
+  R("Promax", "Alpha Dirt 150", Mo, [["1P60FMK", "Zongshen 150, 14 л.с. · в документах 49", A]], ["Alpha Dirt 150(49)", "Альфа Дирт 150"]);
+  R("Stels", "Trigger 50 X", K, [["AM6", "1E40-MB2 — клон Minarelli AM6, 2T 49.6"]], ["Trigger 50X", "Trigger 50 SM", "Trigger", "Стелс Триггер 50"]);
+  R("RATO", "Warrior", Mo, [["152FMH", "110 см³, 7 л.с.", A], ["YX140", "Warrior 3.0 · 140 см³", A]], ["Warrior 150", "Alpha Warrior", "Warior", "Рато Варриор"]);
+  R("Хорс", "053", Sc, [["CN_139QMB", "4T 50 (139QMB — мотор скутеров Хорс)", A]], ["Hors 053", "Хорс Моторс 053", "Хорс 53"]);
+  R("Yamaha", "YB-1 Four", Mo, [["YAM_TTR50", "4T 49 SOHC (YB-1 Four, 2000+)", A]], ["YB1", "YB-1", "YB 1"]);
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
