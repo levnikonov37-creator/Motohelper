@@ -98,7 +98,7 @@ const NAME_ENGINE = [
   // уточнённые варианты одного семейства (FIXCN_*: число передач, инжектор) считаются тем же мотором
   [/NB300|174MN-5/i, ["NB300", "FIXCN_NB300_5", "FIXCN_NB300E_5"]], [/174MN-3|CBS300/i, ["CBS300"]], [/\b174\b|174MN(?!-)/i, ["NB300", "CBS300"]],
   [/CB300RL/i, ["FIXCN_CB300RL_6", "FIXCN_CB300RL_5"]], [/177FMN/i, ["FIXCN_PR300PRO"]],
-  [/CB300(?!RL)(?![\s\S]*177FMN)|175FMM/i, ["175FMM"]], [/NC300|182MN/i, ["NC300", "NB300E"]], [/YBS/i, ["YBS300", "YBS300G2"]],
+  [/CB300(?!RL)(?![\s\S]*177FMN)|175FMM/i, ["175FMM"]], [/NC300|182MN/i, ["NC300", "NB300E"]], [/YBS/i, ["YBS300", "YBS300G2", "YBS300G2_STN"]],
   [/PR250|172FMM-5/i, ["172FMM-5", "FIXCN_PR250_5"]], [/PR300/i, ["PR300", "FIXCN_PR300_5", "FIXCN_PR300_6", "PR300E", "FIXCN_PR300PRO"]], [/NC250|177MM/i, ["NC250", "NC250E"]], [/NC450|194MQ/i, ["NC450", "NC450C"]],
 ];
 const JP_EU = new Set(["Honda", "Yamaha", "Kawasaki", "Suzuki", "KTM", "Husqvarna", "GasGas", "BMW", "Triumph", "Ducati", "Aprilia"]);

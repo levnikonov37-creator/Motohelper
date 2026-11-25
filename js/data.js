@@ -9228,6 +9228,35 @@ mergeFamily("Stels", "Delta", [
     var b = BIKES.find(function (x) { return x.brand === "Motoland" && x.name === "XT300 HS"; });
     if (b) b.versions.push({ engine: "LON_YB300H", label: "4V Loncin 176 (YB300H)", approx: true });
   })();
+  /* Ранний мотор Racer: 170FMN — 270 см³, 2 клапана, 19,7 л.с. при 7500, 20 Н·м при 6000, степень сжатия 9 (продавцы Racer:
+     motolifeshop, moto-life.shop, davavto29; форум china-moto, тема Racer Panther RC300-GY8X). Стоял на Panther RC300-GY8X до рестайлинга и на части K2 300.
+     Заводского мануала нет — всё, кроме объёма и мощности, типовое от ZS172FMM (2 клапана), сверяй с мотором */
+  CL("FIXCN_170FMN", "172FMM", { code: "170FMN", name: "170FMN · 270 см³, 2 клапана (ранние Racer Panther 300 / K2 300)",
+    maker: "Zongshen-тип (у Racer — «двигатель RACER»)", cc: 270, hp: 19.7, torque: "20 Н·м при 6000", compression: "степень сжатия 9 (по форуму владельцев)" }, 1.8);
+  delete ENGINES.FIXCN_170FMN.ex; delete ENGINES.FIXCN_170FMN.dis;
+  ENGINE_AKA.FIXCN_170FMN = "170 170fmn racer 270";
+  (function () {
+    var add = function (name, label) {
+      var b = BIKES.find(function (x) { return x.brand === "Racer" && x.name === name; });
+      if (b && !b.versions.some(function (v) { return v.engine === "FIXCN_170FMN"; })) b.versions.unshift({ engine: "FIXCN_170FMN", label: label, approx: true });
+    };
+    add("Panther RC300-GY8X", "ранние (до рестайлинга) · 170FMN, 270 см³, 19,7 л.с.");
+    add("K2 RC300-GY8A", "часть выпуска · 170FMN, 270 см³");
+    /* у рестайлинга Panther на PR300 мощность в карточке была от старого мотора (19,7) — убираем, берётся с мотора */
+    var p = BIKES.find(function (x) { return x.brand === "Racer" && x.name === "Panther RC300-GY8X"; });
+    if (p) p.versions.forEach(function (v) { if (v.engine !== "FIXCN_170FMN" && v.hp === 19.7) delete v.hp; });
+  })();
+  /* STN H9 PRO YBS300: владелец (комментарий в ТикТоке) — масла не меньше 1,4 л, жиклёры 138 / 32. Мануала STN в открытом доступе нет;
+     у Loncin в мануале 1,2–1,3 л и 140–150 / 40–42. Владельцу H9 доверяем — для H9 своя карточка мотора с его цифрами */
+  ENGINES.YBS300G2_STN = Object.assign({}, ENGINES.YBS300G2, { id: "YBS300G2_STN", name: "Loncin YBS300 Gen 2 (LX176MN, PRO) · STN H9",
+    oilVol: "не меньше 1,4 л (STN H9 Pro, по опыту владельца; в мануале Loncin — 1,2–1,3 л)", jetMain: "138 (STN H9 Pro, по опыту владельца)", jetPilot: "32 (STN H9 Pro, по опыту владельца)" });
+  ENGINES.YBS300G2_STN.ex = Object.assign({}, ENGINES.YBS300G2.ex || {}); delete ENGINES.YBS300G2_STN.ex.oilVol;
+  genKit("YBS300G2_STN", 1.08); ensureSpark("YBS300G2_STN", 1);
+  ENGINE_AKA.YBS300G2_STN = ENGINE_AKA.YBS300G2 || "ybs300";
+  (function () {
+    var b = BIKES.find(function (x) { return x.brand === "STN" && x.name === "H9 PRO YBS300"; });
+    if (b) b.versions.forEach(function (v) { if (v.engine === "YBS300G2") v.engine = "YBS300G2_STN"; });
+  })();
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
