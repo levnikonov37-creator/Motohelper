@@ -17,7 +17,7 @@ const ctx = {};
 vm.createContext(ctx);
 // каталог (js/data.js) и база знаний (js/kb.js) — в том же порядке, что на сайте
 vm.runInContext(fs.readFileSync(path.join(ROOT, "js/data.js"), "utf8"), ctx, { filename: "js/data.js" });
-vm.runInContext(fs.readFileSync(path.join(ROOT, "js/kb.js"), "utf8") + "\n;this.__E = ENGINES; this.__B = BIKES; this.__G = GUIDES; this.__D = DIAG; this.__NC = NO_CVT_GUIDES; this.__W = WIRING; this.__C = CAUSES; this.__WC = WIRE; this.__AKA = ENGINE_AKA; this.__P = BIKE_PHOTOS; this.__PS = bikePhotoSlug;", ctx);
+vm.runInContext(fs.readFileSync(path.join(ROOT, "js/kb.js"), "utf8") + "\n;this.__E = ENGINES; this.__B = BIKES; this.__G = GUIDES; this.__D = DIAG; this.__NC = NO_CVT_GUIDES; this.__W = WIRING; this.__C = CAUSES; this.__WC = WIRE; this.__AKA = ENGINE_AKA; this.__P = BIKE_PHOTOS; this.__PS = bikePhotoSlug; this.__PC = typeof PHOTO_CREDIT === 'object' ? PHOTO_CREDIT : {};", ctx);
 const ENGINES = ctx.__E, BIKES = ctx.__B.filter((b) => b.brand !== "Любая модель");
 const GUIDES = ctx.__G, DIAG = ctx.__D, NO_CVT = ctx.__NC, AKA = ctx.__AKA || {};
 // свои фото моделей (img/bikes): путь к снимку или ""
@@ -168,6 +168,7 @@ h1{font-weight:700!important}h2{font-weight:600!important;font-size:19px!importa
 /* фото моделей: снимок без фона на тёмной «студии» */
 .mphoto{margin:14px 0 4px;padding:4% 4% 3%;border-radius:12px;background:radial-gradient(120% 90% at 50% 100%,#2a2c30 0%,#141518 55%,#0c0c0d 100%);border:1px solid rgba(255,255,255,.1)}
 .mphoto img{display:block;width:100%;max-width:640px;height:auto;margin:0 auto;filter:drop-shadow(0 14px 14px rgba(0,0,0,.6))}
+.mphoto figcaption{margin-top:6px;text-align:center;font-size:11px;opacity:.6}.mphoto figcaption a{color:inherit}
 .card.ph{display:grid;grid-template-columns:96px 1fr;column-gap:12px;align-items:center}.card.ph img{grid-row:span 2;width:96px;height:60px;object-fit:contain;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5))}
 .card.ph small{grid-column:2}
 .showcase{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}.show{display:flex;flex-direction:column;gap:2px;padding:10px 12px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:radial-gradient(120% 90% at 50% 100%,#24262a 0%,#111214 60%,#0b0b0c 100%);color:var(--ink);text-decoration:none;transition:transform .15s,border-color .15s}
@@ -739,7 +740,7 @@ BIKES.forEach((b) => {
   const ru = BRAND_RU[b.brand], fullRu = ru ? ru + " " + b.name : "";
   const body = `<section class="hero"><div class="kick">${esc(b.brand)}${ru ? " (" + esc(ru) + ")" : ""} · ${esc(b.type)}</div><h1>${esc(full)}</h1>
 <p class="lead">Мотор ${esc(e0.code)}${e0.cc ? ", " + e0.cc + " см³" : ""}${e0.hp ? ", " + (b.versions[0].hp || e0.hp) + " л.с" : ""}. ${two0 ? (cvt0 ? "Какое масло 2T и в редуктор" : "Какое масло 2T и в коробку") + ", свеча, " + jet0 + " и слабые места" : "Какое масло и сколько, свеча, зазоры клапанов" + (jet0 === "жиклёры" ? ", жиклёры" : "") + " и слабые места"}${b.versions.length > 1 ? " — по поколениям" : ""}.</p>
-${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}${b.aka && b.aka.length ? (b.versions.length > 1 ? `<p class="note">У продавцов эта модель называется по-разному: ${esc(b.aka.map((n) => b.brand + " " + n).join(", "))}. Это одна машина — версии отличаются только мотором.</p>` : `<p class="note">Также продаётся как: ${esc(b.aka.join(", "))}.</p>`) : ""}${photoOf(b) ? `<figure class="mphoto"><img src="${photoOf(b)}" alt="${esc(full)}" width="800" height="500" fetchpriority="high"></figure>` : ""}</section>
+${b.versions.length > 1 ? `<div class="chips">${b.versions.map((v, vi) => `<span class="chip">${esc(verName(v, vi, ENGINES[v.engine]))}</span>`).join("")}</div>` : ""}${b.aka && b.aka.length ? (b.versions.length > 1 ? `<p class="note">У продавцов эта модель называется по-разному: ${esc(b.aka.map((n) => b.brand + " " + n).join(", "))}. Это одна машина — версии отличаются только мотором.</p>` : `<p class="note">Также продаётся как: ${esc(b.aka.join(", "))}.</p>`) : ""}${photoOf(b) ? `<figure class="mphoto"><img src="${photoOf(b)}" alt="${esc(full)}" width="800" height="500" fetchpriority="high">${(ctx.__PC || {})[b.brand + " " + b.name] ? `<figcaption><a href="${esc(ctx.__PC[b.brand + " " + b.name][1])}" target="_blank" rel="noopener nofollow">Фото: ${esc(ctx.__PC[b.brand + " " + b.name][0])} · Wikimedia Commons</a></figcaption>` : ""}</figure>` : ""}</section>
 ${vers}
 ${probBikes.has(b) ? `<h2>Частые поломки ${esc(full)}</h2><div class="chips">${probsFor(b).map((d) => `<a class="chip" href="/m/${slug}/${d.id}/">${esc(probShort(d.id))}</a>`).join("")}</div>` : ""}
 ${probBikes.has(b) ? "" : `<h2>Если ${esc(full)} не заводится, глохнет или дымит</h2><div class="chips">${probsFor(b).slice(0, 8).map((d) => `<a class="chip" href="/m/polomka/${d.id}/">${esc(probShort(d.id))}</a>`).join("")}</div>`}

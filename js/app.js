@@ -11883,7 +11883,8 @@ function useModelPhotos(bike, ver) {
     list: (own ? [{
       id: "own",
       own: true,
-      u: own
+      u: own,
+      cr: typeof PHOTO_CREDIT === "object" ? PHOTO_CREDIT[key] : null
     }] : []).concat(wiki && wiki.u ? [Object.assign({
       id: "wiki"
     }, wiki)] : []).concat(web)
@@ -11971,11 +11972,11 @@ function BikeView(props) {
     role: "status"
   }, /*#__PURE__*/React.createElement("span", {
     className: "mp-spin"
-  }), "Ищу фото ", bike.brand, " ", bike.name, "…"), ok && !cur.own && /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("a", {
-    href: cur.page,
+  }), "Ищу фото ", bike.brand, " ", bike.name, "…"), ok && (!cur.own || cur.cr) && /*#__PURE__*/React.createElement("figcaption", null, /*#__PURE__*/React.createElement("a", {
+    href: cur.cr ? cur.cr[1] : cur.page,
     target: "_blank",
     rel: "noopener noreferrer"
-  }, cur.web ? "Фото из интернета · Bing" : "Фото: " + (cur.by || "Wikimedia Commons") + (cur.lic ? " · " + cur.lic : ""))), ok && live.length > 1 && /*#__PURE__*/React.createElement("button", {
+  }, cur.cr ? "Фото: " + cur.cr[0] + " · Wikimedia Commons" : cur.web ? "Фото из интернета · Bing" : "Фото: " + (cur.by || "Wikimedia Commons") + (cur.lic ? " · " + cur.lic : ""))), ok && live.length > 1 && /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "mp-next",
     onClick: another
