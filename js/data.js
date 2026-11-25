@@ -9283,6 +9283,8 @@ mergeFamily("Stels", "Delta", [
   /* XGZ H26 — xgzmoto.ru (официальный): Loncin YBS300, 294,9 см³, 28,5 л.с., NIBBI PWK34, водяное; заявка 25.11.
      Встречается и версия на YB300H (обзор «XGZ H26 YB300H», youtube) */
   R("XGZ", "H26 YBS300", E, [["YBS300", "Loncin YBS300, 294,9 см³, 28,5 л.с."], ["LON_YB300H", "Loncin YB300H", A]], ["XGZ H26", "XGZ H26 PRO", "H26 YBS300 PRO", "XGZ H26 YBS300 PRO"]);
+  /* Shock Moto Sports 125 (питбайк) — drom.ru, avito; ozon.by (отзыв владельца: «мотор 154fmi»); заявка из ТикТока 25.11 */
+  R("Shock", "Moto Sports 125", P, [["154FMI", "125 см³", A]], ["Shock 125", "Shock Moto-Sports 125", "Шок 125"]);
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
