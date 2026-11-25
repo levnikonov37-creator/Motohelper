@@ -9210,6 +9210,8 @@ mergeFamily("Stels", "Delta", [
   R("Yamaha", "YB-1 Four", Mo, [["YAM_TTR50", "4T 49 SOHC (YB-1 Four, 2000+)", A]], ["YB1", "YB-1", "YB 1"]);
   /* Заявки 25.11.2026: JHL LX2 CB250 — ZS172FMM-3A (jhlmoto.ru, darexmoto, kursk-moto) */
   R("JHL", "LX2 CB250", E, [["172FMM-3A", "ZS172FMM-3A (CB250)"]], ["LX2", "LX2 250", "JHL-moto LX2"]);
+  /* Запрос владельца 25.11.2026: JHL MX YB300H — Loncin LX176FMN (jhlmoto.ru), 27–28 л.с. */
+  R("JHL", "MX YB300H", E, [["LON_YB300H", "Loncin YB300H (LX176FMN), 27 л.с."]], ["JHLofr MX YB300H", "MX26", "MX YB300H LX176FMN"]);
   /* Fxmoto X7 бывает и на ZS184MN (31–33 л.с., bvdshop, mototeka) — второй вариант к заводскому NC300 */
   (function () {
     var b = BIKES.find(function (x) { return x.brand === "Fxmoto" && x.name === "X7 NC300"; });
