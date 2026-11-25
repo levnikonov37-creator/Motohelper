@@ -277,16 +277,16 @@
    "area": "scooter-winter"
   },
   {
-   "id": "bike-bmw-f-700-gs",
+   "id": "bike-bmw-f-650-funduro",
    "kind": "bike",
    "brand": "BMW",
-   "name": "F 700 GS",
-   "photo": "img/bikes/bmw-f-700-gs.webp",
+   "name": "F 650 Funduro",
+   "photo": "img/bikes/bmw-f-650-funduro.webp",
    "chips": [
     "Тур-эндуро",
-    "BMW F800",
-    "798 см³",
-    "75 л.с."
+    "Rotax 652 (карб.)",
+    "652 см³",
+    "48 л.с."
    ]
   },
   {
@@ -364,16 +364,16 @@
    ]
   },
   {
-   "id": "bike-darex-alga-300-s",
+   "id": "bike-buell-blast",
    "kind": "bike",
-   "brand": "Darex",
-   "name": "Alga 300 S",
-   "photo": "img/bikes/darex-alga-300-s.webp",
+   "brand": "Buell",
+   "name": "Blast",
+   "photo": "img/bikes/buell-blast.webp",
    "chips": [
-    "Эндуро",
-    "ZS PR300",
-    "271 см³",
-    "26 л.с."
+    "Нейкед",
+    "Buell Blast 492",
+    "492 см³",
+    "34 л.с."
    ]
   },
   {
@@ -388,24 +388,24 @@
    "area": "head"
   },
   {
-   "id": "bike-gr-gr2-250-enduro",
+   "id": "bike-cagiva-mito-125",
    "kind": "bike",
-   "brand": "GR",
-   "name": "GR2 250 Enduro",
-   "photo": "img/bikes/gr-gr2-250-enduro.webp",
+   "brand": "Cagiva",
+   "name": "Mito 125",
+   "photo": "img/bikes/cagiva-mito-125.webp",
    "chips": [
-    "Эндуро",
-    "ZS172FMM",
-    "249 см³",
-    "21 л.с."
+    "Спорт",
+    "Cagiva 125 2T",
+    "125 см³",
+    "34 л.с."
    ]
   },
   {
-   "id": "bike-gr8-f300a-enduro-pro",
+   "id": "bike-darex-alga-300-s",
    "kind": "bike",
-   "brand": "GR8",
-   "name": "F300A Enduro Pro",
-   "photo": "img/bikes/gr8-f300a-enduro-pro.webp",
+   "brand": "Darex",
+   "name": "Alga 300 S",
+   "photo": "img/bikes/darex-alga-300-s.webp",
    "chips": [
     "Эндуро",
     "ZS PR300",
@@ -425,29 +425,29 @@
    "area": "cyl"
   },
   {
-   "id": "bike-hasky-a10-pro-nb300",
+   "id": "bike-derbi-gpr-50",
    "kind": "bike",
-   "brand": "Hasky",
-   "name": "A10 Pro NB300",
-   "photo": "img/bikes/hasky-a10-pro-nb300.webp",
+   "brand": "Derbi",
+   "name": "GPR 50",
+   "photo": "img/bikes/derbi-gpr-50.webp",
    "chips": [
-    "Эндуро",
-    "ZS174MN-5",
-    "280 см³",
-    "26 л.с."
+    "Спорт",
+    "Derbi D50B0",
+    "50 см³",
+    "4 л.с."
    ]
   },
   {
-   "id": "bike-hengjian-s7-ybs300",
+   "id": "bike-ducati-1098",
    "kind": "bike",
-   "brand": "Hengjian",
-   "name": "S7 YBS300",
-   "photo": "img/bikes/hengjian-s7-ybs300.webp",
+   "brand": "Ducati",
+   "name": "1098",
+   "photo": "img/bikes/ducati-1098.webp",
    "chips": [
-    "Эндуро",
-    "LX176MN",
-    "295 см³",
-    "29 л.с."
+    "Спорт",
+    "Testastretta Evo 1099",
+    "1099 см³",
+    "160 л.с."
    ]
   },
   {
@@ -462,29 +462,29 @@
    "area": "gearbox"
   },
   {
-   "id": "bike-irbis-ttr125r",
+   "id": "bike-fantic-caballero-125",
    "kind": "bike",
-   "brand": "Irbis",
-   "name": "TTR125R",
-   "photo": "img/bikes/irbis-ttr125r.webp",
+   "brand": "Fantic",
+   "name": "Caballero 125",
+   "photo": "img/bikes/fantic-caballero-125.webp",
    "chips": [
-    "Питбайк",
-    "1P54FMI",
-    "124 см³",
-    "8.6 л.с."
+    "Лёгкий эндуро",
+    "Minarelli 125 4T",
+    "125 см³",
+    "15 л.с."
    ]
   },
   {
-   "id": "bike-jhl-h6-ybs300",
+   "id": "bike-gr-gr2-250-enduro",
    "kind": "bike",
-   "brand": "JHL",
-   "name": "H6 YBS300",
-   "photo": "img/bikes/jhl-h6-ybs300.webp",
+   "brand": "GR",
+   "name": "GR2 250 Enduro",
+   "photo": "img/bikes/gr-gr2-250-enduro.webp",
    "chips": [
     "Эндуро",
-    "LX176MN",
-    "295 см³",
-    "29 л.с."
+    "ZS172FMM",
+    "249 см³",
+    "21 л.с."
    ]
   },
   {
@@ -499,29 +499,29 @@
    "area": "timing"
   },
   {
-   "id": "bike-kews-k16-250",
+   "id": "bike-gr8-f300a-enduro-pro",
    "kind": "bike",
-   "brand": "Kews",
-   "name": "K16 250",
-   "photo": "img/bikes/kews-k16-250.webp",
+   "brand": "GR8",
+   "name": "F300A Enduro Pro",
+   "photo": "img/bikes/gr8-f300a-enduro-pro.webp",
    "chips": [
     "Эндуро",
-    "ZS172FMM",
-    "249 см³",
-    "21 л.с."
+    "ZS PR300",
+    "271 см³",
+    "26 л.с."
    ]
   },
   {
-   "id": "bike-kove-450-rally-ex",
+   "id": "bike-gasgas-ec-125",
    "kind": "bike",
-   "brand": "Kove",
-   "name": "450 Rally EX",
-   "photo": "img/bikes/kove-450-rally-ex.webp",
+   "brand": "GasGas",
+   "name": "EC 125",
+   "photo": "img/bikes/gasgas-ec-125.webp",
    "chips": [
-    "Эндуро",
-    "Kove 450",
-    "449 см³",
-    "49 л.с."
+    "Кросс-эндуро",
+    "GasGas EC 125 2T",
+    "125 см³",
+    "30 л.с."
    ]
   },
   {
@@ -536,24 +536,24 @@
    "area": "fork"
   },
   {
-   "id": "bike-pitonmoto-mx8-edge-nb300",
+   "id": "bike-harley-davidson-breakout",
    "kind": "bike",
-   "brand": "Pitonmoto",
-   "name": "MX8 Edge NB300",
-   "photo": "img/bikes/pitonmoto-mx8-edge-nb300.webp",
+   "brand": "Harley-Davidson",
+   "name": "Breakout",
+   "photo": "img/bikes/harley-davidson-breakout.webp",
    "chips": [
-    "Эндуро",
-    "ZS174MN-5",
-    "280 см³",
-    "26 л.с."
+    "Чоппер",
+    "Twin Cam 103B",
+    "1690 см³",
+    "79 л.с."
    ]
   },
   {
-   "id": "bike-promax-blackout-nb300",
+   "id": "bike-hasky-a10-pro-nb300",
    "kind": "bike",
-   "brand": "Promax",
-   "name": "Blackout NB300",
-   "photo": "img/bikes/promax-blackout-nb300.webp",
+   "brand": "Hasky",
+   "name": "A10 Pro NB300",
+   "photo": "img/bikes/hasky-a10-pro-nb300.webp",
    "chips": [
     "Эндуро",
     "ZS174MN-5",
@@ -573,6 +573,167 @@
    "area": "bleed"
   },
   {
+   "id": "bike-hengjian-s7-ybs300",
+   "kind": "bike",
+   "brand": "Hengjian",
+   "name": "S7 YBS300",
+   "photo": "img/bikes/hengjian-s7-ybs300.webp",
+   "chips": [
+    "Эндуро",
+    "LX176MN",
+    "295 см³",
+    "29 л.с."
+   ]
+  },
+  {
+   "id": "bike-hero-hunk",
+   "kind": "bike",
+   "brand": "Hero",
+   "name": "Hunk",
+   "photo": "img/bikes/hero-hunk.webp",
+   "chips": [
+    "Нейкед",
+    "Hero 150",
+    "149 см³",
+    "14.4 л.с."
+   ]
+  },
+  {
+   "id": "tip-camchain",
+   "kind": "tip",
+   "title": "Проверка цепи ГРМ и натяжителя",
+   "meta": [
+    "1–2 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "timing"
+  },
+  {
+   "id": "bike-honda-crf250l",
+   "kind": "bike",
+   "brand": "Honda",
+   "name": "CRF250L",
+   "photo": "img/bikes/honda-crf250l.webp",
+   "chips": [
+    "Эндуро",
+    "MD38E",
+    "249 см³",
+    "24 л.с."
+   ]
+  },
+  {
+   "id": "bike-irbis-ttr125r",
+   "kind": "bike",
+   "brand": "Irbis",
+   "name": "TTR125R",
+   "photo": "img/bikes/irbis-ttr125r.webp",
+   "chips": [
+    "Питбайк",
+    "1P54FMI",
+    "124 см³",
+    "8.6 л.с."
+   ]
+  },
+  {
+   "id": "tip-parasitic-drain",
+   "kind": "tip",
+   "title": "Поиск утечки тока (садится АКБ на стоянке)",
+   "meta": [
+    "40 мин",
+    "средне"
+   ],
+   "only": "",
+   "area": "gen"
+  },
+  {
+   "id": "bike-jhl-h6-ybs300",
+   "kind": "bike",
+   "brand": "JHL",
+   "name": "H6 YBS300",
+   "photo": "img/bikes/jhl-h6-ybs300.webp",
+   "chips": [
+    "Эндуро",
+    "LX176MN",
+    "295 см³",
+    "29 л.с."
+   ]
+  },
+  {
+   "id": "bike-kews-k16-250",
+   "kind": "bike",
+   "brand": "Kews",
+   "name": "K16 250",
+   "photo": "img/bikes/kews-k16-250.webp",
+   "chips": [
+    "Эндуро",
+    "ZS172FMM",
+    "249 см³",
+    "21 л.с."
+   ]
+  },
+  {
+   "id": "tip-pads",
+   "kind": "tip",
+   "title": "Замена тормозных колодок",
+   "meta": [
+    "30 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "pads"
+  },
+  {
+   "id": "bike-kove-450-rally-ex",
+   "kind": "bike",
+   "brand": "Kove",
+   "name": "450 Rally EX",
+   "photo": "img/bikes/kove-450-rally-ex.webp",
+   "chips": [
+    "Эндуро",
+    "Kove 450",
+    "449 см³",
+    "49 л.с."
+   ]
+  },
+  {
+   "id": "bike-pitonmoto-mx8-edge-nb300",
+   "kind": "bike",
+   "brand": "Pitonmoto",
+   "name": "MX8 Edge NB300",
+   "photo": "img/bikes/pitonmoto-mx8-edge-nb300.webp",
+   "chips": [
+    "Эндуро",
+    "ZS174MN-5",
+    "280 см³",
+    "26 л.с."
+   ]
+  },
+  {
+   "id": "tip-coolant",
+   "kind": "tip",
+   "title": "Замена антифриза",
+   "meta": [
+    "40 мин",
+    "средне"
+   ],
+   "only": "для моторов с жидкостным охлаждением",
+   "area": "cooling"
+  },
+  {
+   "id": "bike-promax-blackout-nb300",
+   "kind": "bike",
+   "brand": "Promax",
+   "name": "Blackout NB300",
+   "photo": "img/bikes/promax-blackout-nb300.webp",
+   "chips": [
+    "Эндуро",
+    "ZS174MN-5",
+    "280 см³",
+    "26 л.с."
+   ]
+  },
+  {
    "id": "bike-rockot-rs250-firestorm",
    "kind": "bike",
    "brand": "Rockot",
@@ -584,6 +745,17 @@
     "249 см³",
     "23 л.с."
    ]
+  },
+  {
+   "id": "tip-used-check",
+   "kind": "tip",
+   "title": "Осмотр б/у мотоцикла перед покупкой",
+   "meta": [
+    "1 ч",
+    "просто"
+   ],
+   "only": "",
+   "area": "compression"
   },
   {
    "id": "bike-roliz-sport-005",
@@ -599,17 +771,6 @@
    ]
   },
   {
-   "id": "tip-camchain",
-   "kind": "tip",
-   "title": "Проверка цепи ГРМ и натяжителя",
-   "meta": [
-    "1–2 ч",
-    "средне"
-   ],
-   "only": "",
-   "area": "timing"
-  },
-  {
    "id": "bike-stn-g8-nb300",
    "kind": "bike",
    "brand": "STN",
@@ -623,6 +784,17 @@
    ]
   },
   {
+   "id": "tip-wheelbearings",
+   "kind": "tip",
+   "title": "Замена подшипников колеса",
+   "meta": [
+    "1 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "wheelbearings"
+  },
+  {
    "id": "bike-sharmax-powermax-300-air",
    "kind": "bike",
    "brand": "Sharmax",
@@ -634,17 +806,6 @@
     "271 см³",
     "26 л.с."
    ]
-  },
-  {
-   "id": "tip-parasitic-drain",
-   "kind": "tip",
-   "title": "Поиск утечки тока (садится АКБ на стоянке)",
-   "meta": [
-    "40 мин",
-    "средне"
-   ],
-   "only": "",
-   "area": "gen"
   },
   {
    "id": "bike-stels-enduro-250",
@@ -673,17 +834,6 @@
    ]
   },
   {
-   "id": "tip-pads",
-   "kind": "tip",
-   "title": "Замена тормозных колодок",
-   "meta": [
-    "30 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "pads"
-  },
-  {
    "id": "bike-ycf-bigy-125-mx",
    "kind": "bike",
    "brand": "YCF",
@@ -695,6 +845,17 @@
     "124 см³",
     "8.6 л.с."
    ]
+  },
+  {
+   "id": "tip-oil-level",
+   "kind": "tip",
+   "title": "Как правильно проверить уровень масла",
+   "meta": [
+    "10 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "oil"
   },
   {
    "id": "bike-zuumav-k6-300",
@@ -710,17 +871,6 @@
    ]
   },
   {
-   "id": "tip-coolant",
-   "kind": "tip",
-   "title": "Замена антифриза",
-   "meta": [
-    "40 мин",
-    "средне"
-   ],
-   "only": "для моторов с жидкостным охлаждением",
-   "area": "cooling"
-  },
-  {
    "id": "bike-motoland-xt250-hs",
    "kind": "bike",
    "brand": "Motoland",
@@ -732,6 +882,17 @@
     "249 см³",
     "23 л.с."
    ]
+  },
+  {
+   "id": "tip-gripheat-install",
+   "kind": "tip",
+   "title": "Установка подогрева ручек",
+   "meta": [
+    "1.5–2 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "gen"
   },
   {
    "id": "bike-kayo-k1-300",
@@ -747,17 +908,6 @@
    ]
   },
   {
-   "id": "tip-used-check",
-   "kind": "tip",
-   "title": "Осмотр б/у мотоцикла перед покупкой",
-   "meta": [
-    "1 ч",
-    "просто"
-   ],
-   "only": "",
-   "area": "compression"
-  },
-  {
    "id": "bike-regulmoto-athlete-300",
    "kind": "bike",
    "brand": "Regulmoto",
@@ -769,6 +919,17 @@
     "271 см³",
     "26 л.с."
    ]
+  },
+  {
+   "id": "tip-steering-bearings",
+   "kind": "tip",
+   "title": "Замена подшипников рулевой колонки",
+   "meta": [
+    "2–3 ч",
+    "сложно"
+   ],
+   "only": "",
+   "area": "steering-bearings"
   },
   {
    "id": "bike-avantis-enduro-250-carb-ars",
@@ -784,17 +945,6 @@
    ]
   },
   {
-   "id": "tip-wheelbearings",
-   "kind": "tip",
-   "title": "Замена подшипников колеса",
-   "meta": [
-    "1 ч",
-    "средне"
-   ],
-   "only": "",
-   "area": "wheelbearings"
-  },
-  {
    "id": "bike-progasi-endurance-300",
    "kind": "bike",
    "brand": "Progasi",
@@ -806,6 +956,17 @@
     "280 см³",
     "31 л.с."
    ]
+  },
+  {
+   "id": "tip-charging",
+   "kind": "tip",
+   "title": "Проверка зарядки",
+   "meta": [
+    "30 мин",
+    "средне"
+   ],
+   "only": "",
+   "area": "gen"
   },
   {
    "id": "bike-bse-ph10-125",
@@ -834,6 +995,17 @@
    ]
   },
   {
+   "id": "tip-carb-float",
+   "kind": "tip",
+   "title": "Карбюратор: уровень поплавка",
+   "meta": [
+    "40 мин",
+    "средне"
+   ],
+   "only": "для карбюраторных моторов",
+   "area": "carb"
+  },
+  {
    "id": "bike-apollo-rxf-freeride-125",
    "kind": "bike",
    "brand": "Apollo",
@@ -845,17 +1017,6 @@
     "124 см³",
     "8.6 л.с."
    ]
-  },
-  {
-   "id": "tip-oil-level",
-   "kind": "tip",
-   "title": "Как правильно проверить уровень масла",
-   "meta": [
-    "10 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "oil"
   },
   {
    "id": "bike-aprilia-dorsoduro-1200",
@@ -871,6 +1032,17 @@
    ]
   },
   {
+   "id": "tip-fork-oil",
+   "kind": "tip",
+   "title": "Замена масла в вилке",
+   "meta": [
+    "1.5 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "fork"
+  },
+  {
    "id": "bike-ataki-s004-300",
    "kind": "bike",
    "brand": "Ataki",
@@ -884,28 +1056,28 @@
    ]
   },
   {
-   "id": "tip-gripheat-install",
+   "id": "bike-bmw-f-700-gs",
+   "kind": "bike",
+   "brand": "BMW",
+   "name": "F 700 GS",
+   "photo": "img/bikes/bmw-f-700-gs.webp",
+   "chips": [
+    "Тур-эндуро",
+    "BMW F800",
+    "798 см³",
+    "75 л.с."
+   ]
+  },
+  {
+   "id": "tip-coil-test",
    "kind": "tip",
-   "title": "Установка подогрева ручек",
+   "title": "Проверка зажигания мультиметром",
    "meta": [
-    "1.5–2 ч",
+    "30 мин",
     "средне"
    ],
    "only": "",
-   "area": "gen"
-  },
-  {
-   "id": "bike-bmw-f-750-gs",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "F 750 GS",
-   "photo": "img/bikes/bmw-f-750-gs.webp",
-   "chips": [
-    "Тур-эндуро",
-    "BMW F850",
-    "853 см³",
-    "77 л.с."
-   ]
+   "area": "spark"
   },
   {
    "id": "bike-brz-x5-pr300",
@@ -921,17 +1093,6 @@
    ]
   },
   {
-   "id": "tip-steering-bearings",
-   "kind": "tip",
-   "title": "Замена подшипников рулевой колонки",
-   "meta": [
-    "2–3 ч",
-    "сложно"
-   ],
-   "only": "",
-   "area": "steering-bearings"
-  },
-  {
    "id": "bike-bajaj-dominar-400",
    "kind": "bike",
    "brand": "Bajaj",
@@ -943,6 +1104,17 @@
     "373 см³",
     "40 л.с."
    ]
+  },
+  {
+   "id": "tip-led-install",
+   "kind": "tip",
+   "title": "Установка LED-фары",
+   "meta": [
+    "40 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "gen"
   },
   {
    "id": "bike-benelli-bn-125",
@@ -958,17 +1130,6 @@
    ]
   },
   {
-   "id": "tip-charging",
-   "kind": "tip",
-   "title": "Проверка зарядки",
-   "meta": [
-    "30 мин",
-    "средне"
-   ],
-   "only": "",
-   "area": "gen"
-  },
-  {
    "id": "bike-beta-rr-200-2t",
    "kind": "bike",
    "brand": "Beta",
@@ -980,6 +1141,54 @@
     "190 см³",
     "30 л.с."
    ]
+  },
+  {
+   "id": "tip-sprocket-change",
+   "kind": "tip",
+   "title": "Замена звёзд и подбор передаточного",
+   "meta": [
+    "1 ч",
+    "просто"
+   ],
+   "only": "",
+   "area": "gearbox"
+  },
+  {
+   "id": "bike-buell-xb12s-lightning",
+   "kind": "bike",
+   "brand": "Buell",
+   "name": "XB12S Lightning",
+   "photo": "img/bikes/buell-xb12s-lightning.webp",
+   "chips": [
+    "Нейкед",
+    "Buell XB12 (1203)",
+    "1202 см³",
+    "103 л.с."
+   ]
+  },
+  {
+   "id": "bike-cagiva-navigator-1000",
+   "kind": "bike",
+   "brand": "Cagiva",
+   "name": "Navigator 1000",
+   "photo": "img/bikes/cagiva-navigator-1000.webp",
+   "chips": [
+    "Тур-эндуро",
+    "V-Strom 1000",
+    "1037 см³",
+    "98 л.с."
+   ]
+  },
+  {
+   "id": "tip-clutch-cable",
+   "kind": "tip",
+   "title": "Регулировка троса сцепления",
+   "meta": [
+    "10 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "clutch"
   },
   {
    "id": "bike-darex-timer-300",
@@ -995,15 +1204,28 @@
    ]
   },
   {
-   "id": "tip-carb-float",
+   "id": "bike-ducati-748",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "748",
+   "photo": "img/bikes/ducati-748.webp",
+   "chips": [
+    "Спорт",
+    "Desmoquattro 748",
+    "748 см³",
+    "97 л.с."
+   ]
+  },
+  {
+   "id": "tip-piston2t",
    "kind": "tip",
-   "title": "Карбюратор: уровень поплавка",
+   "title": "Замена поршня 2T",
    "meta": [
-    "40 мин",
-    "средне"
+    "2–3 ч",
+    "сложно"
    ],
-   "only": "для карбюраторных моторов",
-   "area": "carb"
+   "only": "для двухтактников",
+   "area": "cyl"
   },
   {
    "id": "bike-gr-gr2-300-pro",
@@ -1032,15 +1254,52 @@
    ]
   },
   {
-   "id": "tip-fork-oil",
+   "id": "tip-filter-install",
    "kind": "tip",
-   "title": "Замена масла в вилке",
+   "title": "Установка фильтра нулевого сопротивления",
    "meta": [
-    "1.5 ч",
-    "средне"
+    "40 мин",
+    "просто"
    ],
    "only": "",
-   "area": "fork"
+   "area": "carb"
+  },
+  {
+   "id": "bike-gasgas-ec-200",
+   "kind": "bike",
+   "brand": "GasGas",
+   "name": "EC 200",
+   "photo": "img/bikes/gasgas-ec-200.webp",
+   "chips": [
+    "Кросс-эндуро",
+    "GasGas EC 200 2T",
+    "199 см³",
+    "38 л.с."
+   ]
+  },
+  {
+   "id": "bike-harley-davidson-dyna-super-glide",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Dyna Super Glide",
+   "photo": "img/bikes/harley-davidson-dyna-super-glide.webp",
+   "chips": [
+    "Чоппер",
+    "Evolution 1340",
+    "1340 см³",
+    "63 л.с."
+   ]
+  },
+  {
+   "id": "tip-valves-dohc",
+   "kind": "tip",
+   "title": "Проверка клапанов (DOHC, шайбы)",
+   "meta": [
+    "2–4 ч",
+    "сложно"
+   ],
+   "only": "",
+   "area": "head"
   },
   {
    "id": "bike-hasky-f6-racing",
@@ -1056,6 +1315,30 @@
    ]
   },
   {
+   "id": "bike-honda-crf300-rally",
+   "kind": "bike",
+   "brand": "Honda",
+   "name": "CRF300 Rally",
+   "photo": "img/bikes/honda-crf300-rally.webp",
+   "chips": [
+    "Тур-эндуро",
+    "NC56E",
+    "286 см³",
+    "27 л.с."
+   ]
+  },
+  {
+   "id": "tip-ground-check",
+   "kind": "tip",
+   "title": "Проверка масс и падения напряжения",
+   "meta": [
+    "40 мин",
+    "средне"
+   ],
+   "only": "",
+   "area": "gen"
+  },
+  {
    "id": "bike-irbis-ttr150",
    "kind": "bike",
    "brand": "Irbis",
@@ -1067,17 +1350,6 @@
     "156 см³",
     "14 л.с."
    ]
-  },
-  {
-   "id": "tip-coil-test",
-   "kind": "tip",
-   "title": "Проверка зажигания мультиметром",
-   "meta": [
-    "30 мин",
-    "средне"
-   ],
-   "only": "",
-   "area": "spark"
   },
   {
    "id": "bike-jhl-lx3-pr300",
@@ -1093,6 +1365,17 @@
    ]
   },
   {
+   "id": "tip-carb-needle",
+   "kind": "tip",
+   "title": "Карбюратор: игла и положение клипсы",
+   "meta": [
+    "30 мин",
+    "средне"
+   ],
+   "only": "для карбюраторных моторов",
+   "area": "carb"
+  },
+  {
    "id": "bike-kews-k16-nb300",
    "kind": "bike",
    "brand": "Kews",
@@ -1104,17 +1387,6 @@
     "280 см³",
     "26 л.с."
    ]
-  },
-  {
-   "id": "tip-led-install",
-   "kind": "tip",
-   "title": "Установка LED-фары",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "gen"
   },
   {
    "id": "bike-kove-450-rally-pro",
@@ -1130,6 +1402,17 @@
    ]
   },
   {
+   "id": "tip-regulator-replace",
+   "kind": "tip",
+   "title": "Замена реле-регулятора",
+   "meta": [
+    "30 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "gen"
+  },
+  {
    "id": "bike-promax-rx1-cb300rl",
    "kind": "bike",
    "brand": "Promax",
@@ -1143,294 +1426,11 @@
    ]
   },
   {
-   "id": "tip-sprocket-change",
-   "kind": "tip",
-   "title": "Замена звёзд и подбор передаточного",
-   "meta": [
-    "1 ч",
-    "просто"
-   ],
-   "only": "",
-   "area": "gearbox"
-  },
-  {
    "id": "bike-rockot-zx300-red-fury",
    "kind": "bike",
    "brand": "Rockot",
    "name": "ZX300 Red Fury",
    "photo": "img/bikes/rockot-zx300-red-fury.webp",
-   "chips": [
-    "Эндуро",
-    "ZS174MN-5",
-    "280 см³",
-    "26 л.с."
-   ]
-  },
-  {
-   "id": "bike-roliz-sport-007",
-   "kind": "bike",
-   "brand": "Roliz",
-   "name": "Sport-007",
-   "photo": "img/bikes/roliz-sport-007.webp",
-   "chips": [
-    "Эндуро",
-    "ZS PR300",
-    "271 см³",
-    "26 л.с."
-   ]
-  },
-  {
-   "id": "tip-clutch-cable",
-   "kind": "tip",
-   "title": "Регулировка троса сцепления",
-   "meta": [
-    "10 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "clutch"
-  },
-  {
-   "id": "bike-stn-g8-pro-nb300",
-   "kind": "bike",
-   "brand": "STN",
-   "name": "G8 PRO NB300",
-   "photo": "img/bikes/stn-g8-pro-nb300.webp",
-   "chips": [
-    "Эндуро",
-    "ZS174MN-5",
-    "280 см³",
-    "26 л.с."
-   ]
-  },
-  {
-   "id": "bike-sharmax-sport-250",
-   "kind": "bike",
-   "brand": "Sharmax",
-   "name": "Sport 250",
-   "photo": "img/bikes/sharmax-sport-250.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM-3A",
-    "249 см³",
-    "23 л.с."
-   ]
-  },
-  {
-   "id": "tip-piston2t",
-   "kind": "tip",
-   "title": "Замена поршня 2T",
-   "meta": [
-    "2–3 ч",
-    "сложно"
-   ],
-   "only": "для двухтактников",
-   "area": "cyl"
-  },
-  {
-   "id": "bike-stels-flame-200",
-   "kind": "bike",
-   "brand": "Stels",
-   "name": "Flame 200",
-   "photo": "img/bikes/stels-flame-200.webp",
-   "chips": [
-    "Нейкед",
-    "163FML",
-    "197 см³",
-    "15.6 л.с."
-   ]
-  },
-  {
-   "id": "bike-zuumav-k8-nb300",
-   "kind": "bike",
-   "brand": "Zuumav",
-   "name": "K8 NB300",
-   "photo": "img/bikes/zuumav-k8-nb300.webp",
-   "chips": [
-    "Эндуро",
-    "ZS174MN-5",
-    "280 см³",
-    "26 л.с."
-   ]
-  },
-  {
-   "id": "tip-filter-install",
-   "kind": "tip",
-   "title": "Установка фильтра нулевого сопротивления",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "carb"
-  },
-  {
-   "id": "bike-motoland-xr250",
-   "kind": "bike",
-   "brand": "Motoland",
-   "name": "XR250",
-   "photo": "img/bikes/motoland-xr250.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM",
-    "249 см³",
-    "21 л.с."
-   ]
-  },
-  {
-   "id": "bike-kayo-t4-250",
-   "kind": "bike",
-   "brand": "Kayo",
-   "name": "T4 250",
-   "photo": "img/bikes/kayo-t4-250.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM",
-    "249 см³",
-    "21 л.с."
-   ]
-  },
-  {
-   "id": "tip-valves-dohc",
-   "kind": "tip",
-   "title": "Проверка клапанов (DOHC, шайбы)",
-   "meta": [
-    "2–4 ч",
-    "сложно"
-   ],
-   "only": "",
-   "area": "head"
-  },
-  {
-   "id": "bike-regulmoto-crosstrec-300",
-   "kind": "bike",
-   "brand": "Regulmoto",
-   "name": "Crosstrec 300",
-   "photo": "img/bikes/regulmoto-crosstrec-300.webp",
-   "chips": [
-    "Эндуро",
-    "ZS174MN-5 (5 ст.)",
-    "280 см³",
-    "28 л.с."
-   ]
-  },
-  {
-   "id": "bike-avantis-enduro-300-pro-carb",
-   "kind": "bike",
-   "brand": "Avantis",
-   "name": "Enduro 300 PRO CARB",
-   "photo": "img/bikes/avantis-enduro-300-pro.webp",
-   "chips": [
-    "Эндуро",
-    "ZS174MN-5",
-    "280 см³",
-    "26 л.с."
-   ]
-  },
-  {
-   "id": "tip-ground-check",
-   "kind": "tip",
-   "title": "Проверка масс и падения напряжения",
-   "meta": [
-    "40 мин",
-    "средне"
-   ],
-   "only": "",
-   "area": "gen"
-  },
-  {
-   "id": "bike-progasi-race-300",
-   "kind": "bike",
-   "brand": "Progasi",
-   "name": "Race 300",
-   "photo": "img/bikes/progasi-race-300.webp",
-   "chips": [
-    "Эндуро",
-    "ZS182MN",
-    "283 см³",
-    "31 л.с."
-   ]
-  },
-  {
-   "id": "bike-bse-z5-250",
-   "kind": "bike",
-   "brand": "BSE",
-   "name": "Z5 250",
-   "photo": "img/bikes/bse-z5-250.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM-7",
-    "249 см³",
-    "25 л.с."
-   ]
-  },
-  {
-   "id": "tip-carb-needle",
-   "kind": "tip",
-   "title": "Карбюратор: игла и положение клипсы",
-   "meta": [
-    "30 мин",
-    "средне"
-   ],
-   "only": "для карбюраторных моторов",
-   "area": "carb"
-  },
-  {
-   "id": "bike-racer-bros-rc300-gy8b",
-   "kind": "bike",
-   "brand": "Racer",
-   "name": "Bros RC300-GY8B",
-   "photo": "img/bikes/racer-bros-rc300-gy8b.webp",
-   "chips": [
-    "Эндуро",
-    "ZS177FMN (PR300 Pro)",
-    "298 см³",
-    "24.5 л.с."
-   ]
-  },
-  {
-   "id": "bike-aprilia-dorsoduro-750",
-   "kind": "bike",
-   "brand": "Aprilia",
-   "name": "Dorsoduro 750",
-   "photo": "img/bikes/aprilia-dorsoduro-750.webp",
-   "chips": [
-    "Мотард",
-    "Aprilia 750 V90",
-    "750 см³",
-    "92 л.с."
-   ]
-  },
-  {
-   "id": "tip-regulator-replace",
-   "kind": "tip",
-   "title": "Замена реле-регулятора",
-   "meta": [
-    "30 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "gen"
-  },
-  {
-   "id": "bike-bmw-f-800-gs",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "F 800 GS",
-   "photo": "img/bikes/bmw-f-800-gs.webp",
-   "chips": [
-    "Тур-эндуро",
-    "BMW F800",
-    "798 см³",
-    "85 л.с."
-   ]
-  },
-  {
-   "id": "bike-brz-x6-nb300",
-   "kind": "bike",
-   "brand": "BRZ",
-   "name": "X6 NB300",
-   "photo": "img/bikes/brz-x6-nb300.webp",
    "chips": [
     "Эндуро",
     "ZS174MN-5",
@@ -1450,6 +1450,278 @@
    "area": "spark"
   },
   {
+   "id": "bike-roliz-sport-007",
+   "kind": "bike",
+   "brand": "Roliz",
+   "name": "Sport-007",
+   "photo": "img/bikes/roliz-sport-007.webp",
+   "chips": [
+    "Эндуро",
+    "ZS PR300",
+    "271 см³",
+    "26 л.с."
+   ]
+  },
+  {
+   "id": "bike-stn-g8-pro-nb300",
+   "kind": "bike",
+   "brand": "STN",
+   "name": "G8 PRO NB300",
+   "photo": "img/bikes/stn-g8-pro-nb300.webp",
+   "chips": [
+    "Эндуро",
+    "ZS174MN-5",
+    "280 см³",
+    "26 л.с."
+   ]
+  },
+  {
+   "id": "tip-rings-gap",
+   "kind": "tip",
+   "title": "Кольца: зазор в замке и правильная установка",
+   "meta": [
+    "30 мин",
+    "средне"
+   ],
+   "only": "",
+   "area": "cyl"
+  },
+  {
+   "id": "bike-sharmax-sport-250",
+   "kind": "bike",
+   "brand": "Sharmax",
+   "name": "Sport 250",
+   "photo": "img/bikes/sharmax-sport-250.webp",
+   "chips": [
+    "Эндуро",
+    "ZS172FMM-3A",
+    "249 см³",
+    "23 л.с."
+   ]
+  },
+  {
+   "id": "bike-stels-flame-200",
+   "kind": "bike",
+   "brand": "Stels",
+   "name": "Flame 200",
+   "photo": "img/bikes/stels-flame-200.webp",
+   "chips": [
+    "Нейкед",
+    "163FML",
+    "197 см³",
+    "15.6 л.с."
+   ]
+  },
+  {
+   "id": "tip-skid-install",
+   "kind": "tip",
+   "title": "Установка защиты картера",
+   "meta": [
+    "30–40 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "chain"
+  },
+  {
+   "id": "bike-zuumav-k8-nb300",
+   "kind": "bike",
+   "brand": "Zuumav",
+   "name": "K8 NB300",
+   "photo": "img/bikes/zuumav-k8-nb300.webp",
+   "chips": [
+    "Эндуро",
+    "ZS174MN-5",
+    "280 см³",
+    "26 л.с."
+   ]
+  },
+  {
+   "id": "bike-motoland-xr250",
+   "kind": "bike",
+   "brand": "Motoland",
+   "name": "XR250",
+   "photo": "img/bikes/motoland-xr250.webp",
+   "chips": [
+    "Эндуро",
+    "ZS172FMM",
+    "249 см³",
+    "21 л.с."
+   ]
+  },
+  {
+   "id": "tip-throttle-cable",
+   "kind": "tip",
+   "title": "Замена и регулировка троса газа",
+   "meta": [
+    "40 мин",
+    "средне"
+   ],
+   "only": "",
+   "area": "carb"
+  },
+  {
+   "id": "bike-kayo-t4-250",
+   "kind": "bike",
+   "brand": "Kayo",
+   "name": "T4 250",
+   "photo": "img/bikes/kayo-t4-250.webp",
+   "chips": [
+    "Эндуро",
+    "ZS172FMM",
+    "249 см³",
+    "21 л.с."
+   ]
+  },
+  {
+   "id": "bike-regulmoto-crosstrec-300",
+   "kind": "bike",
+   "brand": "Regulmoto",
+   "name": "Crosstrec 300",
+   "photo": "img/bikes/regulmoto-crosstrec-300.webp",
+   "chips": [
+    "Эндуро",
+    "ZS174MN-5 (5 ст.)",
+    "280 см³",
+    "28 л.с."
+   ]
+  },
+  {
+   "id": "tip-oil-centrifuge",
+   "kind": "tip",
+   "title": "Чистка масляной центрифуги и сетки (горизонтальные и CG-моторы)",
+   "meta": [
+    "1–1.5 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "oil"
+  },
+  {
+   "id": "bike-avantis-enduro-300-pro-carb",
+   "kind": "bike",
+   "brand": "Avantis",
+   "name": "Enduro 300 PRO CARB",
+   "photo": "img/bikes/avantis-enduro-300-pro.webp",
+   "chips": [
+    "Эндуро",
+    "ZS174MN-5",
+    "280 см³",
+    "26 л.с."
+   ]
+  },
+  {
+   "id": "bike-progasi-race-300",
+   "kind": "bike",
+   "brand": "Progasi",
+   "name": "Race 300",
+   "photo": "img/bikes/progasi-race-300.webp",
+   "chips": [
+    "Эндуро",
+    "ZS182MN",
+    "283 см³",
+    "31 л.с."
+   ]
+  },
+  {
+   "id": "tip-exhaust-install",
+   "kind": "tip",
+   "title": "Установка прямотока или полной системы выпуска",
+   "meta": [
+    "1 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "exhaust"
+  },
+  {
+   "id": "bike-bse-z5-250",
+   "kind": "bike",
+   "brand": "BSE",
+   "name": "Z5 250",
+   "photo": "img/bikes/bse-z5-250.webp",
+   "chips": [
+    "Эндуро",
+    "ZS172FMM-7",
+    "249 см³",
+    "25 л.с."
+   ]
+  },
+  {
+   "id": "bike-racer-bros-rc300-gy8b",
+   "kind": "bike",
+   "brand": "Racer",
+   "name": "Bros RC300-GY8B",
+   "photo": "img/bikes/racer-bros-rc300-gy8b.webp",
+   "chips": [
+    "Эндуро",
+    "ZS177FMN (PR300 Pro)",
+    "298 см³",
+    "24.5 л.с."
+   ]
+  },
+  {
+   "id": "tip-clutch-inspect",
+   "kind": "tip",
+   "title": "Дефектовка сцепления: замер дисков и пружин",
+   "meta": [
+    "1.5 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "clutch"
+  },
+  {
+   "id": "bike-aprilia-dorsoduro-750",
+   "kind": "bike",
+   "brand": "Aprilia",
+   "name": "Dorsoduro 750",
+   "photo": "img/bikes/aprilia-dorsoduro-750.webp",
+   "chips": [
+    "Мотард",
+    "Aprilia 750 V90",
+    "750 см³",
+    "92 л.с."
+   ]
+  },
+  {
+   "id": "bike-bmw-f-750-gs",
+   "kind": "bike",
+   "brand": "BMW",
+   "name": "F 750 GS",
+   "photo": "img/bikes/bmw-f-750-gs.webp",
+   "chips": [
+    "Тур-эндуро",
+    "BMW F850",
+    "853 см³",
+    "77 л.с."
+   ]
+  },
+  {
+   "id": "tip-wiring-repair",
+   "kind": "tip",
+   "title": "Ремонт проводки: пайка, термоусадка, разъёмы",
+   "meta": [
+    "30 мин – 2 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "gen"
+  },
+  {
+   "id": "bike-brz-x6-nb300",
+   "kind": "bike",
+   "brand": "BRZ",
+   "name": "X6 NB300",
+   "photo": "img/bikes/brz-x6-nb300.webp",
+   "chips": [
+    "Эндуро",
+    "ZS174MN-5",
+    "280 см³",
+    "26 л.с."
+   ]
+  },
+  {
    "id": "bike-bajaj-pulsar-150",
    "kind": "bike",
    "brand": "Bajaj",
@@ -1461,6 +1733,17 @@
     "149 см³",
     "14 л.с."
    ]
+  },
+  {
+   "id": "tip-swingarm-bushings",
+   "kind": "tip",
+   "title": "Замена втулок и подшипников маятника",
+   "meta": [
+    "1.5–3 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "swingarm-bushings"
   },
   {
    "id": "bike-benelli-imperiale-400",
@@ -1476,17 +1759,6 @@
    ]
   },
   {
-   "id": "tip-rings-gap",
-   "kind": "tip",
-   "title": "Кольца: зазор в замке и правильная установка",
-   "meta": [
-    "30 мин",
-    "средне"
-   ],
-   "only": "",
-   "area": "cyl"
-  },
-  {
    "id": "bike-beta-rr-50-enduro",
    "kind": "bike",
    "brand": "Beta",
@@ -1498,6 +1770,80 @@
     "49 см³",
     "4 л.с."
    ]
+  },
+  {
+   "id": "tip-muffler-repack",
+   "kind": "tip",
+   "title": "Перенабивка глушителя (2T и 4T)",
+   "meta": [
+    "1 ч",
+    "просто"
+   ],
+   "only": "",
+   "area": "exhaust"
+  },
+  {
+   "id": "bike-cagiva-w16-600",
+   "kind": "bike",
+   "brand": "Cagiva",
+   "name": "W16 600",
+   "photo": "img/bikes/cagiva-w16-600.webp",
+   "chips": [
+    "Эндуро",
+    "Cagiva 601",
+    "601 см³",
+    "45 л.с."
+   ]
+  },
+  {
+   "id": "bike-ducati-749",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "749",
+   "photo": "img/bikes/ducati-749.webp",
+   "chips": [
+    "Спорт",
+    "Testastretta 749",
+    "749 см³",
+    "103 л.с."
+   ]
+  },
+  {
+   "id": "bike-gasgas-ec-250",
+   "kind": "bike",
+   "brand": "GasGas",
+   "name": "EC 250",
+   "photo": "img/bikes/gasgas-ec-250.webp",
+   "chips": [
+    "Кросс-эндуро",
+    "GasGas EC 250 2T",
+    "249 см³",
+    "45 л.с."
+   ]
+  },
+  {
+   "id": "bike-harley-davidson-dyna-super-glide-custom",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Dyna Super Glide Custom",
+   "photo": "img/bikes/harley-davidson-dyna-super-glide-custom.webp",
+   "chips": [
+    "Чоппер",
+    "Twin Cam 88",
+    "1450 см³",
+    "67 л.с."
+   ]
+  },
+  {
+   "id": "tip-starter-brushes",
+   "kind": "tip",
+   "title": "Ремонт стартера: щётки и коллектор",
+   "meta": [
+    "1 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "gen"
   },
   {
    "id": "bike-hasky-f7-pro",
@@ -1513,15 +1859,28 @@
    ]
   },
   {
-   "id": "tip-skid-install",
+   "id": "bike-honda-xr250r",
+   "kind": "bike",
+   "brand": "Honda",
+   "name": "XR250R",
+   "photo": "img/bikes/honda-xr250r.webp",
+   "chips": [
+    "Эндуро",
+    "MD30E",
+    "249 см³",
+    "26 л.с."
+   ]
+  },
+  {
+   "id": "tip-intake-boot",
    "kind": "tip",
-   "title": "Установка защиты картера",
+   "title": "Впускной патрубок: поиск подсоса и замена",
    "meta": [
-    "30–40 мин",
+    "40 мин",
     "просто"
    ],
    "only": "",
-   "area": "chain"
+   "area": "carb"
   },
   {
    "id": "bike-irbis-ttr250",
@@ -1550,15 +1909,15 @@
    ]
   },
   {
-   "id": "tip-throttle-cable",
+   "id": "tip-lithium-battery",
    "kind": "tip",
-   "title": "Замена и регулировка троса газа",
+   "title": "Установка литиевого аккумулятора",
    "meta": [
-    "40 мин",
-    "средне"
+    "30 мин",
+    "просто"
    ],
    "only": "",
-   "area": "carb"
+   "area": "gen"
   },
   {
    "id": "bike-kews-k23-nb300",
@@ -1587,12 +1946,12 @@
    ]
   },
   {
-   "id": "tip-oil-centrifuge",
+   "id": "tip-breather-clean",
    "kind": "tip",
-   "title": "Чистка масляной центрифуги и сетки (горизонтальные и CG-моторы)",
+   "title": "Сапун картера: чистка и проверка",
    "meta": [
-    "1–1.5 ч",
-    "средне"
+    "30 мин",
+    "просто"
    ],
    "only": "",
    "area": "oil"
@@ -1624,15 +1983,15 @@
    ]
   },
   {
-   "id": "tip-exhaust-install",
+   "id": "tip-cockpit-setup",
    "kind": "tip",
-   "title": "Установка прямотока или полной системы выпуска",
+   "title": "Посадка: руль, рычаги и педали под себя",
    "meta": [
-    "1 ч",
-    "средне"
+    "30 мин",
+    "просто"
    ],
    "only": "",
-   "area": "exhaust"
+   "area": "cockpit-setup"
   },
   {
    "id": "bike-regulmoto-nibbi-300",
@@ -1661,15 +2020,15 @@
    ]
   },
   {
-   "id": "tip-clutch-inspect",
+   "id": "tip-caliper-rebuild",
    "kind": "tip",
-   "title": "Дефектовка сцепления: замер дисков и пружин",
+   "title": "Переборка суппорта: манжеты и поршни",
    "meta": [
-    "1.5 ч",
+    "1.5–2 ч",
     "средне"
    ],
    "only": "",
-   "area": "clutch"
+   "area": "caliper-rebuild"
   },
   {
    "id": "bike-progasi-endurance-450",
@@ -1698,15 +2057,15 @@
    ]
   },
   {
-   "id": "tip-wiring-repair",
+   "id": "tip-spring-prep",
    "kind": "tip",
-   "title": "Ремонт проводки: пайка, термоусадка, разъёмы",
+   "title": "Подготовка к сезону после зимы",
    "meta": [
-    "30 мин – 2 ч",
-    "средне"
+    "1 ч",
+    "просто"
    ],
    "only": "",
-   "area": "gen"
+   "area": "spring-prep"
   },
   {
    "id": "bike-racer-caiman-rc250xzr-x",
@@ -1735,27 +2094,27 @@
    ]
   },
   {
-   "id": "tip-swingarm-bushings",
+   "id": "tip-first-service",
    "kind": "tip",
-   "title": "Замена втулок и подшипников маятника",
+   "title": "Первое ТО нового мотоцикла после обкатки",
    "meta": [
-    "1.5–3 ч",
+    "2–3 ч",
     "средне"
    ],
    "only": "",
-   "area": "swingarm-bushings"
+   "area": "first-service"
   },
   {
-   "id": "bike-bmw-f-800-r",
+   "id": "bike-bmw-f-800-gs",
    "kind": "bike",
    "brand": "BMW",
-   "name": "F 800 R",
-   "photo": "img/bikes/bmw-f-800-r.webp",
+   "name": "F 800 GS",
+   "photo": "img/bikes/bmw-f-800-gs.webp",
    "chips": [
-    "Нейкед",
+    "Тур-эндуро",
     "BMW F800",
     "798 см³",
-    "87 л.с."
+    "85 л.с."
    ]
   },
   {
@@ -1772,15 +2131,15 @@
    ]
   },
   {
-   "id": "tip-muffler-repack",
+   "id": "tip-breakin",
    "kind": "tip",
-   "title": "Перенабивка глушителя (2T и 4T)",
+   "title": "Обкатка нового или отремонтированного мотора",
    "meta": [
-    "1 ч",
+    "300–500 км",
     "просто"
    ],
    "only": "",
-   "area": "exhaust"
+   "area": "cyl"
   },
   {
    "id": "bike-bajaj-pulsar-ns200",
@@ -1809,6 +2168,91 @@
    ]
   },
   {
+   "id": "tip-tire-mount",
+   "kind": "tip",
+   "title": "Замена покрышки и бортзамка",
+   "meta": [
+    "1 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "tire-mount"
+  },
+  {
+   "id": "bike-ducati-848",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "848",
+   "photo": "img/bikes/ducati-848.webp",
+   "chips": [
+    "Спорт",
+    "Testastretta Evo 849",
+    "849 см³",
+    "134 л.с."
+   ]
+  },
+  {
+   "id": "bike-gasgas-ec-300",
+   "kind": "bike",
+   "brand": "GasGas",
+   "name": "EC 300",
+   "photo": "img/bikes/gasgas-ec-300.webp",
+   "chips": [
+    "Кросс-эндуро",
+    "GasGas EC 300 2T",
+    "300 см³",
+    "50 л.с."
+   ]
+  },
+  {
+   "id": "tip-chain",
+   "kind": "tip",
+   "title": "Натяжка и смазка цепи",
+   "meta": [
+    "20 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "gearbox"
+  },
+  {
+   "id": "bike-harley-davidson-dyna-wide-glide",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Dyna Wide Glide",
+   "photo": "img/bikes/harley-davidson-dyna-wide-glide.webp",
+   "chips": [
+    "Чоппер",
+    "Evolution 1340",
+    "1340 см³",
+    "63 л.с."
+   ]
+  },
+  {
+   "id": "bike-honda-xr650l",
+   "kind": "bike",
+   "brand": "Honda",
+   "name": "XR650L",
+   "photo": "img/bikes/honda-xr650l.webp",
+   "chips": [
+    "Тур-эндуро",
+    "RE01E",
+    "644 см³",
+    "43 л.с."
+   ]
+  },
+  {
+   "id": "tip-airfilter",
+   "kind": "tip",
+   "title": "Обслуживание воздушного фильтра",
+   "meta": [
+    "30 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "carb"
+  },
+  {
    "id": "bike-irbis-ttr250r",
    "kind": "bike",
    "brand": "Irbis",
@@ -1835,15 +2279,15 @@
    ]
   },
   {
-   "id": "tip-starter-brushes",
+   "id": "tip-carb-tune",
    "kind": "tip",
-   "title": "Ремонт стартера: щётки и коллектор",
+   "title": "Настройка карбюратора по свече",
    "meta": [
-    "1 ч",
+    "1–2 ч",
     "средне"
    ],
-   "only": "",
-   "area": "gen"
+   "only": "для карбюраторных моторов",
+   "area": "carb"
   },
   {
    "id": "bike-kews-k28-pro-ybs300",
@@ -1872,15 +2316,15 @@
    ]
   },
   {
-   "id": "tip-intake-boot",
+   "id": "tip-spokes",
    "kind": "tip",
-   "title": "Впускной патрубок: поиск подсоса и замена",
+   "title": "Протяжка спиц",
    "meta": [
-    "40 мин",
-    "просто"
+    "1 ч",
+    "средне"
    ],
    "only": "",
-   "area": "carb"
+   "area": "spokes"
   },
   {
    "id": "bike-motoland-xt300-hs",
@@ -1909,15 +2353,15 @@
    ]
   },
   {
-   "id": "tip-lithium-battery",
+   "id": "tip-idle-set",
    "kind": "tip",
-   "title": "Установка литиевого аккумулятора",
+   "title": "Регулировка холостого хода карбюратора",
    "meta": [
-    "30 мин",
+    "15 мин",
     "просто"
    ],
-   "only": "",
-   "area": "gen"
+   "only": "для карбюраторных моторов",
+   "area": "carb"
   },
   {
    "id": "bike-regulmoto-legend-300-pro",
@@ -1946,15 +2390,15 @@
    ]
   },
   {
-   "id": "tip-breather-clean",
+   "id": "tip-brake-bedding",
    "kind": "tip",
-   "title": "Сапун картера: чистка и проверка",
+   "title": "Притирка новых колодок и диска",
    "meta": [
-    "30 мин",
+    "20 мин",
     "просто"
    ],
    "only": "",
-   "area": "oil"
+   "area": "brake-bedding"
   },
   {
    "id": "bike-progasi-gaudi-300",
@@ -1983,15 +2427,15 @@
    ]
   },
   {
-   "id": "tip-cockpit-setup",
+   "id": "tip-sag",
    "kind": "tip",
-   "title": "Посадка: руль, рычаги и педали под себя",
+   "title": "Настройка провиса подвески (SAG)",
    "meta": [
     "30 мин",
-    "просто"
+    "средне"
    ],
    "only": "",
-   "area": "cockpit-setup"
+   "area": "sag"
   },
   {
    "id": "bike-racer-enduro-300-rc300-gy8a",
@@ -2020,27 +2464,27 @@
    ]
   },
   {
-   "id": "tip-caliper-rebuild",
+   "id": "tip-interlock-check",
    "kind": "tip",
-   "title": "Переборка суппорта: манжеты и поршни",
+   "title": "Блокировки запуска: подножка, сцепление, нейтраль, кнопка Kill",
    "meta": [
-    "1.5–2 ч",
-    "средне"
+    "30 мин",
+    "просто"
    ],
    "only": "",
-   "area": "caliper-rebuild"
+   "area": "gen"
   },
   {
-   "id": "bike-bmw-f-850-gs",
+   "id": "bike-bmw-f-800-gt",
    "kind": "bike",
    "brand": "BMW",
-   "name": "F 850 GS",
-   "photo": "img/bikes/bmw-f-850-gs.webp",
+   "name": "F 800 GT",
+   "photo": "img/bikes/bmw-f-800-gt.webp",
    "chips": [
-    "Тур-эндуро",
-    "BMW F850",
-    "853 см³",
-    "95 л.с."
+    "Турер",
+    "BMW F800",
+    "798 см³",
+    "90 л.с."
    ]
   },
   {
@@ -2057,27 +2501,64 @@
    ]
   },
   {
-   "id": "tip-spring-prep",
+   "id": "tip-tubeless-plug",
    "kind": "tip",
-   "title": "Подготовка к сезону после зимы",
+   "title": "Ремонт бескамерной шины жгутом в дороге",
    "meta": [
-    "1 ч",
+    "20 мин",
     "просто"
    ],
    "only": "",
-   "area": "spring-prep"
+   "area": "tubeless-plug"
   },
   {
-   "id": "bike-benelli-trk-502x",
+   "id": "bike-benelli-trk-502",
    "kind": "bike",
    "brand": "Benelli",
-   "name": "TRK 502X",
-   "photo": "img/bikes/benelli-trk-502x.webp",
+   "name": "TRK 502",
+   "photo": "img/bikes/benelli-trk-502.webp",
    "chips": [
     "Тур-эндуро",
     "TRK 502",
     "500 см³",
     "47.6 л.с."
+   ]
+  },
+  {
+   "id": "bike-ducati-916",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "916",
+   "photo": "img/bikes/ducati-916.webp",
+   "chips": [
+    "Спорт",
+    "Desmoquattro 916",
+    "916 см³",
+    "109 л.с."
+   ]
+  },
+  {
+   "id": "tip-oil2t-mix",
+   "kind": "tip",
+   "title": "Приготовление смеси 2T",
+   "meta": [
+    "5 мин",
+    "просто"
+   ],
+   "only": "для двухтактников",
+   "area": "oil"
+  },
+  {
+   "id": "bike-harley-davidson-electra-glide-ultra-limited",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Electra Glide Ultra Limited",
+   "photo": "img/bikes/harley-davidson-electra-glide-ultra-limited.webp",
+   "chips": [
+    "Турер",
+    "Twin Cam 103",
+    "1690 см³",
+    "79 л.с."
    ]
   },
   {
@@ -2094,15 +2575,15 @@
    ]
   },
   {
-   "id": "tip-first-service",
+   "id": "tip-cvt",
    "kind": "tip",
-   "title": "Первое ТО нового мотоцикла после обкатки",
+   "title": "Вариатор скутера: ремень, ролики, сцепление",
    "meta": [
-    "2–3 ч",
+    "1–1.5 ч",
     "средне"
    ],
-   "only": "",
-   "area": "first-service"
+   "only": "для скутеров",
+   "area": "cvt"
   },
   {
    "id": "bike-jhl-z5-nb300",
@@ -2131,15 +2612,15 @@
    ]
   },
   {
-   "id": "tip-breakin",
+   "id": "tip-moped-clutch",
    "kind": "tip",
-   "title": "Обкатка нового или отремонтированного мотора",
+   "title": "Регулировка сцепления полуавтомата (мопед)",
    "meta": [
-    "300–500 км",
+    "15 мин",
     "просто"
    ],
-   "only": "",
-   "area": "cyl"
+   "only": "для мопедов и питбайков",
+   "area": "clutch"
   },
   {
    "id": "bike-motoland-xr300",
@@ -2168,15 +2649,15 @@
    ]
   },
   {
-   "id": "tip-tire-mount",
+   "id": "tip-headlight-bulb",
    "kind": "tip",
-   "title": "Замена покрышки и бортзамка",
+   "title": "Замена лампы фары и регулировка луча",
    "meta": [
-    "1 ч",
-    "средне"
+    "20 мин",
+    "просто"
    ],
    "only": "",
-   "area": "tire-mount"
+   "area": "gen"
   },
   {
    "id": "bike-regulmoto-athlete-250",
@@ -2205,15 +2686,15 @@
    ]
   },
   {
-   "id": "tip-chain",
+   "id": "tip-suspension-clickers",
    "kind": "tip",
-   "title": "Натяжка и смазка цепи",
+   "title": "Настройка подвески: преднатяг, сжатие, отбой",
    "meta": [
-    "20 мин",
-    "просто"
+    "30–60 мин",
+    "средне"
    ],
    "only": "",
-   "area": "gearbox"
+   "area": "sag"
   },
   {
    "id": "bike-progasi-hardcore-450",
@@ -2242,15 +2723,15 @@
    ]
   },
   {
-   "id": "tip-airfilter",
+   "id": "tip-wash-bike",
    "kind": "tip",
-   "title": "Обслуживание воздушного фильтра",
+   "title": "Мойка мотоцикла без вреда для техники",
    "meta": [
-    "30 мин",
+    "30–60 мин",
     "просто"
    ],
    "only": "",
-   "area": "carb"
+   "area": "wash-bike"
   },
   {
    "id": "bike-racer-enduro-l150-rc150-23x",
@@ -2279,52 +2760,89 @@
    ]
   },
   {
-   "id": "tip-carb-tune",
+   "id": "tip-fieldkit",
    "kind": "tip",
-   "title": "Настройка карбюратора по свече",
+   "title": "Что брать с собой в лес",
    "meta": [
-    "1–2 ч",
-    "средне"
+    "—",
+    "просто"
    ],
-   "only": "для карбюраторных моторов",
-   "area": "carb"
+   "only": "",
+   "area": "fieldkit"
   },
   {
-   "id": "bike-bmw-f-900-r",
+   "id": "bike-bmw-f-800-r",
    "kind": "bike",
    "brand": "BMW",
-   "name": "F 900 R",
-   "photo": "img/bikes/bmw-f-900-r.webp",
+   "name": "F 800 R",
+   "photo": "img/bikes/bmw-f-800-r.webp",
    "chips": [
     "Нейкед",
-    "BMW F900",
-    "895 см³",
-    "105 л.с."
+    "BMW F800",
+    "798 см³",
+    "87 л.с."
    ]
   },
   {
-   "id": "bike-benelli-trk-702x",
+   "id": "bike-benelli-trk-502x",
    "kind": "bike",
    "brand": "Benelli",
-   "name": "TRK 702X",
-   "photo": "img/bikes/benelli-trk-702x.webp",
+   "name": "TRK 502X",
+   "photo": "img/bikes/benelli-trk-502x.webp",
    "chips": [
     "Тур-эндуро",
-    "QJ 698",
-    "698 см³",
-    "70 л.с."
+    "TRK 502",
+    "500 см³",
+    "47.6 л.с."
    ]
   },
   {
-   "id": "tip-spokes",
+   "id": "tip-tube",
    "kind": "tip",
-   "title": "Протяжка спиц",
+   "title": "Замена камеры в поле",
    "meta": [
-    "1 ч",
+    "40 мин",
     "средне"
    ],
    "only": "",
-   "area": "spokes"
+   "area": "tube"
+  },
+  {
+   "id": "bike-ducati-996",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "996",
+   "photo": "img/bikes/ducati-996.webp",
+   "chips": [
+    "Спорт",
+    "Desmoquattro 996",
+    "996 см³",
+    "112 л.с."
+   ]
+  },
+  {
+   "id": "bike-harley-davidson-fat-boy",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Fat Boy",
+   "photo": "img/bikes/harley-davidson-fat-boy.webp",
+   "chips": [
+    "Чоппер",
+    "Evolution 1340",
+    "1340 см³",
+    "63 л.с."
+   ]
+  },
+  {
+   "id": "tip-cush-drive",
+   "kind": "tip",
+   "title": "Демпфер ступицы заднего колеса",
+   "meta": [
+    "40 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "cush-drive"
   },
   {
    "id": "bike-jhl-z6-nb300",
@@ -2353,15 +2871,15 @@
    ]
   },
   {
-   "id": "tip-idle-set",
+   "id": "tip-neutral-switch",
    "kind": "tip",
-   "title": "Регулировка холостого хода карбюратора",
+   "title": "Проверка и замена датчика нейтрали",
    "meta": [
-    "15 мин",
+    "30 мин",
     "просто"
    ],
-   "only": "для карбюраторных моторов",
-   "area": "carb"
+   "only": "",
+   "area": "gearbox"
   },
   {
    "id": "bike-kayo-k2-300",
@@ -2390,17 +2908,6 @@
    ]
   },
   {
-   "id": "tip-brake-bedding",
-   "kind": "tip",
-   "title": "Притирка новых колодок и диска",
-   "meta": [
-    "20 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "brake-bedding"
-  },
-  {
    "id": "bike-avantis-a6-lux-300",
    "kind": "bike",
    "brand": "Avantis",
@@ -2427,15 +2934,15 @@
    ]
   },
   {
-   "id": "tip-sag",
+   "id": "tip-drum-adjust",
    "kind": "tip",
-   "title": "Настройка провиса подвески (SAG)",
+   "title": "Барабанный тормоз: регулировка и смазка кулака",
    "meta": [
-    "30 мин",
-    "средне"
+    "40 мин",
+    "просто"
    ],
    "only": "",
-   "area": "sag"
+   "area": "drum-adjust"
   },
   {
    "id": "bike-bse-rtc-300",
@@ -2464,15 +2971,15 @@
    ]
   },
   {
-   "id": "tip-interlock-check",
+   "id": "tip-chain-slider",
    "kind": "tip",
-   "title": "Блокировки запуска: подножка, сцепление, нейтраль, кнопка Kill",
+   "title": "Замена слайдера маятника и роликов цепи",
    "meta": [
-    "30 мин",
+    "40 мин",
     "просто"
    ],
    "only": "",
-   "area": "gen"
+   "area": "gearbox"
   },
   {
    "id": "bike-aprilia-pegaso-650",
@@ -2488,40 +2995,77 @@
    ]
   },
   {
-   "id": "bike-bmw-g-310-gs",
+   "id": "bike-bmw-f-800-st",
    "kind": "bike",
    "brand": "BMW",
-   "name": "G 310 GS",
-   "photo": "img/bikes/bmw-g-310-gs.webp",
+   "name": "F 800 ST",
+   "photo": "img/bikes/bmw-f-800-st.webp",
    "chips": [
-    "Тур-эндуро",
-    "BMW G310",
-    "313 см³",
-    "34 л.с."
+    "Турер",
+    "BMW F800",
+    "798 см³",
+    "85 л.с."
    ]
   },
   {
-   "id": "tip-tubeless-plug",
+   "id": "tip-long-trip",
    "kind": "tip",
-   "title": "Ремонт бескамерной шины жгутом в дороге",
+   "title": "Подготовка к дальней поездке",
    "meta": [
-    "20 мин",
+    "2–3 ч",
     "просто"
    ],
    "only": "",
-   "area": "tubeless-plug"
+   "area": "long-trip"
   },
   {
-   "id": "bike-benelli-tornado-tre-900",
+   "id": "bike-benelli-trk-702x",
    "kind": "bike",
    "brand": "Benelli",
-   "name": "Tornado Tre 900",
-   "photo": "img/bikes/benelli-tornado-tre-900.webp",
+   "name": "TRK 702X",
+   "photo": "img/bikes/benelli-trk-702x.webp",
+   "chips": [
+    "Тур-эндуро",
+    "QJ 698",
+    "698 см³",
+    "70 л.с."
+   ]
+  },
+  {
+   "id": "bike-ducati-998",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "998",
+   "photo": "img/bikes/ducati-998.webp",
    "chips": [
     "Спорт",
-    "Benelli 899 I3",
-    "898 см³",
-    "140 л.с."
+    "Testastretta 998",
+    "998 см³",
+    "123 л.с."
+   ]
+  },
+  {
+   "id": "tip-ford",
+   "kind": "tip",
+   "title": "Брод: подготовка и если мотор хлебнул воды",
+   "meta": [
+    "—",
+    "средне"
+   ],
+   "only": "",
+   "area": "cyl"
+  },
+  {
+   "id": "bike-harley-davidson-heritage-classic",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Heritage Classic",
+   "photo": "img/bikes/harley-davidson-heritage-classic.webp",
+   "chips": [
+    "Чоппер",
+    "Milwaukee-Eight 107",
+    "1746 см³",
+    "86 л.с."
    ]
   },
   {
@@ -2538,15 +3082,15 @@
    ]
   },
   {
-   "id": "tip-oil2t-mix",
+   "id": "tip-post-crash",
    "kind": "tip",
-   "title": "Приготовление смеси 2T",
+   "title": "Осмотр после падения",
    "meta": [
-    "5 мин",
+    "30–60 мин",
     "просто"
    ],
-   "only": "для двухтактников",
-   "area": "oil"
+   "only": "",
+   "area": "post-crash"
   },
   {
    "id": "bike-motoland-300-enduro-gl300",
@@ -2575,15 +3119,15 @@
    ]
   },
   {
-   "id": "tip-cvt",
+   "id": "tip-fan-check",
    "kind": "tip",
-   "title": "Вариатор скутера: ремень, ролики, сцепление",
+   "title": "Вентилятор радиатора: проверка, датчик и реле",
    "meta": [
-    "1–1.5 ч",
-    "средне"
+    "30 мин",
+    "просто"
    ],
-   "only": "для скутеров",
-   "area": "cvt"
+   "only": "для моторов с жидкостным охлаждением",
+   "area": "cooling"
   },
   {
    "id": "bike-regulmoto-athlete-pro-4v",
@@ -2612,15 +3156,15 @@
    ]
   },
   {
-   "id": "tip-moped-clutch",
+   "id": "tip-carb-altitude",
    "kind": "tip",
-   "title": "Регулировка сцепления полуавтомата (мопед)",
+   "title": "Карбюратор в горах и в жару: поправка смеси",
    "meta": [
-    "15 мин",
-    "просто"
+    "30–60 мин",
+    "средне"
    ],
-   "only": "для мопедов и питбайков",
-   "area": "clutch"
+   "only": "для карбюраторных моторов",
+   "area": "carb"
   },
   {
    "id": "bike-progasi-ibiza-300",
@@ -2649,15 +3193,15 @@
    ]
   },
   {
-   "id": "tip-headlight-bulb",
+   "id": "tip-oilcooler",
    "kind": "tip",
-   "title": "Замена лампы фары и регулировка луча",
+   "title": "Установка маслорадиатора",
    "meta": [
-    "20 мин",
-    "просто"
+    "1.5 ч",
+    "средне"
    ],
-   "only": "",
-   "area": "gen"
+   "only": "для моторов с воздушным охлаждением",
+   "area": "cooling"
   },
   {
    "id": "bike-racer-enduro-xvr-rc300-gy8k",
@@ -2686,52 +3230,89 @@
    ]
   },
   {
-   "id": "tip-suspension-clickers",
+   "id": "tip-fork-align",
    "kind": "tip",
-   "title": "Настройка подвески: преднатяг, сжатие, отбой",
+   "title": "Выставление вилки после падения",
    "meta": [
-    "30–60 мин",
-    "средне"
-   ],
-   "only": "",
-   "area": "sag"
-  },
-  {
-   "id": "bike-bmw-g-310-r",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "G 310 R",
-   "photo": "img/bikes/bmw-g-310-r.webp",
-   "chips": [
-    "Нейкед",
-    "BMW G310",
-    "313 см³",
-    "34 л.с."
-   ]
-  },
-  {
-   "id": "bike-benelli-trek-1130",
-   "kind": "bike",
-   "brand": "Benelli",
-   "name": "TreK 1130",
-   "photo": "img/bikes/benelli-trek-1130.webp",
-   "chips": [
-    "Тур-эндуро",
-    "Benelli 1130 I3",
-    "1131 см³",
-    "125 л.с."
-   ]
-  },
-  {
-   "id": "tip-wash-bike",
-   "kind": "tip",
-   "title": "Мойка мотоцикла без вреда для техники",
-   "meta": [
-    "30–60 мин",
+    "20 мин",
     "просто"
    ],
    "only": "",
-   "area": "wash-bike"
+   "area": "fork-align"
+  },
+  {
+   "id": "bike-bmw-f-850-gs",
+   "kind": "bike",
+   "brand": "BMW",
+   "name": "F 850 GS",
+   "photo": "img/bikes/bmw-f-850-gs.webp",
+   "chips": [
+    "Тур-эндуро",
+    "BMW F850",
+    "853 см³",
+    "95 л.с."
+   ]
+  },
+  {
+   "id": "bike-benelli-tornado-tre-900",
+   "kind": "bike",
+   "brand": "Benelli",
+   "name": "Tornado Tre 900",
+   "photo": "img/bikes/benelli-tornado-tre-900.webp",
+   "chips": [
+    "Спорт",
+    "Benelli 899 I3",
+    "898 см³",
+    "140 л.с."
+   ]
+  },
+  {
+   "id": "tip-shiftlever-fix",
+   "kind": "tip",
+   "title": "Лапка КПП после падения: выправить и заменить сальник вала",
+   "meta": [
+    "40 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "gearbox"
+  },
+  {
+   "id": "bike-ducati-999",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "999",
+   "photo": "img/bikes/ducati-999.webp",
+   "chips": [
+    "Спорт",
+    "Testastretta 998",
+    "998 см³",
+    "124 л.с."
+   ]
+  },
+  {
+   "id": "bike-harley-davidson-heritage-softail-classic",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Heritage Softail Classic",
+   "photo": "img/bikes/harley-davidson-heritage-softail-classic.webp",
+   "chips": [
+    "Чоппер",
+    "Evolution 1340",
+    "1340 см³",
+    "63 л.с."
+   ]
+  },
+  {
+   "id": "tip-radiator-leak",
+   "kind": "tip",
+   "title": "Течь радиатора и патрубков: поиск и ремонт",
+   "meta": [
+    "1 ч",
+    "средне"
+   ],
+   "only": "для моторов с жидкостным охлаждением",
+   "area": "cooling"
   },
   {
    "id": "bike-motoland-alpha",
@@ -2760,15 +3341,15 @@
    ]
   },
   {
-   "id": "tip-fieldkit",
+   "id": "tip-waterpump-seal",
    "kind": "tip",
-   "title": "Что брать с собой в лес",
+   "title": "Помпа: замена сальника и крыльчатки",
    "meta": [
-    "—",
-    "просто"
+    "2–3 ч",
+    "сложно"
    ],
-   "only": "",
-   "area": "fieldkit"
+   "only": "для моторов с жидкостным охлаждением",
+   "area": "cooling"
   },
   {
    "id": "bike-regulmoto-cr-x-300",
@@ -2797,15 +3378,15 @@
    ]
   },
   {
-   "id": "tip-tube",
+   "id": "tip-engine-mounts",
    "kind": "tip",
-   "title": "Замена камеры в поле",
+   "title": "Крепление двигателя и подушки: проверка и протяжка",
    "meta": [
     "40 мин",
-    "средне"
+    "просто"
    ],
    "only": "",
-   "area": "tube"
+   "area": "engine-mounts"
   },
   {
    "id": "bike-progasi-kids-power-110",
@@ -2834,15 +3415,15 @@
    ]
   },
   {
-   "id": "tip-cush-drive",
+   "id": "tip-chain-rivet",
    "kind": "tip",
-   "title": "Демпфер ступицы заднего колеса",
+   "title": "Клёпка замка цепи (заклёпочный замок)",
    "meta": [
-    "40 мин",
-    "просто"
+    "30 мин",
+    "средне"
    ],
    "only": "",
-   "area": "cush-drive"
+   "area": "gearbox"
   },
   {
    "id": "bike-racer-fighter-rc300ck-n",
@@ -2871,28 +3452,89 @@
    ]
   },
   {
-   "id": "tip-neutral-switch",
+   "id": "tip-oil-leak-find",
    "kind": "tip",
-   "title": "Проверка и замена датчика нейтрали",
+   "title": "Поиск течи масла",
    "meta": [
-    "30 мин",
+    "1 ч",
     "просто"
    ],
    "only": "",
-   "area": "gearbox"
+   "area": "oil"
   },
   {
-   "id": "bike-bmw-g-450-x",
+   "id": "bike-bmw-f-850-gs-adventure",
    "kind": "bike",
    "brand": "BMW",
-   "name": "G 450 X",
-   "photo": "img/bikes/bmw-g-450-x.webp",
+   "name": "F 850 GS Adventure",
+   "photo": "img/bikes/bmw-f-850-gs-adventure.webp",
    "chips": [
-    "Эндуро",
-    "BMW G450X",
-    "449 см³",
-    "52 л.с."
+    "Тур-эндуро",
+    "BMW F850",
+    "853 см³",
+    "95 л.с."
    ]
+  },
+  {
+   "id": "bike-benelli-trek-1130",
+   "kind": "bike",
+   "brand": "Benelli",
+   "name": "TreK 1130",
+   "photo": "img/bikes/benelli-trek-1130.webp",
+   "chips": [
+    "Тур-эндуро",
+    "Benelli 1130 I3",
+    "1131 см³",
+    "125 л.с."
+   ]
+  },
+  {
+   "id": "tip-brake-clean",
+   "kind": "tip",
+   "title": "Чистка тормозного суппорта",
+   "meta": [
+    "1 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "pads"
+  },
+  {
+   "id": "bike-ducati-hypermotard-698-mono",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "Hypermotard 698 Mono",
+   "photo": "img/bikes/ducati-hypermotard-698-mono.webp",
+   "chips": [
+    "Мотард",
+    "Superquadro Mono",
+    "659 см³",
+    "77.5 л.с."
+   ]
+  },
+  {
+   "id": "bike-harley-davidson-heritage-springer",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Heritage Springer",
+   "photo": "img/bikes/harley-davidson-heritage-springer.webp",
+   "chips": [
+    "Чоппер",
+    "Evolution 1340",
+    "1340 см³",
+    "63 л.с."
+   ]
+  },
+  {
+   "id": "tip-csseal",
+   "kind": "tip",
+   "title": "Замена сальника у передней звезды",
+   "meta": [
+    "1 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "gearbox"
   },
   {
    "id": "bike-motoland-300-enduro-garet",
@@ -2921,6 +3563,17 @@
    ]
   },
   {
+   "id": "tip-mousse-install",
+   "kind": "tip",
+   "title": "Установка мусса вместо камеры",
+   "meta": [
+    "1–1.5 ч",
+    "сложно"
+   ],
+   "only": "",
+   "area": "mousse-install"
+  },
+  {
    "id": "bike-regulmoto-cr-x-pro",
    "kind": "bike",
    "brand": "Regulmoto",
@@ -2932,17 +3585,6 @@
     "271 см³",
     "26 л.с."
    ]
-  },
-  {
-   "id": "tip-drum-adjust",
-   "kind": "tip",
-   "title": "Барабанный тормоз: регулировка и смазка кулака",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "drum-adjust"
   },
   {
    "id": "bike-avantis-dakar-250-twincam",
@@ -2958,6 +3600,17 @@
    ]
   },
   {
+   "id": "tip-thermostat-replace",
+   "kind": "tip",
+   "title": "Проверка и замена термостата",
+   "meta": [
+    "1 ч",
+    "средне"
+   ],
+   "only": "для моторов с жидкостным охлаждением",
+   "area": "cooling"
+  },
+  {
    "id": "bike-progasi-max-150",
    "kind": "bike",
    "brand": "Progasi",
@@ -2969,17 +3622,6 @@
     "149 см³",
     "12 л.с."
    ]
-  },
-  {
-   "id": "tip-chain-slider",
-   "kind": "tip",
-   "title": "Замена слайдера маятника и роликов цепи",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "gearbox"
   },
   {
    "id": "bike-bse-z2-250",
@@ -2995,6 +3637,17 @@
    ]
   },
   {
+   "id": "tip-speedo-fix",
+   "kind": "tip",
+   "title": "Не работает спидометр: тросик, привод, датчик",
+   "meta": [
+    "30–60 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "speedo-fix"
+  },
+  {
    "id": "bike-racer-k2-rc250gy-c2k",
    "kind": "bike",
    "brand": "Racer",
@@ -3006,17 +3659,6 @@
     "249 см³",
     "21 л.с."
    ]
-  },
-  {
-   "id": "tip-long-trip",
-   "kind": "tip",
-   "title": "Подготовка к дальней поездке",
-   "meta": [
-    "2–3 ч",
-    "просто"
-   ],
-   "only": "",
-   "area": "long-trip"
   },
   {
    "id": "bike-aprilia-rs-50",
@@ -3032,28 +3674,65 @@
    ]
   },
   {
-   "id": "bike-bmw-g-650-gs",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "G 650 GS",
-   "photo": "img/bikes/bmw-g-650-gs.webp",
-   "chips": [
-    "Тур-эндуро",
-    "Rotax 652",
-    "652 см³",
-    "48 л.с."
-   ]
-  },
-  {
-   "id": "tip-ford",
+   "id": "tip-fuse-hunt",
    "kind": "tip",
-   "title": "Брод: подготовка и если мотор хлебнул воды",
+   "title": "Горят предохранители: поиск замыкания",
    "meta": [
-    "—",
+    "1 ч",
     "средне"
    ],
    "only": "",
-   "area": "cyl"
+   "area": "gen"
+  },
+  {
+   "id": "bike-bmw-f-900-r",
+   "kind": "bike",
+   "brand": "BMW",
+   "name": "F 900 R",
+   "photo": "img/bikes/bmw-f-900-r.webp",
+   "chips": [
+    "Нейкед",
+    "BMW F900",
+    "895 см³",
+    "105 л.с."
+   ]
+  },
+  {
+   "id": "bike-ducati-monster",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "Monster",
+   "photo": "img/bikes/ducati-monster.webp",
+   "chips": [
+    "Нейкед",
+    "Ducati 937",
+    "937 см³",
+    "111 л.с."
+   ]
+  },
+  {
+   "id": "tip-usb-install",
+   "kind": "tip",
+   "title": "Установка USB-розетки на руль",
+   "meta": [
+    "40 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "gen"
+  },
+  {
+   "id": "bike-harley-davidson-low-rider-st",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Low Rider ST",
+   "photo": "img/bikes/harley-davidson-low-rider-st.webp",
+   "chips": [
+    "Чоппер",
+    "Milwaukee-Eight 117",
+    "1923 см³",
+    "103 л.с."
+   ]
   },
   {
    "id": "bike-motoland-300-enduro-st-neon",
@@ -3069,6 +3748,17 @@
    ]
   },
   {
+   "id": "tip-handguards-install",
+   "kind": "tip",
+   "title": "Установка защиты рук",
+   "meta": [
+    "40 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "handguards-install"
+  },
+  {
    "id": "bike-kayo-k1-l-300-mx",
    "kind": "bike",
    "brand": "Kayo",
@@ -3080,17 +3770,6 @@
     "276 см³",
     "24 л.с."
    ]
-  },
-  {
-   "id": "tip-post-crash",
-   "kind": "tip",
-   "title": "Осмотр после падения",
-   "meta": [
-    "30–60 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "post-crash"
   },
   {
    "id": "bike-regulmoto-cr-z-350",
@@ -3106,6 +3785,17 @@
    ]
   },
   {
+   "id": "tip-wheel-balance",
+   "kind": "tip",
+   "title": "Балансировка колеса",
+   "meta": [
+    "40 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "wheel-balance"
+  },
+  {
    "id": "bike-avantis-fx-250",
    "kind": "bike",
    "brand": "Avantis",
@@ -3117,17 +3807,6 @@
     "249 см³",
     "23 л.с."
    ]
-  },
-  {
-   "id": "tip-fan-check",
-   "kind": "tip",
-   "title": "Вентилятор радиатора: проверка, датчик и реле",
-   "meta": [
-    "30 мин",
-    "просто"
-   ],
-   "only": "для моторов с жидкостным охлаждением",
-   "area": "cooling"
   },
   {
    "id": "bike-progasi-palma-250-ng",
@@ -3143,6 +3822,17 @@
    ]
   },
   {
+   "id": "tip-exhaust",
+   "kind": "tip",
+   "title": "Замена прокладки выпуска",
+   "meta": [
+    "30 мин",
+    "просто"
+   ],
+   "only": "",
+   "area": "exhaust"
+  },
+  {
    "id": "bike-bse-z3-300",
    "kind": "bike",
    "brand": "BSE",
@@ -3154,17 +3844,6 @@
     "271 см³",
     "26 л.с."
    ]
-  },
-  {
-   "id": "tip-carb-altitude",
-   "kind": "tip",
-   "title": "Карбюратор в горах и в жару: поправка смеси",
-   "meta": [
-    "30–60 мин",
-    "средне"
-   ],
-   "only": "для карбюраторных моторов",
-   "area": "carb"
   },
   {
    "id": "bike-racer-k2-rc300-gy8a",
@@ -3180,6 +3859,17 @@
    ]
   },
   {
+   "id": "tip-kick-repair",
+   "kind": "tip",
+   "title": "Ремонт кикстартера: храповик и пружина",
+   "meta": [
+    "1.5–2 ч",
+    "средне"
+   ],
+   "only": "",
+   "area": "clutch"
+  },
+  {
    "id": "bike-aprilia-rs-660",
    "kind": "bike",
    "brand": "Aprilia",
@@ -3193,28 +3883,65 @@
    ]
   },
   {
-   "id": "tip-oilcooler",
-   "kind": "tip",
-   "title": "Установка маслорадиатора",
-   "meta": [
-    "1.5 ч",
-    "средне"
-   ],
-   "only": "для моторов с воздушным охлаждением",
-   "area": "cooling"
-  },
-  {
-   "id": "bike-bmw-g-650-xchallenge",
+   "id": "bike-bmw-g-310-gs",
    "kind": "bike",
    "brand": "BMW",
-   "name": "G 650 Xchallenge",
-   "photo": "img/bikes/bmw-g-650-xchallenge.webp",
+   "name": "G 310 GS",
+   "photo": "img/bikes/bmw-g-310-gs.webp",
    "chips": [
-    "Эндуро",
-    "Rotax 652",
-    "652 см³",
-    "53 л.с."
+    "Тур-эндуро",
+    "BMW G310",
+    "313 см³",
+    "34 л.с."
    ]
+  },
+  {
+   "id": "tip-starter-clutch",
+   "kind": "tip",
+   "title": "Обгонная муфта стартера: стартер крутит, а мотор нет",
+   "meta": [
+    "2–3 ч",
+    "сложно"
+   ],
+   "only": "",
+   "area": "gen"
+  },
+  {
+   "id": "bike-ducati-monster-1100",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "Monster 1100",
+   "photo": "img/bikes/ducati-monster-1100.webp",
+   "chips": [
+    "Нейкед",
+    "Ducati 1100 DS",
+    "1078 см³",
+    "95 л.с."
+   ]
+  },
+  {
+   "id": "bike-harley-davidson-road-glide",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Road Glide",
+   "photo": "img/bikes/harley-davidson-road-glide.webp",
+   "chips": [
+    "Турер",
+    "Evolution 1340",
+    "1340 см³",
+    "63 л.с."
+   ]
+  },
+  {
+   "id": "tip-choke-service",
+   "kind": "tip",
+   "title": "Обогатитель (подсос): шток, трос, плунжер",
+   "meta": [
+    "40 мин",
+    "просто"
+   ],
+   "only": "для карбюраторных моторов",
+   "area": "carb"
   },
   {
    "id": "bike-motoland-500-enduro-norton",
@@ -3230,17 +3957,6 @@
    ]
   },
   {
-   "id": "tip-fork-align",
-   "kind": "tip",
-   "title": "Выставление вилки после падения",
-   "meta": [
-    "20 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "fork-align"
-  },
-  {
    "id": "bike-kayo-k6-250",
    "kind": "bike",
    "brand": "Kayo",
@@ -3252,6 +3968,17 @@
     "249 см³",
     "28 л.с."
    ]
+  },
+  {
+   "id": "tip-vacuum-petcock",
+   "kind": "tip",
+   "title": "Вакуумный бензокран: проверка и ремонт",
+   "meta": [
+    "40 мин",
+    "средне"
+   ],
+   "only": "для карбюраторных моторов",
+   "area": "carb"
   },
   {
    "id": "bike-regulmoto-crosstrec-nb350",
@@ -3267,17 +3994,6 @@
    ]
   },
   {
-   "id": "tip-shiftlever-fix",
-   "kind": "tip",
-   "title": "Лапка КПП после падения: выправить и заменить сальник вала",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "gearbox"
-  },
-  {
    "id": "bike-progasi-palma-300-ng",
    "kind": "bike",
    "brand": "Progasi",
@@ -3289,6 +4005,17 @@
     "276 см³",
     "25 л.с."
    ]
+  },
+  {
+   "id": "tip-pipe-decoke-2t",
+   "kind": "tip",
+   "title": "Очистка резонатора 2T от нагара",
+   "meta": [
+    "2 ч + ночь",
+    "средне"
+   ],
+   "only": "для двухтактников",
+   "area": "exhaust"
   },
   {
    "id": "bike-bse-z4-250",
@@ -3304,17 +4031,6 @@
    ]
   },
   {
-   "id": "tip-radiator-leak",
-   "kind": "tip",
-   "title": "Течь радиатора и патрубков: поиск и ремонт",
-   "meta": [
-    "1 ч",
-    "средне"
-   ],
-   "only": "для моторов с жидкостным охлаждением",
-   "area": "cooling"
-  },
-  {
    "id": "bike-racer-magnum-rc200-c5b",
    "kind": "bike",
    "brand": "Racer",
@@ -3326,6 +4042,17 @@
     "197 см³",
     "13.6 л.с."
    ]
+  },
+  {
+   "id": "tip-reed",
+   "kind": "tip",
+   "title": "Проверка лепесткового клапана 2T",
+   "meta": [
+    "1 ч",
+    "средне"
+   ],
+   "only": "для двухтактников",
+   "area": "carb"
   },
   {
    "id": "bike-aprilia-rs4-125",
@@ -3341,28 +4068,65 @@
    ]
   },
   {
-   "id": "tip-waterpump-seal",
-   "kind": "tip",
-   "title": "Помпа: замена сальника и крыльчатки",
-   "meta": [
-    "2–3 ч",
-    "сложно"
-   ],
-   "only": "для моторов с жидкостным охлаждением",
-   "area": "cooling"
-  },
-  {
-   "id": "bike-bmw-r-1100-gs",
+   "id": "bike-bmw-g-310-r",
    "kind": "bike",
    "brand": "BMW",
-   "name": "R 1100 GS",
-   "photo": "img/bikes/bmw-r-1100-gs.webp",
+   "name": "G 310 R",
+   "photo": "img/bikes/bmw-g-310-r.webp",
    "chips": [
-    "Тур-эндуро",
-    "R259 1100",
-    "1085 см³",
-    "80 л.с."
+    "Нейкед",
+    "BMW G310",
+    "313 см³",
+    "34 л.с."
    ]
+  },
+  {
+   "id": "tip-gearoil-2t",
+   "kind": "tip",
+   "title": "Замена масла КПП на двухтактнике",
+   "meta": [
+    "20 мин",
+    "просто"
+   ],
+   "only": "для двухтактников",
+   "area": "oil"
+  },
+  {
+   "id": "bike-ducati-monster-1100-evo",
+   "kind": "bike",
+   "brand": "Ducati",
+   "name": "Monster 1100 EVO",
+   "photo": "img/bikes/ducati-monster-1100-evo.webp",
+   "chips": [
+    "Нейкед",
+    "Ducati 1100 DS",
+    "1078 см³",
+    "100 л.с."
+   ]
+  },
+  {
+   "id": "bike-harley-davidson-road-king",
+   "kind": "bike",
+   "brand": "Harley-Davidson",
+   "name": "Road King",
+   "photo": "img/bikes/harley-davidson-road-king.webp",
+   "chips": [
+    "Чоппер",
+    "Evolution 1340",
+    "1340 см³",
+    "63 л.с."
+   ]
+  },
+  {
+   "id": "tip-scooter-gearoil",
+   "kind": "tip",
+   "title": "Скутер: замена масла в редукторе",
+   "meta": [
+    "20 мин",
+    "просто"
+   ],
+   "only": "для скутеров",
+   "area": "scooter-gearoil"
   },
   {
    "id": "bike-motoland-apex140",
@@ -3378,17 +4142,6 @@
    ]
   },
   {
-   "id": "tip-engine-mounts",
-   "kind": "tip",
-   "title": "Крепление двигателя и подушки: проверка и протяжка",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "engine-mounts"
-  },
-  {
    "id": "bike-kayo-k6-300-fcr",
    "kind": "bike",
    "brand": "Kayo",
@@ -3399,759 +4152,6 @@
     "ZS182MN",
     "283 см³",
     "31 л.с."
-   ]
-  },
-  {
-   "id": "bike-regulmoto-grizzly-pr300pro",
-   "kind": "bike",
-   "brand": "Regulmoto",
-   "name": "Grizzly PR300PRO",
-   "photo": "img/bikes/regulmoto-grizzly-pr300pro.webp",
-   "chips": [
-    "Эндуро",
-    "ZS175FMN (PR300)",
-    "271 см³",
-    "22 л.с."
-   ]
-  },
-  {
-   "id": "tip-chain-rivet",
-   "kind": "tip",
-   "title": "Клёпка замка цепи (заклёпочный замок)",
-   "meta": [
-    "30 мин",
-    "средне"
-   ],
-   "only": "",
-   "area": "gearbox"
-  },
-  {
-   "id": "bike-progasi-race-250",
-   "kind": "bike",
-   "brand": "Progasi",
-   "name": "Race 250",
-   "photo": "img/bikes/progasi-race-250.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM",
-    "249 см³",
-    "21 л.с."
-   ]
-  },
-  {
-   "id": "bike-bse-z6",
-   "kind": "bike",
-   "brand": "BSE",
-   "name": "Z6",
-   "photo": "img/bikes/bse-z6.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM-3A",
-    "249 см³",
-    "23 л.с."
-   ]
-  },
-  {
-   "id": "tip-oil-leak-find",
-   "kind": "tip",
-   "title": "Поиск течи масла",
-   "meta": [
-    "1 ч",
-    "просто"
-   ],
-   "only": "",
-   "area": "oil"
-  },
-  {
-   "id": "bike-racer-nitro-250",
-   "kind": "bike",
-   "brand": "Racer",
-   "name": "Nitro 250",
-   "photo": "img/bikes/racer-nitro-250.webp",
-   "chips": [
-    "Лёгкий эндуро",
-    "167FMM",
-    "229 см³",
-    "16 л.с."
-   ]
-  },
-  {
-   "id": "bike-aprilia-rsv-1000-mille",
-   "kind": "bike",
-   "brand": "Aprilia",
-   "name": "RSV 1000 Mille",
-   "photo": "img/bikes/aprilia-rsv-1000-mille.webp",
-   "chips": [
-    "Спорт",
-    "Rotax V990",
-    "998 см³",
-    "128 л.с."
-   ]
-  },
-  {
-   "id": "tip-brake-clean",
-   "kind": "tip",
-   "title": "Чистка тормозного суппорта",
-   "meta": [
-    "1 ч",
-    "средне"
-   ],
-   "only": "",
-   "area": "pads"
-  },
-  {
-   "id": "bike-bmw-r-1150-gs",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "R 1150 GS",
-   "photo": "img/bikes/bmw-r-1150-gs.webp",
-   "chips": [
-    "Тур-эндуро",
-    "R259 1150",
-    "1130 см³",
-    "85 л.с."
-   ]
-  },
-  {
-   "id": "bike-motoland-apex-125",
-   "kind": "bike",
-   "brand": "Motoland",
-   "name": "Apex 125",
-   "photo": "img/bikes/motoland-apex-125.webp",
-   "chips": [
-    "Питбайк",
-    "1P54FMI",
-    "124 см³",
-    "8.6 л.с."
-   ]
-  },
-  {
-   "id": "tip-csseal",
-   "kind": "tip",
-   "title": "Замена сальника у передней звезды",
-   "meta": [
-    "1 ч",
-    "средне"
-   ],
-   "only": "",
-   "area": "gearbox"
-  },
-  {
-   "id": "bike-kayo-tt125",
-   "kind": "bike",
-   "brand": "Kayo",
-   "name": "TT125",
-   "photo": "img/bikes/kayo-tt125.webp",
-   "chips": [
-    "Питбайк",
-    "1P54FMI",
-    "124 см³",
-    "8.6 л.с."
-   ]
-  },
-  {
-   "id": "bike-regulmoto-holeshot-250",
-   "kind": "bike",
-   "brand": "Regulmoto",
-   "name": "Holeshot 250",
-   "photo": "img/bikes/regulmoto-holeshot-250.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM-3A",
-    "249 см³",
-    "23 л.с."
-   ]
-  },
-  {
-   "id": "tip-mousse-install",
-   "kind": "tip",
-   "title": "Установка мусса вместо камеры",
-   "meta": [
-    "1–1.5 ч",
-    "сложно"
-   ],
-   "only": "",
-   "area": "mousse-install"
-  },
-  {
-   "id": "bike-progasi-race-300-2t",
-   "kind": "bike",
-   "brand": "Progasi",
-   "name": "Race 300 2T",
-   "photo": "img/bikes/progasi-race-300-2t.webp",
-   "chips": [
-    "Кросс-эндуро",
-    "2T 300",
-    "293 см³",
-    "46 л.с."
-   ]
-  },
-  {
-   "id": "bike-racer-panther-pro-rc300b-f",
-   "kind": "bike",
-   "brand": "Racer",
-   "name": "Panther PRO RC300B-F",
-   "photo": "img/bikes/racer-panther-pro-rc300b-f.webp",
-   "chips": [
-    "Эндуро",
-    "ZS175FMM",
-    "276 см³",
-    "24 л.с."
-   ]
-  },
-  {
-   "id": "tip-thermostat-replace",
-   "kind": "tip",
-   "title": "Проверка и замена термостата",
-   "meta": [
-    "1 ч",
-    "средне"
-   ],
-   "only": "для моторов с жидкостным охлаждением",
-   "area": "cooling"
-  },
-  {
-   "id": "bike-aprilia-rsv4",
-   "kind": "bike",
-   "brand": "Aprilia",
-   "name": "RSV4",
-   "photo": "img/bikes/aprilia-rsv4.webp",
-   "chips": [
-    "Спорт",
-    "Aprilia V4 1000",
-    "1000 см³",
-    "180 л.с."
-   ]
-  },
-  {
-   "id": "bike-bmw-r-1200-gs",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "R 1200 GS",
-   "photo": "img/bikes/bmw-r-1200-gs.webp",
-   "chips": [
-    "Тур-эндуро",
-    "BMW Boxer 1170",
-    "1170 см³",
-    "110 л.с."
-   ]
-  },
-  {
-   "id": "tip-speedo-fix",
-   "kind": "tip",
-   "title": "Не работает спидометр: тросик, привод, датчик",
-   "meta": [
-    "30–60 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "speedo-fix"
-  },
-  {
-   "id": "bike-motoland-blazer-250",
-   "kind": "bike",
-   "brand": "Motoland",
-   "name": "Blazer 250",
-   "photo": "img/bikes/motoland-blazer-250.webp",
-   "chips": [
-    "Эндуро",
-    "165FMM",
-    "223 см³",
-    "16.3 л.с."
-   ]
-  },
-  {
-   "id": "bike-kayo-classic-150",
-   "kind": "bike",
-   "brand": "Kayo",
-   "name": "Classic 150",
-   "photo": "img/bikes/kayo-classic-150.webp",
-   "chips": [
-    "Питбайк",
-    "1P60FMK",
-    "156 см³",
-    "14 л.с."
-   ]
-  },
-  {
-   "id": "tip-fuse-hunt",
-   "kind": "tip",
-   "title": "Горят предохранители: поиск замыкания",
-   "meta": [
-    "1 ч",
-    "средне"
-   ],
-   "only": "",
-   "area": "gen"
-  },
-  {
-   "id": "bike-regulmoto-holeshot-300-pro",
-   "kind": "bike",
-   "brand": "Regulmoto",
-   "name": "Holeshot 300 Pro",
-   "photo": "img/bikes/regulmoto-holeshot-300-pro.webp",
-   "chips": [
-    "Эндуро",
-    "ZS177FMN (PR300 Pro)",
-    "298 см³",
-    "25 л.с."
-   ]
-  },
-  {
-   "id": "bike-progasi-race-300-air",
-   "kind": "bike",
-   "brand": "Progasi",
-   "name": "Race 300 Air",
-   "photo": "img/bikes/progasi-race-300-air.webp",
-   "chips": [
-    "Эндуро",
-    "ZS175FMN-7 (CB300RL)",
-    "271 см³",
-    "27 л.с."
-   ]
-  },
-  {
-   "id": "tip-usb-install",
-   "kind": "tip",
-   "title": "Установка USB-розетки на руль",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "gen"
-  },
-  {
-   "id": "bike-racer-panther-rc250gy-c2",
-   "kind": "bike",
-   "brand": "Racer",
-   "name": "Panther RC250GY-C2",
-   "photo": "img/bikes/racer-panther-rc250gy-c2.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM",
-    "249 см³",
-    "21 л.с."
-   ]
-  },
-  {
-   "id": "bike-aprilia-rx-50",
-   "kind": "bike",
-   "brand": "Aprilia",
-   "name": "RX 50",
-   "photo": "img/bikes/aprilia-rx-50.webp",
-   "chips": [
-    "Эндуро",
-    "Derbi D50B0",
-    "50 см³",
-    "4 л.с."
-   ]
-  },
-  {
-   "id": "tip-handguards-install",
-   "kind": "tip",
-   "title": "Установка защиты рук",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "handguards-install"
-  },
-  {
-   "id": "bike-bmw-r-1200-gs-adventure",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "R 1200 GS Adventure",
-   "photo": "img/bikes/bmw-r-1200-gs-adventure.webp",
-   "chips": [
-    "Тур-эндуро",
-    "BMW Boxer 1170",
-    "1170 см³",
-    "110 л.с."
-   ]
-  },
-  {
-   "id": "bike-motoland-crf-st-enduro",
-   "kind": "bike",
-   "brand": "Motoland",
-   "name": "CRF ST Enduro",
-   "photo": "img/bikes/motoland-crf-st-enduro.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM",
-    "249 см³",
-    "21 л.с."
-   ]
-  },
-  {
-   "id": "tip-wheel-balance",
-   "kind": "tip",
-   "title": "Балансировка колеса",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "wheel-balance"
-  },
-  {
-   "id": "bike-kayo-basic-k125",
-   "kind": "bike",
-   "brand": "Kayo",
-   "name": "Basic K125",
-   "photo": "img/bikes/kayo-basic-k125.webp",
-   "chips": [
-    "Питбайк",
-    "1P54FMI",
-    "124 см³",
-    "8.6 л.с."
-   ]
-  },
-  {
-   "id": "bike-regulmoto-holeshot-red-edition",
-   "kind": "bike",
-   "brand": "Regulmoto",
-   "name": "Holeshot Red Edition",
-   "photo": "img/bikes/regulmoto-holeshot-red-edition.webp",
-   "chips": [
-    "Эндуро",
-    "ZS175FMN-7 (CB300RL)",
-    "271 см³",
-    "28 л.с."
-   ]
-  },
-  {
-   "id": "tip-exhaust",
-   "kind": "tip",
-   "title": "Замена прокладки выпуска",
-   "meta": [
-    "30 мин",
-    "просто"
-   ],
-   "only": "",
-   "area": "exhaust"
-  },
-  {
-   "id": "bike-progasi-race-300-wave",
-   "kind": "bike",
-   "brand": "Progasi",
-   "name": "Race 300 Wave",
-   "photo": "img/bikes/progasi-race-300-wave.webp",
-   "chips": [
-    "Эндуро",
-    "ZS174MN-5",
-    "280 см³",
-    "26 л.с."
-   ]
-  },
-  {
-   "id": "bike-racer-panther-rc300",
-   "kind": "bike",
-   "brand": "Racer",
-   "name": "Panther RC300",
-   "photo": "img/bikes/racer-panther-rc300.webp",
-   "chips": [
-    "Эндуро",
-    "ZS PR300",
-    "271 см³",
-    "26 л.с."
-   ]
-  },
-  {
-   "id": "tip-kick-repair",
-   "kind": "tip",
-   "title": "Ремонт кикстартера: храповик и пружина",
-   "meta": [
-    "1.5–2 ч",
-    "средне"
-   ],
-   "only": "",
-   "area": "clutch"
-  },
-  {
-   "id": "bike-aprilia-sx-50",
-   "kind": "bike",
-   "brand": "Aprilia",
-   "name": "SX 50",
-   "photo": "img/bikes/aprilia-sx-50.webp",
-   "chips": [
-    "Мотард",
-    "Derbi D50B0",
-    "50 см³",
-    "4 л.с."
-   ]
-  },
-  {
-   "id": "bike-bmw-r-1250-gs",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "R 1250 GS",
-   "photo": "img/bikes/bmw-r-1250-gs.webp",
-   "chips": [
-    "Тур-эндуро",
-    "BMW Boxer",
-    "1254 см³",
-    "136 л.с."
-   ]
-  },
-  {
-   "id": "tip-starter-clutch",
-   "kind": "tip",
-   "title": "Обгонная муфта стартера: стартер крутит, а мотор нет",
-   "meta": [
-    "2–3 ч",
-    "сложно"
-   ],
-   "only": "",
-   "area": "gen"
-  },
-  {
-   "id": "bike-motoland-enduro-lt-250",
-   "kind": "bike",
-   "brand": "Motoland",
-   "name": "Enduro LT 250",
-   "photo": "img/bikes/motoland-enduro-lt-250.webp",
-   "chips": [
-    "Эндуро",
-    "167FMM",
-    "229 см³",
-    "16 л.с."
-   ]
-  },
-  {
-   "id": "bike-kayo-basic-tt125em",
-   "kind": "bike",
-   "brand": "Kayo",
-   "name": "Basic TT125EM",
-   "photo": "img/bikes/kayo-basic-tt125em.webp",
-   "chips": [
-    "Питбайк",
-    "1P54FMI",
-    "124 см³",
-    "8.6 л.с."
-   ]
-  },
-  {
-   "id": "tip-choke-service",
-   "kind": "tip",
-   "title": "Обогатитель (подсос): шток, трос, плунжер",
-   "meta": [
-    "40 мин",
-    "просто"
-   ],
-   "only": "для карбюраторных моторов",
-   "area": "carb"
-  },
-  {
-   "id": "bike-regulmoto-lfa",
-   "kind": "bike",
-   "brand": "Regulmoto",
-   "name": "LFA",
-   "photo": "img/bikes/regulmoto-lfa.webp",
-   "chips": [
-    "Эндуро",
-    "165FMM",
-    "223 см³",
-    "16.3 л.с."
-   ]
-  },
-  {
-   "id": "bike-progasi-smart-125",
-   "kind": "bike",
-   "brand": "Progasi",
-   "name": "Smart 125",
-   "photo": "img/bikes/progasi-smart-125.webp",
-   "chips": [
-    "Питбайк",
-    "1P53FMI (XY153FMI)",
-    "120 см³",
-    "11 л.с."
-   ]
-  },
-  {
-   "id": "tip-vacuum-petcock",
-   "kind": "tip",
-   "title": "Вакуумный бензокран: проверка и ремонт",
-   "meta": [
-    "40 мин",
-    "средне"
-   ],
-   "only": "для карбюраторных моторов",
-   "area": "carb"
-  },
-  {
-   "id": "bike-racer-panther-rc300-gy8x",
-   "kind": "bike",
-   "brand": "Racer",
-   "name": "Panther RC300-GY8X",
-   "photo": "img/bikes/racer-panther-rc300-gy8x.webp",
-   "chips": [
-    "Эндуро",
-    "170FMN",
-    "270 см³",
-    "19.7 л.с."
-   ]
-  },
-  {
-   "id": "bike-aprilia-shiver-750",
-   "kind": "bike",
-   "brand": "Aprilia",
-   "name": "Shiver 750",
-   "photo": "img/bikes/aprilia-shiver-750.webp",
-   "chips": [
-    "Нейкед",
-    "Aprilia 750 V90",
-    "750 см³",
-    "95 л.с."
-   ]
-  },
-  {
-   "id": "tip-pipe-decoke-2t",
-   "kind": "tip",
-   "title": "Очистка резонатора 2T от нагара",
-   "meta": [
-    "2 ч + ночь",
-    "средне"
-   ],
-   "only": "для двухтактников",
-   "area": "exhaust"
-  },
-  {
-   "id": "bike-bmw-r-1300-gs",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "R 1300 GS",
-   "photo": "img/bikes/bmw-r-1300-gs.webp",
-   "chips": [
-    "Тур-эндуро",
-    "R 1300",
-    "1300 см³",
-    "145 л.с."
-   ]
-  },
-  {
-   "id": "bike-motoland-enduro-st-250",
-   "kind": "bike",
-   "brand": "Motoland",
-   "name": "Enduro ST 250",
-   "photo": "img/bikes/motoland-enduro-st-250.webp",
-   "chips": [
-    "Эндуро",
-    "ZS172FMM-3A",
-    "249 см³",
-    "23 л.с."
-   ]
-  },
-  {
-   "id": "tip-reed",
-   "kind": "tip",
-   "title": "Проверка лепесткового клапана 2T",
-   "meta": [
-    "1 ч",
-    "средне"
-   ],
-   "only": "для двухтактников",
-   "area": "carb"
-  },
-  {
-   "id": "bike-kayo-basic-tt140em",
-   "kind": "bike",
-   "brand": "Kayo",
-   "name": "Basic TT140EM",
-   "photo": "img/bikes/kayo-basic-tt140em.webp",
-   "chips": [
-    "Питбайк",
-    "YX140",
-    "140 см³",
-    "12 л.с."
-   ]
-  },
-  {
-   "id": "bike-regulmoto-lanza-2t",
-   "kind": "bike",
-   "brand": "Regulmoto",
-   "name": "Lanza 2T",
-   "photo": "img/bikes/regulmoto-lanza-2t.webp",
-   "chips": [
-    "Эндуро",
-    "LX166MM (MT250)",
-    "224 см³",
-    "35 л.с."
-   ]
-  },
-  {
-   "id": "tip-gearoil-2t",
-   "kind": "tip",
-   "title": "Замена масла КПП на двухтактнике",
-   "meta": [
-    "20 мин",
-    "просто"
-   ],
-   "only": "для двухтактников",
-   "area": "oil"
-  },
-  {
-   "id": "bike-progasi-smart-150",
-   "kind": "bike",
-   "brand": "Progasi",
-   "name": "Smart 150",
-   "photo": "img/bikes/progasi-smart-150.webp",
-   "chips": [
-    "Питбайк",
-    "YX140",
-    "140 см³",
-    "13 л.с."
-   ]
-  },
-  {
-   "id": "bike-racer-panther-zwc2-300x",
-   "kind": "bike",
-   "brand": "Racer",
-   "name": "Panther ZWC2-300X",
-   "photo": "img/bikes/racer-panther-zwc2-300x.webp",
-   "chips": [
-    "Эндуро",
-    "ZS PR300",
-    "271 см³",
-    "23 л.с."
-   ]
-  },
-  {
-   "id": "tip-scooter-gearoil",
-   "kind": "tip",
-   "title": "Скутер: замена масла в редукторе",
-   "meta": [
-    "20 мин",
-    "просто"
-   ],
-   "only": "для скутеров",
-   "area": "scooter-gearoil"
-  },
-  {
-   "id": "bike-aprilia-tuareg-660",
-   "kind": "bike",
-   "brand": "Aprilia",
-   "name": "Tuareg 660",
-   "photo": "img/bikes/aprilia-tuareg-660.webp",
-   "chips": [
-    "Тур-эндуро",
-    "Aprilia 660",
-    "659 см³",
-    "80 л.с."
-   ]
-  },
-  {
-   "id": "bike-bmw-r-1300-gs-adventure",
-   "kind": "bike",
-   "brand": "BMW",
-   "name": "R 1300 GS Adventure",
-   "photo": "img/bikes/bmw-r-1300-gs-adventure.webp",
-   "chips": [
-    "Тур-эндуро",
-    "R 1300",
-    "1300 см³",
-    "145 л.с."
    ]
   }
  ]
